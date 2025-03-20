@@ -4,7 +4,7 @@
 	"name": "25_Pixel-doomsday-survival-style-test",
 	"runtime": "c3",
 	"useWorker": "auto",
-	"bundleAddons": false,
+	"bundleAddons": true,
 	"usedAddons": [
 		{
 			"type": "plugin",
