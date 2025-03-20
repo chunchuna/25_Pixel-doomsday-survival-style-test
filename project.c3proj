@@ -8,6 +8,15 @@
 	"usedAddons": [
 		{
 			"type": "plugin",
+			"id": "MixonGames_EasyInGameConsole",
+			"name": "[In-Game Console]",
+			"author": "Mixon Games",
+			"bundled": false,
+			"version": "2.0.0.0",
+			"sdkVersion": 2
+		},
+		{
+			"type": "plugin",
 			"id": "Sprite",
 			"name": "精灵",
 			"author": "Scirra",
@@ -66,7 +75,8 @@
 			"ZhiWuSprite3",
 			"ZhiWuSprite4",
 			"ZhiWuSprite5",
-			"RedHairGirlSprite"
+			"RedHairGirlSprite",
+			"InGameConsole"
 		],
 		"subfolders": []
 	},
