@@ -1,0 +1,275 @@
+{
+	"projectFormatVersion": 1,
+	"savedWithRelease": 43100,
+	"name": "25_Pixel-doomsday-survival-style-test",
+	"runtime": "c3",
+	"useWorker": "auto",
+	"bundleAddons": false,
+	"usedAddons": [
+		{
+			"type": "plugin",
+			"id": "Sprite",
+			"name": "精灵",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "TiledBg",
+			"name": "平铺图",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "EightDir",
+			"name": "八方向",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Sin",
+			"name": "正弦运动",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "scrollto",
+			"name": "镜头跟随",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "grayscale",
+			"name": "灰度",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "pixellate",
+			"name": "像素化",
+			"author": "Scirra",
+			"bundled": false
+		}
+	],
+	"uniqueId": "44eynirip7v",
+	"objectTypes": {
+		"items": [
+			"EventHandler",
+			"CaoDiGround",
+			"ZhiWuSprite",
+			"ZhiWuSprite2",
+			"ZhiWuSprite3",
+			"ZhiWuSprite4",
+			"ZhiWuSprite5",
+			"RedHairGirlSprite"
+		],
+		"subfolders": []
+	},
+	"autosaveData": null,
+	"containers": [],
+	"families": {
+		"items": [
+			"CharacterController",
+			"LivingBreathAnimation",
+			"LivingMovementAnimation",
+			"SpriteAutoYsort"
+		],
+		"subfolders": []
+	},
+	"layouts": {
+		"items": [
+			"Level",
+			"Object"
+		],
+		"subfolders": []
+	},
+	"eventSheets": {
+		"items": [
+			"Level",
+			"Global"
+		],
+		"subfolders": []
+	},
+	"rootFileFolders": {
+		"script": {
+			"items": [
+				{
+					"name": "main.js",
+					"type": "application/javascript",
+					"sid": 858126998842176,
+					"script-info": {
+						"purpose": "main"
+					}
+				},
+				{
+					"name": "engine.js",
+					"type": "application/javascript",
+					"sid": 131121335012417,
+					"script-info": {
+						"purpose": "none"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"sound": {
+			"items": [],
+			"subfolders": []
+		},
+		"music": {
+			"items": [],
+			"subfolders": []
+		},
+		"video": {
+			"items": [],
+			"subfolders": []
+		},
+		"font": {
+			"items": [],
+			"subfolders": []
+		},
+		"icon": {
+			"items": [
+				{
+					"name": "icon-16.png",
+					"type": "image/png",
+					"sid": 107416367718827,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-64.png",
+					"type": "image/png",
+					"sid": 402250847320551,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-32.png",
+					"type": "image/png",
+					"sid": 600012253551177,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-512.png",
+					"type": "image/png",
+					"sid": 783345328149653,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-128.png",
+					"type": "image/png",
+					"sid": 469153950991943,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-256.png",
+					"type": "image/png",
+					"sid": 878406454948368,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "loading-logo.png",
+					"type": "image/png",
+					"sid": 892258037557570,
+					"icon-info": {
+						"purpose": "loading-logo"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"general": {
+			"items": [],
+			"subfolders": []
+		}
+	},
+	"timelines": {
+		"items": [
+			"时间轴 1"
+		],
+		"subfolders": [
+			{
+				"items": [],
+				"subfolders": []
+			}
+		]
+	},
+	"flowcharts": {
+		"items": [
+			"流程 1"
+		],
+		"subfolders": []
+	},
+	"properties": {
+		"description": "",
+		"version": "1.0.0.0",
+		"autoIncrementVersion": false,
+		"author": "",
+		"authorEmail": "",
+		"authorWebsite": "",
+		"appId": "",
+		"pixelRounding": true,
+		"zAxisScale": "normalized",
+		"fov": 0.7853981633974483,
+		"useLoaderLayout": false,
+		"fullscreenMode": "letterbox-integer-scale",
+		"fullscreenQuality": "low",
+		"viewportFit": "auto",
+		"backgroundColor": [
+			0,
+			0,
+			0,
+			0
+		],
+		"splashColor": [
+			1,
+			1,
+			1,
+			0
+		],
+		"useThemeColor": false,
+		"themeColor": [
+			1,
+			1,
+			1,
+			0
+		],
+		"orientations": "landscape",
+		"webgpu": "auto",
+		"gpuPreference": "high-performance",
+		"scriptsType": "module",
+		"framerateMode": "vsync",
+		"sampling": "nearest",
+		"downscaling": "medium",
+		"renderingMode": "auto",
+		"anisotropicFiltering": "auto",
+		"zNear": 1,
+		"zFar": 10000,
+		"maxSpriteSheetSize": 2048,
+		"loaderStyle": "splash",
+		"preloadSounds": true,
+		"cordovaiOSScheme": "app",
+		"cordovaAndroidScheme": "https",
+		"exportFileStructure": "folders",
+		"uidAllocationMode": "increment"
+	},
+	"viewportWidth": 640,
+	"viewportHeight": 480,
+	"firstLayout": null
+}

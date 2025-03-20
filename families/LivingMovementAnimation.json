@@ -1,0 +1,11 @@
+{
+	"name": "LivingMovementAnimation",
+	"plugin-id": "Sprite",
+	"sid": 612045867195929,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"members": [
+		"RedHairGirlSprite"
+	]
+}

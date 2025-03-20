@@ -1,0 +1,24 @@
+{
+	"name": "SpriteAutoYsort",
+	"plugin-id": "Sprite",
+	"sid": 426435291600600,
+	"instanceVariables": [
+		{
+			"name": "GetYPosition",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 744545356908695
+		}
+	],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"members": [
+		"RedHairGirlSprite",
+		"ZhiWuSprite",
+		"ZhiWuSprite2",
+		"ZhiWuSprite5",
+		"ZhiWuSprite3",
+		"ZhiWuSprite4"
+	]
+}

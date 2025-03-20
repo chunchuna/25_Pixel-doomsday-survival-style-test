@@ -1,0 +1,22 @@
+{
+	"name": "CharacterController",
+	"plugin-id": "Sprite",
+	"sid": 467637256843862,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "EightDir",
+			"name": "八方向",
+			"sid": 664108157772099
+		},
+		{
+			"behaviorId": "scrollto",
+			"name": "镜头跟随",
+			"sid": 623023063809423
+		}
+	],
+	"effectTypes": [],
+	"members": [
+		"RedHairGirlSprite"
+	]
+}

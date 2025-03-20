@@ -1,0 +1,17 @@
+{
+	"name": "LivingBreathAnimation",
+	"plugin-id": "Sprite",
+	"sid": 105725936317508,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Sin",
+			"name": "正弦运动",
+			"sid": 337894292599909
+		}
+	],
+	"effectTypes": [],
+	"members": [
+		"RedHairGirlSprite"
+	]
+}

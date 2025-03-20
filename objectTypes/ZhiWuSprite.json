@@ -1,0 +1,52 @@
+{
+	"name": "ZhiWuSprite",
+	"plugin-id": "Sprite",
+	"sid": 446690722666053,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 75,
+						"height": 98,
+						"originX": 0.4666666666666667,
+						"originY": 0.8979591836734694,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 6796008,
+						"collisionPoly": {
+							"points": [
+								0.018895238095238097,
+								0.014557823129251702,
+								0.981104761904762,
+								0.014557823129251702,
+								0.981104761904762,
+								0.9854421768707482,
+								0.018895238095238097,
+								0.9854421768707482
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 541734700988856,
+				"name": "Animation 1",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}

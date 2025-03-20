@@ -1,0 +1,16 @@
+{
+	"name": "Global",
+	"events": [
+		{
+			"eventType": "variable",
+			"name": "GameType",
+			"type": "string",
+			"initialValue": "",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 124410482799593
+		}
+	],
+	"sid": 510648612448094
+}

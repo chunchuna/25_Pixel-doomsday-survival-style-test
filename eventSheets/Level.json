@@ -1,0 +1,82 @@
+{
+	"name": "Level",
+	"events": [
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "LevelInit",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "on-start-of-layout",
+							"objectClass": "System",
+							"sid": 407407783617201
+						}
+					],
+					"actions": [
+						{
+							"id": "set-eventvar-value",
+							"objectClass": "System",
+							"sid": 835868086155061,
+							"parameters": {
+								"variable": "GameType",
+								"value": "\"Level\""
+							}
+						}
+					],
+					"sid": 130562937957096
+				}
+			],
+			"sid": 895062493094248
+		},
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "LevelSpriteYsort",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "every-tick",
+							"objectClass": "System",
+							"sid": 610587597647422
+						}
+					],
+					"actions": [
+						{
+							"id": "set-instvar-value",
+							"objectClass": "SpriteAutoYsort",
+							"sid": 713397920583973,
+							"parameters": {
+								"instance-variable": "GetYPosition",
+								"value": "SpriteAutoYsort.Y"
+							}
+						},
+						{
+							"id": "sort-z-order",
+							"objectClass": "System",
+							"sid": 931939432207298,
+							"parameters": {
+								"object": "SpriteAutoYsort",
+								"instance-variable": {
+									"name": "GetYPosition",
+									"objectClass": "SpriteAutoYsort"
+								}
+							}
+						}
+					],
+					"sid": 802581313690733
+				}
+			],
+			"sid": 181002933127707
+		}
+	],
+	"sid": 922946908092461
+}

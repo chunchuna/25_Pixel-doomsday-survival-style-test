@@ -1,0 +1,61 @@
+{
+	"name": "RedHairGirlSprite",
+	"plugin-id": "Sprite",
+	"sid": 711329311071812,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		},
+		{
+			"effectId": "grayscale",
+			"name": "灰度"
+		}
+	],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 94,
+						"height": 229,
+						"originX": 0.4787234042553192,
+						"originY": 0.9694323144104804,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 1350454,
+						"collisionPoly": {
+							"points": [
+								0.018895238095238097,
+								0.014557823129251702,
+								0.981104761904762,
+								0.014557823129251702,
+								0.981104761904762,
+								0.9854421768707482,
+								0.018895238095238097,
+								0.9854421768707482
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 913226592374596,
+				"name": "Animation 1",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}
