@@ -1,0 +1,61 @@
+{
+	"name": "CharacterController",
+	"events": [
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "CharacterController_Group_1",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "is-moving",
+							"objectClass": "CharacterController",
+							"sid": 812290177951239,
+							"behaviorType": "MoveFunction"
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"script": [
+								"const event = new C3.Event(\"CharacterControllerMoveFunctionISMoving\", false)",
+								"const handler =runtime.objects.EventHandler.getFirstInstance();",
+								"handler.dispatchEvent(event)"
+							]
+						}
+					],
+					"sid": 813313385485461
+				},
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "is-moving",
+							"objectClass": "CharacterController",
+							"sid": 212171776841982,
+							"behaviorType": "MoveFunction",
+							"isInverted": true
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"script": [
+								"const event = new C3.Event(\"CharacterControllerMoveFunctionNotMoving\", false)",
+								"const handler =runtime.objects.EventHandler.getFirstInstance();",
+								"handler.dispatchEvent(event)"
+							]
+						}
+					],
+					"sid": 668298586520591
+				}
+			],
+			"sid": 529792715363952
+		}
+	],
+	"sid": 328872248669789
+}

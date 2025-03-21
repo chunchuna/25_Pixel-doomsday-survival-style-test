@@ -8,12 +8,26 @@
 	"usedAddons": [
 		{
 			"type": "plugin",
+			"id": "Keyboard",
+			"name": "键盘",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
 			"id": "MixonGames_EasyInGameConsole",
 			"name": "[In-Game Console]",
 			"author": "Mixon Games",
 			"bundled": false,
 			"version": "2.0.0.0",
 			"sdkVersion": 2
+		},
+		{
+			"type": "plugin",
+			"id": "Mouse",
+			"name": "鼠标",
+			"author": "Scirra",
+			"bundled": false
 		},
 		{
 			"type": "plugin",
@@ -67,18 +81,32 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [
-			"EventHandler",
-			"CaoDiGround",
-			"ZhiWuSprite",
-			"ZhiWuSprite2",
-			"ZhiWuSprite3",
-			"ZhiWuSprite4",
-			"ZhiWuSprite5",
-			"RedHairGirlSprite",
-			"InGameConsole"
-		],
-		"subfolders": []
+		"items": [],
+		"subfolders": [
+			{
+				"items": [
+					"CaoDiGround",
+					"EventHandler",
+					"RedHairGirlSprite",
+					"ZhiWuSprite",
+					"ZhiWuSprite2",
+					"ZhiWuSprite3",
+					"ZhiWuSprite4",
+					"ZhiWuSprite5"
+				],
+				"subfolders": [],
+				"name": "Sprite"
+			},
+			{
+				"items": [
+					"InGameConsole",
+					"Keyboard",
+					"Mouse"
+				],
+				"subfolders": [],
+				"name": "Addon"
+			}
+		]
 	},
 	"autosaveData": null,
 	"containers": [],
@@ -87,7 +115,8 @@
 			"CharacterController",
 			"LivingBreathAnimation",
 			"LivingMovementAnimation",
-			"SpriteAutoYsort"
+			"SpriteAutoYsort",
+			"CharacterSineAnimation"
 		],
 		"subfolders": []
 	},
@@ -101,7 +130,8 @@
 	"eventSheets": {
 		"items": [
 			"Level",
-			"Global"
+			"Global",
+			"CharacterController"
 		],
 		"subfolders": []
 	},
@@ -125,7 +155,53 @@
 					}
 				}
 			],
-			"subfolders": []
+			"subfolders": [
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [
+								{
+									"name": "PIXLevel.js",
+									"type": "application/javascript",
+									"sid": 705066639574493,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXCharacterController.js",
+									"type": "application/javascript",
+									"sid": 585266803045644,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXCharacterAnimation.js",
+									"type": "application/javascript",
+									"sid": 951256658725208,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXCommandAddon.js",
+									"type": "application/javascript",
+									"sid": 757218954071808,
+									"script-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "Module"
+						}
+					],
+					"name": "PixelDoom"
+				}
+			],
+			"autoReloadOnPreview": true
 		},
 		"sound": {
 			"items": [],

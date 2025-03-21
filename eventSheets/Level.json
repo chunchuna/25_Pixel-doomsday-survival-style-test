@@ -2,6 +2,14 @@
 	"name": "Level",
 	"events": [
 		{
+			"eventType": "include",
+			"includeSheet": "CharacterController"
+		},
+		{
+			"eventType": "include",
+			"includeSheet": "Global"
+		},
+		{
 			"eventType": "group",
 			"disabled": false,
 			"title": "LevelInit",

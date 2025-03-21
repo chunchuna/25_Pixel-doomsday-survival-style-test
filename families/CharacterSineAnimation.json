@@ -1,0 +1,17 @@
+{
+	"name": "CharacterSineAnimation",
+	"plugin-id": "Sprite",
+	"sid": 328075153294672,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Sin",
+			"name": "CharacterWalkAnimtion",
+			"sid": 544073459272925
+		}
+	],
+	"effectTypes": [],
+	"members": [
+		"RedHairGirlSprite"
+	]
+}

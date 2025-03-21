@@ -6,12 +6,12 @@
 	"behaviorTypes": [
 		{
 			"behaviorId": "EightDir",
-			"name": "八方向",
+			"name": "MoveFunction",
 			"sid": 664108157772099
 		},
 		{
 			"behaviorId": "scrollto",
-			"name": "镜头跟随",
+			"name": "CameraLockFunction",
 			"sid": 623023063809423
 		}
 	],

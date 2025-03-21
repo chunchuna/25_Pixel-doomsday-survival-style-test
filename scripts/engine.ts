@@ -62,6 +62,16 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     }
 
 
+    public static gl$_run_eventhandle_(EventName: string, parameter: any[]) {
+        // @ts-ignore
+        var event = new C3.Event(EventName, false, parameter)
+        //console.log(event)
+        var handler = this.RUN_TIME_.objects.EventHandler.getFirstInstance();
+        // @ts-ignore
+        handler.dispatchEvent(event,parameter)
+    }
+
+
     public static gl_ubu_init_$$LEVEL = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener("afteranylayoutstart", () => {
