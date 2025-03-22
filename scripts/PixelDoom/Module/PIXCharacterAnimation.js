@@ -1,5 +1,4 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
-var PLAYER_IS_DO_WALK_SINE = false;
 var GAME$_CHARACTER_SINE_ANIMATION;
 var GAME$_CHARACTER_CONTROLLER;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
@@ -13,20 +12,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (GAME$_CHARACTER_SINE_ANIMATION == null)
         return;
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("CharacterControllerMoveFunctionISMoving", () => {
-        if (PLAYER_IS_DO_WALK_SINE == false) {
-            if (GAME$_CHARACTER_SINE_ANIMATION == null)
-                return;
-            GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = true;
-            PLAYER_IS_DO_WALK_SINE = true;
-        }
+        if (GAME$_CHARACTER_SINE_ANIMATION == null)
+            return;
+        GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = true;
     });
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("CharacterControllerMoveFunctionNotMoving", () => {
-        if (PLAYER_IS_DO_WALK_SINE == true) {
-            if (GAME$_CHARACTER_SINE_ANIMATION == null)
-                return;
-            GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = false;
-            PLAYER_IS_DO_WALK_SINE = false;
-            GAME$_CHARACTER_CONTROLLER.angle = 0;
-        }
+        if (GAME$_CHARACTER_SINE_ANIMATION == null)
+            return;
+        GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = false;
+        GAME$_CHARACTER_CONTROLLER.angle = 0;
     });
 });

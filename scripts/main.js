@@ -5,6 +5,7 @@ import "./PixelDoom/Module/PIXCommandAddon.js";
 import "./PixelDoom/Module/PIXLevel.js";
 import "./PixelDoom/Module/PIXCharacterController.js";
 import "./PixelDoom/Module/PIXCharacterAnimation.js";
+import "./PixelDoom/Module/PIXWeather.js";
 runOnStartup(async (runtime) => {
     // Code to run on the loading screen.
     // Note layouts, objects etc. are not yet available.

@@ -1,0 +1,72 @@
+{
+	"name": "Raindrop",
+	"plugin-id": "Sprite",
+	"sid": 344347441595539,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Bullet",
+			"name": "Bullet",
+			"sid": 799743255250781
+		},
+		{
+			"behaviorId": "wrap",
+			"name": "边界穿梭",
+			"sid": 250269260291001
+		},
+		{
+			"behaviorId": "Timer",
+			"name": "Timer",
+			"sid": 675808230408161
+		}
+	],
+	"effectTypes": [],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 10,
+						"height": 4,
+						"originX": 1,
+						"originY": 0.5,
+						"originalSource": "C:\\Users\\David\\Desktop\\streak-middle.png",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 3922760,
+						"collisionPoly": {
+							"points": [
+								0.266667,
+								0.48,
+								0.488889,
+								0.52,
+								0.444444,
+								0.48,
+								0.488889,
+								0.68,
+								0.244444,
+								0.56,
+								0.222222,
+								0.48
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 928278589628360,
+				"name": "Default",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}

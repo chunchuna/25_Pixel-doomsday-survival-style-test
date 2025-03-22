@@ -21,7 +21,12 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     //A utility function used to create a Promise with a specified delay time.
     //This function is typically used to implement asynchronous wait logic, such as delaying the execution of certain operations or simulating asynchronous tasks.
     //The parameter 'ms' represents the delay time (in milliseconds).
-    static WAIT_TIME_FORM_PROMISE = (ms) => new Promise(res => setTimeout(res, ms));
+    static WAIT_TIME_FORM_PROMISE = (ms) => new Promise(res => setTimeout(res, ms)); // 使用的毫秒
+    static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback, intervalSeconds) {
+        const intervalMilliseconds = intervalSeconds * 1000; // 将秒转换为毫秒
+        const intervalId = setInterval(callback, intervalMilliseconds); // 启动计时器
+        return intervalId; // 返回计时器 ID
+    }
     static gl$_ubu_init = (Function) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async (runtime) => {
             runtime.addEventListener("afteranylayoutstart", Function);
@@ -77,6 +82,16 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         },
     };
     static Justlerp = (start, end, t) => (1 - t) * start + t * end;
+    static GetRandomNumber(min, max, isFloat = false) {
+        if (isFloat) {
+            // 生成浮点数
+            return Math.random() * (max - min) + min;
+        }
+        else {
+            // 生成整数
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+    }
     static CalculateDistancehahaShitCode = (x1, y1, x2, y2) => {
         const deltaX = x2 - x1;
         const deltaY = y2 - y1;

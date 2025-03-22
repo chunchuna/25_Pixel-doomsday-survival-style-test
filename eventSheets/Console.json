@@ -1,0 +1,175 @@
+{
+	"name": "Console",
+	"events": [
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "ConsoleFunction",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [
+				{
+					"functionName": "ConsoleOpen",
+					"functionDescription": "",
+					"functionCategory": "",
+					"functionReturnType": "none",
+					"functionCopyPicked": false,
+					"functionIsAsync": false,
+					"functionParameters": [],
+					"eventType": "function-block",
+					"conditions": [],
+					"actions": [
+						{
+							"id": "open",
+							"objectClass": "InGameConsole",
+							"sid": 702412703582334
+						}
+					],
+					"sid": 937789263994085
+				},
+				{
+					"functionName": "ConsoleClose",
+					"functionDescription": "",
+					"functionCategory": "",
+					"functionReturnType": "none",
+					"functionCopyPicked": false,
+					"functionIsAsync": false,
+					"functionParameters": [],
+					"eventType": "function-block",
+					"conditions": [],
+					"actions": [
+						{
+							"id": "close",
+							"objectClass": "InGameConsole",
+							"sid": 281462430224540
+						}
+					],
+					"sid": 644275502365373
+				},
+				{
+					"functionName": "ConsoleBindEvent",
+					"functionDescription": "",
+					"functionCategory": "",
+					"functionReturnType": "none",
+					"functionCopyPicked": false,
+					"functionIsAsync": false,
+					"functionParameters": [
+						{
+							"name": "Command",
+							"type": "string",
+							"initialValue": "",
+							"comment": "",
+							"sid": 457742603045183
+						},
+						{
+							"name": "Params",
+							"type": "string",
+							"initialValue": "",
+							"comment": "",
+							"sid": 712112540110989
+						},
+						{
+							"name": "Description",
+							"type": "string",
+							"initialValue": "",
+							"comment": "",
+							"sid": 936824801181646
+						},
+						{
+							"name": "Help",
+							"type": "boolean",
+							"initialValue": "false",
+							"comment": "",
+							"sid": 142482972701263
+						}
+					],
+					"eventType": "function-block",
+					"conditions": [],
+					"actions": [
+						{
+							"id": "register-command",
+							"objectClass": "InGameConsole",
+							"sid": 431362259808231,
+							"parameters": {
+								"command": "Command",
+								"params": "Params",
+								"description": "Description",
+								"hide": false
+							}
+						}
+					],
+					"sid": 564869567398399
+				},
+				{
+					"functionName": "ConsolePrint",
+					"functionDescription": "",
+					"functionCategory": "",
+					"functionReturnType": "none",
+					"functionCopyPicked": false,
+					"functionIsAsync": false,
+					"functionParameters": [
+						{
+							"name": "Content",
+							"type": "string",
+							"initialValue": "",
+							"comment": "",
+							"sid": 788941486186090
+						}
+					],
+					"eventType": "function-block",
+					"conditions": [],
+					"actions": [
+						{
+							"id": "print",
+							"objectClass": "InGameConsole",
+							"sid": 780349612849233,
+							"parameters": {
+								"text": "Content"
+							}
+						}
+					],
+					"sid": 311784641905170
+				},
+				{
+					"functionName": "ConsoleClear",
+					"functionDescription": "",
+					"functionCategory": "",
+					"functionReturnType": "none",
+					"functionCopyPicked": false,
+					"functionIsAsync": false,
+					"functionParameters": [],
+					"eventType": "function-block",
+					"conditions": [],
+					"actions": [
+						{
+							"id": "clear",
+							"objectClass": "InGameConsole",
+							"sid": 549294882447263
+						}
+					],
+					"sid": 768872482900239
+				}
+			],
+			"sid": 273725477660468
+		},
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "ConsoleBindEvent",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [],
+			"sid": 129841653710304
+		},
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "MenuC",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [],
+			"sid": 808215791644249
+		}
+	],
+	"sid": 115376568419007
+}

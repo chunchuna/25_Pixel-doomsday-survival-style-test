@@ -13,13 +13,11 @@ var GAME$_CHARACTER_CONTROLLER;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.GameType != GAME_TYPE.LEVEL)
         return;
-    // Get KEYBOARD
     //@ts-ignore
     if (GAME$_KEYBOARD_INSTAHCE == null) {
         GAME$_KEYBOARD_INSTAHCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.Keyboard;
         console.log(GAME$_KEYBOARD_INSTAHCE);
     }
-    // Get PLAYER
     //@ts-ignore
     if (GAME$_CHARACTER_CONTROLLER == null) {
         //@ts-ignore

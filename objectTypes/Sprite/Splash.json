@@ -1,0 +1,23 @@
+{
+	"name": "Splash",
+	"plugin-id": "Particles",
+	"sid": 632889422485724,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"image": {
+		"width": 10,
+		"height": 4,
+		"originX": 0.5,
+		"originY": 0.5,
+		"originalSource": "C:\\Users\\David\\Desktop\\streak-middle.png",
+		"exportFormat": "lossless",
+		"exportQuality": 0.8,
+		"fileType": "image/png",
+		"imageSpriteId": 6498433,
+		"useCollisionPoly": true,
+		"tag": ""
+	}
+}

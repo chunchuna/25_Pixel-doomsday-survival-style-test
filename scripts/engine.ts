@@ -30,7 +30,13 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     //A utility function used to create a Promise with a specified delay time.
     //This function is typically used to implement asynchronous wait logic, such as delaying the execution of certain operations or simulating asynchronous tasks.
     //The parameter 'ms' represents the delay time (in milliseconds).
-    public static WAIT_TIME_FORM_PROMISE = (ms: number) => new Promise(res => setTimeout(res, ms));
+    public static WAIT_TIME_FORM_PROMISE = (ms: number) => new Promise(res => setTimeout(res, ms)); // 使用的毫秒
+
+    public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): number {
+        const intervalMilliseconds = intervalSeconds * 1000; // 将秒转换为毫秒
+        const intervalId = setInterval(callback, intervalMilliseconds); // 启动计时器
+        return intervalId; // 返回计时器 ID
+    }
 
 
 
@@ -68,7 +74,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         //console.log(event)
         var handler = this.RUN_TIME_.objects.EventHandler.getFirstInstance();
         // @ts-ignore
-        handler.dispatchEvent(event,parameter)
+        handler.dispatchEvent(event, parameter)
     }
 
 
@@ -106,6 +112,16 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
     public static Justlerp = (start: number, end: number, t: number): number => (1 - t) * start + t * end;
+
+    public static GetRandomNumber(min: number, max: number, isFloat: boolean = false): number {
+        if (isFloat) {
+            // 生成浮点数
+            return Math.random() * (max - min) + min;
+        } else {
+            // 生成整数
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+    }
 
 
     public static CalculateDistancehahaShitCode = (x1: number, y1: number, x2: number, y2: number): number => {

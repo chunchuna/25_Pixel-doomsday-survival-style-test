@@ -31,6 +31,13 @@
 		},
 		{
 			"type": "plugin",
+			"id": "Particles",
+			"name": "粒子",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
 			"id": "Sprite",
 			"name": "精灵",
 			"author": "Scirra",
@@ -40,6 +47,13 @@
 			"type": "plugin",
 			"id": "TiledBg",
 			"name": "平铺图",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Bullet",
+			"name": "子弹",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -59,8 +73,22 @@
 		},
 		{
 			"type": "behavior",
+			"id": "Timer",
+			"name": "计时器",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
 			"id": "scrollto",
 			"name": "镜头跟随",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "wrap",
+			"name": "边界穿梭",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -92,7 +120,9 @@
 					"ZhiWuSprite2",
 					"ZhiWuSprite3",
 					"ZhiWuSprite4",
-					"ZhiWuSprite5"
+					"ZhiWuSprite5",
+					"Splash",
+					"Raindrop"
 				],
 				"subfolders": [],
 				"name": "Sprite"
@@ -131,7 +161,8 @@
 		"items": [
 			"Level",
 			"Global",
-			"CharacterController"
+			"CharacterController",
+			"Console"
 		],
 		"subfolders": []
 	},
@@ -189,6 +220,14 @@
 									"name": "PIXCommandAddon.js",
 									"type": "application/javascript",
 									"sid": 757218954071808,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXWeather.js",
+									"type": "application/javascript",
+									"sid": 311836309308908,
 									"script-info": {
 										"purpose": "none"
 									}
@@ -315,7 +354,7 @@
 		"fov": 0.7853981633974483,
 		"useLoaderLayout": false,
 		"fullscreenMode": "letterbox-integer-scale",
-		"fullscreenQuality": "low",
+		"fullscreenQuality": "high",
 		"viewportFit": "auto",
 		"backgroundColor": [
 			0,

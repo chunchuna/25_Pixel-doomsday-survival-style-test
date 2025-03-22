@@ -18,17 +18,31 @@
 							"behaviorType": "MoveFunction"
 						}
 					],
-					"actions": [
+					"actions": [],
+					"sid": 813313385485461,
+					"children": [
 						{
-							"type": "script",
-							"script": [
-								"const event = new C3.Event(\"CharacterControllerMoveFunctionISMoving\", false)",
-								"const handler =runtime.objects.EventHandler.getFirstInstance();",
-								"handler.dispatchEvent(event)"
-							]
+							"eventType": "block",
+							"conditions": [
+								{
+									"id": "trigger-once-while-true",
+									"objectClass": "System",
+									"sid": 164819272036334
+								}
+							],
+							"actions": [
+								{
+									"type": "script",
+									"script": [
+										"const event = new C3.Event(\"CharacterControllerMoveFunctionISMoving\", false)",
+										"const handler =runtime.objects.EventHandler.getFirstInstance();",
+										"handler.dispatchEvent(event)"
+									]
+								}
+							],
+							"sid": 541398674774390
 						}
-					],
-					"sid": 813313385485461
+					]
 				},
 				{
 					"eventType": "block",
@@ -41,17 +55,31 @@
 							"isInverted": true
 						}
 					],
-					"actions": [
+					"actions": [],
+					"sid": 668298586520591,
+					"children": [
 						{
-							"type": "script",
-							"script": [
-								"const event = new C3.Event(\"CharacterControllerMoveFunctionNotMoving\", false)",
-								"const handler =runtime.objects.EventHandler.getFirstInstance();",
-								"handler.dispatchEvent(event)"
-							]
+							"eventType": "block",
+							"conditions": [
+								{
+									"id": "trigger-once-while-true",
+									"objectClass": "System",
+									"sid": 475139960948519
+								}
+							],
+							"actions": [
+								{
+									"type": "script",
+									"script": [
+										"const event = new C3.Event(\"CharacterControllerMoveFunctionNotMoving\", false)",
+										"const handler =runtime.objects.EventHandler.getFirstInstance();",
+										"handler.dispatchEvent(event)"
+									]
+								}
+							],
+							"sid": 730764024935847
 						}
-					],
-					"sid": 668298586520591
+					]
 				}
 			],
 			"sid": 529792715363952
