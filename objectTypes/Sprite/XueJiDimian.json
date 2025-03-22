@@ -1,44 +1,41 @@
 {
-	"name": "ZhiWuSprite",
+	"name": "XueJiDimian",
 	"plugin-id": "Sprite",
-	"sid": 446690722666053,
+	"sid": 457632072902803,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
 	"behaviorTypes": [],
-	"effectTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		},
+		{
+			"effectId": "grayscale",
+			"name": "灰度"
+		}
+	],
 	"animations": {
 		"items": [
 			{
 				"frames": [
 					{
-						"width": 75,
-						"height": 98,
-						"originX": 0.48,
-						"originY": 0.9285714285714286,
+						"width": 195,
+						"height": 202,
+						"originX": 0.4717948717948718,
+						"originY": 0.4752475247524752,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 6796008,
-						"collisionPoly": {
-							"points": [
-								0.018895238095238097,
-								0.014557823129251702,
-								0.981104761904762,
-								0.014557823129251702,
-								0.981104761904762,
-								0.9854421768707482,
-								0.018895238095238097,
-								0.9854421768707482
-							]
-						},
+						"imageSpriteId": 6017793,
 						"useCollisionPoly": true,
 						"duration": 1,
 						"tag": ""
 					}
 				],
-				"sid": 541734700988856,
+				"sid": 853294718686951,
 				"name": "Animation 1",
 				"isLooping": false,
 				"isPingPong": false,

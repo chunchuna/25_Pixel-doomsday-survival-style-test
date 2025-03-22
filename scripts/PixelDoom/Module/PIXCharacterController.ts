@@ -1,10 +1,8 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { GAME_TYPE } from "../Global/PIXGlobal.js";
 
 
-enum GAME_TYPE {
-    LEVEL = "Level",
 
-}
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("[CharacterController] init")
@@ -47,6 +45,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
     if (GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX > 0) {
         GAME$_CHARACTER_CONTROLLER.width = Math.abs(GAME$_CHARACTER_CONTROLLER.width)
+    }
+
+    if (GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX > 0 || GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY > 0) {
+
     }
 })
 

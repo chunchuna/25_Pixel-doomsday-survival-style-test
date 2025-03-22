@@ -1,0 +1,264 @@
+{
+	"name": "Audio",
+	"events": [
+		{
+			"eventType": "block",
+			"conditions": [
+				{
+					"id": "on-start-of-layout",
+					"objectClass": "System",
+					"sid": 330072422581874
+				}
+			],
+			"actions": [
+				{
+					"id": "set-listener-object",
+					"objectClass": "Audio",
+					"sid": 621634074071996,
+					"parameters": {
+						"object": "RedHairGirlSprite"
+					}
+				}
+			],
+			"sid": 808007739081951
+		},
+		{
+			"functionName": "AudioPlayOnce",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "AudioName",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 576972147887989
+				},
+				{
+					"name": "YinLiang",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 253984023141255
+				},
+				{
+					"name": "ShengDao",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 179005629316486
+				},
+				{
+					"name": "Tag",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 237436866349740
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "play-by-name",
+					"objectClass": "Audio",
+					"sid": 328449630357471,
+					"parameters": {
+						"folder": "sounds",
+						"audio-file-name": "AudioName",
+						"loop": "not-looping",
+						"volume": "YinLiang",
+						"stereo-pan": "ShengDao",
+						"tag-optional": "Tag"
+					}
+				}
+			],
+			"sid": 144776731002829
+		},
+		{
+			"functionName": "AudioPlayCycle",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "AudioName",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 172066477087100
+				},
+				{
+					"name": "YinLiang",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 876751450786466
+				},
+				{
+					"name": "ShengDao",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 311368087638517
+				},
+				{
+					"name": "Tag",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 685267401009325
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "play-by-name",
+					"objectClass": "Audio",
+					"sid": 358294478524842,
+					"parameters": {
+						"folder": "sounds",
+						"audio-file-name": "AudioName",
+						"loop": "looping",
+						"volume": "YinLiang",
+						"stereo-pan": "ShengDao",
+						"tag-optional": "Tag"
+					}
+				}
+			],
+			"sid": 865331477638198
+		},
+		{
+			"functionName": "AudioStop",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "Tag",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 714513550668208
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "stop",
+					"objectClass": "Audio",
+					"sid": 523192864447334,
+					"parameters": {
+						"tag": "Tag"
+					}
+				}
+			],
+			"sid": 232974664414527
+		},
+		{
+			"functionName": "AudioStopAll",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "stop-all",
+					"objectClass": "Audio",
+					"sid": 247577007280979
+				}
+			],
+			"sid": 399296184366113
+		},
+		{
+			"functionName": "AudioPlayOnPostion",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "AudioName",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 564535947563014
+				},
+				{
+					"name": "ZengYi",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 221734753675523
+				},
+				{
+					"name": "X",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 995768655082299
+				},
+				{
+					"name": "Y",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 586492660822155
+				},
+				{
+					"name": "Z",
+					"type": "number",
+					"initialValue": "0",
+					"comment": "",
+					"sid": 797549107056207
+				},
+				{
+					"name": "Tag",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 505434693898555
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "play-at-position-by-name",
+					"objectClass": "Audio",
+					"sid": 669685812538126,
+					"parameters": {
+						"folder": "sounds",
+						"audio-file-name": "AudioName",
+						"loop": "not-looping",
+						"volume": "ZengYi",
+						"x": "X",
+						"y": "Y",
+						"z": "Z",
+						"angle": "0",
+						"inner-angle": "360",
+						"outer-angle": "360",
+						"outer-gain": "ZengYi",
+						"tag-optional": "Tag"
+					}
+				}
+			],
+			"sid": 600120259091358
+		}
+	],
+	"sid": 549234457080181
+}

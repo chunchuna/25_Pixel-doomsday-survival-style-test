@@ -1,7 +1,7 @@
 {
-	"name": "ZhiWuSprite",
+	"name": "ZhangPeng2",
 	"plugin-id": "Sprite",
-	"sid": 446690722666053,
+	"sid": 888030384611908,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
@@ -12,25 +12,25 @@
 			{
 				"frames": [
 					{
-						"width": 75,
-						"height": 98,
-						"originX": 0.48,
-						"originY": 0.9285714285714286,
+						"width": 78,
+						"height": 53,
+						"originX": 0.47435897435897434,
+						"originY": 0.9245283018867925,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 6796008,
+						"imageSpriteId": 1000017,
 						"collisionPoly": {
 							"points": [
-								0.018895238095238097,
-								0.014557823129251702,
-								0.981104761904762,
-								0.014557823129251702,
-								0.981104761904762,
-								0.9854421768707482,
-								0.018895238095238097,
-								0.9854421768707482
+								0.012820512820512818,
+								0.018867924528301886,
+								1,
+								0.018867924528301886,
+								1,
+								0.9811320754716981,
+								0.012820512820512818,
+								0.9811320754716981
 							]
 						},
 						"useCollisionPoly": true,
@@ -38,8 +38,8 @@
 						"tag": ""
 					}
 				],
-				"sid": 541734700988856,
-				"name": "Animation 1",
+				"sid": 381890534003957,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

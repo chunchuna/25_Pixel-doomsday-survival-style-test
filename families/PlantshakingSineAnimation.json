@@ -1,0 +1,19 @@
+{
+	"name": "PlantshakingSineAnimation",
+	"plugin-id": "Sprite",
+	"sid": 509111578796891,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Sin",
+			"name": "正弦运动",
+			"sid": 849299056120816
+		}
+	],
+	"effectTypes": [],
+	"members": [
+		"ZhiWuSprite",
+		"ZhiWuSprite2",
+		"ZhiWuSprite5"
+	]
+}

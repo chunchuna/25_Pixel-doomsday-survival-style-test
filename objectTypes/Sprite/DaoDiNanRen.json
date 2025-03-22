@@ -1,36 +1,45 @@
 {
-	"name": "ZhiWuSprite",
+	"name": "DaoDiNanRen",
 	"plugin-id": "Sprite",
-	"sid": 446690722666053,
+	"sid": 230066932522564,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
 	"behaviorTypes": [],
-	"effectTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		},
+		{
+			"effectId": "grayscale",
+			"name": "灰度"
+		}
+	],
 	"animations": {
 		"items": [
 			{
 				"frames": [
 					{
-						"width": 75,
-						"height": 98,
-						"originX": 0.48,
-						"originY": 0.9285714285714286,
+						"width": 140,
+						"height": 100,
+						"originX": 0.5785714285714286,
+						"originY": 0.95,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 6796008,
+						"imageSpriteId": 2519847,
 						"collisionPoly": {
 							"points": [
-								0.018895238095238097,
-								0.014557823129251702,
-								0.981104761904762,
-								0.014557823129251702,
-								0.981104761904762,
-								0.9854421768707482,
-								0.018895238095238097,
-								0.9854421768707482
+								0.007142857142857143,
+								0.01,
+								1,
+								0.01,
+								1,
+								1,
+								0.007142857142857143,
+								1
 							]
 						},
 						"useCollisionPoly": true,
@@ -38,8 +47,8 @@
 						"tag": ""
 					}
 				],
-				"sid": 541734700988856,
-				"name": "Animation 1",
+				"sid": 713741793388611,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

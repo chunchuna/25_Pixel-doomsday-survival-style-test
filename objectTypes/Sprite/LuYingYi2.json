@@ -1,36 +1,41 @@
 {
-	"name": "ZhiWuSprite",
+	"name": "LuYingYi2",
 	"plugin-id": "Sprite",
-	"sid": 446690722666053,
+	"sid": 319818360158464,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
 	"behaviorTypes": [],
-	"effectTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		}
+	],
 	"animations": {
 		"items": [
 			{
 				"frames": [
 					{
-						"width": 75,
-						"height": 98,
-						"originX": 0.48,
-						"originY": 0.9285714285714286,
+						"width": 67,
+						"height": 82,
+						"originX": 0.4925373134328358,
+						"originY": 0.9390243902439024,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 6796008,
+						"imageSpriteId": 4924864,
 						"collisionPoly": {
 							"points": [
-								0.018895238095238097,
-								0.014557823129251702,
-								0.981104761904762,
-								0.014557823129251702,
-								0.981104761904762,
-								0.9854421768707482,
-								0.018895238095238097,
-								0.9854421768707482
+								0.014925373134328358,
+								0.012195121951219513,
+								0.9850746268656716,
+								0.012195121951219513,
+								0.9850746268656716,
+								0.9878048780487805,
+								0.014925373134328358,
+								0.9878048780487805
 							]
 						},
 						"useCollisionPoly": true,
@@ -38,8 +43,8 @@
 						"tag": ""
 					}
 				],
-				"sid": 541734700988856,
-				"name": "Animation 1",
+				"sid": 760228382367976,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

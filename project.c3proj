@@ -8,6 +8,13 @@
 	"usedAddons": [
 		{
 			"type": "plugin",
+			"id": "Audio",
+			"name": "音频",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
 			"id": "Keyboard",
 			"name": "键盘",
 			"author": "Scirra",
@@ -26,13 +33,6 @@
 			"type": "plugin",
 			"id": "Mouse",
 			"name": "鼠标",
-			"author": "Scirra",
-			"bundled": false
-		},
-		{
-			"type": "plugin",
-			"id": "Particles",
-			"name": "粒子",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -94,8 +94,29 @@
 		},
 		{
 			"type": "effect",
+			"id": "blurhorizontal",
+			"name": "水平模糊",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "blurvertical",
+			"name": "垂直模糊",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
 			"id": "grayscale",
 			"name": "灰度",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "multiply",
+			"name": "正片叠底",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -104,6 +125,20 @@
 			"id": "pixellate",
 			"name": "像素化",
 			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "pixellatemask",
+			"name": "像素化蒙版",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "vignette",
+			"name": "暗角",
+			"author": "Brad Larson",
 			"bundled": false
 		}
 	],
@@ -121,8 +156,20 @@
 					"ZhiWuSprite3",
 					"ZhiWuSprite4",
 					"ZhiWuSprite5",
-					"Splash",
-					"Raindrop"
+					"Raindrop",
+					"HuoDui",
+					"ZhangPeng",
+					"GouHouGuang",
+					"LightNew",
+					"HuoYanm",
+					"LuYingYi",
+					"LuYingYi2",
+					"Road",
+					"JingChe",
+					"ZhangPeng2",
+					"XueJiDimian",
+					"DaoDiNvHai",
+					"DaoDiNanRen"
 				],
 				"subfolders": [],
 				"name": "Sprite"
@@ -131,7 +178,8 @@
 				"items": [
 					"InGameConsole",
 					"Keyboard",
-					"Mouse"
+					"Mouse",
+					"Audio"
 				],
 				"subfolders": [],
 				"name": "Addon"
@@ -146,7 +194,8 @@
 			"LivingBreathAnimation",
 			"LivingMovementAnimation",
 			"SpriteAutoYsort",
-			"CharacterSineAnimation"
+			"CharacterSineAnimation",
+			"PlantshakingSineAnimation"
 		],
 		"subfolders": []
 	},
@@ -162,7 +211,8 @@
 			"Level",
 			"Global",
 			"CharacterController",
-			"Console"
+			"Console",
+			"Audio"
 		],
 		"subfolders": []
 	},
@@ -231,10 +281,54 @@
 									"script-info": {
 										"purpose": "none"
 									}
+								},
+								{
+									"name": "PIXAudio.js",
+									"type": "application/javascript",
+									"sid": 653951169141746,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXCharacterAudio.js",
+									"type": "application/javascript",
+									"sid": 918358233357336,
+									"script-info": {
+										"purpose": "none"
+									}
 								}
 							],
 							"subfolders": [],
 							"name": "Module"
+						},
+						{
+							"items": [
+								{
+									"name": "PIXGroupAmbientSoundEffect.js",
+									"type": "application/javascript",
+									"sid": 582339475545987,
+									"script-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "Group"
+						},
+						{
+							"items": [
+								{
+									"name": "PIXGlobal.js",
+									"type": "application/javascript",
+									"sid": 286509382015185,
+									"script-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "Global"
 						}
 					],
 					"name": "PixelDoom"
@@ -243,11 +337,37 @@
 			"autoReloadOnPreview": true
 		},
 		"sound": {
-			"items": [],
+			"items": [
+				{
+					"name": "sfx_JiaoBuSheng.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 438716414160207,
+					"file-info": {
+						"purpose": "none"
+					}
+				}
+			],
 			"subfolders": []
 		},
 		"music": {
-			"items": [],
+			"items": [
+				{
+					"name": "Rain.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 810382260084777,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "NiaoJiao.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 422942614134471,
+					"file-info": {
+						"purpose": "none"
+					}
+				}
+			],
 			"subfolders": []
 		},
 		"video": {

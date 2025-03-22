@@ -1,7 +1,7 @@
 {
-	"name": "RedHairGirlSprite",
+	"name": "JingChe",
 	"plugin-id": "Sprite",
-	"sid": 711329311071812,
+	"sid": 717552266669544,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
@@ -21,34 +21,22 @@
 			{
 				"frames": [
 					{
-						"width": 96,
-						"height": 231,
-						"originX": 0.5104166666666666,
-						"originY": 1,
+						"width": 126,
+						"height": 49,
+						"originX": 0.5158730158730159,
+						"originY": 0.9795918367346939,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 4050233,
-						"collisionPoly": {
-							"points": [
-								0.02891825396825397,
-								0.01876078569956121,
-								0.9710817460317461,
-								0.01876078569956121,
-								0.9710817460317461,
-								0.9812392143004387,
-								0.02891825396825397,
-								0.9812392143004387
-							]
-						},
+						"imageSpriteId": 4958070,
 						"useCollisionPoly": true,
 						"duration": 1,
 						"tag": ""
 					}
 				],
-				"sid": 913226592374596,
-				"name": "Animation 1",
+				"sid": 858893199388010,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

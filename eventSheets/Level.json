@@ -10,6 +10,14 @@
 			"includeSheet": "Global"
 		},
 		{
+			"eventType": "include",
+			"includeSheet": "Audio"
+		},
+		{
+			"eventType": "include",
+			"includeSheet": "Console"
+		},
+		{
 			"eventType": "group",
 			"disabled": false,
 			"title": "LevelInit",

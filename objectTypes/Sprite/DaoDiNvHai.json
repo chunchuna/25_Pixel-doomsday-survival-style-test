@@ -1,7 +1,7 @@
 {
-	"name": "RedHairGirlSprite",
+	"name": "DaoDiNvHai",
 	"plugin-id": "Sprite",
-	"sid": 711329311071812,
+	"sid": 306285645441648,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
@@ -21,34 +21,22 @@
 			{
 				"frames": [
 					{
-						"width": 96,
-						"height": 231,
-						"originX": 0.5104166666666666,
-						"originY": 1,
+						"width": 148,
+						"height": 103,
+						"originX": 0.4864864864864865,
+						"originY": 0.6990291262135923,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 4050233,
-						"collisionPoly": {
-							"points": [
-								0.02891825396825397,
-								0.01876078569956121,
-								0.9710817460317461,
-								0.01876078569956121,
-								0.9710817460317461,
-								0.9812392143004387,
-								0.02891825396825397,
-								0.9812392143004387
-							]
-						},
+						"imageSpriteId": 5104222,
 						"useCollisionPoly": true,
 						"duration": 1,
 						"tag": ""
 					}
 				],
-				"sid": 913226592374596,
-				"name": "Animation 1",
+				"sid": 983815342088894,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

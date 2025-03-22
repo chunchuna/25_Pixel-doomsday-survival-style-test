@@ -1,36 +1,42 @@
 {
-	"name": "ZhiWuSprite",
+	"name": "GouHouGuang",
 	"plugin-id": "Sprite",
-	"sid": 446690722666053,
+	"sid": 805554131759338,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
-	"behaviorTypes": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Sin",
+			"name": "正弦运动",
+			"sid": 629306405895165
+		}
+	],
 	"effectTypes": [],
 	"animations": {
 		"items": [
 			{
 				"frames": [
 					{
-						"width": 75,
-						"height": 98,
-						"originX": 0.48,
-						"originY": 0.9285714285714286,
+						"width": 64,
+						"height": 64,
+						"originX": 0.5,
+						"originY": 0.5,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 6796008,
+						"imageSpriteId": 2133241,
 						"collisionPoly": {
 							"points": [
-								0.018895238095238097,
-								0.014557823129251702,
-								0.981104761904762,
-								0.014557823129251702,
-								0.981104761904762,
-								0.9854421768707482,
-								0.018895238095238097,
-								0.9854421768707482
+								0.0010256410256410256,
+								0.0010204081632653062,
+								0.9989743589743589,
+								0.0010204081632653062,
+								0.9989743589743589,
+								0.9989795918367347,
+								0.0010256410256410256,
+								0.9989795918367347
 							]
 						},
 						"useCollisionPoly": true,
@@ -38,8 +44,8 @@
 						"tag": ""
 					}
 				],
-				"sid": 541734700988856,
-				"name": "Animation 1",
+				"sid": 219071678272807,
+				"name": "Default",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,

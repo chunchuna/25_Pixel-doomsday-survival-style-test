@@ -1,0 +1,75 @@
+{
+	"name": "HuoDui",
+	"plugin-id": "Sprite",
+	"sid": 943241765435723,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		},
+		{
+			"effectId": "grayscale",
+			"name": "灰度"
+		}
+	],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 115,
+						"height": 99,
+						"originX": 0.5304347826086957,
+						"originY": 0.98989898989899,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 7465142,
+						"collisionPoly": {
+							"points": [
+								0.6491228070175439,
+								0,
+								0.8070175438596491,
+								0,
+								0.9298245614035088,
+								0,
+								0.9649122807017544,
+								0.4857142857142857,
+								0.9649122807017544,
+								0.6285714285714286,
+								0.9298245614035088,
+								0.6857142857142857,
+								0.7368421052631579,
+								0.7714285714285715,
+								0.38596491228070173,
+								0.8,
+								0.05263157894736842,
+								0.6285714285714286,
+								0.05263157894736842,
+								0.4857142857142857,
+								0.3157894736842105,
+								0
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 688099126383109,
+				"name": "Default",
+				"isLooping": true,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 10
+			}
+		],
+		"subfolders": []
+	}
+}

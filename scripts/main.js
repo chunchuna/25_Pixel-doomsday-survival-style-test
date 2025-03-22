@@ -6,6 +6,9 @@ import "./PixelDoom/Module/PIXLevel.js";
 import "./PixelDoom/Module/PIXCharacterController.js";
 import "./PixelDoom/Module/PIXCharacterAnimation.js";
 import "./PixelDoom/Module/PIXWeather.js";
+import "./PixelDoom/Module/PIXAudio.js";
+import "./PixelDoom/Module/PIXCharacterAudio.js";
+import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js";
 runOnStartup(async (runtime) => {
     // Code to run on the loading screen.
     // Note layouts, objects etc. are not yet available.
