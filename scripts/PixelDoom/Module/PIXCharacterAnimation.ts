@@ -7,6 +7,7 @@ var GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    console.log("typescript test34234")
     //@ts-ignore
     GAME$_CHARACTER_SINE_ANIMATION = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.CharacterSineAnimation.getFirstInstance();
 

@@ -33,9 +33,12 @@
 							"actions": [
 								{
 									"type": "script",
+									"language": "typescript",
 									"script": [
+										"// @ts-ignore",
 										"const event = new C3.Event(\"CharacterControllerMoveFunctionISMoving\", false)",
 										"const handler =runtime.objects.EventHandler.getFirstInstance();",
+										"// @ts-ignore",
 										"handler.dispatchEvent(event)"
 									]
 								}
@@ -70,9 +73,12 @@
 							"actions": [
 								{
 									"type": "script",
+									"language": "typescript",
 									"script": [
+										"// @ts-ignore",
 										"const event = new C3.Event(\"CharacterControllerMoveFunctionNotMoving\", false)",
 										"const handler =runtime.objects.EventHandler.getFirstInstance();",
+										"// @ts-ignore",
 										"handler.dispatchEvent(event)"
 									]
 								}

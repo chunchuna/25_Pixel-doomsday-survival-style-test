@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 43100,
+	"savedWithRelease": 43300,
 	"name": "25_Pixel-doomsday-survival-style-test",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -9,14 +9,14 @@
 		{
 			"type": "plugin",
 			"id": "Audio",
-			"name": "音频",
+			"name": "音頻",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "Keyboard",
-			"name": "键盘",
+			"name": "鍵盤",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -32,63 +32,63 @@
 		{
 			"type": "plugin",
 			"id": "Mouse",
-			"name": "鼠标",
+			"name": "滑鼠",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "Sprite",
-			"name": "精灵",
+			"name": "Sprite",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "TiledBg",
-			"name": "平铺图",
+			"name": "平鋪背景",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Bullet",
-			"name": "子弹",
+			"name": "子彈",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "EightDir",
-			"name": "八方向",
+			"name": "8方向",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Sin",
-			"name": "正弦运动",
+			"name": "正弦",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Timer",
-			"name": "计时器",
+			"name": "計時器",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "scrollto",
-			"name": "镜头跟随",
+			"name": "視野跟隨",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "wrap",
-			"name": "边界穿梭",
+			"name": "邊界穿梭",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -116,28 +116,28 @@
 		{
 			"type": "effect",
 			"id": "multiply",
-			"name": "正片叠底",
+			"name": "正片疊底",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "pixellate",
-			"name": "像素化",
+			"name": "馬賽克",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "pixellatemask",
-			"name": "像素化蒙版",
+			"name": "蒙版:馬賽克",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "vignette",
-			"name": "暗角",
+			"name": "暈影",
 			"author": "Brad Larson",
 			"bundled": false
 		}
@@ -220,19 +220,19 @@
 		"script": {
 			"items": [
 				{
-					"name": "main.js",
-					"type": "application/javascript",
-					"sid": 858126998842176,
+					"name": "engine.ts",
+					"type": "application/typescript",
+					"sid": 344890577127725,
 					"script-info": {
-						"purpose": "main"
+						"purpose": "none"
 					}
 				},
 				{
-					"name": "engine.js",
-					"type": "application/javascript",
-					"sid": 131121335012417,
+					"name": "main.ts",
+					"type": "application/typescript",
+					"sid": 535426228116103,
 					"script-info": {
-						"purpose": "none"
+						"purpose": "main"
 					}
 				}
 			],
@@ -243,57 +243,57 @@
 						{
 							"items": [
 								{
-									"name": "PIXLevel.js",
-									"type": "application/javascript",
-									"sid": 705066639574493,
+									"name": "PIXLevel.ts",
+									"type": "application/typescript",
+									"sid": 491322135849876,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXCharacterController.js",
-									"type": "application/javascript",
-									"sid": 585266803045644,
+									"name": "PIXCharacterController.ts",
+									"type": "application/typescript",
+									"sid": 293724821323184,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXCharacterAnimation.js",
-									"type": "application/javascript",
-									"sid": 951256658725208,
+									"name": "PIXCharacterAnimation.ts",
+									"type": "application/typescript",
+									"sid": 374646544190009,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXCommandAddon.js",
-									"type": "application/javascript",
-									"sid": 757218954071808,
+									"name": "PIXWeather.ts",
+									"type": "application/typescript",
+									"sid": 254664797401993,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXWeather.js",
-									"type": "application/javascript",
-									"sid": 311836309308908,
+									"name": "PIXAudio.ts",
+									"type": "application/typescript",
+									"sid": 716854765683052,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXAudio.js",
-									"type": "application/javascript",
-									"sid": 653951169141746,
+									"name": "PIXCommandAddon.ts",
+									"type": "application/typescript",
+									"sid": 685101852217774,
 									"script-info": {
 										"purpose": "none"
 									}
 								},
 								{
-									"name": "PIXCharacterAudio.js",
-									"type": "application/javascript",
-									"sid": 918358233357336,
+									"name": "PIXCharacterAudio.ts",
+									"type": "application/typescript",
+									"sid": 295968931501728,
 									"script-info": {
 										"purpose": "none"
 									}
@@ -305,9 +305,9 @@
 						{
 							"items": [
 								{
-									"name": "PIXGroupAmbientSoundEffect.js",
-									"type": "application/javascript",
-									"sid": 582339475545987,
+									"name": "PIXGroupAmbientSoundEffect.ts",
+									"type": "application/typescript",
+									"sid": 315082051678213,
 									"script-info": {
 										"purpose": "none"
 									}
@@ -319,9 +319,9 @@
 						{
 							"items": [
 								{
-									"name": "PIXGlobal.js",
-									"type": "application/javascript",
-									"sid": 286509382015185,
+									"name": "PIXGlobal.ts",
+									"type": "application/typescript",
+									"sid": 497994802833887,
 									"script-info": {
 										"purpose": "none"
 									}
@@ -333,8 +333,7 @@
 					],
 					"name": "PixelDoom"
 				}
-			],
-			"autoReloadOnPreview": true
+			]
 		},
 		"sound": {
 			"items": [
