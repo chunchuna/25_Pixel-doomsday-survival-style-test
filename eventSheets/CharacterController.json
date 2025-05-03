@@ -39,7 +39,9 @@
 										"const event = new C3.Event(\"CharacterControllerMoveFunctionISMoving\", false)",
 										"const handler =runtime.objects.EventHandler.getFirstInstance();",
 										"// @ts-ignore",
-										"handler.dispatchEvent(event)"
+										"handler.dispatchEvent(event)",
+										"",
+										""
 									]
 								}
 							],
@@ -89,6 +91,42 @@
 				}
 			],
 			"sid": 529792715363952
+		},
+		{
+			"eventType": "group",
+			"disabled": false,
+			"title": "ForDebug",
+			"description": "",
+			"isActiveOnStart": true,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "on-click",
+							"objectClass": "Mouse",
+							"sid": 807958587767995,
+							"parameters": {
+								"mouse-button": "left",
+								"click-type": "clicked"
+							}
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"language": "typescript",
+							"script": [
+								"// @ts-ignore",
+								"gl$_run_eventhandle_(\"MouseClick\",{state:\"clickonece\",usedivice:\"macbook\"})"
+							]
+						}
+					],
+					"sid": 195430153606665,
+					"disabled": true
+				}
+			],
+			"sid": 872031929841737
 		}
 	],
 	"sid": 328872248669789

@@ -2,6 +2,15 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { GAME_TYPE } from "../Global/PIXGlobal.js";
 
 
+// new eventhandler test
+
+// pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+//     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("MouseClick", (e: any) => {
+//         console.log("MouseClick")
+//         console.log(e.data)
+//         console.log(e.data.state)
+//     },)
+// })
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {

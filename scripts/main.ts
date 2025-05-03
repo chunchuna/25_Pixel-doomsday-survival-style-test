@@ -16,6 +16,7 @@ import "./PixelDoom/Module/PIXAudio.js"
 import "./PixelDoom/Module/PIXCharacterAudio.js"
 import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js"
 
+
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.
 	// Note layouts, objects etc. are not yet available.
@@ -34,3 +35,5 @@ async function OnBeforeProjectStart(runtime: IRuntime) {
 function Tick(runtime: IRuntime) {
 	// Code to run every tick
 }
+
+

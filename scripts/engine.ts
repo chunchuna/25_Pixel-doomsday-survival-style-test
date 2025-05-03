@@ -40,72 +40,51 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
 
-
-
-
-
-
     public static gl$_ubu_init = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-            runtime.addEventListener("afteranylayoutstart", Function);
+            runtime.addEventListener(GAME_STATES.INIT, Function);
         });
     }
 
 
     public static gl$_ubu_update = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-            runtime.addEventListener("tick", Function);
+            runtime.addEventListener(GAME_STATES.TICK, Function);
         });
     };
 
 
-    public static async gl$_call_eventhandle_(EventName: string, func: any) {
+    public static async gl$_call_eventhandle_(EventName: string, func: any,) {
         // @ts-ignore
-        await (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async () => {
+        await (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async (e) => {
             if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) return;
-            func();
+            func(e);
         });
     }
 
 
-    public static gl$_run_eventhandle_(EventName: string, parameter: any[]) {
+    public static gl$_run_eventhandle_(EventName: string, parameter: any) {
         // @ts-ignore
-        var event = new C3.Event(EventName, false, parameter)
+        var event = new C3.Event(EventName, false,)
+        event.data = parameter;
         //console.log(event)
-        var handler = this.RUN_TIME_.objects.EventHandler.getFirstInstance();
+        var handler = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
         // @ts-ignore
-        handler.dispatchEvent(event, parameter)
+        handler.dispatchEvent(event)
     }
 
-
-    public static gl_ubu_init_$$LEVEL = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-            runtime.addEventListener("afteranylayoutstart", () => {
-                if (runtime.globalVars.GameType === "Level") Function();
-            });
-        });
-    }
-
-
-    public static gl_ubu_update$$LEVEL = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-            runtime.addEventListener("tick", () => {
-                if (runtime.globalVars.GameType === "Level") Function();
-            });
-        });
-    };
 
     public static UBU_CLIENT_DRAW_FRAME = {
 
         gl$_ubu_init: (Fcuntion: () => void) => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-                runtime.addEventListener("afteranylayoutstart", Fcuntion);
+                runtime.addEventListener(GAME_STATES.INIT, Fcuntion);
             });
         },
 
         gl$_ubu_update: (Function: () => void) => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-                runtime.addEventListener("tick", Function);
+                runtime.addEventListener(GAME_STATES.TICK, Function);
             });
         },
     };
@@ -135,6 +114,27 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Engine here
 

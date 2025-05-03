@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 43300,
+	"savedWithRelease": 43700,
 	"name": "25_Pixel-doomsday-survival-style-test",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -9,14 +9,14 @@
 		{
 			"type": "plugin",
 			"id": "Audio",
-			"name": "音頻",
+			"name": "音频",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "Keyboard",
-			"name": "鍵盤",
+			"name": "键盘",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -32,63 +32,63 @@
 		{
 			"type": "plugin",
 			"id": "Mouse",
-			"name": "滑鼠",
+			"name": "鼠标",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "Sprite",
-			"name": "Sprite",
+			"name": "精灵",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "plugin",
 			"id": "TiledBg",
-			"name": "平鋪背景",
+			"name": "平铺图",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Bullet",
-			"name": "子彈",
+			"name": "子弹",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "EightDir",
-			"name": "8方向",
+			"name": "八方向",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Sin",
-			"name": "正弦",
+			"name": "正弦运动",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "Timer",
-			"name": "計時器",
+			"name": "计时器",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "scrollto",
-			"name": "視野跟隨",
+			"name": "镜头跟随",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "behavior",
 			"id": "wrap",
-			"name": "邊界穿梭",
+			"name": "边界穿梭",
 			"author": "Scirra",
 			"bundled": false
 		},
@@ -116,28 +116,28 @@
 		{
 			"type": "effect",
 			"id": "multiply",
-			"name": "正片疊底",
+			"name": "正片叠底",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "pixellate",
-			"name": "馬賽克",
+			"name": "像素化",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "pixellatemask",
-			"name": "蒙版:馬賽克",
+			"name": "像素化蒙版",
 			"author": "Scirra",
 			"bundled": false
 		},
 		{
 			"type": "effect",
 			"id": "vignette",
-			"name": "暈影",
+			"name": "暗角",
 			"author": "Brad Larson",
 			"bundled": false
 		}
@@ -186,6 +186,7 @@
 			}
 		]
 	},
+	"functionsName": "Functions",
 	"autosaveData": null,
 	"containers": [],
 	"families": {
@@ -233,6 +234,14 @@
 					"sid": 535426228116103,
 					"script-info": {
 						"purpose": "main"
+					}
+				},
+				{
+					"name": "eventsheet.ts",
+					"type": "application/typescript",
+					"sid": 962878861716093,
+					"script-info": {
+						"purpose": "imports-for-events"
 					}
 				}
 			],
