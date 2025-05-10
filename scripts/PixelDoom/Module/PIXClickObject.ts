@@ -60,17 +60,6 @@ export class ClickObject {
 }
 
 
-// Common Actions   
-// 通用交互指令
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
-
-    // 当玩家选择了 Check 指令
-    GL_COMMAND_._TRY_ACTION_UPDATE("check", () => {
-        GL_COMMAND_._draw("[color=yellow]执行检查:" + LastestChooseObject.instVars.CheckDescribe+"[/color]")
-    })
-
-
-})
 
 
 

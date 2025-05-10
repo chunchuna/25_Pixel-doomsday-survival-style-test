@@ -309,7 +309,7 @@
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
 										"ID": "LuYingYiZi",
-										"Actions": "use,destroy,none,check",
+										"Actions": "use,destroy,check",
 										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
 									},
 									"behaviors": {},
@@ -379,7 +379,7 @@
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
 										"ID": "LuYingYiZi",
-										"Actions": "use,destroy,none",
+										"Actions": "use,destroy,check",
 										"CheckDescribe": ""
 									},
 									"behaviors": {},

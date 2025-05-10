@@ -21,6 +21,7 @@ import "./PixelDoom/Module/PIXSortObject.js"
 import "./PixelDoom/Module/PIXClickObject.js"
 // ClickObject
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
+import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.

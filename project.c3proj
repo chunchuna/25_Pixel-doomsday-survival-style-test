@@ -357,6 +357,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "PIXClickObjectCommonObject.ts",
+											"type": "application/typescript",
+											"sid": 306009418764226,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],
