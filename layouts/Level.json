@@ -306,10 +306,29 @@
 									"sid": 219055436918493,
 									"tags": "",
 									"instanceVariables": {
-										"GetYPosition": 0
+										"GetYPosition": 0,
+										"ObjectName": "露营椅子",
+										"ID": 0,
+										"Actions": "use,destroy,none,check",
+										"CheckDescribe": ""
 									},
 									"behaviors": {},
 									"effects": {
+										"BetterOutline": {
+											"isEnabled": false,
+											"parameters": {
+												"color": [
+													1,
+													0,
+													0,
+													1
+												],
+												"width": 1,
+												"precision-step": 10,
+												"samples": 3,
+												"opacity": 1
+											}
+										},
 										"像素化": {
 											"isEnabled": true,
 											"parameters": {
@@ -340,7 +359,8 @@
 											1
 										],
 										"angle": 0,
-										"zElevation": 0
+										"zElevation": 0,
+										"blendMode": "additive"
 									}
 								},
 								{
@@ -356,10 +376,29 @@
 									"sid": 469125833392813,
 									"tags": "",
 									"instanceVariables": {
-										"GetYPosition": 0
+										"GetYPosition": 0,
+										"ObjectName": "露营椅子",
+										"ID": 0,
+										"Actions": "use,destroy,none",
+										"CheckDescribe": ""
 									},
 									"behaviors": {},
 									"effects": {
+										"BetterOutline": {
+											"isEnabled": false,
+											"parameters": {
+												"color": [
+													1,
+													0,
+													0,
+													1
+												],
+												"width": 1,
+												"precision-step": 10,
+												"samples": 3,
+												"opacity": 1
+											}
+										},
 										"像素化": {
 											"isEnabled": true,
 											"parameters": {
@@ -390,7 +429,8 @@
 											1
 										],
 										"angle": 0,
-										"zElevation": 0
+										"zElevation": 0,
+										"blendMode": "additive"
 									}
 								},
 								{
@@ -62623,7 +62663,7 @@
 										"x": 2127.6,
 										"y": 2199.9024390243903,
 										"width": 177.72117983687008,
-										"height": 181.64189050203336,
+										"height": 181.64189050203333,
 										"originX": 0.45,
 										"originY": 0.9024390243902439,
 										"color": [

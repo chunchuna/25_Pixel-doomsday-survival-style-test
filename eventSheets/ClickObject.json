@@ -30,8 +30,9 @@
 							"type": "script",
 							"language": "typescript",
 							"script": [
+								"var GetThisObject = runtime.objects.ClickObjectEntity.getFirstPickedInstance()",
 								"// @ts-ignore",
-								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject\",)"
+								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject\",{object:GetThisObject})"
 							]
 						}
 					],
@@ -69,12 +70,53 @@
 							"type": "script",
 							"language": "typescript",
 							"script": [
-								"// @ts-ignore",
-								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject-none\",)"
+								"var GetThisObject = runtime.objects.ClickObjectEntity.getFirstPickedInstance()",
+								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject-none\",{object:GetThisObject})"
 							]
 						}
 					],
 					"sid": 557824566837745
+				}
+			]
+		},
+		{
+			"eventType": "block",
+			"conditions": [
+				{
+					"id": "on-object-clicked",
+					"objectClass": "Mouse",
+					"sid": 103065279573342,
+					"parameters": {
+						"mouse-button": "left",
+						"click-type": "clicked",
+						"object-clicked": "ClickObjectEntity"
+					}
+				}
+			],
+			"actions": [],
+			"sid": 720359956003902,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "trigger-once-while-true",
+							"objectClass": "System",
+							"sid": 469724615487749
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"language": "typescript",
+							"script": [
+								"var GetThisObject = runtime.objects.ClickObjectEntity.getFirstPickedInstance()",
+								"// @ts-ignore",
+								"gl$_run_eventhandle_(\"ClickObject:MouseClickObject\",{object:GetThisObject})"
+							]
+						}
+					],
+					"sid": 875812925190231
 				}
 			]
 		}

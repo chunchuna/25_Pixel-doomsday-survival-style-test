@@ -136,6 +136,14 @@
 		},
 		{
 			"type": "effect",
+			"id": "skymen_BetterOutline",
+			"name": "[Better Outline]",
+			"author": "skymen",
+			"bundled": true,
+			"version": "2.1.0.1"
+		},
+		{
+			"type": "effect",
 			"id": "vignette",
 			"name": "暗角",
 			"author": "Brad Larson",

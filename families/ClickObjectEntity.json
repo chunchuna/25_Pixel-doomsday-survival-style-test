@@ -2,9 +2,43 @@
 	"name": "ClickObjectEntity",
 	"plugin-id": "Sprite",
 	"sid": 418787833301768,
-	"instanceVariables": [],
+	"instanceVariables": [
+		{
+			"name": "ObjectName",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 367237930862105
+		},
+		{
+			"name": "ID",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 118467312273640
+		},
+		{
+			"name": "Actions",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 118170140669486
+		},
+		{
+			"name": "CheckDescribe",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 493004424103206
+		}
+	],
 	"behaviorTypes": [],
-	"effectTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "skymen_BetterOutline",
+			"name": "BetterOutline"
+		}
+	],
 	"members": [
 		"LuYingYi",
 		"LuYingYi2"
