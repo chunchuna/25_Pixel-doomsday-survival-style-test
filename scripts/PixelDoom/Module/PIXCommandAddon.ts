@@ -69,6 +69,7 @@ export class GL_COMMAND_ {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log(" [GL_COMMAND] console init")
+    GL_COMMAND_.ACTION_OPEN_();
 
 })
 
