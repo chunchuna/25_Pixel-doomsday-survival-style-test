@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 43700,
+	"savedWithRelease": 43600,
 	"name": "25_Pixel-doomsday-survival-style-test",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -186,7 +186,6 @@
 			}
 		]
 	},
-	"functionsName": "Functions",
 	"autosaveData": null,
 	"containers": [],
 	"families": {
@@ -196,7 +195,8 @@
 			"LivingMovementAnimation",
 			"SpriteAutoYsort",
 			"CharacterSineAnimation",
-			"PlantshakingSineAnimation"
+			"PlantshakingSineAnimation",
+			"ClickObjectEntity"
 		],
 		"subfolders": []
 	},
@@ -213,7 +213,8 @@
 			"Global",
 			"CharacterController",
 			"Console",
-			"Audio"
+			"Audio",
+			"ClickObject"
 		],
 		"subfolders": []
 	},
@@ -239,7 +240,7 @@
 				{
 					"name": "eventsheet.ts",
 					"type": "application/typescript",
-					"sid": 962878861716093,
+					"sid": 904110516649093,
 					"script-info": {
 						"purpose": "imports-for-events"
 					}
@@ -276,14 +277,6 @@
 									}
 								},
 								{
-									"name": "PIXWeather.ts",
-									"type": "application/typescript",
-									"sid": 254664797401993,
-									"script-info": {
-										"purpose": "none"
-									}
-								},
-								{
 									"name": "PIXAudio.ts",
 									"type": "application/typescript",
 									"sid": 716854765683052,
@@ -303,6 +296,30 @@
 									"name": "PIXCharacterAudio.ts",
 									"type": "application/typescript",
 									"sid": 295968931501728,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXWeather.ts",
+									"type": "application/typescript",
+									"sid": 254664797401993,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXSortObject.ts",
+									"type": "application/typescript",
+									"sid": 996095592543983,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "PIXClickObject.ts",
+									"type": "application/typescript",
+									"sid": 772240669849365,
 									"script-info": {
 										"purpose": "none"
 									}
@@ -342,7 +359,8 @@
 					],
 					"name": "PixelDoom"
 				}
-			]
+			],
+			"autoReloadOnPreview": true
 		},
 		"sound": {
 			"items": [

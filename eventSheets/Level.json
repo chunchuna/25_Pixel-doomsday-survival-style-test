@@ -18,6 +18,10 @@
 			"includeSheet": "Console"
 		},
 		{
+			"eventType": "include",
+			"includeSheet": "ClickObject"
+		},
+		{
 			"eventType": "group",
 			"disabled": false,
 			"title": "LevelInit",
@@ -88,7 +92,8 @@
 							}
 						}
 					],
-					"sid": 802581313690733
+					"sid": 802581313690733,
+					"disabled": true
 				}
 			],
 			"sid": 181002933127707

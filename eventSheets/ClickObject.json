@@ -1,0 +1,83 @@
+{
+	"name": "ClickObject",
+	"events": [
+		{
+			"eventType": "block",
+			"conditions": [
+				{
+					"id": "cursor-is-over-object",
+					"objectClass": "Mouse",
+					"sid": 577715036362351,
+					"parameters": {
+						"object": "ClickObjectEntity"
+					}
+				}
+			],
+			"actions": [],
+			"sid": 747342936453001,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "trigger-once-while-true",
+							"objectClass": "System",
+							"sid": 482362793798459
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"language": "typescript",
+							"script": [
+								"// @ts-ignore",
+								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject\",)"
+							]
+						}
+					],
+					"sid": 381053981927231
+				}
+			]
+		},
+		{
+			"eventType": "block",
+			"conditions": [
+				{
+					"id": "cursor-is-over-object",
+					"objectClass": "Mouse",
+					"sid": 961809588882645,
+					"parameters": {
+						"object": "ClickObjectEntity"
+					},
+					"isInverted": true
+				}
+			],
+			"actions": [],
+			"sid": 240629792607793,
+			"children": [
+				{
+					"eventType": "block",
+					"conditions": [
+						{
+							"id": "trigger-once-while-true",
+							"objectClass": "System",
+							"sid": 749734700621416
+						}
+					],
+					"actions": [
+						{
+							"type": "script",
+							"language": "typescript",
+							"script": [
+								"// @ts-ignore",
+								"gl$_run_eventhandle_(\"ClickObject:MouseOverObject-none\",)"
+							]
+						}
+					],
+					"sid": 557824566837745
+				}
+			]
+		}
+	],
+	"sid": 526980637840439
+}

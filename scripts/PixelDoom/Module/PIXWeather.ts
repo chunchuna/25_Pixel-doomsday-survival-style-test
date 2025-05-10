@@ -21,7 +21,6 @@ async function handleWeather() {
     // Rain(); 
 }
 
-
 async function Rain() {
 
     CurrentWeather = WEATHER_TYPE.RAIN;

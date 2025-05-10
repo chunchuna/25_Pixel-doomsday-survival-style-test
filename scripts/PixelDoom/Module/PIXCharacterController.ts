@@ -80,3 +80,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("right");
     }
 })  
+
+
+
+
