@@ -6,15 +6,19 @@ export class GL_COMMAND_ {
     public static GET_LAST_ACTION: string;
     public static IN_GAME_CONSOLE_INSTANCE: any;
 
+    public static COMMAND_OPEN = false;
+
 
     static ACTION_OPEN_() {
         //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Open();
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleOpen")
+        GL_COMMAND_.COMMAND_OPEN = true;
     }
 
     static ACTION_CLOSE_() {
         // GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Close();
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleClose")
+        GL_COMMAND_.COMMAND_OPEN = false;
     }
 
     static _draw(cont: string) {
@@ -41,11 +45,26 @@ export class GL_COMMAND_ {
             if (GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction == ActionName) {
                 Fcuntion();
                 GL_COMMAND_.GET_LAST_ACTION = ActionName;
+                GL_COMMAND_.GET_LAST_ACTION = "refresh"
+                GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction="refresh"
             }
         }
 
     }
+
+
+    public static _TRY_ACTION_(ActionName: string, Fcuntion: () => void) {
+
+        if (GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE == null) return;
+        if (ActionName == GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction) {
+            Function()
+        }
+
+
+    }
+
 }
+
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {

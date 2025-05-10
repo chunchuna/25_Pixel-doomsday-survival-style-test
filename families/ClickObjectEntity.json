@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "ID",
-			"type": "number",
+			"type": "string",
 			"desc": "",
 			"show": true,
 			"sid": 118467312273640

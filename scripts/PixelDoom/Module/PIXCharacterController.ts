@@ -67,6 +67,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (GAME$_KEYBOARD_INSTAHCE == null) return
     if (GAME$_CHARACTER_CONTROLLER == null) return
 
+    
+
     if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyW")) {
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("up");
     }

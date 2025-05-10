@@ -2,7 +2,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
 
-var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后选择的物体
+export var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后选择的物体
 
 
 
@@ -55,7 +55,6 @@ export class ClickObject {
 
     }
 
-
     static GenerateInstructions(ActionConetent: string) {
         GL_COMMAND_.ACTION_OPEN_();
         //GL_COMMAND_._draw(ActionConetent)
@@ -64,7 +63,7 @@ export class ClickObject {
             .map(item => item.trim())
             .filter(item => item !== "")
             .forEach(trimmedItem => {
-                const formattedAction = `[action name=${trimmedItem} color=red]${trimmedItem}[/action]`;
+                const formattedAction = `[background=blue][action name=${trimmedItem} color=red]${trimmedItem}[/action][/background]`;
                 GL_COMMAND_._draw(formattedAction);
             });
 

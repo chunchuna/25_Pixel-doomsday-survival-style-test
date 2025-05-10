@@ -347,7 +347,22 @@
 									}
 								}
 							],
-							"subfolders": [],
+							"subfolders": [
+								{
+									"items": [
+										{
+											"name": "PIXClickObjectItem_LuYingYi.ts",
+											"type": "application/typescript",
+											"sid": 714907302401401,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "ClickObject"
+								}
+							],
 							"name": "Group"
 						},
 						{

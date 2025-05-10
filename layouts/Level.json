@@ -308,7 +308,7 @@
 									"instanceVariables": {
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
-										"ID": 0,
+										"ID": "LuYingYiZi",
 										"Actions": "use,destroy,none,check",
 										"CheckDescribe": ""
 									},
@@ -378,7 +378,7 @@
 									"instanceVariables": {
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
-										"ID": 0,
+										"ID": "LuYingYiZi",
 										"Actions": "use,destroy,none",
 										"CheckDescribe": ""
 									},
