@@ -310,7 +310,7 @@
 										"ObjectName": "露营椅子",
 										"ID": "LuYingYiZi",
 										"Actions": "use,destroy,none,check",
-										"CheckDescribe": ""
+										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
 									},
 									"behaviors": {},
 									"effects": {

@@ -4,14 +4,9 @@ import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
 export var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后选择的物体
 
-
-
-
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("[ClickObject] init")
 })
-
-
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
@@ -23,7 +18,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     })
 
-
     // 鼠标离开交互物体
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseOverObject-none", (e: any) => {
@@ -32,7 +26,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         for (var ALLClickObject of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
             ClickObject.EnableOutLine(ALLClickObject, false)
         }
-
     })
 
 
@@ -43,11 +36,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         ClickObject.GenerateInstructions(LastestChooseObject.instVars.Actions)
 
-
-
     })
 })
-
 
 export class ClickObject {
     static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
@@ -66,18 +56,18 @@ export class ClickObject {
                 const formattedAction = `[background=blue][action name=${trimmedItem} color=red]${trimmedItem}[/action][/background]`;
                 GL_COMMAND_._draw(formattedAction);
             });
-
     }
-
 }
-
 
 
 // Common Actions   
 // 通用交互指令
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
     // 当玩家选择了 Check 指令
+    GL_COMMAND_._TRY_ACTION_UPDATE("check", () => {
+        GL_COMMAND_._draw("[color=yellow]执行检查:" + LastestChooseObject.instVars.CheckDescribe+"[/color]")
+    })
 
 
 })
