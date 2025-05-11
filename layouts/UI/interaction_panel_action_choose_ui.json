@@ -17,7 +17,7 @@
 						"class": "",
 						"allow-context-menu": false,
 						"stop-input-events": "entire-element",
-						"origin": "top-left",
+						"origin": "bottom-right",
 						"set-color": true,
 						"default-color": [
 							0,
@@ -51,12 +51,12 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": 13.45216882285041,
-						"y": 10.289738955959251,
-						"width": 292.20681647428455,
-						"height": 199.03695102793523,
-						"originX": 0,
-						"originY": 0,
+						"x": 638.6257769278056,
+						"y": 477.3471757393621,
+						"width": 150,
+						"height": 200,
+						"originX": 1,
+						"originY": 1,
 						"color": [
 							1,
 							1,

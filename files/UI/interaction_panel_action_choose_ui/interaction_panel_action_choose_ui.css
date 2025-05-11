@@ -1,14 +1,13 @@
 /* CSS */
 .interaction-panel {
-  position: fixed;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 150px;
-  max-height: 200px;
-  background-color: rgba(40, 40, 40, 0.9);
+  position:fixed;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  max-height: 350px;
+  background-color: rgba(40, 40, 40, 0.5);
   border-radius: 10px;
-  padding: 15px;
+  padding: 0px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
   display: none;
@@ -25,8 +24,8 @@
   padding: 12px 20px;
   max-height: 10px;
   line-height: 5px;
-  background-color: #4a4a4a;
-  color: white;
+  background-color: #4a4a4a00;
+  color: #ffef16;
   border: none;
   border-radius: 2px;
   cursor: pointer;
@@ -79,5 +78,5 @@
     transform: scale(0.95);
   }
 }
-/**                       **/
 
+/**                       **/
