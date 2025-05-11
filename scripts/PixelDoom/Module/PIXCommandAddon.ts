@@ -46,7 +46,7 @@ export class GL_COMMAND_ {
                 Fcuntion();
                 GL_COMMAND_.GET_LAST_ACTION = ActionName;
                 GL_COMMAND_.GET_LAST_ACTION = "refresh"
-                GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction="refresh"
+                GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction = "refresh"
             }
         }
 
@@ -69,7 +69,7 @@ export class GL_COMMAND_ {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log(" [GL_COMMAND] console init")
-    GL_COMMAND_.ACTION_OPEN_();
+    //GL_COMMAND_.ACTION_OPEN_();
 
 })
 

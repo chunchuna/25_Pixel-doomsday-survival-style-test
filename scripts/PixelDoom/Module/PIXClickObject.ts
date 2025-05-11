@@ -1,4 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
 
@@ -34,7 +35,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
         LastestChooseObject = GetChooseObject;
 
-        ClickObject.GenerateInstructions(LastestChooseObject.instVars.Actions)
+        //ClickObject.GenerateInstructions(LastestChooseObject.instVars.Actions)
+        ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
 
     })
 })
@@ -56,6 +58,11 @@ export class ClickObject {
                 const formattedAction = `[background=blue][action name=${trimmedItem} color=red]${trimmedItem}[/action][/background]`;
                 GL_COMMAND_._draw(formattedAction);
             });
+    }
+
+
+    static GenerateInstructionsBy_interactionpanelactionchoose(Content: string) {
+        UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content)
     }
 }
 

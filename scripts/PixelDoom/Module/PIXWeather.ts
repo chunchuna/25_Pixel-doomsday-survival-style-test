@@ -10,6 +10,7 @@ var CurrentWeather = null;
 var CurrentInterval = null; // 当前的计时器
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+   if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     handleWeather();
 })
 
@@ -38,7 +39,7 @@ async function Rain() {
     //console.log(GameLayoutdth)
     CurrentInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
         var RainmDropSprite = RainDropSpriteClass.createInstance("Rain", pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth), 10, false)
-    }, 0.0001)
+    }, 0.0000000000000001)
 
 }
 

@@ -23,6 +23,9 @@ import "./PixelDoom/Module/PIXClickObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 
+//UI
+import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
+
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.
 	// Note layouts, objects etc. are not yet available.

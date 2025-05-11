@@ -15,6 +15,13 @@
 		},
 		{
 			"type": "plugin",
+			"id": "HTMLElement",
+			"name": "HTML",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
 			"id": "Keyboard",
 			"name": "键盘",
 			"author": "Scirra",
@@ -191,6 +198,13 @@
 				],
 				"subfolders": [],
 				"name": "Addon"
+			},
+			{
+				"items": [
+					"interaction_panel_action_choose_ui"
+				],
+				"subfolders": [],
+				"name": "UI"
 			}
 		]
 	},
@@ -213,7 +227,15 @@
 			"Level",
 			"Object"
 		],
-		"subfolders": []
+		"subfolders": [
+			{
+				"items": [
+					"interaction_panel_action_choose_ui"
+				],
+				"subfolders": [],
+				"name": "UI"
+			}
+		]
 	},
 	"eventSheets": {
 		"items": [
@@ -386,6 +408,26 @@
 							],
 							"subfolders": [],
 							"name": "Global"
+						},
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [
+										{
+											"name": "UIInteractionPanelActionChoose.ts",
+											"type": "application/typescript",
+											"sid": 387352353770272,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "interaction_panel_action_choose_ui"
+								}
+							],
+							"name": "UI"
 						}
 					],
 					"name": "PixelDoom"
@@ -498,7 +540,29 @@
 		},
 		"general": {
 			"items": [],
-			"subfolders": []
+			"subfolders": [
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [
+								{
+									"name": "interaction_panel_action_choose_ui.css",
+									"type": "text/css",
+									"sid": 640873709287311,
+									"file-info": {
+										"purpose": "stylesheet"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "interaction_panel_action_choose_ui"
+						}
+					],
+					"name": "UI"
+				}
+			],
+			"autoReloadOnPreview": true
 		}
 	},
 	"timelines": {

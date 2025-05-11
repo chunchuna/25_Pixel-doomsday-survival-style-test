@@ -1,0 +1,56 @@
+/* CSS */
+.interaction-panel {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  max-height: 200px;
+  background-color: rgba(40, 40, 40, 0.9);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  display: none;
+  z-index: 1000;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.interaction-btn {
+  padding: 12px 20px;
+  max-height: 10px;
+  line-height: 5px;
+  background-color: #4a4a4a;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  text-align:center;
+  text-size-adjust: auto;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s, background-color 0.2s;
+}
+
+.interaction-btn:hover {
+  background-color: #5a5a5a;
+}
+
+/* 滚动条样式 */
+.interaction-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.interaction-panel::-webkit-scrollbar-thumb {
+  background-color: #666;
+  border-radius: 4px;
+}
+
+.interaction-panel::-webkit-scrollbar-track {
+  background-color: transparent;
+}
