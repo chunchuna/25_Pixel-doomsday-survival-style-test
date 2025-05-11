@@ -63,7 +63,7 @@ export class UIInteractionPanelActionChooseMain {
     button.addEventListener('click', function () {
       // 这里可以添加按钮点击后的逻辑
       console.log('点击了按钮:', ButtonContent);
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: ButtonContent })
+      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: ButtonContent })
       //CloseChoosePanle();
     });
 

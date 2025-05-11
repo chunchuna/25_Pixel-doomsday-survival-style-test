@@ -17,9 +17,29 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 /** 使用 UI 交互 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e:any) => {
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+
         var ButtonConetent: string = e.data.ButtonContent_;
-        
+        if (ButtonConetent == "use") {
+            if (LastestChooseObject == null) return
+            if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
+
+
+            //GL_COMMAND_.GET_LAST_ACTION="refresh"
+            console.log(GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction)
+
+            var LuyingYizi = LastestChooseObject;
+            PlayerInstance.x = LuyingYizi.x
+            PlayerInstance.y = LuyingYizi.y;
+        }
+
+        if (ButtonConetent == "destroy") {
+            if (LastestChooseObject == null) return
+            if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
+            GL_COMMAND_.ACTION_OPEN_();
+            GL_COMMAND_._draw("[background=yellow][color=black]此物品无法被破坏[/color][/background]")
+        }
+
 
     })
 })

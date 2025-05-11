@@ -16,6 +16,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         console.log("[ClickObject] Mouse Over Object")
         var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
         ClickObject.EnableOutLine(GetChooseObject, true)
+        document.documentElement.style.cursor = "pointer"
 
     })
 
@@ -27,6 +28,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         for (var ALLClickObject of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
             ClickObject.EnableOutLine(ALLClickObject, false)
         }
+        document.documentElement.style.cursor = "default"
     })
 
 
@@ -49,6 +51,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         // if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0) return
 
         /** 呼出UI */
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (PlayerInstance == null) return
+        var GetLastestObject = LastestChooseObject;
+        if (GetLastestObject == null) return
+        var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(GetLastestObject.x, GetLastestObject.y, PlayerInstance.x, PlayerInstance.y)
+        if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) return
+
         ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
 
 
@@ -98,7 +107,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 export class ClickObject {
 
     /** 最大的交互距离 */
-    static ClickObjectClickMaxDistance = 200;
+    static ClickObjectClickMaxDistance = 100;
 
 
     static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
