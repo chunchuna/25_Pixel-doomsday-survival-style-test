@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
+import { UISubtitleMain } from "../UI/subtitle_ui/UISubtitle.js";
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
 
@@ -55,8 +56,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (PlayerInstance == null) return
         var GetLastestObject = LastestChooseObject;
         if (GetLastestObject == null) return
-        var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(GetLastestObject.x, GetLastestObject.y, PlayerInstance.x, PlayerInstance.y)
-        if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) return
+        var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(
+            GetLastestObject.x,
+            GetLastestObject.y,
+            PlayerInstance.x,
+            PlayerInstance.y)
+        if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) {
+            UISubtitleMain.ShowSubtitles("超过了这个物品的交互范围!", 0.5)
+            return
+        }
 
         ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
 
@@ -97,7 +105,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     /** 获取 最新的互动物 */
     var GetLastestObject = LastestChooseObject;
     if (GetLastestObject == null) return
-    var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(GetLastestObject.x, GetLastestObject.y, PlayerInstance.x, PlayerInstance.y)
+    var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(
+        GetLastestObject.x,
+        GetLastestObject.y,
+        PlayerInstance.x,
+        PlayerInstance.y)
     if (DistanceFromLastestObject > InteractionMaxDistance) {
         UIInteractionPanelActionChooseMain.CloseChoosePanle();
     }
@@ -107,7 +119,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 export class ClickObject {
 
     /** 最大的交互距离 */
-    static ClickObjectClickMaxDistance = 100;
+    static ClickObjectClickMaxDistance = 50;
 
 
     static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
