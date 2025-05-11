@@ -35,18 +35,79 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
         LastestChooseObject = GetChooseObject;
 
+
+        /** 使用 GL_COMMAND 交互 （已移除） */
         //ClickObject.GenerateInstructions(LastestChooseObject.instVars.Actions)
+
+
+        /** 使用 UI 交互 */
+
+        /** 确保玩家没有在移动状态 */
+        // var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        // if (PlayerInstance == null) return
+
+        // if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0) return
+
+        /** 呼出UI */
         ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
+
 
     })
 })
 
+
+
+/** 玩家在移动的时候 关闭UI面板 */
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+
+    // var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    // if (PlayerInstance == null) return
+
+    // if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0)
+    //     //UIInteractionPanelActionChooseMain.CloseChoosePanle();
+    //     return
+
+})
+
+
+/**玩家距离 超过和互动物的互动距离时 关闭UI面板 */
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+
+
+    var UIpanel = document.getElementById('interaction_panel_action_choose_ui');
+    // @ts-ignore
+    if (UIpanel.style.display == 'none') return
+
+
+
+    var InteractionMaxDistance = ClickObject.ClickObjectClickMaxDistance;
+
+    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    if (PlayerInstance == null) return
+
+    /** 获取 最新的互动物 */
+    var GetLastestObject = LastestChooseObject;
+    if (GetLastestObject == null) return
+    var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(GetLastestObject.x, GetLastestObject.y, PlayerInstance.x, PlayerInstance.y)
+    if (DistanceFromLastestObject > InteractionMaxDistance) {
+        UIInteractionPanelActionChooseMain.CloseChoosePanle();
+    }
+})
+
+
 export class ClickObject {
+
+    /** 最大的交互距离 */
+    static ClickObjectClickMaxDistance = 200;
+
+
     static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
         object.effects[0].isActive = ifEnable;
 
     }
 
+
+    /** 通过 GL_COMMAND 生成指令列表 */
     static GenerateInstructions(ActionConetent: string) {
         GL_COMMAND_.ACTION_OPEN_();
         //GL_COMMAND_._draw(ActionConetent)
@@ -60,7 +121,7 @@ export class ClickObject {
             });
     }
 
-
+    /** 通过 UI 生成按钮列表 */
     static GenerateInstructionsBy_interactionpanelactionchoose(Content: string) {
         UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content)
     }

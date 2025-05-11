@@ -30,7 +30,7 @@
   border: none;
   border-radius: 2px;
   cursor: pointer;
-  text-align:center;
+  text-align: center;
   text-size-adjust: auto;
   opacity: 0;
   transform: translateY(20px);
@@ -54,3 +54,30 @@
 .interaction-panel::-webkit-scrollbar-track {
   background-color: transparent;
 }
+
+
+
+/** 关闭面板的动画 **/
+
+#interaction_panel_action_choose_ui {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#interaction_panel_action_choose_ui.closing {
+  animation: fadeOutShrink 0.3s forwards;
+}
+
+@keyframes fadeOutShrink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+/**                       **/
+

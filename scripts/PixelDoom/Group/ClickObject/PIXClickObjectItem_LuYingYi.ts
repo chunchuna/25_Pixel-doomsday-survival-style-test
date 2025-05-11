@@ -12,13 +12,27 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
+
+
+/** 使用 UI 交互 */
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e:any) => {
+        var ButtonConetent: string = e.data.ButtonContent_;
+        
+
+    })
+})
+
+
+/** 使用GL_COMMAND 的交互 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
     GL_COMMAND_._TRY_ACTION_UPDATE("use", () => {
         if (LastestChooseObject == null) return
         if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
 
-    
+
         //GL_COMMAND_.GET_LAST_ACTION="refresh"
         console.log(GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction)
 

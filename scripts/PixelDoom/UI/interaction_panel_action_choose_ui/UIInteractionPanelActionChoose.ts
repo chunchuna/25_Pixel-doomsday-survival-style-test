@@ -1,5 +1,6 @@
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 
 
 
@@ -26,19 +27,6 @@ function initInteractionUI() {
   }
 }
 
-
-
-/** 玩家在移动的时候 关闭UI面板 */
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
-
-  var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-  if (PlayerInstance == null) return
-
-  if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0)
-    UIInteractionPanelActionChooseMain.CloseChoosePanle();
-
-})
-
 export class UIInteractionPanelActionChooseMain {
   // 显示UI面板
   static ShowChoosePanle() {
@@ -51,7 +39,17 @@ export class UIInteractionPanelActionChooseMain {
   static CloseChoosePanle() {
     const panel = document.getElementById('interaction_panel_action_choose_ui');
     // @ts-ignore
-    panel.style.display = 'none';
+    panel.classList.add('closing');
+    // @ts-ignore
+    panel.addEventListener('animationend', () => {
+      // @ts-ignore
+      panel.style.display = 'none';
+      // @ts-ignore
+      panel.classList.remove('closing');
+    }, { once: true });
+
+
+
   }
 
   // 增加按钮进入面板
