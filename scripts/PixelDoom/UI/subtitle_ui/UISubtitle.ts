@@ -42,7 +42,7 @@ export class UISubtitleMain {
         // 创建新字幕
         var subtitleElement = document.createElement('div');
         subtitleElement.className = 'subtitle-item';
-        subtitleElement.textContent = content;
+        subtitleElement.innerHTML = content;
         container.appendChild(subtitleElement);
 
         // 强制重绘，确保动画能播放

@@ -41,7 +41,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
             //GL_COMMAND_.ACTION_OPEN_();
             GL_COMMAND_._draw("[background=yellow][color=black]此物品无法被破坏[/color][/background]")
-            UISubtitleMain.ShowSubtitles("此物品无法被破坏", 5)
+            UISubtitleMain.ShowSubtitles('<span style="color: red;">*此物品无法被破坏</span>', 5)
         }
 
 

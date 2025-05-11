@@ -21,10 +21,30 @@ export class GL_COMMAND_ {
         GL_COMMAND_.COMMAND_OPEN = false;
     }
 
-    static _draw(cont: string) {
-        //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Print(cont)
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsolePrint", cont)
+    // static _draw(cont: string) {
+    //     //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Print(cont)
+    //     const now = new Date();
+    //     const hours = now.getHours().toString().padStart(2, '0');
+    //     const minutes = now.getMinutes().toString().padStart(2, '0');
+    //     const content_add_timetag = `[color=yellow]${hours}:${minutes}[/color] : ${cont}`;
 
+    //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsolePrint", content_add_timetag)
+
+    // }
+
+    static _draw(cont: string) {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0'); // 添加秒数更专业
+
+        // 优化后的日志格式（带时间标签和内容缩进）
+        const content_add_timetag =
+            `[color=#FFD700][${hours}:${minutes}:${seconds}][/color] » ${cont}`;
+        // 金色时间标签 + 三角箭头分隔符
+
+        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+            .callFunction("ConsolePrint", content_add_timetag);
     }
 
     static _REGISTER_COMMAND_(command: string, par: string, des: string, help: string) {
