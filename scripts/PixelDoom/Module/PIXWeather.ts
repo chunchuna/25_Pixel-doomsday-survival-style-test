@@ -10,7 +10,7 @@ var CurrentWeather = null;
 var CurrentInterval = null; // 当前的计时器
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-   if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
     handleWeather();
 })
 
@@ -37,9 +37,21 @@ async function Rain() {
     var RainDropSpriteClass = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.Raindrop;
     var GameLayoutdth = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
     //console.log(GameLayoutdth)
+    // CurrentInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
+    //     var RainmDropSprite = RainDropSpriteClass.createInstance("Rain", pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth), 10, false)
+    // }, 0.0000000000000001)
+
     CurrentInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
-        var RainmDropSprite = RainDropSpriteClass.createInstance("Rain", pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth), 10, false)
-    }, 0.0000000000000001)
+        // 一次性创建多个雨滴
+        for (let i = 0; i < 90; i++) { // 每次创建10个雨滴
+            RainDropSpriteClass.createInstance(
+                "Rain",
+                pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth),
+                10,
+                false
+            );
+        }
+    }, 0.3);
 
 }
 

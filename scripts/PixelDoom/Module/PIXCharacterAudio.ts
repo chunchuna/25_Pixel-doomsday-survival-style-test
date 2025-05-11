@@ -9,7 +9,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         JiaoBuShengInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
             _Audio.AudioPlayOnce("sfx_JiaoBuSheng", -25, 2, "SFX_JiaoBuSheng")
-        }, 0.25)
+        }, 0.5)
     })
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("CharacterControllerMoveFunctionNotMoving", () => {

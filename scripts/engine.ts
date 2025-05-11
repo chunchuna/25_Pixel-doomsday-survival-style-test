@@ -30,10 +30,10 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     //A utility function used to create a Promise with a specified delay time.
     //This function is typically used to implement asynchronous wait logic, such as delaying the execution of certain operations or simulating asynchronous tasks.
     //The parameter 'ms' represents the delay time (in milliseconds).
-    public static WAIT_TIME_FORM_PROMISE = (ms: number) => new Promise(res => setTimeout(res, ms)); // 使用的毫秒
+    public static WAIT_TIME_FORM_PROMISE = (ms: number) => new Promise(res => setTimeout(res, ms * 1000)); // 秒
 
-    public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): number {
-        const intervalMilliseconds = intervalSeconds * 1000; // 将秒转换为毫秒
+    public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): number { //使用秒
+        const intervalMilliseconds = intervalSeconds * 1000  // 将秒转换为毫秒
         const intervalId = setInterval(callback, intervalMilliseconds); // 启动计时器
         return intervalId; // 返回计时器 ID
     }
