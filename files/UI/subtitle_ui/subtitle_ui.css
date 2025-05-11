@@ -1,0 +1,35 @@
+#subtitle-container {
+    position: fixed;
+    bottom: 10px;
+    right:28%;
+    width: 50%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.subtitle-item {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    word-break: break-word;
+}
+
+.subtitle-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.subtitle-item.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}

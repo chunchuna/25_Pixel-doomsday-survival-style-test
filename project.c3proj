@@ -201,7 +201,8 @@
 			},
 			{
 				"items": [
-					"interaction_panel_action_choose_ui"
+					"interaction_panel_action_choose_ui",
+					"subtitle_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -230,7 +231,8 @@
 		"subfolders": [
 			{
 				"items": [
-					"interaction_panel_action_choose_ui"
+					"interaction_panel_action_choose_ui",
+					"subtitle_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -425,6 +427,20 @@
 									],
 									"subfolders": [],
 									"name": "interaction_panel_action_choose_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UISubtitle.ts",
+											"type": "application/typescript",
+											"sid": 617845780305481,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "subtitle_ui"
 								}
 							],
 							"name": "UI"
@@ -557,6 +573,20 @@
 							],
 							"subfolders": [],
 							"name": "interaction_panel_action_choose_ui"
+						},
+						{
+							"items": [
+								{
+									"name": "subtitle_ui.css",
+									"type": "text/css",
+									"sid": 224566511549273,
+									"file-info": {
+										"purpose": "stylesheet"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "subtitle_ui"
 						}
 					],
 					"name": "UI"

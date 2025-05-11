@@ -1,23 +1,23 @@
 {
-	"name": "interaction_panel_action_choose_ui",
+	"name": "subtitle_ui",
 	"layers": [
 		{
-			"name": "interaction_panel_action_choose_ui",
+			"name": "subtitle_ui",
 			"overriden": 0,
 			"subLayers": [],
 			"instances": [
 				{
-					"type": "interaction_panel_action_choose_ui",
+					"type": "subtitle_ui",
 					"properties": {
 						"tag": "div",
-						"content": "<!-- HTML -->\n<div id=\"interaction_panel_action_choose_ui\" class=\"interaction-panel\">\n  <div id=\"interaction_buttons_container_action_choose_ui\" class=\"buttons-container\"></div>\n</div>",
+						"content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>游戏字幕系统</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <div id=\"subtitle-container\"></div>\n</body>\n</html>",
 						"content-type": "html",
 						"initially-visible": true,
 						"id": "",
 						"class": "",
 						"allow-context-menu": false,
-						"stop-input-events": "entire-element",
-						"origin": "bottom",
+						"stop-input-events": "no",
+						"origin": "bottom-right",
 						"set-color": true,
 						"default-color": [
 							0,
@@ -36,13 +36,13 @@
 						"allow-text-selection": false,
 						"style-attribute": ""
 					},
-					"uid": 34,
-					"sid": 340866133810063,
+					"uid": 114,
+					"sid": 762278385365312,
 					"tags": "",
 					"instanceVariables": {},
 					"behaviors": {},
 					"instanceFolderItem": {
-						"sid": 340866133810063,
+						"sid": 762278385365312,
 						"expanded": true,
 						"folderName": "",
 						"indexInFolder": -1,
@@ -51,11 +51,11 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": 554.6151219179021,
-						"y": 473.2490950071717,
-						"width": 150,
-						"height": 200,
-						"originX": 0.5,
+						"x": 635,
+						"y": 471,
+						"width": 200,
+						"height": 100,
+						"originX": 1,
 						"originY": 1,
 						"color": [
 							1,
@@ -74,13 +74,13 @@
 						"enable-collisions": true,
 						"live-preview": false
 					},
-					"uid": 113,
-					"sid": 580612828550759,
+					"uid": 115,
+					"sid": 708097916665436,
 					"tags": "",
 					"instanceVariables": {},
 					"behaviors": {},
 					"instanceFolderItem": {
-						"sid": 580612828550759,
+						"sid": 708097916665436,
 						"expanded": true,
 						"folderName": "",
 						"indexInFolder": -1,
@@ -89,8 +89,8 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": -38.457173128286335,
-						"y": 18.82739393141628,
+						"x": -43,
+						"y": 18,
 						"width": 28.89481592787378,
 						"height": 28.2118024725087,
 						"originX": 0.5,
@@ -106,7 +106,7 @@
 					}
 				}
 			],
-			"sid": 715346069651490,
+			"sid": 147087986603089,
 			"effectTypes": [],
 			"isInitiallyVisible": true,
 			"isInitiallyInteractive": true,
@@ -140,7 +140,7 @@
 		"items": [],
 		"subfolders": []
 	},
-	"sid": 606077159259066,
+	"sid": 235391870345754,
 	"nonworld-instances": [],
 	"effectTypes": [],
 	"width": 1280,

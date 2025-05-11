@@ -1,6 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { GL_COMMAND_ } from "../../Module/PIXCommandAddon.js";
+import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -26,18 +27,21 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
             //GL_COMMAND_.GET_LAST_ACTION="refresh"
-            console.log(GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction)
+            // console.log(GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction)
 
             var LuyingYizi = LastestChooseObject;
             PlayerInstance.x = LuyingYizi.x
             PlayerInstance.y = LuyingYizi.y;
+
+            UISubtitleMain.ShowSubtitles("你正在使用 [露营椅子]", 5)
         }
 
         if (ButtonConetent == "destroy") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
-            GL_COMMAND_.ACTION_OPEN_();
+            //GL_COMMAND_.ACTION_OPEN_();
             GL_COMMAND_._draw("[background=yellow][color=black]此物品无法被破坏[/color][/background]")
+            UISubtitleMain.ShowSubtitles("此物品无法被破坏", 5)
         }
 
 
