@@ -202,7 +202,8 @@
 			{
 				"items": [
 					"interaction_panel_action_choose_ui",
-					"subtitle_ui"
+					"subtitle_ui",
+					"dialogue_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -232,7 +233,8 @@
 			{
 				"items": [
 					"interaction_panel_action_choose_ui",
-					"subtitle_ui"
+					"subtitle_ui",
+					"dialogue_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -441,6 +443,20 @@
 									],
 									"subfolders": [],
 									"name": "subtitle_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIDialogue.ts",
+											"type": "application/typescript",
+											"sid": 993608801998169,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "dialogue_ui"
 								}
 							],
 							"name": "UI"
@@ -587,6 +603,20 @@
 							],
 							"subfolders": [],
 							"name": "subtitle_ui"
+						},
+						{
+							"items": [
+								{
+									"name": "dialogue_ui.css",
+									"type": "text/css",
+									"sid": 393602241245802,
+									"file-info": {
+										"purpose": "stylesheet"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "dialogue_ui"
 						}
 					],
 					"name": "UI"
