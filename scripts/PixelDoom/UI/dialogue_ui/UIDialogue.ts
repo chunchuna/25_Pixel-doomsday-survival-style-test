@@ -1,4 +1,3 @@
-
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
 
@@ -69,6 +68,9 @@ export class DialogueSystem {
 
     // 解析对话文本并显示对话面板
     public ShowDialogue(content: string): void {
+        // 先彻底清理当前状态
+        this.cleanupAllState();
+        
         // 解析对话内容
         this.mainDialogueLines = this.parseDialogueContent(content);
         this.currentMainIndex = 0;
@@ -76,11 +78,53 @@ export class DialogueSystem {
         // 显示对话面板
         this.dialoguePanel.classList.add('active');
 
-        // 清空之前的内容
-        this.ClearDialogue();
-
         // 显示主对话内容
         this.displayMainDialogue();
+    }
+
+    // 清理所有状态和事件监听器
+    private cleanupAllState(): void {
+        // 清空所有内容
+        this.dialogueContent.innerHTML = '';
+        this.choicesContainer.innerHTML = '';
+        
+        // 取消所有打字效果计时器
+        const typingIntervals = document.querySelectorAll('[data-typing-interval]');
+        typingIntervals.forEach(element => {
+            const intervalId = (element as HTMLElement).dataset.typingInterval;
+            if (intervalId) {
+                clearInterval(parseInt(intervalId, 10));
+                delete (element as HTMLElement).dataset.typingInterval;
+            }
+        });
+        
+        // 重置状态变量
+        this.isTyping = false;
+        this.currentMainIndex = 0;
+        this.mainDialogueLines = [];
+        
+        // 移除所有选择按钮的事件监听器
+        const buttons = document.querySelectorAll('.choice-button');
+        buttons.forEach(button => {
+            const newButton = button.cloneNode(true);
+            if (button.parentNode) {
+                button.parentNode.replaceChild(newButton, button);
+            }
+        });
+        
+        // 移除全局空格事件监听器
+        if (this.handleGlobalKeydown) {
+            document.removeEventListener('keydown', this.handleGlobalKeydown);
+        }
+        
+        // 移除对话点击事件监听器
+        if (this.handleDialogueClick) {
+            this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
+        }
+        
+        // 移除可能存在的继续提示
+        const continuePrompts = document.querySelectorAll('.continue-prompt');
+        continuePrompts.forEach(prompt => prompt.remove());
     }
 
     // 显示主对话
@@ -219,31 +263,63 @@ export class DialogueSystem {
         // 添加一个小的继续提示
         const continuePrompt = document.createElement('div');
         continuePrompt.className = 'continue-prompt';
+        continuePrompt.id = 'dialogue-continue-prompt-' + Date.now(); // 添加唯一ID
         continuePrompt.innerHTML = '<span style="color: white;" class="blink">▼</span>';
         this.dialogueContent.appendChild(continuePrompt);
 
         // 滚动到底部
         this.scrollToBottom();
+        
+        // 移除可能存在的之前的事件监听器
+        if (this.handleGlobalKeydown) {
+            document.removeEventListener('keydown', this.handleGlobalKeydown);
+        }
+        if (this.handleDialogueClick) {
+            this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
+        }
 
         // 定义事件处理函数
         const handleContinue = (event: KeyboardEvent | MouseEvent) => {
+            // 检查是否对话系统已经关闭或重置
+            if (!document.body.contains(continuePrompt)) {
+                // 如果提示已被移除，也移除事件监听器
+                document.removeEventListener('keydown', handleContinue as EventListener);
+                this.dialogueContent.removeEventListener('click', handleContinue as EventListener);
+                return;
+            }
+            
             if ((event as KeyboardEvent).code === 'Space' || event.type === 'click') {
                 // 移除事件监听器
                 document.removeEventListener('keydown', handleContinue as EventListener);
                 this.dialogueContent.removeEventListener('click', handleContinue as EventListener);
 
-                // 移除继续提示
-                continuePrompt.remove();
+                // 检查提示是否仍然在DOM中
+                if (document.body.contains(continuePrompt)) {
+                    // 移除继续提示
+                    continuePrompt.remove();
+                }
 
                 // 继续显示下一行对话
-                callback();
+                try {
+                    callback();
+                } catch (e) {
+                    console.error('执行对话回调时出错:', e);
+                }
             }
         };
 
+        // 存储为类的属性，以便后续引用
+        this.handleGlobalKeydown = handleContinue as EventListener;
+        this.handleDialogueClick = handleContinue as EventListener;
+
         // 添加事件监听器
-        document.addEventListener('keydown', handleContinue as EventListener);
-        this.dialogueContent.addEventListener('click', handleContinue as EventListener);
+        document.addEventListener('keydown', this.handleGlobalKeydown);
+        this.dialogueContent.addEventListener('click', this.handleDialogueClick);
     }
+    
+    // 事件处理函数引用
+    private handleGlobalKeydown: EventListener = null as unknown as EventListener;
+    private handleDialogueClick: EventListener = null as unknown as EventListener;
 
     // 添加一行对话内容
     private appendDialogueLine(line: DialogueLine, callback: () => void): void {
@@ -636,10 +712,11 @@ export class DialogueSystem {
 
     // 关闭对话面板
     public CloseDialogue(): void {
+        // 清理所有状态
+        this.cleanupAllState();
+        
+        // 关闭对话面板
         this.dialoguePanel.classList.remove('active');
-        setTimeout(() => {
-            this.ClearDialogue();
-        }, 300);
     }
 }
 
@@ -675,8 +752,8 @@ export class DialogueSystem {
 //     console.log('对话系统初始化完成');
 // }
 
-// 页面加载完成后初始化对话系统
-//document.addEventListener('DOMContentLoaded', initDialogueSystem);
+// // 页面加载完成后初始化对话系统
+// document.addEventListener('DOMContentLoaded', initDialogueSystem);
 
 // pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 //     console.log("对话系统初始化中...");
