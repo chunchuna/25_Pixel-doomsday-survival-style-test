@@ -20,9 +20,11 @@ body {
     position: fixed;
     bottom: 20px;
     left: 0;
-    width: 50%;
-    max-width: 500px;
-    height: 600px;
+    width: 10%;
+    max-width: 800px;
+    min-width: 300px;
+    height: 60vh;
+    min-height: 400px;
     background-color: rgba(10, 10, 10, 0.9);
     border: 2px solid #555;
     border-radius: 5px;
@@ -31,7 +33,6 @@ body {
     opacity: 0;
     transform: translateY(30px);
     transition: transform 0.3s ease, opacity 0.3s ease;
-    scale: 0.5;
 }
 
 #dialogue-panel.active {
@@ -43,24 +44,27 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
-    background-color: #222;
-    border-bottom: 1px solid #444;
+    padding: 6px 12px;
+    background-color: rgba(34, 34, 34, 0.95);
+    border-bottom: 1px solid #333;
+    height: 15px;
 }
 
 .title {
-    font-weight: bold;
+    font-weight: 200;
     color: #ddd;
-    font-size: 1.2em;
+    font-size: 0.8em;
 }
 
 #close-button {
     background: none;
     border: none;
     color: #aaa;
-    font-size: 1.5em;
+    font-size: 1.2em;
     cursor: pointer;
     transition: color 0.2s;
+    padding: 2px 6px;
+    line-height: 1;
 }
 
 #close-button:hover {
@@ -95,6 +99,7 @@ body {
     max-width: 80%;
     position: relative;
     animation: fadeIn 0.3s ease;
+    font-size: 16px;
 }
 
 @keyframes fadeIn {
@@ -148,6 +153,7 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
     border-radius: 3px;
+    font-size: 16px;
 }
 
 .choice-button:hover {
