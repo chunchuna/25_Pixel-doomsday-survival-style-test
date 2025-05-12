@@ -453,6 +453,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "DialogueScript.ts",
+											"type": "application/typescript",
+											"sid": 112229022797973,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],
