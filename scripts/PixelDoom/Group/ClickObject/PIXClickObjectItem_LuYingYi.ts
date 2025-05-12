@@ -1,9 +1,12 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { GL_COMMAND_ } from "../../Module/PIXCommandAddon.js";
-import { testscript_001 } from "../../UI/dialogue_ui/DialogueScript.js";
+
 import { DialogueSystem } from "../../UI/dialogue_ui/UIDialogue.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
+
+
+import { DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -49,8 +52,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (ButtonConetent == "find") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
-            var Dialogue =new DialogueSystem();
-            Dialogue.ShowDialogue(testscript_001)
+            // @ts-ignore
+            DialogueMainController.ShowDialogue(DIA_CONTENT_test001)
 
         }
 

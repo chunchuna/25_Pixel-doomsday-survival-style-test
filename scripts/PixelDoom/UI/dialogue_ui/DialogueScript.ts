@@ -1,8 +1,11 @@
-export var testscript_001 =`左->篝火余烬中飘起一缕青烟
+import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js"
+import { DialogueSystem } from "./UIDialogue.js"
+
+export var DIA_CONTENT_test001 = `左->篝火余烬中飘起一缕青烟
 右->（蹲下捻动炭灰）这堆火最多半小时前还有人...
 左->潮湿的松针地上散落着登山绳和空罐头
 左->choose:拨开灰烬检查
-	右->（金属反光）烧烤架底下压着半块没烧完的薯片包装
+	右->（金属反光）烧烤架底下压着半块没烧完的薯片包装[code-(code_goto_testscript_002())]
 	左->包装袋边缘沾着暗红色痕迹
 右->（用树枝挑起）番茄酱？还是...血迹？
 左->choose:查看登山绳断口
@@ -35,3 +38,45 @@ export var testscript_001 =`左->篝火余烬中飘起一缕青烟
 	左->choose:检查止血带
 		右->等等...这个蝴蝶结打法，和我在军校学的战场包扎术一模一样
 	`
+
+export var DIA_CONTENT_test002 = `
+右->这里已经进入到通过代码强行转到了第二个事件脚本
+左->choose:切回到第一个脚本
+	左->现在切换到第一个事件脚本[code-(code_goto_testscript_001())]
+左->choose:测试按钮
+	左->这里显示别的测试按钮
+	左->choose:测试按钮2
+	左->choose:测试按钮3
+		左->这里显示别的测试按钮剩余的
+		左->choose:你好4
+左->结束测试`
+
+
+
+
+
+async function  code_goto_testscript_002() {
+	// @ts-ignore
+	DialogueMainController.CloseDialogue()
+	await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
+	// @ts-ignore
+	DialogueMainController.ShowDialogue(DIA_CONTENT_test002)
+
+
+
+
+}
+
+async function code_goto_testscript_001() {
+	// @ts-ignore
+	DialogueMainController.CloseDialogue()
+	await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
+	// @ts-ignore
+	DialogueMainController.ShowDialogue(DIA_CONTENT_test001)
+
+}
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+	(window as any).code_goto_testscript_002 = code_goto_testscript_002;
+	(window as any).code_goto_testscript_001 = code_goto_testscript_001;
+})

@@ -2,6 +2,13 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
 
+var DialogueMainController:DialogueSystem;
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    (window as any).DialogueMainController = new DialogueSystem();
+})
+
+
+
 interface DialogueLine {
     text: string;
     position: 'left' | 'right';
@@ -100,7 +107,7 @@ export class DialogueSystem {
     }
 
     // 解析对话内容为结构化数据
-    private parseDialogueContent(content: string): DialogueLine[] {
+    public parseDialogueContent(content: string): DialogueLine[] {
         const lines = content.split('\n');
         const parsedLines = this.parseLines(lines, 0)[0] as DialogueLine[];
         console.log("解析后的对话结构:", JSON.stringify(parsedLines, null, 2));
@@ -167,7 +174,7 @@ export class DialogueSystem {
                     }
 
                     // 检查是否包含代码段 [code:...]
-                    const codeRegex = /\[code:(.*?)\]/;
+                    const codeRegex = /\[code-(.*?)\]/;
                     const codeMatch = text.match(codeRegex);
                     if (codeMatch) {
                         code = codeMatch[1];
