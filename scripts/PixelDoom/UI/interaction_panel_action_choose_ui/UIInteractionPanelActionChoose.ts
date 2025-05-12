@@ -1,4 +1,3 @@
-
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 
@@ -19,11 +18,15 @@ function initInteractionUI() {
   // @ts-ignore
   if (!panel) {
     const panelHTML = `
-      <div id="interaction_panel_action_choose_ui" class="interaction-panel">
+      <div id="interaction_panel_action_choose_ui" class="interaction-panel" style="display: none;">
         <div id="interaction_buttons_container_action_choose_ui" class="buttons-container"></div>
       </div>
     `;
     document.body.insertAdjacentHTML('beforeend', panelHTML);
+  } else {
+    // 确保已存在的面板也具有正确的初始状态
+    // @ts-ignore
+    panel.style.display = 'none';
   }
 }
 
@@ -33,6 +36,12 @@ export class UIInteractionPanelActionChooseMain {
     const panel = document.getElementById('interaction_panel_action_choose_ui');
     // @ts-ignore
     panel.style.display = 'block';
+    // 确保面板在显示时设置初始状态标记
+    // @ts-ignore
+    if (!panel.hasAttribute('data-initialized')) {
+      // @ts-ignore
+      panel.setAttribute('data-initialized', 'true');
+    }
   }
 
   // 关闭UI面板
@@ -40,6 +49,9 @@ export class UIInteractionPanelActionChooseMain {
     const panel = document.getElementById('interaction_panel_action_choose_ui');
     // @ts-ignore
     panel.classList.add('closing');
+    // 重置初始化标记，确保下次打开面板时不会立即关闭
+    // @ts-ignore
+    panel.removeAttribute('data-initialized');
     // @ts-ignore
     panel.addEventListener('animationend', () => {
       // @ts-ignore
@@ -47,9 +59,6 @@ export class UIInteractionPanelActionChooseMain {
       // @ts-ignore
       panel.classList.remove('closing');
     }, { once: true });
-
-
-
   }
 
   // 增加按钮进入面板

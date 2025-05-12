@@ -91,13 +91,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
 /**玩家距离 超过和互动物的互动距离时 关闭UI面板 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
-
-
+    // 获取面板元素
     var UIpanel = document.getElementById('interaction_panel_action_choose_ui');
+    // 如果面板不存在或已经隐藏，则不继续执行
     // @ts-ignore
-    if (UIpanel.style.display == 'none') return
+    if (!UIpanel || UIpanel.style.display == 'none') return
 
-
+    // 防止第一次点击时立即关闭的问题
+    // 使用一个延迟变量，确保面板显示后有一个短暂的宽限期
+    // @ts-ignore
+    if (!UIpanel.hasAttribute('data-initialized')) {
+        // @ts-ignore
+        UIpanel.setAttribute('data-initialized', 'true');
+        return; // 第一次检测时直接返回，不进行距离检查
+    }
 
     var InteractionMaxDistance = ClickObject.ClickObjectClickMaxDistance;
 
@@ -114,6 +121,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
         PlayerInstance.y)
     if (DistanceFromLastestObject > InteractionMaxDistance) {
         UIInteractionPanelActionChooseMain.CloseChoosePanle();
+        // 重置初始化标记，下次显示面板时再次应用宽限期
+        // @ts-ignore
+        UIpanel.removeAttribute('data-initialized');
     }
 })
 
