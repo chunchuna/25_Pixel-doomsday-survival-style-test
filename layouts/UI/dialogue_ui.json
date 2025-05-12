@@ -10,7 +10,7 @@
 					"type": "dialogue_ui",
 					"properties": {
 						"tag": "div",
-						"content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Dialogue System</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <div class=\"dialogue-container\" id=\"dialogueContainer\">\n        <div class=\"dialogue-content\" id=\"dialogueContent\">\n            <!-- Dialogue content will be inserted here -->\n        </div>\n        <div class=\"scroll-bar\" id=\"scrollBar\"></div>\n    </div>\n\n</body>\n</html>",
+						"content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Dialogue Panel</title>\n    <link rel=\"stylesheet\" href=\"dialogue-panel.css\">\n</head>\n<body>\n    <div id=\"dialogue-panel\">\n        <div id=\"dialogue-header\">\n            <div class=\"title\">对话</div>\n            <button id=\"close-button\">×</button>\n        </div>\n        <div id=\"dialogue-content\">\n            <!-- Dialogue content will be inserted here -->\n        </div>\n        <div id=\"choices-container\">\n            <!-- Choices will be inserted here -->\n        </div>\n    </div>\n    \n    <!-- Demo controls (仅用于测试，实际集成时可删除) -->\n     <!--<div id=\"demo-controls\">\n        <h3>测试控制台</h3>\n        <button id=\"test-dialogue\">测试对话</button>\n        <button id=\"clear-dialogue\">清空对话</button>\n        <button id=\"close-dialogue\">关闭对话</button>\n    </div>-->\n\n</body>\n</html>",
 						"content-type": "html",
 						"initially-visible": true,
 						"id": "",
@@ -51,8 +51,8 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": 172.91899460419353,
-						"y": 165.26582883682792,
+						"x": 191,
+						"y": 172,
 						"width": 173,
 						"height": 83,
 						"originX": 0,
