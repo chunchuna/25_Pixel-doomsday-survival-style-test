@@ -1,13 +1,13 @@
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
-// 对话系统类型定义
+
 interface DialogueLine {
     text: string;
     position: 'left' | 'right';
     character?: string;
     choices?: DialogueChoice[];
-    code?: string; // 添加code字段，用于存储可执行代码
+    code?: string; 
 }
 
 interface DialogueChoice {
@@ -15,8 +15,8 @@ interface DialogueChoice {
     nextLines: DialogueLine[];
 }
 
-// 对话系统主类
-class DialogueSystem {
+
+export class DialogueSystem {
     private dialoguePanel: HTMLElement;
     private dialogueContent: HTMLElement;
     private choicesContainer: HTMLElement;
@@ -46,31 +46,7 @@ class DialogueSystem {
 
         // 测试用的按钮
         document.getElementById('test-dialogue')?.addEventListener('click', () => {
-            const testContent = `左->你到达了一个公园，这里看起来荒废很久。
-左->这里之前是一个城市是森林公园，不过在20年前就被荒废了。
-左->肯定有什么原因吧。
-左->公车慢慢靠站了。
-左->今天天气不错了。
-右->史丹利:看起来是一个不错的公园呢。
-右->史丹利:看起来是一个不错的公园呢。[code:alert("测试代码执行成功！")]
-右->史丹利:我检查一下随身携带的物品，然后准备：
-左->choose:使用手机
-    左->你打开了手机，然后你准备：
-    左->choose:查看微博
-    左->choose:查看短信
-    左->choose:查看微信
-左->choose:查看下周围 
-    左->你选择了下车
-左->choose:观察下公车的车牌号 
-    左->车牌号非常的好记，你记了下来
-左->choose:继续呆在车上
-    左->车上有点无聊
-    左->choose:下车
-        左->你下车了，感觉空气清新
-    左->choose:看看手机的电量
-        左->电量还有85%[code:console.log("玩家查看了手机电量")]
-右->史丹利:确实有点无聊呢
-左->你感受到这个地方有一点阴森`;
+            const testContent = ``;
             console.log("开始解析对话:\n" + testContent);
             this.ShowDialogue(testContent);
         });
@@ -236,7 +212,7 @@ class DialogueSystem {
         // 添加一个小的继续提示
         const continuePrompt = document.createElement('div');
         continuePrompt.className = 'continue-prompt';
-        continuePrompt.innerHTML = '<span class="blink">▼</span>';
+        continuePrompt.innerHTML = '<span style="color: white;" class="blink">▼</span>';
         this.dialogueContent.appendChild(continuePrompt);
 
         // 滚动到底部
@@ -695,18 +671,18 @@ class DialogueSystem {
 // 页面加载完成后初始化对话系统
 //document.addEventListener('DOMContentLoaded', initDialogueSystem);
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    console.log("对话系统初始化中...");
+// pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+//     console.log("对话系统初始化中...");
    
-    var dialogueSystem_ = new DialogueSystem();
-    dialogueSystem_.ShowDialogue(`
-左->这里看来有人来过
-左->火堆还没有熄灭
-左->choose:查看火堆周围的情况
-	右->并没有发现什么异常
-	左->现在该干嘛呢
-	左->choose:使用打火机
-        左->你并没有打火机
-左->choose:查看帐篷情况`)
+//     var dialogueSystem_ = new DialogueSystem();
+//     dialogueSystem_.ShowDialogue(`
+// 左->这里看来有人来过
+// 左->火堆还没有熄灭
+// 左->choose:查看火堆周围的情况
+// 	右->并没有发现什么异常
+// 	左->现在该干嘛呢
+// 	左->choose:使用打火机
+//         左->你并没有打火机
+// 左->choose:查看帐篷情况`)
     
-});
+// });

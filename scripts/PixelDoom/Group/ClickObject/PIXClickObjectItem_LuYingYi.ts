@@ -1,6 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { GL_COMMAND_ } from "../../Module/PIXCommandAddon.js";
+import { DialogueSystem } from "../../UI/dialogue_ui/UIDialogue.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
@@ -42,6 +43,23 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             //GL_COMMAND_.ACTION_OPEN_();
             GL_COMMAND_._draw("[background=yellow][color=black]此物品无法被破坏[/color][/background]")
             UISubtitleMain.ShowSubtitles('<span style="color: red;">*此物品无法被破坏</span>', 5)
+        }
+
+        if (ButtonConetent == "find") {
+            if (LastestChooseObject == null) return
+            if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
+            var Dialogue =new DialogueSystem();
+            Dialogue.ShowDialogue(`左->这里看来有人来过
+左->火堆还没有熄灭
+左->choose:仔细检查露营椅子
+	右->并没有发现什么异常
+	左->不过有雨水打湿的痕迹。最近在雨季。
+左->choose:查看帐篷情况
+左->继续
+左->choose:查看露营椅的牌子
+	右->磨损严重看不清
+左->继续`)
+
         }
 
 
