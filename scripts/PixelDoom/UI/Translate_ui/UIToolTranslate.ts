@@ -5,6 +5,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("开始初始化翻译工具");
     // 直接调用创建按钮的函数
     createTranslateUI();
+    ShowArrowPointLanague();
+    
 })
 
 // real-time-translator.ts
@@ -420,7 +422,7 @@ async function processPage(mode: WorkMode, targetLang: string = 'zh-CN'): Promis
 /**
  * 显示/隐藏加载指示器
  */
-function showLoader(show: boolean, message: string = '处理中...'): void {
+function showLoader(show: boolean, message: string = 'Processing...'): void {
     let loader = document.getElementById('translation-loader');
 
     if (show) {
@@ -522,7 +524,7 @@ function stopObservingDOM(): void {
  * 创建翻译UI界面
  */
 function createTranslateUI() {
-    console.log("创建翻译UI界面...");
+    console.log("Creating translation UI...");
     
     try {
         // 创建主容器
@@ -545,7 +547,7 @@ function createTranslateUI() {
         flagButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
         flagButton.style.transition = 'transform 0.2s ease';
         flagButton.style.overflow = 'hidden';
-        flagButton.title = '翻译工具';
+        flagButton.title = 'Translation Tool';
         
         // 设置初始国旗样式
         updateFlagButton(flagButton, 'zh-CN');
@@ -566,9 +568,9 @@ function createTranslateUI() {
         panel.style.top = '42px'; // 按钮下方
         panel.style.right = '0';
         panel.style.width = '180px';
-        panel.style.backgroundColor = 'rgba(40, 40, 40, 0.85)';
+        panel.style.backgroundColor = 'rgba(30, 30, 30, 0.9)';
         panel.style.borderRadius = '8px';
-        panel.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.35)';
+        panel.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.4)';
         panel.style.padding = '12px';
         panel.style.display = 'none'; // 默认隐藏
         panel.style.opacity = '0';
@@ -577,8 +579,8 @@ function createTranslateUI() {
         
         // 添加面板标题
         const title = document.createElement('div');
-        title.textContent = 'Language Selection (beta)';
-        title.style.color = '#ccc';
+        title.textContent = 'Immersive Translate';
+        title.style.color = '#ddd';
         title.style.fontSize = '14px';
         title.style.fontWeight = 'bold';
         title.style.marginBottom = '10px';
@@ -589,7 +591,7 @@ function createTranslateUI() {
         
         // 添加语言选择
         const langLabel = document.createElement('div');
-        langLabel.textContent = 'Language:';
+        langLabel.textContent = 'Select target language:';
         langLabel.style.color = '#bbb';
         langLabel.style.fontSize = '12px';
         langLabel.style.marginBottom = '5px';
@@ -599,11 +601,11 @@ function createTranslateUI() {
         langSelect.id = 'lang-select';
         langSelect.style.width = '100%';
         langSelect.style.padding = '6px';
-        langSelect.style.backgroundColor = 'rgba(60, 60, 60, 0.7)';
+        langSelect.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
         langSelect.style.color = '#fff';
-        langSelect.style.border = '1px solid rgba(100, 100, 100, 0.5)';
+        langSelect.style.border = '1px solid rgba(80, 80, 80, 0.5)';
         langSelect.style.borderRadius = '4px';
-        langSelect.style.marginBottom = '10px';
+        langSelect.style.marginBottom = '12px';
         langSelect.style.fontSize = '12px';
         
         // 添加语言选项
@@ -624,82 +626,42 @@ function createTranslateUI() {
         
         panel.appendChild(langSelect);
         
-        // 创建按钮组
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.style.display = 'flex';
-        buttonsContainer.style.gap = '8px';
-        buttonsContainer.style.marginBottom = '8px';
-        
-        // 开始翻译按钮
-        const translateButton = document.createElement('button');
-        translateButton.textContent = 'Translate Game';
-        translateButton.style.flex = '1';
-        translateButton.style.padding = '7px 0';
-        translateButton.style.backgroundColor = 'rgba(80, 80, 80, 0.8)';
-        translateButton.style.color = '#fff';
-        translateButton.style.border = 'none';
-        translateButton.style.borderRadius = '4px';
-        translateButton.style.cursor = 'pointer';
-        translateButton.style.fontSize = '12px';
-        translateButton.style.fontWeight = 'bold';
-        translateButton.addEventListener('click', () => {
-            const selectedLang = langSelect.value;
-            currentLanguage = selectedLang;
-            
-            // 更新国旗显示
-            updateFlagButton(flagButton, selectedLang);
-            
-            // 开始翻译
-            startTranslation(selectedLang);
-            
-            // 收起面板
-            togglePanel(false);
-        });
-        buttonsContainer.appendChild(translateButton);
-        
-        // 关闭翻译按钮
-        const turnOffButton = document.createElement('button');
-        turnOffButton.textContent = 'Stop';
-        turnOffButton.style.flex = '1';
-        turnOffButton.style.padding = '7px 0';
-        turnOffButton.style.backgroundColor = 'rgba(130, 40, 40, 0.8)';
-        turnOffButton.style.color = '#fff';
-        turnOffButton.style.border = 'none';
-        turnOffButton.style.borderRadius = '4px';
-        turnOffButton.style.cursor = 'pointer';
-        turnOffButton.style.fontSize = '12px';
-        turnOffButton.addEventListener('click', () => {
-            // 停止翻译
-            stopTranslation();
-            
-            // 重置国旗为中文
-            updateFlagButton(flagButton, 'zh-CN');
-            
-            // 收起面板
-            togglePanel(false);
-        });
-        buttonsContainer.appendChild(turnOffButton);
-        
-        panel.appendChild(buttonsContainer);
-        
-        // 添加沉浸式翻译SDK按钮
+        // SDK翻译按钮容器
         const sdkButtonContainer = document.createElement('div');
-        sdkButtonContainer.style.display = 'flex';
-        sdkButtonContainer.style.marginBottom = '8px';
+        sdkButtonContainer.style.marginBottom = '12px';
         
+        // SDK翻译按钮
         const sdkTranslateButton = document.createElement('button');
-        sdkTranslateButton.textContent = 'SDK翻译';
-        sdkTranslateButton.style.flex = '1';
-        sdkTranslateButton.style.padding = '7px 0';
-        sdkTranslateButton.style.backgroundColor = 'rgba(60, 60, 100, 0.8)';
-        sdkTranslateButton.style.color = '#fff';
-        sdkTranslateButton.style.border = 'none';
+        sdkTranslateButton.textContent = 'Start Translation';
+        sdkTranslateButton.style.width = '100%';
+        sdkTranslateButton.style.padding = '10px 0';
+        sdkTranslateButton.style.backgroundColor = '#333';
+        sdkTranslateButton.style.color = '#ddd';
+        sdkTranslateButton.style.border = '1px solid #444';
         sdkTranslateButton.style.borderRadius = '4px';
         sdkTranslateButton.style.cursor = 'pointer';
-        sdkTranslateButton.style.fontSize = '12px';
+        sdkTranslateButton.style.fontSize = '13px';
         sdkTranslateButton.style.fontWeight = 'bold';
+        sdkTranslateButton.style.transition = 'all 0.2s ease';
+        
+        // 添加悬停效果
+        sdkTranslateButton.addEventListener('mouseover', () => {
+            sdkTranslateButton.style.backgroundColor = '#444';
+        });
+        
+        sdkTranslateButton.addEventListener('mouseout', () => {
+            sdkTranslateButton.style.backgroundColor = '#333';
+        });
+        
         sdkTranslateButton.addEventListener('click', () => {
             const selectedLang = langSelect.value;
+            
+            // 如果选择的是中文，提示用户选择其他语言
+            if (selectedLang === 'zh-CN') {
+                //alert('Please select a non-Chinese target language');
+                return;
+            }
+            
             currentLanguage = selectedLang;
             
             // 更新国旗显示
@@ -712,100 +674,85 @@ function createTranslateUI() {
             togglePanel(false);
         });
         sdkButtonContainer.appendChild(sdkTranslateButton);
+        panel.appendChild(sdkButtonContainer);
         
-        // 停止SDK翻译按钮
+        // 添加停止翻译按钮
         const stopSdkButton = document.createElement('button');
-        stopSdkButton.textContent = '停止SDK';
-        stopSdkButton.style.flex = '1';
-        stopSdkButton.style.padding = '7px 0';
-        stopSdkButton.style.backgroundColor = 'rgba(100, 40, 130, 0.8)';
-        stopSdkButton.style.color = '#fff';
-        stopSdkButton.style.border = 'none';
+        stopSdkButton.textContent = 'Stop Translation';
+        stopSdkButton.style.width = '100%';
+        stopSdkButton.style.padding = '8px 0';
+        stopSdkButton.style.backgroundColor = '#333';
+        stopSdkButton.style.color = '#ddd';
+        stopSdkButton.style.border = '1px solid #444';
         stopSdkButton.style.borderRadius = '4px';
         stopSdkButton.style.cursor = 'pointer';
         stopSdkButton.style.fontSize = '12px';
+        stopSdkButton.style.marginBottom = '12px';
+        stopSdkButton.style.transition = 'all 0.2s ease';
+        
+        // 添加悬停效果
+        stopSdkButton.addEventListener('mouseover', () => {
+            stopSdkButton.style.backgroundColor = '#444';
+        });
+        
+        stopSdkButton.addEventListener('mouseout', () => {
+            stopSdkButton.style.backgroundColor = '#333';
+        });
+        
         stopSdkButton.addEventListener('click', () => {
             // 停止沉浸式翻译SDK
             stopImmersiveTranslateSDK();
             
             // 显示提示信息
-            showLoader(true, '已停止SDK翻译');
+            showLoader(true, 'Translation stopped');
             
             // 收起面板
             togglePanel(false);
         });
-        sdkButtonContainer.appendChild(stopSdkButton);
+        panel.appendChild(stopSdkButton);
         
-        panel.appendChild(sdkButtonContainer);
+        // 添加翻译使用教程按钮
+        const tutorialButton = document.createElement('button');
+        tutorialButton.textContent = 'Translation Guide';
+        tutorialButton.style.width = '100%';
+        tutorialButton.style.padding = '8px 0';
+        tutorialButton.style.backgroundColor = '#222';
+        tutorialButton.style.color = '#bbb';
+        tutorialButton.style.border = '1px solid #444';
+        tutorialButton.style.borderRadius = '4px';
+        tutorialButton.style.cursor = 'pointer';
+        tutorialButton.style.fontSize = '12px';
+        tutorialButton.style.marginBottom = '10px';
+        tutorialButton.style.transition = 'all 0.2s ease';
         
-        // 添加本地翻译设置按钮
-        const localTransButton = document.createElement('button');
-        localTransButton.textContent = '编辑翻译表';
-        localTransButton.style.width = '100%';
-        localTransButton.style.padding = '8px 0';
-        localTransButton.style.marginTop = '8px';
-        localTransButton.style.backgroundColor = 'rgba(60, 100, 80, 0.8)';
-        localTransButton.style.color = '#fff';
-        localTransButton.style.border = 'none';
-        localTransButton.style.borderRadius = '4px';
-        localTransButton.style.cursor = 'pointer';
-        localTransButton.style.fontSize = '12px';
-        localTransButton.addEventListener('click', () => {
-            showLocalTranslationEditor();
-            togglePanel(false);
+        // 添加悬停效果
+        tutorialButton.addEventListener('mouseover', () => {
+            tutorialButton.style.backgroundColor = '#333';
+            tutorialButton.style.color = '#ddd';
         });
-        panel.appendChild(localTransButton);
         
-        // 添加翻译统计
-        const statsDiv = document.createElement('div');
-        statsDiv.id = 'translation-stats';
-        statsDiv.style.color = '#aaa';
-        statsDiv.style.fontSize = '10px';
-        statsDiv.style.marginTop = '8px';
-        statsDiv.style.textAlign = 'center';
-        updateTranslationStats(statsDiv);
-        panel.appendChild(statsDiv);
+        tutorialButton.addEventListener('mouseout', () => {
+            tutorialButton.style.backgroundColor = '#222';
+            tutorialButton.style.color = '#bbb';
+        });
         
-        // 添加开发者模式按钮（重新加载默认翻译）
-        const devButton = document.createElement('button');
-        devButton.textContent = '重新加载默认翻译';
-        devButton.style.width = '100%';
-        devButton.style.padding = '6px 0';
-        devButton.style.marginTop = '8px';
-        devButton.style.backgroundColor = 'rgba(60, 40, 100, 0.8)';
-        devButton.style.color = '#fff';
-        devButton.style.border = 'none';
-        devButton.style.borderRadius = '4px';
-        devButton.style.cursor = 'pointer';
-        devButton.style.fontSize = '11px';
-        devButton.addEventListener('click', () => {
-            // 重新加载默认翻译和已保存的翻译
-            loadLocalTranslations();
-            updateTranslationStats(document.getElementById('translation-stats'));
-            showLoader(true, `已重新加载默认翻译 (${Object.keys(localTranslations).length}项)`);
+        tutorialButton.addEventListener('click', () => {
+            // 打开沉浸式翻译使用教程页面
+            window.open('https://immersivetranslate.com/en/docs/usage/', '_blank');
             
-            // 关闭面板
+            // 收起面板
             togglePanel(false);
         });
-        panel.appendChild(devButton);
+        panel.appendChild(tutorialButton);
         
         // 添加版本信息
         const versionInfo = document.createElement('div');
-        versionInfo.textContent = 'v2.0 (Local Translation)';
+        versionInfo.textContent = 'Immersive Translate v3.0';
         versionInfo.style.color = 'rgba(150, 150, 150, 0.6)';
         versionInfo.style.fontSize = '10px';
-        versionInfo.style.textAlign = 'right';
-        versionInfo.style.marginTop = '8px';
+        versionInfo.style.textAlign = 'center';
+        versionInfo.style.marginTop = '5px';
         panel.appendChild(versionInfo);
-        
-        // 添加说明文本
-        const sdkInfoText = document.createElement('div');
-        sdkInfoText.textContent = 'SDK翻译使用沉浸式翻译，适用于复杂文本';
-        sdkInfoText.style.color = '#888';
-        sdkInfoText.style.fontSize = '10px';
-        sdkInfoText.style.marginBottom = '8px';
-        sdkInfoText.style.textAlign = 'center';
-        panel.appendChild(sdkInfoText);
         
         // 添加面板到容器
         container.appendChild(panel);
@@ -819,11 +766,6 @@ function createTranslateUI() {
         flagButton.addEventListener('click', () => {
             isPanelVisible = !isPanelVisible;
             togglePanel(isPanelVisible);
-            
-            // 更新翻译统计
-            if (isPanelVisible) {
-                updateTranslationStats(document.getElementById('translation-stats'));
-            }
         });
         
         function togglePanel(show) {
@@ -845,11 +787,11 @@ function createTranslateUI() {
         // 添加到文档
         if (document.body) {
             document.body.appendChild(container);
-            console.log("翻译UI已添加到页面");
+            console.log("Translation UI added to page");
         } else {
             window.addEventListener('load', function() {
                 document.body.appendChild(container);
-                console.log("延迟加载：翻译UI已添加到页面");
+                console.log("Delayed loading: Translation UI added to page");
             });
         }
         
@@ -859,32 +801,17 @@ function createTranslateUI() {
             if (isPanelVisible && 
                 target !== flagButton && 
                 target !== panel &&
-                !panel.contains(target) && 
-                !isElementInsideModal(target)) {
+                !panel.contains(target)) {
                 isPanelVisible = false;
                 togglePanel(false);
             }
         });
         
-        // 检查元素是否在模态框内部
-        function isElementInsideModal(element: Element): boolean {
-            let current = element;
-            while (current) {
-                if (current.id === 'local-translation-editor-modal') {
-                    return true;
-                }
-                const parent = current.parentElement;
-                if (!parent) break;
-                current = parent;
-            }
-            return false;
-        }
-        
         // 加载本地翻译数据
         loadLocalTranslations();
         
     } catch (error) {
-        console.error("创建翻译UI失败:", error);
+        console.error("Failed to create translation UI:", error);
     }
 }
 
@@ -1726,6 +1653,13 @@ function initImmersiveTranslateSDK(targetLang: string): void {
     const sdkConfig = {
         isAutoTranslate: true,
         targetLanguage: SDK_LANGUAGE_MAP[targetLang] || 'en',
+        sourceLanguage: 'zh-CN', // 指定源语言为中文
+        detectLanguage: false, // 禁用语言检测，强制使用指定的源语言
+        translationService: 'baidu', // 使用百度翻译作为后端服务，也可以根据需要更改
+        noTargetLanguageUI: false, // 允许显示语言选择UI
+        translationTheme: 'dual', // 设置双语对照模式
+        translationAreaInvisible: false, // 确保翻译区域可见
+        translationStartMode: 'instantTranslate', // 立即翻译模式
         pageRule: {
             selectors: ["body"], // 翻译整个页面
             excludeSelectors: [
@@ -1738,6 +1672,19 @@ function initImmersiveTranslateSDK(targetLang: string): void {
             containerMinTextCount: 1, // 降低最小字符数，确保短文本也能被翻译
             paragraphMinTextCount: 1, // 降低段落最小字符数
             urlChangeDelay: 100 // 降低延迟时间
+        },
+        // 自定义样式，让双语显示更美观
+        translationThemeCustomStyles: {
+            dual: {
+                "paddingBlock": "0.2em",
+                "paddingInline": "0.2em",
+                "marginBlock": "0.1em",
+                "fontWeight": "normal",
+                "fontSize": "1em",
+                "lineHeight": "1.4",
+                "color": "#e0e0e0",
+                "backgroundColor": "rgba(40, 40, 40, 0.45)"
+            }
         }
     };
     
@@ -1754,9 +1701,39 @@ function initImmersiveTranslateSDK(targetLang: string): void {
     document.head.appendChild(script);
     
     // 显示加载提示
-    showLoader(true, `正在使用沉浸式翻译SDK翻译为${getLangName(targetLang)}...`);
+    showLoader(true, `Translating Chinese to ${getLangName(targetLang)} (dual-language mode)...`);
     
-    console.log(`已初始化沉浸式翻译SDK，目标语言: ${targetLang}`);
+    console.log(`Initialized Immersive Translate SDK, source: Chinese, target: ${targetLang}, dual-language mode`);
+    
+    // 不再调用hideSDKUIElements，允许SDK UI显示
+    // setTimeout(() => {
+    //     hideSDKUIElements();
+    // }, 5000);
+}
+
+/**
+ * 隐藏SDK自带的UI元素
+ * 注意：此函数已不再使用，保留作为参考
+ */
+function hideSDKUIElements(): void {
+    // 寻找并隐藏SDK的语言选择等UI元素
+    const sdkUI = document.querySelectorAll('[id^="immersive-translate-"]');
+    sdkUI.forEach(el => {
+        if (el.id !== 'immersive-translate-sdk' && el.tagName !== 'STYLE') {
+            (el as HTMLElement).style.display = 'none';
+        }
+    });
+    
+    // 也可以通过CSS添加全局样式来隐藏
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        .immersive-translate-popup,
+        .immersive-translate-target-popup,
+        .immersive-translate-ui {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(styleEl);
 }
 
 /**
@@ -1781,8 +1758,167 @@ function stopImmersiveTranslateSDK(): void {
         el.remove();
     });
     
-    console.log('已停止沉浸式翻译SDK');
+    // 移除可能添加的隐藏UI样式
+    const hideUIStyle = document.querySelectorAll('style');
+    hideUIStyle.forEach(el => {
+        if (el.textContent && el.textContent.includes('immersive-translate-ui')) {
+            el.remove();
+        }
+    });
+    
+    console.log('Stopped Immersive Translate SDK');
+}
+
+/**
+ * 显示指向语言切换按钮的动画箭头
+ */
+function ShowArrowPointLanague(): void {
+    console.log("Showing language selection arrow pointer");
+    
+    // 先检查箭头是否已存在
+    if (document.getElementById('language-arrow-pointer')) {
+        return; // 如果箭头已存在，不再创建
+    }
+    
+    // 查找国旗按钮
+    const flagButton = document.getElementById('translation-flag-button');
+    if (!flagButton) {
+        console.error("Flag button not found, cannot show arrow pointer");
+        return;
+    }
+    
+    // 创建箭头容器
+    const arrowContainer = document.createElement('div');
+    arrowContainer.id = 'language-arrow-pointer';
+    arrowContainer.style.position = 'fixed';
+    arrowContainer.style.zIndex = '999998'; // 低于国旗按钮
+    arrowContainer.style.pointerEvents = 'none'; // 避免阻挡点击事件
+    
+    // 获取国旗按钮的位置
+    const flagRect = flagButton.getBoundingClientRect();
+    
+    // 设置箭头位置
+    arrowContainer.style.top = (flagRect.top + flagRect.height + 10) + 'px';
+    arrowContainer.style.right = (window.innerWidth - flagRect.left - 10) + 'px';
+    
+    // 创建箭头元素
+    const arrow = document.createElement('div');
+    arrow.style.width = '20px';
+    arrow.style.height = '20px';
+    arrow.style.borderTop = '4px solid #ffcc00';
+    arrow.style.borderRight = '4px solid #ffcc00';
+    arrow.style.transform = 'rotate(-45deg)'; // 旋转使箭头指向右上
+    arrow.style.display = 'inline-block';
+    arrow.style.opacity = '0.9';
+    arrow.style.filter = 'drop-shadow(0 0 3px rgba(0,0,0,0.5))';
+    
+    // 添加文字提示
+    const textHint = document.createElement('div');
+    textHint.textContent = 'Select your language';
+    textHint.style.color = '#ffcc00';
+    textHint.style.fontWeight = 'bold';
+    textHint.style.fontSize = '14px';
+    textHint.style.marginTop = '8px';
+    textHint.style.textAlign = 'center';
+    textHint.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+    textHint.style.whiteSpace = 'nowrap';
+    
+    // 添加元素到容器
+    arrowContainer.appendChild(arrow);
+    arrowContainer.appendChild(textHint);
+    
+    // 添加到文档
+    document.body.appendChild(arrowContainer);
+    
+    // 添加上下浮动的动画
+    let direction = 1;
+    let position = 0;
+    const bounceAnimation = setInterval(() => {
+        position += 0.5 * direction;
+        if (position >= 10 || position <= 0) {
+            direction *= -1;
+        }
+        arrow.style.transform = `rotate(-45deg) translateY(${position}px)`;
+    }, 30);
+    
+    // 添加闪烁效果
+    let fadeDirection = -1;
+    let opacity = 0.9;
+    const fadeAnimation = setInterval(() => {
+        opacity += 0.05 * fadeDirection;
+        if (opacity <= 0.5) {
+            fadeDirection = 1;
+        } else if (opacity >= 0.9) {
+            fadeDirection = -1;
+        }
+        arrowContainer.style.opacity = opacity.toString();
+    }, 50);
+    
+    // 存储动画计时器ID
+    (window as any).arrowAnimationTimers = {
+        bounce: bounceAnimation,
+        fade: fadeAnimation
+    };
+    
+    // 在国旗按钮点击事件中移除箭头
+    flagButton.addEventListener('click', hideLanguageArrow);
+    
+    // 5分钟后自动移除箭头
+    setTimeout(hideLanguageArrow, 300000);
+    
+    // 窗口大小改变时更新箭头位置
+    window.addEventListener('resize', updateArrowPosition);
+}
+
+/**
+ * 隐藏语言切换箭头
+ */
+function hideLanguageArrow(): void {
+    const arrowElement = document.getElementById('language-arrow-pointer');
+    if (arrowElement) {
+        arrowElement.style.opacity = '0';
+        arrowElement.style.transition = 'opacity 0.5s ease';
+        
+        // 延迟移除元素
+        setTimeout(() => {
+            if (arrowElement.parentNode) {
+                arrowElement.parentNode.removeChild(arrowElement);
+            }
+        }, 500);
+        
+        // 清除所有动画
+        if ((window as any).arrowAnimationTimers) {
+            clearInterval((window as any).arrowAnimationTimers.bounce);
+            clearInterval((window as any).arrowAnimationTimers.fade);
+            delete (window as any).arrowAnimationTimers;
+        }
+        
+        // 移除事件监听器
+        window.removeEventListener('resize', updateArrowPosition);
+        
+        // 移除点击事件监听
+        const flagButton = document.getElementById('translation-flag-button');
+        if (flagButton) {
+            flagButton.removeEventListener('click', hideLanguageArrow);
+        }
+        
+        console.log("Language arrow pointer hidden");
+    }
+}
+
+/**
+ * 更新箭头位置
+ */
+function updateArrowPosition(): void {
+    const arrowElement = document.getElementById('language-arrow-pointer');
+    const flagButton = document.getElementById('translation-flag-button');
+    
+    if (arrowElement && flagButton) {
+        const flagRect = flagButton.getBoundingClientRect();
+        arrowElement.style.top = (flagRect.top + flagRect.height + 10) + 'px';
+        arrowElement.style.right = (window.innerWidth - flagRect.left - 10) + 'px';
+    }
 }
 
 // 导出函数供外部使用
-export { startTranslation as StartTranslate };
+export { startTranslation as StartTranslate, ShowArrowPointLanague };
