@@ -1021,6 +1021,7 @@ class GameMainScene {
         // 设置位置
         title.style.left = x;
         title.style.top = y;
+        title.style.scale="1.5";
         
         // 等待入场动画完成后添加持续动画
         setTimeout(() => {
@@ -1084,7 +1085,7 @@ function initGameMainScene(): void {
     GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
    
     // 显示游戏标题示例
-    GameMainScene.getInstance().ShowGameTitle("The Park", "pixel", "pulse", "50%", "15%");
+    GameMainScene.getInstance().ShowGameTitle("The Park", "glitch", "pulse", "50%", "15%");
   }, 1000); // 延迟1秒，确保按钮已经完全显示
 }
   
