@@ -2,7 +2,7 @@
 	"name": "EventHandler",
 	"plugin-id": "Sprite",
 	"sid": 583326850195891,
-	"isGlobal": true,
+	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
 	"behaviorTypes": [],

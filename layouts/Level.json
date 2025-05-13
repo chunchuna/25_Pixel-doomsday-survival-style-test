@@ -63677,10 +63677,10 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": -88,
-						"y": 54,
-						"width": 89,
-						"height": 89,
+						"x": -40.5,
+						"y": 60,
+						"width": 62,
+						"height": 55,
 						"originX": 0.5,
 						"originY": 0.5,
 						"color": [

@@ -2,6 +2,1143 @@
 	"name": "MainMenu",
 	"layers": [
 		{
+			"name": "mainmenu_content",
+			"overriden": 0,
+			"subLayers": [
+				{
+					"name": "background",
+					"overriden": 0,
+					"subLayers": [],
+					"instances": [],
+					"sid": 265083285741202,
+					"effectTypes": [],
+					"isInitiallyVisible": true,
+					"isInitiallyInteractive": true,
+					"isHTMLElementsLayer": false,
+					"color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"backgroundColor": [
+						0.3686274509803922,
+						0.3686274509803922,
+						0.3686274509803922,
+						1
+					],
+					"isTransparent": true,
+					"parallaxX": 1,
+					"parallaxY": 1,
+					"scaleRate": 1,
+					"forceOwnTexture": false,
+					"renderingMode": "3d",
+					"drawOrder": "z-order",
+					"useRenderCells": false,
+					"blendMode": "normal",
+					"zElevation": 0,
+					"global": false
+				},
+				{
+					"name": "front",
+					"overriden": 0,
+					"subLayers": [],
+					"instances": [
+						{
+							"type": "ZhiWuSprite5",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Animation 1",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 283,
+							"sid": 966756861209196,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {
+								"正弦运动": {
+									"properties": {
+										"movement": "angle",
+										"wave": "sine",
+										"period": 6,
+										"period-random": 10,
+										"period-offset": 0.3,
+										"period-offset-random": 0,
+										"magnitude": 1,
+										"magnitude-random": 6,
+										"enabled": true,
+										"live-preview": false
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 966756861209196,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 321.39760979159064,
+								"y": 263.53669221663836,
+								"width": 81.27812794864826,
+								"height": 114.74559239809165,
+								"originX": 0.5294117647058824,
+								"originY": 0.8958333333333334,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 0,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "LuYingYi",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Default",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 113,
+							"sid": 127162927049257,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0,
+								"ObjectName": "露营椅子",
+								"ID": "LuYingYiZi",
+								"Actions": "use,destroy,check,fix,collect,hide,find",
+								"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
+							},
+							"behaviors": {},
+							"effects": {
+								"BetterOutline": {
+									"isEnabled": false,
+									"parameters": {
+										"color": [
+											1,
+											0,
+											0,
+											1
+										],
+										"width": 1,
+										"precision-step": 10,
+										"samples": 3,
+										"opacity": 1
+									}
+								},
+								"像素化": {
+									"isEnabled": true,
+									"parameters": {
+										"size": 2
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 127162927049257,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 372.84490485741685,
+								"y": 196.37494806992294,
+								"width": 86.30491926640632,
+								"height": 86.30491926640632,
+								"originX": 0.46875,
+								"originY": 0.921875,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 0.8469786880026341,
+								"zElevation": 0,
+								"blendMode": "additive"
+							}
+						},
+						{
+							"type": "JingChe",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Default",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 115,
+							"sid": 905466497237090,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {},
+							"effects": {
+								"像素化": {
+									"isEnabled": true,
+									"parameters": {
+										"size": 1
+									}
+								},
+								"灰度": {
+									"isEnabled": true,
+									"parameters": {
+										"intensity": 0.6
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 905466497237090,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 382.40391915498714,
+								"y": 301.6973980599908,
+								"width": 117.86880486800084,
+								"height": 44.21733843852013,
+								"originX": 0.5158730158730159,
+								"originY": 0.9795918367346939,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 5.724152495131496,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "DaoDiNanRen",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Default",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 120,
+							"sid": 569857517567291,
+							"tags": "",
+							"instanceVariables": {},
+							"behaviors": {},
+							"effects": {
+								"像素化": {
+									"isEnabled": true,
+									"parameters": {
+										"size": 3
+									}
+								},
+								"灰度": {
+									"isEnabled": true,
+									"parameters": {
+										"intensity": 0.6
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 569857517567291,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 254.19067138337405,
+								"y": 250.3823213564133,
+								"width": 128.5396338905106,
+								"height": 89.27711708758011,
+								"originX": 0.5785714285714286,
+								"originY": 0.95,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 0,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "ZhiWuSprite",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Animation 1",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 124,
+							"sid": 432843590438275,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {
+								"正弦运动": {
+									"properties": {
+										"movement": "angle",
+										"wave": "sine",
+										"period": 6,
+										"period-random": 10,
+										"period-offset": 0.3,
+										"period-offset-random": 0,
+										"magnitude": 1,
+										"magnitude-random": 6,
+										"enabled": true,
+										"live-preview": false
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 432843590438275,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 286.2378321116004,
+								"y": 273.47940844242845,
+								"width": 94.66535489277817,
+								"height": 123.69606372656352,
+								"originX": 0.48,
+								"originY": 0.9285714285714286,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 3.4626850002874194,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "ZhiWuSprite2",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Animation 1",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 125,
+							"sid": 235224051684286,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {
+								"正弦运动": {
+									"properties": {
+										"movement": "angle",
+										"wave": "sine",
+										"period": 6,
+										"period-random": 10,
+										"period-offset": 0.3,
+										"period-offset-random": 0,
+										"magnitude": 1,
+										"magnitude-random": 6,
+										"enabled": true,
+										"live-preview": false
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 235224051684286,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 380.1019054043038,
+								"y": 235.59786052012134,
+								"width": 50.73151875350071,
+								"height": 84.55253125583452,
+								"originX": 0.5098039215686274,
+								"originY": 0.9647058823529412,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 1.4835298641951802,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "ZhiWuSprite",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Animation 1",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 126,
+							"sid": 843857051381336,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {
+								"正弦运动": {
+									"properties": {
+										"movement": "angle",
+										"wave": "sine",
+										"period": 6,
+										"period-random": 10,
+										"period-offset": 0.3,
+										"period-offset-random": 0,
+										"magnitude": 1,
+										"magnitude-random": 6,
+										"enabled": true,
+										"live-preview": false
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 843857051381336,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 292.25822742382746,
+								"y": 162.58384555425664,
+								"width": 44.18493549273671,
+								"height": 57.734982377175996,
+								"originX": 0.48,
+								"originY": 0.9285714285714286,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 5.662949080484335,
+								"zElevation": 0
+							}
+						},
+						{
+							"type": "ZhangPeng",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Default",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 127,
+							"sid": 959261222508681,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {},
+							"instanceFolderItem": {
+								"sid": 959261222508681,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 483.55444447549,
+								"y": 207.68562363416618,
+								"width": 49.480589779130355,
+								"height": 39.87987832944833,
+								"originX": 0.5522388059701493,
+								"originY": 0.8888888888888888,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 5.835827282567868,
+								"zElevation": 0
+							}
+						}
+					],
+					"sid": 274708084896365,
+					"effectTypes": [],
+					"isInitiallyVisible": true,
+					"isInitiallyInteractive": true,
+					"isHTMLElementsLayer": false,
+					"color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"backgroundColor": [
+						0.3686274509803922,
+						0.3686274509803922,
+						0.3686274509803922,
+						1
+					],
+					"isTransparent": true,
+					"parallaxX": 1,
+					"parallaxY": 1,
+					"scaleRate": 1,
+					"forceOwnTexture": false,
+					"renderingMode": "3d",
+					"drawOrder": "z-order",
+					"useRenderCells": false,
+					"blendMode": "normal",
+					"zElevation": 0,
+					"global": false
+				},
+				{
+					"name": "VFX",
+					"overriden": 0,
+					"subLayers": [
+						{
+							"name": "Light",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 239,
+									"sid": 165176798324896,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 239,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 165176798324896,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 309,
+										"y": 243,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								},
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 268,
+									"sid": 641142374803989,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 268,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 641142374803989,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 323,
+										"y": 253,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								},
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 396,
+									"sid": 253065852703488,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 396,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 253065852703488,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 292,
+										"y": 241,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								},
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 398,
+									"sid": 865210874625886,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 398,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 865210874625886,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 297.6342739538746,
+										"y": 240.19211362182847,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								},
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 402,
+									"sid": 218663505426115,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 402,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 218663505426115,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 327.0750326971523,
+										"y": 197.95393384704226,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								},
+								{
+									"type": "GouHouGuang",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 1181,
+									"sid": 310627885560925,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {
+										"正弦运动": {
+											"properties": {
+												"movement": "size",
+												"wave": "sine",
+												"period": 0.25,
+												"period-random": 0,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 30,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										}
+									},
+									"sceneGraphData": {
+										"parent-uid": null,
+										"uid": 1181,
+										"flags": {
+											"x": true,
+											"y": true,
+											"z": true,
+											"w": true,
+											"h": true,
+											"a": true,
+											"o": false,
+											"v": false,
+											"d": true,
+											"sm": "normal"
+										},
+										"preview": {
+											"transformX": 0,
+											"transformY": 0,
+											"transformZElevation": 0,
+											"transformW": 0,
+											"transformH": 0,
+											"transformA": 0,
+											"transformSX": 0,
+											"transformSY": 0,
+											"transformO": 0,
+											"previewSceneGraph": false
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 310627885560925,
+										"expanded": true,
+										"folderName": "",
+										"indexInFolder": -1,
+										"folderNestingLevel": -1
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 348.4276770599488,
+										"y": 242.2894786010756,
+										"width": 274.23997196268306,
+										"height": 294.6474308162722,
+										"originX": 0.5,
+										"originY": 0.5,
+										"color": [
+											0.47058823529411764,
+											0.47058823529411764,
+											0.47058823529411764,
+											0.6
+										],
+										"angle": 0.00003548993858748517,
+										"zElevation": 0,
+										"blendMode": "additive"
+									}
+								}
+							],
+							"sid": 829964278328293,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "additive",
+							"zElevation": 0,
+							"global": false
+						}
+					],
+					"instances": [],
+					"sid": 722948970443870,
+					"effectTypes": [
+						{
+							"effectId": "multiply",
+							"name": "正片叠底",
+							"instance": {
+								"isEnabled": true,
+								"parameters": {}
+							}
+						}
+					],
+					"isInitiallyVisible": true,
+					"isInitiallyInteractive": true,
+					"isHTMLElementsLayer": false,
+					"color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"backgroundColor": [
+						0.7294117647058823,
+						0.7294117647058823,
+						0.7294117647058823,
+						1
+					],
+					"isTransparent": false,
+					"parallaxX": 1,
+					"parallaxY": 1,
+					"scaleRate": 1,
+					"forceOwnTexture": false,
+					"renderingMode": "3d",
+					"drawOrder": "z-order",
+					"useRenderCells": false,
+					"blendMode": "normal",
+					"zElevation": 0,
+					"global": false
+				}
+			],
+			"instances": [],
+			"sid": 951057866944874,
+			"effectTypes": [],
+			"isInitiallyVisible": true,
+			"isInitiallyInteractive": true,
+			"isHTMLElementsLayer": false,
+			"color": [
+				1,
+				1,
+				1,
+				1
+			],
+			"backgroundColor": [
+				0.3686274509803922,
+				0.3686274509803922,
+				0.3686274509803922,
+				1
+			],
+			"isTransparent": true,
+			"parallaxX": 1,
+			"parallaxY": 1,
+			"scaleRate": 1,
+			"forceOwnTexture": false,
+			"renderingMode": "3d",
+			"drawOrder": "z-order",
+			"useRenderCells": false,
+			"blendMode": "normal",
+			"zElevation": 0,
+			"global": false
+		},
+		{
 			"name": "mainmenu_ui",
 			"overriden": 1,
 			"subLayers": [],

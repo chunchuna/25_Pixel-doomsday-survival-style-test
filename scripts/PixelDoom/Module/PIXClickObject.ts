@@ -35,6 +35,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     //点击对象 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
+        
+        console.log("点击了交互物")
+        
         var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
         LastestChooseObject = GetChooseObject;
 
@@ -64,10 +67,12 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         if (DistanceFromLastestObject == null) return
         if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) {
+            
             UISubtitleMain.ShowSubtitles("超过了这个物品的交互范围!", 0.5)
             return
         }
 
+        
         ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
 
 
