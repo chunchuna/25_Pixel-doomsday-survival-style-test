@@ -39,7 +39,9 @@ class GameMainScene {
       this.bindEvents();
   
       // 添加按钮动画
-      this.animateMenuButtons();
+      setTimeout(() => {
+        this.animateMenuButtons();
+      }, 500); // 等待500ms后开始按钮动画
     }
   
     private bindEvents(): void {
@@ -230,19 +232,51 @@ class GameMainScene {
           color: #ffffff;
         }
   
+        @keyframes panelSlideIn {
+          0% {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+          }
+        }
+  
+        @keyframes panelGlow {
+          0% { 
+            background-color: rgba(42, 42, 42, 0.85);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                       0 0 30px rgba(66, 134, 244, 0.2);
+          }
+          50% { 
+            background-color: rgba(42, 42, 42, 0.75);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
+                       0 0 40px rgba(66, 134, 244, 0.3);
+          }
+          100% { 
+            background-color: rgba(42, 42, 42, 0.85);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                       0 0 30px rgba(66, 134, 244, 0.2);
+          }
+        }
+  
         .game-main-panel {
           position: absolute;
           bottom: 0;
           left: 30%;
-          transform: translate(-50%, -50%);
+          transform: translate(-50%, 100%);
           width: 300px;
           padding: 20px;
-          background-color: rgba(42, 42, 42, 0.95);
+          background-color: rgba(42, 42, 42, 0.85);
           border-radius: 8px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
                       0 0 30px rgba(66, 134, 244, 0.2);
-          border: 1px solid rgba(58, 58, 58, 0.8);
-          backdrop-filter: blur(5px);
+          border: 1px solid rgba(58, 58, 58, 0.5);
+          backdrop-filter: blur(10px);
+          opacity: 0;
+          animation: panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+                     panelGlow 3s ease-in-out infinite;
         }
   
         .game-title {
@@ -260,9 +294,9 @@ class GameMainScene {
   
         .menu-btn {
           padding: 0.2rem 0;
-          background-color: rgba(58, 58, 58, 0.9);
+          background-color: rgba(58, 58, 58, 0.7);
           color: #e0e0e0;
-          border: 1px solid #4a4a4a;
+          border: 1px solid rgba(74, 74, 74, 0.5);
           border-radius: 4px;
           font-size: 0.8rem;
           max-height: 35px;
@@ -272,6 +306,7 @@ class GameMainScene {
           transform: translateX(-50px);
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(5px);
         }
   
         .menu-btn::before {
@@ -284,14 +319,14 @@ class GameMainScene {
           background: linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0.2),
             transparent
           );
           transition: 0.5s;
         }
   
         .menu-btn:hover {
-          background-color: #4a4a4a;
+          background-color: rgba(74, 74, 74, 0.9);
           transform: scale(1.02);
           box-shadow: 0 0 15px rgba(66, 134, 244, 0.3);
         }
@@ -302,27 +337,12 @@ class GameMainScene {
   
         .menu-btn:active {
           transform: scale(0.98);
-          background-color: #555;
+          background-color: rgba(85, 85, 85, 0.9);
         }
   
         .menu-btn.show {
           opacity: 1;
           transform: translateX(0);
-        }
-  
-        @keyframes glow {
-          0% { box-shadow: 0 0 5px rgba(66, 134, 244, 0.3); }
-          50% { box-shadow: 0 0 20px rgba(66, 134, 244, 0.5); }
-          100% { box-shadow: 0 0 5px rgba(66, 134, 244, 0.3); }
-        }
-  
-        .menu-btn:nth-child(1) { animation-delay: 0.2s; }
-        .menu-btn:nth-child(2) { animation-delay: 0.4s; }
-        .menu-btn:nth-child(3) { animation-delay: 0.6s; }
-        .menu-btn:nth-child(4) { animation-delay: 0.8s; }
-  
-        .menu-btn.active {
-          animation: glow 2s infinite;
         }
   
         .modal {
@@ -534,9 +554,9 @@ class GameMainScene {
             
             const rect = (e.target as HTMLElement).getBoundingClientRect();
              // @ts-ignore
-            const x = e.clientX - rect.left;
-             // @ts-ignore
-            const y = e.clientY - rect.top;
+             const x = e.clientX - rect.left;
+              // @ts-ignore
+             const y = e.clientY - rect.top;
             
             ripple.style.left = x + 'px';
             ripple.style.top = y + 'px';
