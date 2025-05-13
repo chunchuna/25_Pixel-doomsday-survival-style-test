@@ -1,5 +1,3 @@
-// GameMainScene.ts
-
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 // GameMainScene.ts
 
@@ -10,6 +8,8 @@ class GameMainScene {
     private mainContainer: HTMLElement | null = null;
     private isMuted: boolean = false;
     private isFullscreen: boolean = false;
+    private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
+    private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
   
     private constructor() {
       this.htmlTemplate = this.getHTMLTemplate();
@@ -56,45 +56,33 @@ class GameMainScene {
       // 设置按钮
       const settingsBtn = document.getElementById('settings-btn');
       const settingsModal = document.getElementById('settings-modal');
-      const closeSettingsBtn = document.getElementById('close-settings-btn');
       
-      if (settingsBtn && settingsModal && closeSettingsBtn) {
+      if (settingsBtn && settingsModal) {
         settingsBtn.addEventListener('click', () => {
+          settingsModal.classList.remove('closing');
           settingsModal.classList.add('active');
-        });
-        
-        closeSettingsBtn.addEventListener('click', () => {
-          settingsModal.classList.remove('active');
         });
       }
   
       // 存档读取按钮
       const loadGameBtn = document.getElementById('load-game-btn');
       const loadGameModal = document.getElementById('load-game-modal');
-      const closeLoadGameBtn = document.getElementById('close-load-game-btn');
       
-      if (loadGameBtn && loadGameModal && closeLoadGameBtn) {
+      if (loadGameBtn && loadGameModal) {
         loadGameBtn.addEventListener('click', () => {
+          loadGameModal.classList.remove('closing');
           loadGameModal.classList.add('active');
-        });
-        
-        closeLoadGameBtn.addEventListener('click', () => {
-          loadGameModal.classList.remove('active');
         });
       }
   
       // 关于按钮
       const aboutBtn = document.getElementById('about-btn');
       const aboutModal = document.getElementById('about-modal');
-      const closeAboutBtn = document.getElementById('close-about-btn');
       
-      if (aboutBtn && aboutModal && closeAboutBtn) {
+      if (aboutBtn && aboutModal) {
         aboutBtn.addEventListener('click', () => {
+          aboutModal.classList.remove('closing');
           aboutModal.classList.add('active');
-        });
-        
-        closeAboutBtn.addEventListener('click', () => {
-          aboutModal.classList.remove('active');
         });
       }
   
@@ -123,6 +111,28 @@ class GameMainScene {
           console.log('从本地读取存档 - 等待实现');
         });
       }
+  
+      // 统一处理所有模态框的关闭
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        // 点击背景关闭
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('closing');
+            setTimeout(() => {
+              modal.classList.remove('active', 'closing');
+            }, 300);
+          }
+        });
+  
+        // 防止点击内容区域关闭
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+          modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+        }
+      });
     }
   
     private toggleFullscreen(): void {
@@ -153,10 +163,6 @@ class GameMainScene {
         <!-- 设置弹窗 -->
         <div id="settings-modal" class="modal">
           <div class="modal-content">
-            <div class="modal-header">
-              <h2>游戏设置</h2>
-              <button id="close-settings-btn" class="close-btn">×</button>
-            </div>
             <div class="modal-body">
               <div class="setting-item">
                 <label for="mute-toggle">静音：</label>
@@ -179,13 +185,8 @@ class GameMainScene {
         <!-- 存档读取弹窗 -->
         <div id="load-game-modal" class="modal">
           <div class="modal-content">
-            <div class="modal-header">
-              <h2>读取存档</h2>
-              <button id="close-load-game-btn" class="close-btn">×</button>
-            </div>
             <div class="modal-body">
-              <button id="load-local-btn" class="action-btn">从本地读取</button>
-              <div class="save-slots">
+              <button id="load-local-btn" class="action-btn">从本地读取</button><div class="save-slots">
                 <p>暂无存档</p>
               </div>
             </div>
@@ -195,10 +196,6 @@ class GameMainScene {
         <!-- 关于弹窗 -->
         <div id="about-modal" class="modal">
           <div class="modal-content">
-            <div class="modal-header">
-              <h2>关于游戏</h2>
-              <button id="close-about-btn" class="close-btn">×</button>
-            </div>
             <div class="modal-body scrollable">
               <h3>游戏版本</h3>
               <p>v1.0.0</p>
@@ -261,6 +258,47 @@ class GameMainScene {
           }
         }
   
+        @keyframes panelSlideOut {
+          0% {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+          }
+        }
+  
+        @keyframes modalSlideIn {
+          0% {
+            transform: translateY(-50px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+  
+        @keyframes modalSlideOut {
+          0% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-50px);
+            opacity: 0;
+          }
+        }
+  
+        @keyframes buttonShake {
+          0% { transform: translateX(0); }
+          25% { transform: translateX(var(--shake-size)); }
+          50% { transform: translateX(0); }
+          75% { transform: translateX(calc(-1 * var(--shake-size))); }
+          100% { transform: translateX(0); }
+        }
+  
         .game-main-panel {
           position: absolute;
           bottom: 0;
@@ -289,24 +327,21 @@ class GameMainScene {
         .main-menu {
           display: flex;
           flex-direction: column;
-          gap: 0.1rem;
+          gap: 0.8rem;
         }
   
         .menu-btn {
           padding: 0.2rem 0;
-          background-color: rgba(58, 58, 58, 0.7);
+          background-color: transparent;
           color: #e0e0e0;
-          border: 1px solid rgba(74, 74, 74, 0.5);
-          border-radius: 4px;
-          font-size: 0.8rem;
-          max-height: 35px;
+          border: none;
+          font-size: 1rem;
           cursor: pointer;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           opacity: 0;
           transform: translateX(-50px);
           position: relative;
           overflow: hidden;
-          backdrop-filter: blur(5px);
         }
   
         .menu-btn::before {
@@ -326,9 +361,9 @@ class GameMainScene {
         }
   
         .menu-btn:hover {
-          background-color: rgba(74, 74, 74, 0.9);
-          transform: scale(1.02);
-          box-shadow: 0 0 15px rgba(66, 134, 244, 0.3);
+          color: #ffffff;
+          transform: scale(1.05);
+          text-shadow: 0 0 10px rgba(66, 134, 244, 0.7);
         }
   
         .menu-btn:hover::before {
@@ -337,12 +372,16 @@ class GameMainScene {
   
         .menu-btn:active {
           transform: scale(0.98);
-          background-color: rgba(85, 85, 85, 0.9);
         }
   
         .menu-btn.show {
           opacity: 1;
           transform: translateX(0);
+        }
+        
+        .menu-btn.shake {
+          --shake-size: 5px;
+          animation: buttonShake 0.5s infinite ease-in-out;
         }
   
         .modal {
@@ -352,7 +391,7 @@ class GameMainScene {
           left: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.7);
+          background-color: rgba(0, 0, 0, 0);
           z-index: 1000;
           align-items: center;
           justify-content: center;
@@ -360,43 +399,76 @@ class GameMainScene {
   
         .modal.active {
           display: flex;
+          animation: modalBackgroundFadeIn 0.3s forwards;
+        }
+  
+        .modal.closing {
+          animation: modalBackgroundFadeOut 0.3s forwards;
         }
   
         .modal-content {
-          background-color: #2a2a2a;
+          position: relative;
+          background-color: rgba(42, 42, 42, 0.95);
           border-radius: 8px;
           width: 90%;
           max-width: 400px;
           max-height: 80vh;
           overflow: hidden;
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-          border: 1px solid #3a3a3a;
+          box-shadow: 0 4px 20px rgba(0, 0, 0,0.4),
+                      0 0 30px rgba(66, 134, 244, 0.2);
+          border: 1px solid rgba(58, 58, 58, 0.5);
+          backdrop-filter: blur(10px);
+          opacity: 0;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: modalSlideIn 0.3s forwards;
         }
   
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.8rem 1rem;
-          background-color: #333;
-          border-bottom: 1px solid #444;
+        .modal.active .modal-content {
+          opacity: 1;
+          animation: modalContentGlow 3s ease-in-out infinite, modalSlideIn 0.3s forwards;
         }
   
-        .modal-header h2 {
-          color: #e0e0e0;
-          font-size: 1.2rem;
+        .modal.closing .modal-content {
+          animation: modalSlideOut 0.3s forwards;
+          opacity: 0;
         }
   
-        .close-btn {
-          background: none;
-          border: none;
-          color: #e0e0e0;
-          font-size: 1.5rem;
-          cursor: pointer;
+        @keyframes modalBackgroundFadeIn {
+          from { background-color: rgba(0, 0, 0, 0); }
+          to { background-color: rgba(0, 0, 0, 0.7); }
+        }
+  
+        @keyframes modalBackgroundFadeOut {
+          from { background-color: rgba(0, 0, 0, 0.7); }
+          to { background-color: rgba(0, 0, 0, 0); }
+        }
+  
+        @keyframes modalContentGlow {
+          0% { 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                       0 0 30px rgba(66, 134, 244, 0.2);
+          }
+          50% { 
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
+                       0 0 40px rgba(66, 134, 244, 0.3);
+          }
+          100% { 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
+                       0 0 30px rgba(66, 134, 244, 0.2);
+          }
         }
   
         .modal-body {
-          padding: 1rem;
+          padding: 1.5rem;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: all 0.3s ease;
+        }
+  
+        .modal.active .modal-body {
+          opacity: 1;
+          transform: translateY(0);
+          transition-delay: 0.2s;
         }
   
         .scrollable {
@@ -479,9 +551,9 @@ class GameMainScene {
   
         .action-btn {
           padding: 0.6rem 0;
-          background-color: #3a3a3a;
+          background-color: transparent;
           color: #e0e0e0;
-          border: 1px solid #4a4a4a;
+          border: none;
           border-radius: 4px;
           font-size: 0.9rem;
           cursor: pointer;
@@ -491,7 +563,8 @@ class GameMainScene {
         }
   
         .action-btn:hover {
-          background-color: #4a4a4a;
+          color: #ffffff;
+          text-shadow: 0 0 10px rgba(66, 134, 244, 0.7);
         }
   
         .save-slots {
@@ -568,6 +641,101 @@ class GameMainScene {
           
         }, 200 * (index + 1)); // 每个按钮延迟200ms出现
       });
+    }
+  
+    // 新增显示/隐藏菜单方法
+    public ShowMainMenu(): void {
+        if (this.mainContainer) {
+            this.mainContainer.style.display = 'block';
+            const panel = this.mainContainer.querySelector('.game-main-panel');
+            if (panel) {
+                (panel as HTMLElement).style.animation = 'panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards, panelGlow 3s ease-in-out infinite';
+            }
+            // 重新触发按钮动画
+            setTimeout(() => {
+                this.animateMenuButtons();
+            }, 500);
+        }
+    }
+
+    public HideMainMenu(): void {
+        if (this.mainContainer) {
+            const panel = this.mainContainer.querySelector('.game-main-panel');
+            if (panel) {
+                (panel as HTMLElement).style.animation = 'panelSlideOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                setTimeout(() => {
+                    this.mainContainer!.style.display = 'none';
+                }, 800);
+            }
+        }
+    }
+
+    // 新增添加按钮方法
+    public MenuAddButton(buttonText: string, callback: () => void): void {
+        // 创建新按钮
+        const button = document.createElement('button');
+        button.textContent = buttonText;
+        button.className = 'menu-btn';
+        
+        // 存储回调函数
+        this.menuButtons.set(buttonText, callback);
+        
+        // 添加点击事件
+        button.addEventListener('click', callback);
+        
+        // 添加到菜单
+        const mainMenu = document.querySelector('.main-menu');
+        if (mainMenu) {
+            mainMenu.appendChild(button);
+            // 立即触发按钮动画
+            setTimeout(() => {
+                button.classList.add('show');
+            }, 100);
+        }
+    }
+
+    /**
+     * 添加按钮晃动效果
+     * @param buttonId 按钮的ID
+     * @param size 晃动幅度（像素）
+     * @param interval 晃动间隔（毫秒）
+     */
+    public AddButtonShakeEffect(buttonId: string, size: number, interval: number): void {
+      // 先清除已有的晃动效果
+      this.RemoveButtonShakeEffect(buttonId);
+      
+      const button = document.getElementById(buttonId);
+      if (button) {
+        // 设置晃动幅度
+        button.style.setProperty('--shake-size', `${size}px`);
+        
+        // 添加晃动样式类
+        button.classList.add('shake');
+        
+        // 如果提供了自定义的晃动间隔，则应用
+        if (interval && interval !== 500) { // 默认动画是500ms
+          button.style.animationDuration = `${interval}ms`;
+        }
+        
+        // 存储晃动效果的ID，以便后续可以移除
+        this.buttonShakeEffects.set(buttonId, 1);
+      }
+    }
+    
+    /**
+     * 移除按钮晃动效果
+     * @param buttonId 按钮的ID
+     */
+    public RemoveButtonShakeEffect(buttonId: string): void {
+      if (this.buttonShakeEffects.has(buttonId)) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+          button.classList.remove('shake');
+          button.style.removeProperty('--shake-size');
+          button.style.removeProperty('animation-duration');
+        }
+        this.buttonShakeEffects.delete(buttonId);
+      }
     }
   }
   
