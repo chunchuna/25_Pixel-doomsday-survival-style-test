@@ -325,45 +325,40 @@ class GameMainScene {
         .menu-btn {
           padding: 0.2rem 0;
           background-color: transparent;
-          color: #e0e0e0;
+          color: #b0b0b0;
           border: none;
           font-size: 1rem;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.2s ease;
           opacity: 0;
           transform: translateX(-50px);
           position: relative;
           overflow: hidden;
+          text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
   
         .menu-btn::before {
           content: '';
           position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.2),
-            transparent
-          );
-          transition: 0.5s;
+          left: 0;
+          bottom: 0;
+          width: 0;
+          height: 2px;
+          background-color: #ffffff;
+          transition: width 0.3s ease;
         }
   
         .menu-btn:hover {
           color: #ffffff;
-          transform: scale(1.05);
-          text-shadow: 0 0 10px rgba(66, 134, 244, 0.7);
+          text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
         }
   
         .menu-btn:hover::before {
-          left: 100%;
+          width: 100%;
         }
   
         .menu-btn:active {
-          transform: scale(0.98);
+          transform: scale(0.95);
         }
   
         .menu-btn.show {
@@ -400,15 +395,17 @@ class GameMainScene {
   
         .modal-content {
           position: relative;
-          background-color: rgba(42, 42, 42, 0.95);
+          background-color: rgba(32, 32, 32, 0.9);
           border-radius: 8px;
           width: 90%;
           max-width: 400px;
           max-height: 80vh;
           overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0,0.4),
-                      0 0 30px rgba(66, 134, 244, 0.2);
-          border: 1px solid rgba(58, 58, 58, 0.5);
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
+                      inset 0 0 8px rgba(120, 120, 120, 0.5);
+          border: 1px solid rgba(80, 80, 80, 0.6);
+          border-top: 1px solid rgba(100, 100, 100, 0.8);
+          border-bottom: 1px solid rgba(50, 50, 50, 0.8);
           backdrop-filter: blur(10px);
           opacity: 0;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -417,7 +414,7 @@ class GameMainScene {
   
         .modal.active .modal-content {
           opacity: 1;
-          animation: modalContentGlow 3s ease-in-out infinite, modalSlideIn 0.3s forwards;
+          animation: modalSlideIn 0.3s forwards;
         }
   
         .modal.closing .modal-content {
@@ -437,16 +434,16 @@ class GameMainScene {
   
         @keyframes modalContentGlow {
           0% { 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                       0 0 30px rgba(66, 134, 244, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
+                        inset 0 0 8px rgba(120, 120, 120, 0.5);
           }
           50% { 
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
-                       0 0 40px rgba(66, 134, 244, 0.3);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7),
+                        inset 0 0 12px rgba(140, 140, 140, 0.6);
           }
           100% { 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                       0 0 30px rgba(66, 134, 244, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
+                        inset 0 0 8px rgba(120, 120, 120, 0.5);
           }
         }
   
@@ -455,6 +452,20 @@ class GameMainScene {
           opacity: 0;
           transform: translateY(10px);
           transition: all 0.3s ease;
+          position: relative;
+          border-top: 1px solid rgba(60, 60, 60, 0.3);
+        }
+  
+        .modal-body::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 8px;
+          background: linear-gradient(to bottom, 
+                      rgba(100, 100, 100, 0.2), 
+                      transparent);
         }
   
         .modal.active .modal-body {
@@ -488,6 +499,10 @@ class GameMainScene {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 0.8rem;
+          padding: 0.5rem;
+          border-radius: 4px;
+          background-color: rgba(50, 50, 50, 0.5);
+          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
         }
   
         .switch {
@@ -543,7 +558,7 @@ class GameMainScene {
   
         .action-btn {
           padding: 0.6rem 0;
-          background-color: transparent;
+          background-color: rgba(60, 60, 60, 0.5);
           color: #e0e0e0;
           border: none;
           border-radius: 4px;
@@ -552,20 +567,32 @@ class GameMainScene {
           transition: all 0.2s;
           margin-bottom: 1rem;
           width: 100%;
+          text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
   
         .action-btn:hover {
           color: #ffffff;
+          background-color: rgba(70, 70, 70, 0.7);
           text-shadow: 0 0 10px rgba(66, 134, 244, 0.7);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+  
+        .action-btn:active {
+          transform: translateY(1px);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
   
         .save-slots {
           margin-top: 0.8rem;
           padding: 0.8rem;
-          background-color: #333;
+          background-color: rgba(40, 40, 40, 0.7);
           border-radius: 4px;
           text-align: center;
           color: #aaa;
+          box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(60, 60, 60, 0.5);
         }
   
         h3 {
@@ -735,14 +762,16 @@ class GameMainScene {
   function initGameMainScene(): void {
     const gameMainScene = GameMainScene.getInstance();
     gameMainScene.initialize();
+
+    GameMainScene.getInstance().MenuAddButton("语言",()=>{
+        
+    })
     
     // 在initialize之后添加晃动效果，确保DOM元素已经创建
     setTimeout(() => {
       // 使用角度作为晃动幅度，值改为5度
       GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
-      GameMainScene.getInstance().MenuAddButton("语言",()=>{
-        
-      })
+     
     }, 1000); // 延迟1秒，确保按钮已经完全显示
   }
   
