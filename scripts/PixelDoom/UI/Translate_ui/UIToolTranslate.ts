@@ -1770,153 +1770,215 @@ function stopImmersiveTranslateSDK(): void {
 }
 
 /**
- * 显示指向语言切换按钮的动画箭头
+ * 显示指向语言切换按钮的气泡提示
  */
 function ShowArrowPointLanague(): void {
-    console.log("Showing language selection arrow pointer");
+    console.log("Showing language selection bubble tooltip");
     
-    // 先检查箭头是否已存在
-    if (document.getElementById('language-arrow-pointer')) {
-        return; // 如果箭头已存在，不再创建
+    // 先检查气泡是否已存在
+    if (document.getElementById('language-bubble-tooltip')) {
+        return; // 如果气泡已存在，不再创建
     }
     
     // 查找国旗按钮
     const flagButton = document.getElementById('translation-flag-button');
     if (!flagButton) {
-        console.error("Flag button not found, cannot show arrow pointer");
+        console.error("Flag button not found, cannot show bubble tooltip");
         return;
     }
     
-    // 创建箭头容器
-    const arrowContainer = document.createElement('div');
-    arrowContainer.id = 'language-arrow-pointer';
-    arrowContainer.style.position = 'fixed';
-    arrowContainer.style.zIndex = '999998'; // 低于国旗按钮
-    arrowContainer.style.pointerEvents = 'none'; // 避免阻挡点击事件
+    // 创建气泡容器
+    const bubbleContainer = document.createElement('div');
+    bubbleContainer.id = 'language-bubble-tooltip';
+    bubbleContainer.style.position = 'fixed';
+    bubbleContainer.style.zIndex = '999998'; // 低于国旗按钮
+    bubbleContainer.style.pointerEvents = 'none'; // 避免阻挡点击事件
     
     // 获取国旗按钮的位置
     const flagRect = flagButton.getBoundingClientRect();
     
-    // 设置箭头位置
-    arrowContainer.style.top = (flagRect.top + flagRect.height + 10) + 'px';
-    arrowContainer.style.right = (window.innerWidth - flagRect.left - 10) + 'px';
+    // 创建气泡元素
+    const bubble = document.createElement('div');
+    bubble.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    bubble.style.color = '#fff';
+    bubble.style.padding = '8px 12px';
+    bubble.style.borderRadius = '6px';
+    bubble.style.maxWidth = '160px';
+    bubble.style.textAlign = 'center';
+    bubble.style.fontSize = '13px';
+    bubble.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.3)';
+    bubble.style.lineHeight = '1.4';
+    bubble.style.fontWeight = 'bold';
+    bubble.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    bubble.innerText = 'Click to change language';
     
-    // 创建箭头元素
-    const arrow = document.createElement('div');
-    arrow.style.width = '20px';
-    arrow.style.height = '20px';
-    arrow.style.borderTop = '4px solid #ffcc00';
-    arrow.style.borderRight = '4px solid #ffcc00';
-    arrow.style.transform = 'rotate(-45deg)'; // 旋转使箭头指向右上
-    arrow.style.display = 'inline-block';
-    arrow.style.opacity = '0.9';
-    arrow.style.filter = 'drop-shadow(0 0 3px rgba(0,0,0,0.5))';
-    
-    // 添加文字提示
-    const textHint = document.createElement('div');
-    textHint.textContent = 'Select your language';
-    textHint.style.color = '#ffcc00';
-    textHint.style.fontWeight = 'bold';
-    textHint.style.fontSize = '14px';
-    textHint.style.marginTop = '8px';
-    textHint.style.textAlign = 'center';
-    textHint.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
-    textHint.style.whiteSpace = 'nowrap';
+    // 创建气泡小尾巴
+    const bubbleTail = document.createElement('div');
+    bubbleTail.style.position = 'absolute';
+    bubbleTail.style.bottom = '-5px';
+    bubbleTail.style.left = '50%';
+    bubbleTail.style.width = '10px';
+    bubbleTail.style.height = '10px';
+    bubbleTail.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    bubbleTail.style.transform = 'translateX(-50%) rotate(45deg)';
+    bubbleTail.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    bubbleTail.style.borderTop = 'none';
+    bubbleTail.style.borderLeft = 'none';
     
     // 添加元素到容器
-    arrowContainer.appendChild(arrow);
-    arrowContainer.appendChild(textHint);
+    bubble.appendChild(bubbleTail);
+    bubbleContainer.appendChild(bubble);
     
-    // 添加到文档
-    document.body.appendChild(arrowContainer);
-    
-    // 添加上下浮动的动画
-    let direction = 1;
-    let position = 0;
-    const bounceAnimation = setInterval(() => {
-        position += 0.5 * direction;
-        if (position >= 10 || position <= 0) {
-            direction *= -1;
+    // 设置气泡位置 - 放在国旗按钮正上方
+    const horizontalCenter = flagRect.left + flagRect.width / 2;
+    const topPosition = flagRect.top - bubble.offsetHeight - 15; // 上方15px
+
+    // 使用requestAnimationFrame确保在DOM更新后获取正确的气泡尺寸
+    requestAnimationFrame(() => {
+        // 添加到文档
+        document.body.appendChild(bubbleContainer);
+        
+        // 现在可以获取气泡的实际尺寸
+        const bubbleRect = bubble.getBoundingClientRect();
+        
+        // 更新位置，确保气泡在国旗正上方居中
+        bubbleContainer.style.top = (flagRect.top - bubbleRect.height - 15) + 'px';
+        bubbleContainer.style.left = (horizontalCenter - bubbleRect.width / 2) + 'px';
+        
+        // 确保气泡不超出屏幕
+        const rightEdge = horizontalCenter + bubbleRect.width / 2;
+        const leftEdge = horizontalCenter - bubbleRect.width / 2;
+        
+        if (rightEdge > window.innerWidth) {
+            bubbleContainer.style.left = (window.innerWidth - bubbleRect.width - 10) + 'px';
+            // 调整小尾巴位置
+            bubbleTail.style.left = (horizontalCenter - (window.innerWidth - bubbleRect.width - 10)) + 'px';
+        } else if (leftEdge < 0) {
+            bubbleContainer.style.left = '10px';
+            // 调整小尾巴位置
+            bubbleTail.style.left = (horizontalCenter - 10) + 'px';
         }
-        arrow.style.transform = `rotate(-45deg) translateY(${position}px)`;
-    }, 30);
-    
-    // 添加闪烁效果
-    let fadeDirection = -1;
-    let opacity = 0.9;
-    const fadeAnimation = setInterval(() => {
-        opacity += 0.05 * fadeDirection;
-        if (opacity <= 0.5) {
-            fadeDirection = 1;
-        } else if (opacity >= 0.9) {
-            fadeDirection = -1;
+        
+        // 如果气泡会显示在屏幕上方看不到的位置，则调整到下方
+        if (parseFloat(bubbleContainer.style.top) < 10) {
+            bubbleContainer.style.top = (flagRect.bottom + 15) + 'px';
+            // 调整小尾巴到上方
+            bubbleTail.style.bottom = 'auto';
+            bubbleTail.style.top = '-5px';
+            bubbleTail.style.borderBottom = 'none';
+            bubbleTail.style.borderRight = 'none';
+            bubbleTail.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
+            bubbleTail.style.borderLeft = '1px solid rgba(255, 255, 255, 0.2)';
         }
-        arrowContainer.style.opacity = opacity.toString();
+    });
+    
+    // 添加脉动动画
+    let scale = 1;
+    let growing = false;
+    const pulseAnimation = setInterval(() => {
+        if (growing) {
+            scale += 0.01;
+            if (scale >= 1.1) {
+                growing = false;
+            }
+        } else {
+            scale -= 0.01;
+            if (scale <= 0.95) {
+                growing = true;
+            }
+        }
+        bubble.style.transform = `scale(${scale})`;
     }, 50);
     
     // 存储动画计时器ID
-    (window as any).arrowAnimationTimers = {
-        bounce: bounceAnimation,
-        fade: fadeAnimation
+    (window as any).bubbleAnimationTimers = {
+        pulse: pulseAnimation
     };
     
-    // 在国旗按钮点击事件中移除箭头
-    flagButton.addEventListener('click', hideLanguageArrow);
+    // 在国旗按钮点击事件中移除气泡
+    flagButton.addEventListener('click', hideLanguageBubble);
     
-    // 5分钟后自动移除箭头
-    setTimeout(hideLanguageArrow, 300000);
+    // 30秒后自动移除气泡
+    setTimeout(hideLanguageBubble, 30000);
     
-    // 窗口大小改变时更新箭头位置
-    window.addEventListener('resize', updateArrowPosition);
+    // 窗口大小改变时更新气泡位置
+    window.addEventListener('resize', updateBubblePosition);
 }
 
 /**
- * 隐藏语言切换箭头
+ * 隐藏语言切换气泡
  */
-function hideLanguageArrow(): void {
-    const arrowElement = document.getElementById('language-arrow-pointer');
-    if (arrowElement) {
-        arrowElement.style.opacity = '0';
-        arrowElement.style.transition = 'opacity 0.5s ease';
+function hideLanguageBubble(): void {
+    const bubbleElement = document.getElementById('language-bubble-tooltip');
+    if (bubbleElement) {
+        bubbleElement.style.opacity = '0';
+        bubbleElement.style.transform = 'translateY(-10px)';
+        bubbleElement.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         
         // 延迟移除元素
         setTimeout(() => {
-            if (arrowElement.parentNode) {
-                arrowElement.parentNode.removeChild(arrowElement);
+            if (bubbleElement.parentNode) {
+                bubbleElement.parentNode.removeChild(bubbleElement);
             }
         }, 500);
         
         // 清除所有动画
-        if ((window as any).arrowAnimationTimers) {
-            clearInterval((window as any).arrowAnimationTimers.bounce);
-            clearInterval((window as any).arrowAnimationTimers.fade);
-            delete (window as any).arrowAnimationTimers;
+        if ((window as any).bubbleAnimationTimers) {
+            clearInterval((window as any).bubbleAnimationTimers.pulse);
+            delete (window as any).bubbleAnimationTimers;
         }
         
         // 移除事件监听器
-        window.removeEventListener('resize', updateArrowPosition);
+        window.removeEventListener('resize', updateBubblePosition);
         
         // 移除点击事件监听
         const flagButton = document.getElementById('translation-flag-button');
         if (flagButton) {
-            flagButton.removeEventListener('click', hideLanguageArrow);
+            flagButton.removeEventListener('click', hideLanguageBubble);
         }
         
-        console.log("Language arrow pointer hidden");
+        console.log("Language bubble tooltip hidden");
     }
 }
 
 /**
- * 更新箭头位置
+ * 更新气泡位置
  */
-function updateArrowPosition(): void {
-    const arrowElement = document.getElementById('language-arrow-pointer');
+function updateBubblePosition(): void {
+    const bubbleElement = document.getElementById('language-bubble-tooltip');
     const flagButton = document.getElementById('translation-flag-button');
     
-    if (arrowElement && flagButton) {
+    if (bubbleElement && flagButton) {
         const flagRect = flagButton.getBoundingClientRect();
-        arrowElement.style.top = (flagRect.top + flagRect.height + 10) + 'px';
-        arrowElement.style.right = (window.innerWidth - flagRect.left - 10) + 'px';
+        const bubble = bubbleElement.firstChild as HTMLElement;
+        const bubbleRect = bubble.getBoundingClientRect();
+        
+        // 检查当前小尾巴位置，判断气泡是在上方还是下方
+        const tail = bubble.firstChild as HTMLElement;
+        const isAbove = tail.style.bottom === '-5px';
+        
+        // 根据气泡位置计算正确的位置
+        if (isAbove) {
+            // 气泡在上方
+            bubbleElement.style.top = (flagRect.top - bubbleRect.height - 15) + 'px';
+        } else {
+            // 气泡在下方
+            bubbleElement.style.top = (flagRect.bottom + 15) + 'px';
+        }
+        
+        // 水平居中对齐
+        const horizontalCenter = flagRect.left + flagRect.width / 2;
+        bubbleElement.style.left = (horizontalCenter - bubbleRect.width / 2) + 'px';
+        
+        // 确保气泡不超出屏幕
+        const rightEdge = horizontalCenter + bubbleRect.width / 2;
+        const leftEdge = horizontalCenter - bubbleRect.width / 2;
+        
+        if (rightEdge > window.innerWidth) {
+            bubbleElement.style.left = (window.innerWidth - bubbleRect.width - 10) + 'px';
+        } else if (leftEdge < 0) {
+            bubbleElement.style.left = '10px';
+        }
     }
 }
 
