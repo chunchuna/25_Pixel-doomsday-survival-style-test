@@ -242,19 +242,13 @@ class GameMainScene {
   
         @keyframes panelGlow {
           0% { 
-            background-color: rgba(42, 42, 42, 0.85);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                       0 0 30px rgba(66, 134, 244, 0.2);
+            box-shadow: 0 0 30px rgba(66, 134, 244, 0.2);
           }
           50% { 
-            background-color: rgba(42, 42, 42, 0.75);
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
-                       0 0 40px rgba(66, 134, 244, 0.3);
+            box-shadow: 0 0 40px rgba(66, 134, 244, 0.3);
           }
           100% { 
-            background-color: rgba(42, 42, 42, 0.85);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                       0 0 30px rgba(66, 134, 244, 0.2);
+            box-shadow: 0 0 30px rgba(66, 134, 244, 0.2);
           }
         }
   
@@ -306,15 +300,13 @@ class GameMainScene {
           transform: translate(-50%, 100%);
           width: 300px;
           padding: 20px;
-          background-color: rgba(42, 42, 42, 0.85);
+          background-color: transparent;
           border-radius: 8px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),
-                      0 0 30px rgba(66, 134, 244, 0.2);
-          border: 1px solid rgba(58, 58, 58, 0.5);
-          backdrop-filter: blur(10px);
+          box-shadow: none;
+          border: none;
+          backdrop-filter: none;
           opacity: 0;
-          animation: panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards,
-                     panelGlow 3s ease-in-out infinite;
+          animation: panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
   
         .game-title {
@@ -748,6 +740,9 @@ class GameMainScene {
     setTimeout(() => {
       // 使用角度作为晃动幅度，值改为5度
       GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
+      GameMainScene.getInstance().MenuAddButton("语言",()=>{
+        
+      })
     }, 1000); // 延迟1秒，确保按钮已经完全显示
   }
   
