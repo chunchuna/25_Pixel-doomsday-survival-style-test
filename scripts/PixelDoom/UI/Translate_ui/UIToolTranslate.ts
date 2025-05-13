@@ -2,7 +2,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    StartTranslate("en")
+    //StartTranslate("en")
 })
 
 // real-time-translator.ts
@@ -86,7 +86,7 @@ async function translateTextWithLibre(text: string, targetLang: string): Promise
             },
             body: JSON.stringify({
                 q: text,
-                source: 'auto',
+                source: 'zh-CN',
                 target: targetLang
             })
         });
@@ -131,7 +131,7 @@ async function translateTextWithMyMemory(text: string, targetLang: string): Prom
     if (!text || text.trim() === '') return text;
 
     try {
-        const url = `${MYMEMORY_API}?q=${encodeURIComponent(text)}&langpair=auto|${targetLang}`;
+        const url = `${MYMEMORY_API}?q=${encodeURIComponent(text)}&langpair=zh-CN|${targetLang}`;
         const response = await fetch(url);
 
         if (!response.ok) {

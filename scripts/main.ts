@@ -28,7 +28,8 @@ import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActi
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"
 import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
 
-import "./PixelDoom/UI/Translate/UIToolTranslate.js"
+import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"
+import "./PixelDoom/UI/MainMenu_ui/UIMainMenu.js"
 
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.

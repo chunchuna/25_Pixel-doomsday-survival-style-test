@@ -3,6 +3,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 
 var DialogueMainController:DialogueSystem;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     (window as any).DialogueMainController = new DialogueSystem();
 })
 
@@ -37,7 +38,7 @@ export class DialogueSystem {
         this.dialogueContent = document.getElementById('dialogue-content') as HTMLElement;
         this.choicesContainer = document.getElementById('choices-container') as HTMLElement;
         this.closeButton = document.getElementById('close-button') as HTMLElement;
-
+        
         // 添加关闭按钮事件
         this.closeButton.addEventListener('click', () => {
             this.CloseDialogue();

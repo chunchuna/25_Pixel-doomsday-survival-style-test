@@ -227,14 +227,16 @@
 	"layouts": {
 		"items": [
 			"Level",
-			"Object"
+			"Object",
+			"MainMenu"
 		],
 		"subfolders": [
 			{
 				"items": [
 					"interaction_panel_action_choose_ui",
 					"subtitle_ui",
-					"dialogue_ui"
+					"dialogue_ui",
+					"mainmenu_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -248,7 +250,8 @@
 			"CharacterController",
 			"Console",
 			"Audio",
-			"ClickObject"
+			"ClickObject",
+			"MainMenu"
 		],
 		"subfolders": []
 	},
@@ -478,7 +481,21 @@
 										}
 									],
 									"subfolders": [],
-									"name": "Translate"
+									"name": "Translate_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIMainMenu.ts",
+											"type": "application/typescript",
+											"sid": 558419567300437,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "MainMenu_ui"
 								}
 							],
 							"name": "UI"
