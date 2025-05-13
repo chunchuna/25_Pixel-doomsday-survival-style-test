@@ -474,7 +474,7 @@ async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<v
             showLoader(false);
         } else {
             // 更新加载指示器为"实时模式"
-            showLoader(true, mode === 'mark' ? '实时标记模式已启用' : `实时翻译模式已启用(${targetLang})`);
+            showLoader(true, mode === 'mark' ? 'you chose' : `you chose (${targetLang})`);
         }
     }
 }
@@ -490,20 +490,27 @@ function showLoader(show: boolean, message: string = '处理中...'): void {
             loader = document.createElement('div');
             loader.id = 'translation-loader';
             loader.style.position = 'fixed';
-            loader.style.top = '10px';
-            loader.style.left = '50%';
+            loader.style.top = "3%";
+            loader.style.right = "2%";
             loader.style.transform = 'translateX(-50%)';
             loader.style.padding = '6px 12px';
             loader.style.backgroundColor = 'rgba(30,30,30,0.85)';
             loader.style.color = '#fff';
             loader.style.borderRadius = '4px';
             loader.style.zIndex = '9999';
-            loader.style.fontSize = '13px';
+            loader.style.fontSize = '10px';
             loader.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
             document.body.appendChild(loader);
         }
         loader.innerHTML = message;
         loader.style.display = 'block';
+        
+        // 添加自动隐藏功能 - 5秒后自动隐藏
+        setTimeout(() => {
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        }, 5000);
     } else if (loader) {
         loader.style.display = 'none';
     }
@@ -632,7 +639,7 @@ function createTranslateUI() {
         
         // 添加面板标题
         const title = document.createElement('div');
-        title.textContent = '翻译设置';
+        title.textContent = 'Language Selection (beta)';
         title.style.color = '#ccc';
         title.style.fontSize = '14px';
         title.style.fontWeight = 'bold';
@@ -644,7 +651,7 @@ function createTranslateUI() {
         
         // 添加语言选择
         const langLabel = document.createElement('div');
-        langLabel.textContent = '选择语言:';
+        langLabel.textContent = 'Language:';
         langLabel.style.color = '#bbb';
         langLabel.style.fontSize = '12px';
         langLabel.style.marginBottom = '5px';
@@ -687,7 +694,7 @@ function createTranslateUI() {
         
         // 开始翻译按钮
         const translateButton = document.createElement('button');
-        translateButton.textContent = '翻译';
+        translateButton.textContent = 'Translate For Game (beta)';
         translateButton.style.flex = '1';
         translateButton.style.padding = '7px 0';
         translateButton.style.backgroundColor = 'rgba(80, 80, 80, 0.8)';
@@ -714,7 +721,7 @@ function createTranslateUI() {
         
         // 关闭翻译按钮
         const turnOffButton = document.createElement('button');
-        turnOffButton.textContent = '关闭';
+        turnOffButton.textContent = 'Stop';
         turnOffButton.style.flex = '1';
         turnOffButton.style.padding = '7px 0';
         turnOffButton.style.backgroundColor = 'rgba(130, 40, 40, 0.8)';
@@ -748,6 +755,7 @@ function createTranslateUI() {
         apiSettingsButton.style.borderRadius = '4px';
         apiSettingsButton.style.cursor = 'pointer';
         apiSettingsButton.style.fontSize = '11px';
+        apiSettingsButton.style.display="none";
         apiSettingsButton.addEventListener('click', () => {
             showApiSettingsModal();
         });
@@ -906,7 +914,7 @@ function startTranslation(lang) {
     loadApiSettings();
     
     // 显示加载指示器
-    showLoader(true, `正在翻译为${lang}...`);
+    showLoader(true, `translate${lang}...`);
     
     try {
         // 处理页面内容

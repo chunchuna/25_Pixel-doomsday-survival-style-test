@@ -257,7 +257,7 @@ class UIMainMenu {
             <div class="modal-body scrollable">
             <div class="about-wrapper">
               <div class="version-tag">
-                <span class="version-number">完全的Demo版本</span>
+                <span class="version-number">Tech Demo!!!</span>
                 <div class="tech-demo-badge">
                   <span class="badge-text">🚧 Tech Demo / Prototype 🚧</span>
                 </div>
