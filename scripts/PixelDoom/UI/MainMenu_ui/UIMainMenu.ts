@@ -22,11 +22,16 @@ function initGameMainScene(): void {
   setTimeout(() => {
 
     UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800);
+    const aboutModal = document.getElementById('about-modal');
+    //@ts-ignore
+    aboutModal.classList.remove('closing');
+    //@ts-ignore
+    aboutModal.classList.add('active');
 
     UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
   }, 1000); // 延迟1秒，确保按钮已经完全显示
 
- 
+
   (window as any).HideALLMainMenuUI = (callback?: () => void) => {
     UIMainMenu.getInstance().HideALLMainMenuUI(callback);
   };
@@ -250,17 +255,79 @@ class UIMainMenu {
         <div id="about-modal" class="modal">
           <div class="modal-content">
             <div class="modal-body scrollable">
-              <h3>游戏版本</h3>
-              <p>v1.0.0</p>
-              
-              <h3>开发者</h3>
-              <p>chunchun</p>
-              
-              <h3>游戏简介</h3>
-              <p>这是一个精彩的RPG冒险游戏，玩家将在这个世界中探索未知的领域，经历各种奇幻冒险，解决各种谜题，与各种角色互动。</p>
-              
-              <h3>特别鸣谢</h3>
-              <p>感谢所有参与游戏测试的玩家，你们的反馈让这款游戏变得更好！</p>
+            <div class="about-wrapper">
+              <div class="version-tag">
+                <span class="version-number">v1001</span>
+                <div class="version-glow"></div>
+              </div>
+
+              <div class="credits-section">
+                <h2 class="section-title glitch-text" data-text="👨‍💻Credits">👨‍💻Credits</h2>
+                <div class="credits-content">
+                  <div class="credit-item">
+                    <span class="role">Lead Developer:</span>
+                    <span class="name">[chunchun]</span>
+                  </div>
+                  <div class="credit-item">
+                    <span class="role">Design & Art:</span>
+                    <span class="name">[chunchun]</span>
+                  </div>
+                  <div class="credit-item">
+                    <span class="role">Programming:</span>
+                    <span class="name">[chunchun]</span>
+                  </div>
+                  <div class="credit-item">
+                    <span class="role">Sound/Music:</span>
+                    <span class="name">[chunchun]</span>
+                  </div>
+                  <div class="credit-item">
+                    <span class="role">Special Thanks:</span>
+                    <span class="name blink-text">[? wait ]</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="about-section">
+                <h2 class="section-title rainbow-text">🏷️About</h2>
+                <div class="tech-demo-badge">
+                  <span class="badge-text">🚧 Tech Demo / Prototype 🚧</span>
+                </div>
+                <p class="about-text typewriter-text">
+                  🔧 "这是一个用于测试核心游戏系统的早期版本，欢迎试玩并反馈！"
+                </p>
+                <p class="about-text-en fade-in-text">
+                  (This is an early prototype for testing core game systems. Your feedback is welcome!)
+                </p>
+              </div>
+
+              <div class="contact-section">
+                <h2 class="section-title pulse-text">📡 Contact & Follow Us 📺️</h2>
+                <div class="social-links">
+                  <a href="https://space.bilibili.com/10794241" target="_blank" class="social-link bilibili-link">
+                    <span class="icon">🐦</span>
+                    <span class="link-text">Bilibili空间</span>
+                    <div class="link-hover-effect"></div>
+                  </a>
+                  <a href="https://steamcommunity.com/profiles/76561198964375678/" target="_blank" class="social-link steam-link">
+                    <span class="icon">🎮</span>
+                    <span class="link-text">Steam个人资料</span>
+                    <div class="link-hover-effect"></div>
+                  </a>
+                  <div class="discord-info">
+                    <span class="icon">📷</span>
+                    <span class="info-text">Discord: _chunchun57</span>
+                    <span class="discord-id">(ID: 371678255096397835)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="thanks-message">
+                <p class="message-text floating-text">"Thank you for playing! We poured our hearts into this game—hope you enjoy it!"</p>
+                <div class="heart-container">
+                  <div class="heart"></div>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         </div>
@@ -904,6 +971,432 @@ class UIMainMenu {
           transform: translateX(24px);
           background-color: #fff;
           box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 关于页面的炫酷样式 */
+        .about-wrapper {
+          position: relative;
+          padding: 10px 5px;
+          overflow: hidden;
+        }
+        
+        /* 版本标签 */
+        .version-tag {
+          position: relative;
+          display: inline-block;
+          padding: 5px 15px;
+          background: rgba(40, 40, 40, 0.7);
+          border-radius: 20px;
+          margin-bottom: 15px;
+          overflow: hidden;
+        }
+        
+        .version-number {
+          position: relative;
+          z-index: 2;
+          font-weight: bold;
+          letter-spacing: 1px;
+          color: #fff;
+        }
+        
+        .version-glow {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 50px;
+          height: 100%;
+          background: linear-gradient(
+            90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent
+          );
+          animation: version-shine 3s infinite;
+        }
+        
+        @keyframes version-shine {
+          0% { left: -100%; }
+          20% { left: 100%; }
+          100% { left: 100%; }
+        }
+        
+        /* 章节标题样式 */
+        .section-title {
+          font-size: 1.3rem;
+          margin: 20px 0 10px;
+          position: relative;
+          display: inline-block;
+        }
+        
+        /* 故障文本效果 */
+        .glitch-text {
+          position: relative;
+          color: #fff;
+          animation: glitch-skew 1s infinite linear alternate-reverse;
+        }
+        
+        .glitch-text::before,
+        .glitch-text::after {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .glitch-text::before {
+          left: 2px;
+          text-shadow: -2px 0 #ff00c1;
+          clip: rect(44px, 450px, 56px, 0);
+          animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch-text::after {
+          left: -2px;
+          text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+          clip: rect(44px, 450px, 56px, 0);
+          animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+          0% { clip: rect(16px, 9999px, 35px, 0); transform: skew(0.55deg); }
+          5% { clip: rect(63px, 9999px, 78px, 0); transform: skew(0.75deg); }
+          10% { clip: rect(95px, 9999px, 35px, 0); transform: skew(0.3deg); }
+          15% { clip: rect(90px, 9999px, 100px, 0); transform: skew(0.12deg); }
+          20% { clip: rect(96px, 9999px, 98px, 0); transform: skew(0.75deg); }
+          25% { clip: rect(51px, 9999px, 53px, 0); transform: skew(0.51deg); }
+          30% { clip: rect(44px, 9999px, 63px, 0); transform: skew(0.31deg); }
+          35% { clip: rect(41px, 9999px, 28px, 0); transform: skew(0.2deg); }
+          40% { clip: rect(89px, 9999px, 100px, 0); transform: skew(0.49deg); }
+          45% { clip: rect(70px, 9999px, 100px, 0); transform: skew(0.1deg); }
+          50% { clip: rect(18px, 9999px, 5px, 0); transform: skew(0.58deg); }
+          55% { clip: rect(65px, 9999px, 52px, 0); transform: skew(0.87deg); }
+          60% { clip: rect(13px, 9999px, 62px, 0); transform: skew(0.38deg); }
+          65% { clip: rect(60px, 9999px, 56px, 0); transform: skew(0.59deg); }
+          70% { clip: rect(8px, 9999px, 75px, 0); transform: skew(0.24deg); }
+          75% { clip: rect(66px, 9999px, 55px, 0); transform: skew(0.72deg); }
+          80% { clip: rect(98px, 9999px, 23px, 0); transform: skew(0.71deg); }
+          85% { clip: rect(69px, 9999px, 14px, 0); transform: skew(0.02deg); }
+          90% { clip: rect(9px, 9999px, 74px, 0); transform: skew(0.48deg); }
+          95% { clip: rect(52px, 9999px, 93px, 0); transform: skew(0.01deg); }
+          100% { clip: rect(53px, 9999px, 84px, 0); transform: skew(0.05deg); }
+        }
+        
+        @keyframes glitch-anim2 {
+          0% { clip: rect(25px, 9999px, 40px, 0); transform: skew(0.25deg); }
+          5% { clip: rect(90px, 9999px, 83px, 0); transform: skew(0.56deg); }
+          10% { clip: rect(24px, 9999px, 82px, 0); transform: skew(0.66deg); }
+          15% { clip: rect(78px, 9999px, 74px, 0); transform: skew(0.12deg); }
+          20% { clip: rect(60px, 9999px, 3px, 0); transform: skew(0.23deg); }
+          25% { clip: rect(55px, 9999px, 49px, 0); transform: skew(0.84deg); }
+          30% { clip: rect(12px, 9999px, 18px, 0); transform: skew(0.75deg); }
+          35% { clip: rect(66px, 9999px, 73px, 0); transform: skew(0.22deg); }
+          40% { clip: rect(41px, 9999px, 58px, 0); transform: skew(0.28deg); }
+          45% { clip: rect(24px, 9999px, 92px, 0); transform: skew(0.2deg); }
+          50% { clip: rect(20px, 9999px, 14px, 0); transform: skew(0.1deg); }
+          55% { clip: rect(65px, 9999px, 25px, 0); transform: skew(0.85deg); }
+          60% { clip: rect(12px, 9999px, 66px, 0); transform: skew(0.55deg); }
+          65% { clip: rect(49px, 9999px, 95px, 0); transform: skew(0.93deg); }
+          70% { clip: rect(86px, 9999px, 73px, 0); transform: skew(0.36deg); }
+          75% { clip: rect(50px, 9999px, 66px, 0); transform: skew(0.12deg); }
+          80% { clip: rect(2px, 9999px, 60px, 0); transform: skew(0.68deg); }
+          85% { clip: rect(97px, 9999px, 74px, 0); transform: skew(0.61deg); }
+          90% { clip: rect(74px, 9999px, 85px, 0); transform: skew(0.37deg); }
+          95% { clip: rect(22px, 9999px, 39px, 0); transform: skew(0.61deg); }
+          100% { clip: rect(91px, 9999px, 91px, 0); transform: skew(0.47deg); }
+        }
+        
+        @keyframes glitch-skew {
+          0% { transform: skew(-2deg); }
+          10% { transform: skew(1deg); }
+          20% { transform: skew(0deg); }
+          30% { transform: skew(0deg); }
+          40% { transform: skew(-1deg); }
+          50% { transform: skew(-1deg); }
+          60% { transform: skew(0deg); }
+          70% { transform: skew(1deg); }
+          80% { transform: skew(-1deg); }
+          90% { transform: skew(0deg); }
+          100% { transform: skew(0deg); }
+        }
+        
+        /* 彩虹文本效果 */
+        .rainbow-text {
+          background-image: linear-gradient(
+            90deg,
+            #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3
+          );
+          background-size: 200% auto;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          animation: rainbow-animation 6s linear infinite;
+        }
+        
+        @keyframes rainbow-animation {
+          0% { background-position: 0% center; }
+          100% { background-position: 200% center; }
+        }
+        
+        /* 脉冲文本效果 */
+        .pulse-text {
+          animation: pulse-text 2s infinite;
+        }
+        
+        @keyframes pulse-text {
+          0% { text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #00e6e6, 0 0 8px #00e6e6; }
+          50% { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #00e6e6, 0 0 40px #00e6e6; }
+          100% { text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #00e6e6, 0 0 8px #00e6e6; }
+        }
+        
+        /* 闪烁文本效果 */
+        .blink-text {
+          animation: blink-animation 1s infinite;
+        }
+        
+        @keyframes blink-animation {
+          0% { opacity: 1; }
+          49% { opacity: 1; }
+          50% { opacity: 0; }
+          99% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        /* Credits 样式 */
+        .credits-content {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 10px;
+          background: rgba(30, 30, 30, 0.4);
+          padding: 10px;
+          border-radius: 5px;
+          border-left: 2px solid rgba(100, 100, 255, 0.5);
+        }
+        
+        .credit-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 3px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .role {
+          color: #aaa;
+          font-weight: bold;
+        }
+        
+        .name {
+          color: #ddd;
+          padding-left: 10px;
+        }
+        
+        /* Tech Demo 徽章 */
+        .tech-demo-badge {
+          background: linear-gradient(45deg, #ff7e5f, #feb47b);
+          display: inline-block;
+          padding: 5px 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+          position: relative;
+          overflow: hidden;
+          animation: badge-pulse 3s infinite;
+        }
+        
+        .badge-text {
+          color: #fff;
+          font-weight: bold;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+          position: relative;
+          z-index: 2;
+        }
+        
+        @keyframes badge-pulse {
+          0% { box-shadow: 0 0 5px rgba(255, 126, 95, 0.5); }
+          50% { box-shadow: 0 0 20px rgba(255, 126, 95, 0.8); }
+          100% { box-shadow: 0 0 5px rgba(255, 126, 95, 0.5); }
+        }
+        
+        /* 打字机效果 */
+        .typewriter-text {
+          border-right: 2px solid rgba(255, 255, 255, 0.75);
+          overflow: hidden;
+          white-space: nowrap;
+          animation: typewriter 4s steps(40) 1s 1 normal both,
+                    blinkCursor 0.5s step-end infinite;
+        }
+        
+        @keyframes typewriter {
+          from { width: 0; }
+          to { width: 100%; }
+        }
+        
+        @keyframes blinkCursor {
+          from, to { border-color: transparent; }
+          50% { border-color: rgba(255, 255, 255, 0.75); }
+        }
+        
+        /* 淡入文本效果 */
+        .fade-in-text {
+          opacity: 0;
+          animation: fadeIn 2s ease-in-out 3s forwards;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        /* 社交链接样式 */
+        .social-links {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 10px;
+        }
+        
+        .social-link {
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          color: #ddd;
+          padding: 8px 12px;
+          border-radius: 5px;
+          background: rgba(40, 40, 40, 0.5);
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        
+        .social-link .icon {
+          margin-right: 10px;
+          font-size: 1.2em;
+        }
+        
+        .link-hover-effect {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.1), 
+            transparent
+          );
+          transition: 0.5s;
+        }
+        
+        .social-link:hover {
+          background: rgba(60, 60, 60, 0.6);
+          transform: translateY(-2px);
+        }
+        
+        .social-link:hover .link-hover-effect {
+          left: 100%;
+        }
+        
+        .bilibili-link:hover {
+          box-shadow: 0 0 10px rgba(0, 160, 255, 0.5);
+        }
+        
+        .steam-link:hover {
+          box-shadow: 0 0 10px rgba(90, 100, 255, 0.5);
+        }
+        
+        .discord-info {
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          border-radius: 5px;
+          background: rgba(40, 40, 40, 0.5);
+          margin-top: 5px;
+        }
+        
+        .discord-info .icon {
+          margin-right: 10px;
+          font-size: 1.2em;
+        }
+        
+        .discord-id {
+          margin-left: auto;
+          font-size: 0.8em;
+          color: #999;
+        }
+        
+        /* 感谢消息 */
+        .thanks-message {
+          margin-top: 25px;
+          text-align: center;
+          position: relative;
+          padding: 15px 0;
+        }
+        
+        .message-text {
+          font-style: italic;
+          color: #ddd;
+          line-height: 1.5;
+          max-width: 90%;
+          margin: 0 auto 15px;
+        }
+        
+        .floating-text {
+          animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
+        }
+        
+        /* 心形动画 */
+        .heart-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 10px;
+        }
+        
+        .heart {
+          background-color: #ff3860;
+          display: inline-block;
+          height: 20px;
+          position: relative;
+          transform: rotate(-45deg);
+          width: 20px;
+          animation: heartbeat 1.5s ease infinite;
+        }
+        
+        .heart:before,
+        .heart:after {
+          content: "";
+          background-color: #ff3860;
+          border-radius: 50%;
+          height: 20px;
+          position: absolute;
+          width: 20px;
+        }
+        
+        .heart:before {
+          top: -10px;
+          left: 0;
+        }
+        
+        .heart:after {
+          left: 10px;
+          top: 0;
+        }
+        
+        @keyframes heartbeat {
+          0% { transform: rotate(-45deg) scale(0.8); }
+          5% { transform: rotate(-45deg) scale(0.9); }
+          10% { transform: rotate(-45deg) scale(0.8); }
+          15% { transform: rotate(-45deg) scale(1); }
+          50% { transform: rotate(-45deg) scale(0.8); }
+          100% { transform: rotate(-45deg) scale(0.8); }
         }
       `;
   }

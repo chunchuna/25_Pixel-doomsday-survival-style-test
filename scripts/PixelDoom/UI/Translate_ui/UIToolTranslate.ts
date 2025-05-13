@@ -2,7 +2,9 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    StartTranslate("en")
+    console.log("开始初始化翻译工具");
+    // 直接调用创建按钮的函数
+    createTranslateUI();
 })
 
 // real-time-translator.ts
@@ -33,14 +35,6 @@ let currentLanguage = 'en';
 // 当前工作模式
 type WorkMode = 'mark' | 'translate' | 'off';
 let currentMode: WorkMode = 'mark';
-
-// 当前选择的API
-type ApiType = 'libre' | 'lingva' | 'mymemory' | 'all';
-let currentApiType: ApiType = 'all';  // 默认使用所有API（自动切换）
-
-// 翻译进度计数
-let translatedItemsCount = 0;
-let totalItemsToTranslate = 0;
 
 // 实时监控的MutationObserver
 let domObserver: MutationObserver | null = null;
@@ -163,39 +157,26 @@ async function translateTextWithMyMemory(text: string, targetLang: string): Prom
  * 尝试使用多个翻译API，直到一个成功
  */
 async function translateText(text: string, targetLang: string): Promise<string> {
-    if (!text || text.trim() === '') return text;
+    // 尝试第一个API
+    try {
+        return await translateTextWithLibre(text, targetLang);
+    } catch (error) {
+        console.warn('Primary translation API failed, trying backup 1:', error);
 
-    // 根据当前选择的API进行翻译
-    switch (currentApiType) {
-        case 'libre':
-            return await translateTextWithLibre(text, targetLang);
-        case 'lingva':
+        // 尝试第二个API
+        try {
             return await translateTextWithLingva(text, targetLang);
-        case 'mymemory':
-            return await translateTextWithMyMemory(text, targetLang);
-        case 'all':
-        default:
-            // 尝试第一个API
+        } catch (error) {
+            console.warn('Backup translation API 1 failed, trying backup 2:', error);
+
+            // 尝试第三个API
             try {
-                return await translateTextWithLibre(text, targetLang);
+                return await translateTextWithMyMemory(text, targetLang);
             } catch (error) {
-                console.warn('Primary translation API failed, trying backup 1:', error);
-
-                // 尝试第二个API
-                try {
-                    return await translateTextWithLingva(text, targetLang);
-                } catch (error) {
-                    console.warn('Backup translation API 1 failed, trying backup 2:', error);
-
-                    // 尝试第三个API
-                    try {
-                        return await translateTextWithMyMemory(text, targetLang);
-                    } catch (error) {
-                        console.error('All translation APIs failed:', error);
-                        return text; // 所有API都失败时返回原文
-                    }
-                }
+                console.error('All translation APIs failed:', error);
+                return text; // 所有API都失败时返回原文
             }
+        }
     }
 }
 
@@ -228,10 +209,6 @@ async function getCachedTranslation(text: string, targetLang: string): Promise<s
 
     // 翻译并缓存结果
     const translated = await translateText(text, targetLang);
-    
-    // 更新翻译计数
-    translatedItemsCount++;
-    updateProgressLoader();
 
     // 更新内存缓存
     translationCache[targetLang][text] = translated;
@@ -459,47 +436,11 @@ function restoreOriginalContent(): void {
 }
 
 /**
- * 更新进度加载指示器
- */
-function updateProgressLoader(): void {
-    if (totalItemsToTranslate > 0) {
-        const percentage = Math.min(Math.round((translatedItemsCount / totalItemsToTranslate) * 100), 100);
-        const apiName = getApiDisplayName(currentApiType);
-        showLoader(true, `正在翻译为${getLanguageDisplayName(currentLanguage)}(${percentage}%) - 使用${apiName}`);
-    }
-}
-
-/**
- * 获取API显示名称
- */
-function getApiDisplayName(apiType: ApiType): string {
-    switch (apiType) {
-        case 'libre': return 'LibreTranslate';
-        case 'lingva': return 'Lingva';
-        case 'mymemory': return 'MyMemory';
-        case 'all': return '自动切换';
-        default: return '未知API';
-    }
-}
-
-/**
- * 获取语言显示名称
- */
-function getLanguageDisplayName(langCode: string): string {
-    const lang = AVAILABLE_LANGUAGES.find(l => l.code === langCode);
-    return lang ? lang.name : langCode;
-}
-
-/**
  * 处理整个页面
  */
 async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<void> {
     currentMode = mode;
     currentLanguage = targetLang;
-    
-    // 重置翻译计数
-    translatedItemsCount = 0;
-    totalItemsToTranslate = 0;
 
     // 显示处理中的加载指示器
     let message = '';
@@ -508,7 +449,7 @@ async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<v
             message = '正在标记文本...';
             break;
         case 'translate':
-            message = `正在翻译为${getLanguageDisplayName(targetLang)}...`;
+            message = `正在翻译为${targetLang}...`;
             break;
         case 'off':
             message = '正在恢复原始文本...';
@@ -521,20 +462,6 @@ async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<v
         if (mode === 'off') {
             restoreOriginalContent();
         } else {
-            // 先计算总共需要翻译的项目数量
-            if (mode === 'translate') {
-                // 计算文本节点数
-                totalItemsToTranslate = originalTextContent.size;
-                // 加上属性节点数
-                totalItemsToTranslate += originalAttributeContent.size;
-                // 如果是全新开始，计算页面上的文本节点
-                if (totalItemsToTranslate === 0) {
-                    // 粗略估计，后续会在翻译过程中更新
-                    totalItemsToTranslate = document.body.textContent?.length || 0;
-                    totalItemsToTranslate = Math.max(100, Math.floor(totalItemsToTranslate / 50));
-                }
-            }
-            
             await processElement(document.body, mode, targetLang);
         }
 
@@ -547,10 +474,7 @@ async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<v
             showLoader(false);
         } else {
             // 更新加载指示器为"实时模式"
-            const apiName = getApiDisplayName(currentApiType);
-            showLoader(true, mode === 'mark' 
-                ? '实时标记模式已启用' 
-                : `实时翻译模式已启用(${getLanguageDisplayName(targetLang)}) - 使用${apiName}`);
+            showLoader(true, mode === 'mark' ? '实时标记模式已启用' : `实时翻译模式已启用(${targetLang})`);
         }
     }
 }
@@ -569,68 +493,16 @@ function showLoader(show: boolean, message: string = '处理中...'): void {
             loader.style.top = '10px';
             loader.style.left = '50%';
             loader.style.transform = 'translateX(-50%)';
-            loader.style.padding = '10px 15px';
-            loader.style.backgroundColor = 'rgba(0,0,0,0.8)';
-            loader.style.color = 'white';
+            loader.style.padding = '6px 12px';
+            loader.style.backgroundColor = 'rgba(30,30,30,0.85)';
+            loader.style.color = '#fff';
             loader.style.borderRadius = '4px';
             loader.style.zIndex = '9999';
-            loader.style.fontSize = '14px';
-            loader.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-            loader.style.minWidth = '250px';
-            loader.style.textAlign = 'center';
-            
-            // 创建消息容器
-            const messageElement = document.createElement('div');
-            messageElement.id = 'translation-message';
-            messageElement.style.marginBottom = '8px';
-            loader.appendChild(messageElement);
-            
-            // 创建进度条容器
-            const progressContainer = document.createElement('div');
-            progressContainer.style.width = '100%';
-            progressContainer.style.backgroundColor = 'rgba(255,255,255,0.2)';
-            progressContainer.style.height = '5px';
-            progressContainer.style.borderRadius = '3px';
-            progressContainer.style.overflow = 'hidden';
-            
-            // 创建进度条
-            const progressBar = document.createElement('div');
-            progressBar.id = 'translation-progress-bar';
-            progressBar.style.width = '0%';
-            progressBar.style.height = '100%';
-            progressBar.style.backgroundColor = '#4CAF50';
-            progressBar.style.transition = 'width 0.3s ease-in-out';
-            
-            progressContainer.appendChild(progressBar);
-            loader.appendChild(progressContainer);
-            
+            loader.style.fontSize = '13px';
+            loader.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
             document.body.appendChild(loader);
         }
-        
-        // 更新消息
-        const messageElement = document.getElementById('translation-message');
-        if (messageElement) {
-            messageElement.textContent = message;
-        }
-        
-        // 如果是翻译模式且有进度，更新进度条
-        if (message.includes('%')) {
-            const progressBar = document.getElementById('translation-progress-bar');
-            if (progressBar) {
-                const percentMatch = message.match(/\((\d+)%\)/);
-                if (percentMatch && percentMatch[1]) {
-                    const percent = parseInt(percentMatch[1], 10);
-                    progressBar.style.width = `${percent}%`;
-                }
-            }
-        } else {
-            // 如果不是显示进度，重置进度条
-            const progressBar = document.getElementById('translation-progress-bar');
-            if (progressBar) {
-                progressBar.style.width = '0%';
-            }
-        }
-        
+        loader.innerHTML = message;
         loader.style.display = 'block';
     } else if (loader) {
         loader.style.display = 'none';
@@ -702,179 +574,387 @@ function stopObservingDOM(): void {
 }
 
 /**
- * 添加控制UI
+ * 创建翻译UI界面
  */
-function addControlUI(): void {
-    // 创建控制容器
-    const container = document.createElement('div');
-    container.id = 'translation-controls';
-    container.style.position = 'fixed';
-    container.style.top = '10px';
-    container.style.right = '10px';
-    container.style.zIndex = '1000';
-    container.style.backgroundColor = 'rgba(255,255,255,0.9)';
-    container.style.padding = '10px';
-    container.style.borderRadius = '4px';
-    container.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '5px';
+function createTranslateUI() {
+    console.log("创建翻译UI界面...");
+    
+    try {
+        // 创建主容器
+        const container = document.createElement('div');
+        container.id = 'translation-ui-container';
+        container.style.position = 'fixed';
+        container.style.top = '15px';
+        container.style.right = '15px';
+        container.style.zIndex = '999999';
+        container.style.transition = 'all 0.3s ease';
+        container.style.fontFamily = 'Arial, sans-serif';
+        
+        // 创建国旗按钮
+        const flagButton = document.createElement('div');
+        flagButton.id = 'translation-flag-button';
+        flagButton.style.width = '36px';
+        flagButton.style.height = '36px';
+        flagButton.style.borderRadius = '6px';
+        flagButton.style.cursor = 'pointer';
+        flagButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+        flagButton.style.transition = 'transform 0.2s ease';
+        flagButton.style.overflow = 'hidden';
+        flagButton.title = '翻译工具';
+        
+        // 设置初始国旗样式
+        updateFlagButton(flagButton, 'en');
+        
+        // 添加鼠标悬停效果
+        flagButton.addEventListener('mouseover', () => {
+            flagButton.style.transform = 'scale(1.05)';
+        });
+        
+        flagButton.addEventListener('mouseout', () => {
+            flagButton.style.transform = 'scale(1)';
+        });
+        
+        // 创建面板容器
+        const panel = document.createElement('div');
+        panel.id = 'translation-panel';
+        panel.style.position = 'absolute';
+        panel.style.top = '42px'; // 按钮下方
+        panel.style.right = '0';
+        panel.style.width = '180px';
+        panel.style.backgroundColor = 'rgba(40, 40, 40, 0.85)';
+        panel.style.borderRadius = '8px';
+        panel.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.35)';
+        panel.style.padding = '12px';
+        panel.style.display = 'none'; // 默认隐藏
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateY(-10px)';
+        panel.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        // 添加面板标题
+        const title = document.createElement('div');
+        title.textContent = '翻译设置';
+        title.style.color = '#ccc';
+        title.style.fontSize = '14px';
+        title.style.fontWeight = 'bold';
+        title.style.marginBottom = '10px';
+        title.style.textAlign = 'center';
+        title.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+        title.style.paddingBottom = '8px';
+        panel.appendChild(title);
+        
+        // 添加语言选择
+        const langLabel = document.createElement('div');
+        langLabel.textContent = '选择语言:';
+        langLabel.style.color = '#bbb';
+        langLabel.style.fontSize = '12px';
+        langLabel.style.marginBottom = '5px';
+        panel.appendChild(langLabel);
+        
+        const langSelect = document.createElement('select');
+        langSelect.id = 'lang-select';
+        langSelect.style.width = '100%';
+        langSelect.style.padding = '6px';
+        langSelect.style.backgroundColor = 'rgba(60, 60, 60, 0.7)';
+        langSelect.style.color = '#fff';
+        langSelect.style.border = '1px solid rgba(100, 100, 100, 0.5)';
+        langSelect.style.borderRadius = '4px';
+        langSelect.style.marginBottom = '10px';
+        langSelect.style.fontSize = '12px';
+        
+        // 添加语言选项
+        AVAILABLE_LANGUAGES.forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang.code;
+            option.text = lang.name;
+            if (lang.code === currentLanguage) {
+                option.selected = true;
+            }
+            langSelect.appendChild(option);
+        });
+        
+        // 当语言改变时更新国旗
+        langSelect.addEventListener('change', () => {
+            updateFlagButton(flagButton, langSelect.value);
+        });
+        
+        panel.appendChild(langSelect);
+        
+        // 创建按钮组
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.display = 'flex';
+        buttonsContainer.style.gap = '8px';
+        buttonsContainer.style.marginBottom = '8px';
+        
+        // 开始翻译按钮
+        const translateButton = document.createElement('button');
+        translateButton.textContent = '翻译';
+        translateButton.style.flex = '1';
+        translateButton.style.padding = '7px 0';
+        translateButton.style.backgroundColor = 'rgba(80, 80, 80, 0.8)';
+        translateButton.style.color = '#fff';
+        translateButton.style.border = 'none';
+        translateButton.style.borderRadius = '4px';
+        translateButton.style.cursor = 'pointer';
+        translateButton.style.fontSize = '12px';
+        translateButton.style.fontWeight = 'bold';
+        translateButton.addEventListener('click', () => {
+            const selectedLang = langSelect.value;
+            currentLanguage = selectedLang;
+            
+            // 更新国旗显示
+            updateFlagButton(flagButton, selectedLang);
+            
+            // 开始翻译
+            startTranslation(selectedLang);
+            
+            // 收起面板
+            togglePanel(false);
+        });
+        buttonsContainer.appendChild(translateButton);
+        
+        // 关闭翻译按钮
+        const turnOffButton = document.createElement('button');
+        turnOffButton.textContent = '关闭';
+        turnOffButton.style.flex = '1';
+        turnOffButton.style.padding = '7px 0';
+        turnOffButton.style.backgroundColor = 'rgba(130, 40, 40, 0.8)';
+        turnOffButton.style.color = '#fff';
+        turnOffButton.style.border = 'none';
+        turnOffButton.style.borderRadius = '4px';
+        turnOffButton.style.cursor = 'pointer';
+        turnOffButton.style.fontSize = '12px';
+        turnOffButton.addEventListener('click', () => {
+            // 停止翻译
+            stopTranslation();
+            
+            // 重置国旗为英文
+            updateFlagButton(flagButton, 'en');
+            
+            // 收起面板
+            togglePanel(false);
+        });
+        buttonsContainer.appendChild(turnOffButton);
+        
+        panel.appendChild(buttonsContainer);
+        
+        // 添加API设置按钮
+        const apiSettingsButton = document.createElement('button');
+        apiSettingsButton.textContent = 'API设置';
+        apiSettingsButton.style.width = '100%';
+        apiSettingsButton.style.padding = '5px 0';
+        apiSettingsButton.style.backgroundColor = 'rgba(60, 80, 100, 0.6)';
+        apiSettingsButton.style.color = '#bbb';
+        apiSettingsButton.style.border = 'none';
+        apiSettingsButton.style.borderRadius = '4px';
+        apiSettingsButton.style.cursor = 'pointer';
+        apiSettingsButton.style.fontSize = '11px';
+        apiSettingsButton.addEventListener('click', () => {
+            showApiSettingsModal();
+        });
+        panel.appendChild(apiSettingsButton);
+        
+        // 添加版本信息
+        const versionInfo = document.createElement('div');
+        versionInfo.textContent = 'v1.0';
+        versionInfo.style.color = 'rgba(150, 150, 150, 0.6)';
+        versionInfo.style.fontSize = '10px';
+        versionInfo.style.textAlign = 'right';
+        versionInfo.style.marginTop = '8px';
+        panel.appendChild(versionInfo);
+        
+        // 添加面板到容器
+        container.appendChild(panel);
+        
+        // 添加国旗按钮到容器
+        container.appendChild(flagButton);
+        
+        // 切换面板显示状态
+        let isPanelVisible = false;
+        
+        flagButton.addEventListener('click', () => {
+            isPanelVisible = !isPanelVisible;
+            togglePanel(isPanelVisible);
+        });
+        
+        function togglePanel(show) {
+            if (show) {
+                panel.style.display = 'block';
+                setTimeout(() => {
+                    panel.style.opacity = '1';
+                    panel.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                panel.style.opacity = '0';
+                panel.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    panel.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // 添加到文档
+        if (document.body) {
+            document.body.appendChild(container);
+            console.log("翻译UI已添加到页面");
+        } else {
+            window.addEventListener('load', function() {
+                document.body.appendChild(container);
+                console.log("延迟加载：翻译UI已添加到页面");
+            });
+        }
+        
+        // 点击外部区域关闭面板
+        document.addEventListener('click', (event) => {
+            const target = event.target;
+            if (isPanelVisible && 
+                target !== flagButton && 
+                target !== panel &&
+                !panel.contains(target)) {
+                isPanelVisible = false;
+                togglePanel(false);
+            }
+        });
+    } catch (error) {
+        console.error("创建翻译UI失败:", error);
+    }
+}
 
-    // 添加标题
-    const title = document.createElement('div');
-    title.textContent = '实时翻译工具';
-    title.style.fontWeight = 'bold';
-    title.style.marginBottom = '5px';
-    container.appendChild(title);
+/**
+ * 更新国旗按钮的样式
+ */
+function updateFlagButton(button, langCode) {
+    // 清空按钮内容
+    button.innerHTML = '';
+    
+    // 设置适合的背景和样式
+    switch(langCode) {
+        case 'en': // 英国国旗
+            button.style.background = `
+                linear-gradient(rgba(0, 36, 125, 0.8), rgba(0, 36, 125, 0.8)),
+                linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(207, 20, 43, 0.8) 50%, transparent calc(50% + 1px))
+            `;
+            addFlagOverlay(button, `
+                <div style="position:absolute; width:100%; height:20%; top:40%; background:rgba(255,255,255,0.8);"></div>
+                <div style="position:absolute; width:20%; height:100%; left:40%; background:rgba(255,255,255,0.8);"></div>
+            `);
+            break;
+        case 'zh-CN': // 中国国旗
+            button.style.background = 'rgba(222, 41, 16, 0.8)';
+            addFlagOverlay(button, `
+                <div style="position:absolute; top:6px; left:6px; color:rgba(255,222,0,0.9); font-size:6px;">★</div>
+                <div style="position:absolute; top:7px; left:12px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
+                <div style="position:absolute; top:11px; left:14px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
+                <div style="position:absolute; top:15px; left:12px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
+                <div style="position:absolute; top:17px; left:6px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
+            `);
+            break;
+        case 'es': // 西班牙国旗
+            button.style.background = 'linear-gradient(to bottom, rgba(170, 21, 27, 0.8) 25%, rgba(241, 191, 0, 0.8) 25%, rgba(241, 191, 0, 0.8) 75%, rgba(170, 21, 27, 0.8) 75%)';
+            break;
+        case 'fr': // 法国国旗
+            button.style.background = 'linear-gradient(to right, rgba(0, 35, 149, 0.8) 33.3%, rgba(255, 255, 255, 0.8) 33.3%, rgba(255, 255, 255, 0.8) 66.6%, rgba(237, 41, 57, 0.8) 66.6%)';
+            break;
+        case 'de': // 德国国旗
+            button.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 33.3%, rgba(221, 0, 0, 0.8) 33.3%, rgba(221, 0, 0, 0.8) 66.6%, rgba(255, 206, 0, 0.8) 66.6%)';
+            break;
+        case 'ja': // 日本国旗
+            button.style.background = 'rgba(255, 255, 255, 0.8)';
+            addFlagOverlay(button, `<div style="position:absolute; width:40%; height:40%; top:30%; left:30%; background:rgba(188, 0, 45, 0.8); border-radius:50%;"></div>`);
+            break;
+        case 'ko': // 韩国国旗
+            button.style.background = 'rgba(255, 255, 255, 0.8)';
+            addFlagOverlay(button, `
+                <div style="position:absolute; width:38%; height:38%; top:31%; left:31%; background:linear-gradient(to right, rgba(205, 46, 58, 0.8) 50%, rgba(0, 71, 160, 0.8) 50%); border-radius:50%;"></div>
+            `);
+            break;
+        default:
+            button.style.background = 'rgba(0, 36, 125, 0.8)';
+            button.innerText = langCode.toUpperCase().substring(0, 2);
+            button.style.color = 'white';
+            button.style.fontWeight = 'bold';
+            button.style.display = 'flex';
+            button.style.justifyContent = 'center';
+            button.style.alignItems = 'center';
+            button.style.fontSize = '14px';
+    }
+}
 
-    // 添加模式选择
-    const modeContainer = document.createElement('div');
-    modeContainer.style.display = 'flex';
-    modeContainer.style.gap = '5px';
+/**
+ * 添加国旗的HTML覆盖层
+ */
+function addFlagOverlay(button, html) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.pointerEvents = 'none';
+    overlay.innerHTML = html;
+    button.appendChild(overlay);
+}
 
-    // 标记模式按钮
-    const markButton = document.createElement('button');
-    markButton.textContent = '标记模式';
-    markButton.style.flex = '1';
-    markButton.style.padding = '5px';
-    markButton.style.cursor = 'pointer';
-    markButton.addEventListener('click', () => {
-        processPage('mark');
+/**
+ * 开始翻译
+ */
+function startTranslation(lang) {
+    console.log(`开始翻译为: ${lang}`);
+    currentLanguage = lang;
+    currentMode = 'translate';
+    
+    // 先加载缓存的API设置
+    loadApiSettings();
+    
+    // 显示加载指示器
+    showLoader(true, `正在翻译为${lang}...`);
+    
+    try {
+        // 处理页面内容
+        processPage('translate', lang);
+        
+        // 启动DOM监控
         startObservingDOM();
-    });
-    modeContainer.appendChild(markButton);
+        
+        console.log("翻译已启动");
+    } catch (error) {
+        console.error("翻译启动失败:", error);
+        showLoader(true, `翻译失败: ${error.message}`);
+        setTimeout(() => {
+            showLoader(false);
+        }, 3000);
+    }
+}
 
-    // 翻译模式按钮
-    const translateButton = document.createElement('button');
-    translateButton.textContent = '翻译模式';
-    translateButton.style.flex = '1';
-    translateButton.style.padding = '5px';
-    translateButton.style.cursor = 'pointer';
-    translateButton.addEventListener('click', () => {
-        const langSelect = document.getElementById('lang-select') as HTMLSelectElement;
-        const apiSelect = document.getElementById('api-select') as HTMLSelectElement;
-        
-        // 保存用户选择
-        currentLanguage = langSelect.value;
-        currentApiType = apiSelect.value as ApiType;
-        
-        // 保存设置到本地存储
-        saveSettings();
-        
-        // 应用翻译
-        processPage('translate', currentLanguage);
-        startObservingDOM();
-    });
-    modeContainer.appendChild(translateButton);
-
-    // 关闭模式按钮
-    const offButton = document.createElement('button');
-    offButton.textContent = '关闭';
-    offButton.style.flex = '1';
-    offButton.style.padding = '5px';
-    offButton.style.cursor = 'pointer';
-    offButton.addEventListener('click', () => {
+/**
+ * 停止翻译
+ */
+function stopTranslation() {
+    console.log("停止翻译");
+    currentMode = 'off';
+    
+    // 显示加载指示器
+    showLoader(true, "正在恢复原始文本...");
+    
+    try {
+        // 恢复原始内容
         processPage('off');
+        
+        // 停止DOM监控
         stopObservingDOM();
-    });
-    modeContainer.appendChild(offButton);
-
-    container.appendChild(modeContainer);
-
-    // 添加语言选择
-    const langLabel = document.createElement('label');
-    langLabel.textContent = '选择语言:';
-    langLabel.style.marginTop = '5px';
-    container.appendChild(langLabel);
-
-    const langSelect = document.createElement('select');
-    langSelect.id = 'lang-select';
-    langSelect.style.width = '100%';
-    langSelect.style.padding = '5px';
-
-    // 添加语言选项
-    AVAILABLE_LANGUAGES.forEach(lang => {
-        const option = document.createElement('option');
-        option.value = lang.code;
-        option.text = lang.name;
-        langSelect.appendChild(option);
-    });
-    container.appendChild(langSelect);
-
-    // 添加API选择
-    const apiLabel = document.createElement('label');
-    apiLabel.textContent = '选择翻译API:';
-    apiLabel.style.marginTop = '5px';
-    container.appendChild(apiLabel);
-
-    const apiSelect = document.createElement('select');
-    apiSelect.id = 'api-select';
-    apiSelect.style.width = '100%';
-    apiSelect.style.padding = '5px';
-    apiSelect.style.marginBottom = '5px';
-
-    // 添加API选项
-    const apiOptions = [
-        { value: 'all', text: '自动切换 (推荐)' },
-        { value: 'libre', text: 'LibreTranslate' },
-        { value: 'lingva', text: 'Lingva' },
-        { value: 'mymemory', text: 'MyMemory' }
-    ];
-
-    apiOptions.forEach(api => {
-        const option = document.createElement('option');
-        option.value = api.value;
-        option.text = api.text;
-        apiSelect.appendChild(option);
-    });
-
-    container.appendChild(apiSelect);
-
-    // 添加统计按钮
-    const statsButton = document.createElement('button');
-    statsButton.textContent = '显示文本统计';
-    statsButton.style.padding = '5px';
-    statsButton.style.marginTop = '5px';
-    statsButton.style.cursor = 'pointer';
-    statsButton.addEventListener('click', () => {
-        const textNodeCount = originalTextContent.size;
-        const attrNodeCount = originalAttributeContent.size;
-
-        alert(`检测到的文本节点: ${textNodeCount}\n检测到的属性节点: ${attrNodeCount}\n总计: ${textNodeCount + attrNodeCount}`);
-    });
-    container.appendChild(statsButton);
-
-    // 添加测试API按钮
-    const testAPIButton = document.createElement('button');
-    testAPIButton.textContent = '测试翻译API';
-    testAPIButton.style.padding = '5px';
-    testAPIButton.style.marginTop = '5px';
-    testAPIButton.style.backgroundColor = '#4CAF50';
-    testAPIButton.style.color = 'white';
-    testAPIButton.style.border = 'none';
-    testAPIButton.style.borderRadius = '4px';
-    testAPIButton.style.cursor = 'pointer';
-    testAPIButton.addEventListener('click', () => {
-        testTranslationAPIs();
-    });
-    container.appendChild(testAPIButton);
-
-    // 添加API设置按钮
-    const apiSettingsButton = document.createElement('button');
-    apiSettingsButton.textContent = 'API设置';
-    apiSettingsButton.style.padding = '5px';
-    apiSettingsButton.style.marginTop = '5px';
-    apiSettingsButton.style.backgroundColor = '#2196F3';
-    apiSettingsButton.style.color = 'white';
-    apiSettingsButton.style.border = 'none';
-    apiSettingsButton.style.borderRadius = '4px';
-    apiSettingsButton.style.cursor = 'pointer';
-    apiSettingsButton.addEventListener('click', () => {
-        showApiSettingsModal();
-    });
-    container.appendChild(apiSettingsButton);
-
-    document.body.appendChild(container);
+        
+        // 隐藏加载指示器
+        setTimeout(() => {
+            showLoader(false);
+        }, 300);
+        
+        console.log("翻译已停止");
+    } catch (error) {
+        console.error("停止翻译失败:", error);
+        showLoader(true, `停止失败: ${error.message}`);
+        setTimeout(() => {
+            showLoader(false);
+        }, 3000);
+    }
 }
 
 /**
@@ -882,7 +962,6 @@ function addControlUI(): void {
  */
 function loadApiSettings(): void {
     try {
-        // 加载API URL设置
         const savedLibreUrl = localStorage.getItem('libreTranslateApiUrl');
         const savedLingvaUrl = localStorage.getItem('lingvaApiUrl');
         const savedMyMemoryUrl = localStorage.getItem('myMemoryApiUrl');
@@ -899,241 +978,10 @@ function loadApiSettings(): void {
             myMemoryApiUrl = savedMyMemoryUrl;
         }
 
-        // 加载上次使用的语言设置
-        const savedLanguage = localStorage.getItem('translationLanguage');
-        if (savedLanguage) {
-            currentLanguage = savedLanguage;
-        }
-
-        // 加载上次使用的API类型设置
-        const savedApiType = localStorage.getItem('translationApiType');
-        if (savedApiType && ['libre', 'lingva', 'mymemory', 'all'].includes(savedApiType)) {
-            currentApiType = savedApiType as ApiType;
-        }
-
-        console.log('已从本地存储加载设置:', { 
-            language: currentLanguage, 
-            apiType: currentApiType 
-        });
+        console.log('已从本地存储加载API设置');
     } catch (error) {
-        console.error('加载设置失败:', error);
+        console.error('加载API设置失败:', error);
     }
-}
-
-/**
- * 保存设置到本地存储
- */
-function saveSettings(): void {
-    try {
-        // 保存当前语言
-        localStorage.setItem('translationLanguage', currentLanguage);
-        
-        // 保存当前API类型
-        localStorage.setItem('translationApiType', currentApiType);
-        
-        console.log('已保存设置:', { 
-            language: currentLanguage, 
-            apiType: currentApiType 
-        });
-    } catch (error) {
-        console.error('保存设置失败:', error);
-    }
-}
-
-/**
- * 启动翻译工具
- * @param mode 初始模式: 'mark'=标记模式, 'translate'=翻译模式, 'off'=关闭
- * @param targetLang 目标语言代码
- */
-function StartTranslate(mode: WorkMode = 'mark', targetLang: string = 'en'): void {
-    console.log(`Starting real-time translator in ${mode} mode, language: ${targetLang}`);
-
-    // 从本地存储加载API设置
-    loadApiSettings();
-
-    // 添加控制UI
-    addControlUI();
-
-    // 更新UI显示已保存的设置
-    setTimeout(() => {
-        // 更新语言选择框
-        const langSelect = document.getElementById('lang-select') as HTMLSelectElement;
-        if (langSelect) {
-            langSelect.value = currentLanguage;
-        }
-        
-        // 更新API选择框
-        const apiSelect = document.getElementById('api-select') as HTMLSelectElement;
-        if (apiSelect) {
-            apiSelect.value = currentApiType;
-        }
-    }, 100);
-
-    // 初始化页面处理
-    processPage(mode, currentLanguage); // 使用保存的语言，而不是默认值
-
-    // 如果不是关闭模式，启动DOM观察
-    if (mode !== 'off') {
-        startObservingDOM();
-    }
-}
-
-/**
- * 测试翻译API的连通性和速度
- */
-async function testTranslationAPIs(): Promise<void> {
-    // 显示测试中的提示
-    showLoader(true, '正在测试翻译API...');
-
-    // 测试文本（简体中文）
-    const testText = '这是一段测试文本，用于检测翻译API的连通性和速度。';
-    
-    // 选择目标语言
-    const langSelect = document.getElementById('lang-select') as HTMLSelectElement;
-    const targetLang = langSelect.value || 'en';
-
-    // 测试结果
-    const results: { api: string; success: boolean; time: number; text?: string; error?: string }[] = [];
-
-    // 测试第一个API - LibreTranslate
-    try {
-        const startTime1 = performance.now();
-        const result1 = await translateTextWithLibre(testText, targetLang);
-        const endTime1 = performance.now();
-        results.push({
-            api: 'LibreTranslate',
-            success: true,
-            time: Math.round(endTime1 - startTime1),
-            text: result1
-        });
-    } catch (error) {
-        results.push({
-            api: 'LibreTranslate',
-            success: false,
-            time: 0,
-            error: error instanceof Error ? error.message : String(error)
-        });
-    }
-
-    // 测试第二个API - Lingva
-    try {
-        const startTime2 = performance.now();
-        const result2 = await translateTextWithLingva(testText, targetLang);
-        const endTime2 = performance.now();
-        results.push({
-            api: 'Lingva',
-            success: true,
-            time: Math.round(endTime2 - startTime2),
-            text: result2
-        });
-    } catch (error) {
-        results.push({
-            api: 'Lingva',
-            success: false,
-            time: 0,
-            error: error instanceof Error ? error.message : String(error)
-        });
-    }
-
-    // 测试第三个API - MyMemory
-    try {
-        const startTime3 = performance.now();
-        const result3 = await translateTextWithMyMemory(testText, targetLang);
-        const endTime3 = performance.now();
-        results.push({
-            api: 'MyMemory',
-            success: true,
-            time: Math.round(endTime3 - startTime3),
-            text: result3
-        });
-    } catch (error) {
-        results.push({
-            api: 'MyMemory',
-            success: false,
-            time: 0,
-            error: error instanceof Error ? error.message : String(error)
-        });
-    }
-
-    // 构建结果弹窗内容
-    let resultContent = `<div style="font-family: Arial, sans-serif; max-width: 500px;">
-        <h3 style="margin-top: 0; color: #333;">翻译API测试结果（${AVAILABLE_LANGUAGES.find(lang => lang.code === targetLang)?.name || targetLang}）</h3>
-        <p><strong>测试文本：</strong>${testText}</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">`;
-
-    // 添加各API的结果
-    for (const result of results) {
-        const statusColor = result.success ? '#4CAF50' : '#F44336';
-        const statusText = result.success ? '成功' : '失败';
-        const timeText = result.success ? `${result.time}毫秒` : '—';
-        const translateResult = result.success ? result.text : result.error;
-
-        resultContent += `
-        <div style="margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <strong>${result.api}</strong>
-                <span style="color: ${statusColor};">${statusText}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #666;">
-                <span>响应时间：</span>
-                <span>${timeText}</span>
-            </div>
-            <div style="background-color: #f9f9f9; padding: 8px; border-radius: 4px; word-break: break-all;">
-                ${result.success ? translateResult : `<span style="color: #F44336;">${translateResult}</span>`}
-            </div>
-        </div>`;
-    }
-
-    resultContent += `</div>`;
-
-    // 隐藏加载提示
-    showLoader(false);
-
-    // 创建自定义弹窗
-    const modal = document.createElement('div');
-    modal.style.position = 'fixed';
-    modal.style.left = '0';
-    modal.style.top = '0';
-    modal.style.width = '100%';
-    modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '10000';
-
-    const modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = 'white';
-    modalContent.style.padding = '20px';
-    modalContent.style.borderRadius = '8px';
-    modalContent.style.maxWidth = '80%';
-    modalContent.style.maxHeight = '80%';
-    modalContent.style.overflow = 'auto';
-    modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-    modalContent.innerHTML = resultContent;
-
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = '关闭';
-    closeBtn.style.display = 'block';
-    closeBtn.style.margin = '20px auto 0';
-    closeBtn.style.padding = '8px 16px';
-    closeBtn.style.backgroundColor = '#555';
-    closeBtn.style.color = 'white';
-    closeBtn.style.border = 'none';
-    closeBtn.style.borderRadius = '4px';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.onclick = () => document.body.removeChild(modal);
-
-    modalContent.appendChild(closeBtn);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-
-    // 点击背景关闭弹窗
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            document.body.removeChild(modal);
-        }
-    });
 }
 
 /**
@@ -1147,7 +995,7 @@ function showApiSettingsModal(): void {
     modal.style.top = '0';
     modal.style.width = '100%';
     modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
     modal.style.display = 'flex';
     modal.style.justifyContent = 'center';
     modal.style.alignItems = 'center';
@@ -1155,20 +1003,22 @@ function showApiSettingsModal(): void {
 
     // 创建模态框内容
     const modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = 'white';
+    modalContent.style.backgroundColor = 'rgba(30,30,30,0.95)';
     modalContent.style.padding = '20px';
     modalContent.style.borderRadius = '8px';
     modalContent.style.maxWidth = '500px';
     modalContent.style.width = '90%';
     modalContent.style.maxHeight = '80%';
     modalContent.style.overflow = 'auto';
-    modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    modalContent.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+    modalContent.style.color = '#ddd';
 
     // 添加标题
     const title = document.createElement('h3');
     title.textContent = '翻译API设置';
     title.style.margin = '0 0 20px 0';
-    title.style.color = '#333';
+    title.style.color = '#fff';
+    title.style.fontSize = '16px';
     modalContent.appendChild(title);
 
     // 创建表单
@@ -1197,7 +1047,7 @@ function showApiSettingsModal(): void {
 
     // 添加LibreTranslate API输入框
     const libreLabel = document.createElement('div');
-    libreLabel.innerHTML = `<strong>LibreTranslate API URL</strong><div style="font-size: 12px; color: #666; margin-bottom: 5px;">主翻译API</div>`;
+    libreLabel.innerHTML = `<strong>LibreTranslate API URL</strong><div style="font-size: 12px; color: #999; margin-bottom: 5px;">主翻译API</div>`;
     form.appendChild(libreLabel);
     
     const libreInput = document.createElement('input');
@@ -1208,13 +1058,15 @@ function showApiSettingsModal(): void {
     libreInput.style.padding = '8px';
     libreInput.style.marginBottom = '15px';
     libreInput.style.boxSizing = 'border-box';
-    libreInput.style.border = '1px solid #ddd';
+    libreInput.style.border = '1px solid #444';
     libreInput.style.borderRadius = '4px';
+    libreInput.style.backgroundColor = 'rgba(50,50,50,0.8)';
+    libreInput.style.color = '#fff';
     form.appendChild(libreInput);
 
     // 添加Lingva API输入框
     const lingvaLabel = document.createElement('div');
-    lingvaLabel.innerHTML = `<strong>Lingva API URL</strong><div style="font-size: 12px; color: #666; margin-bottom: 5px;">备选API 1</div>`;
+    lingvaLabel.innerHTML = `<strong>Lingva API URL</strong><div style="font-size: 12px; color: #999; margin-bottom: 5px;">备选API 1</div>`;
     form.appendChild(lingvaLabel);
     
     const lingvaInput = document.createElement('input');
@@ -1225,13 +1077,15 @@ function showApiSettingsModal(): void {
     lingvaInput.style.padding = '8px';
     lingvaInput.style.marginBottom = '15px';
     lingvaInput.style.boxSizing = 'border-box';
-    lingvaInput.style.border = '1px solid #ddd';
+    lingvaInput.style.border = '1px solid #444';
     lingvaInput.style.borderRadius = '4px';
+    lingvaInput.style.backgroundColor = 'rgba(50,50,50,0.8)';
+    lingvaInput.style.color = '#fff';
     form.appendChild(lingvaInput);
 
     // 添加MyMemory API输入框
     const mymemoryLabel = document.createElement('div');
-    mymemoryLabel.innerHTML = `<strong>MyMemory API URL</strong><div style="font-size: 12px; color: #666; margin-bottom: 5px;">备选API 2</div>`;
+    mymemoryLabel.innerHTML = `<strong>MyMemory API URL</strong><div style="font-size: 12px; color: #999; margin-bottom: 5px;">备选API 2</div>`;
     form.appendChild(mymemoryLabel);
     
     const mymemoryInput = document.createElement('input');
@@ -1242,54 +1096,64 @@ function showApiSettingsModal(): void {
     mymemoryInput.style.padding = '8px';
     mymemoryInput.style.marginBottom = '20px';
     mymemoryInput.style.boxSizing = 'border-box';
-    mymemoryInput.style.border = '1px solid #ddd';
+    mymemoryInput.style.border = '1px solid #444';
     mymemoryInput.style.borderRadius = '4px';
+    mymemoryInput.style.backgroundColor = 'rgba(50,50,50,0.8)';
+    mymemoryInput.style.color = '#fff';
     form.appendChild(mymemoryInput);
+
+    // 按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'space-between';
+    buttonContainer.style.marginTop = '10px';
 
     // 添加重置按钮
     const resetButton = document.createElement('button');
     resetButton.type = 'button';
     resetButton.textContent = '恢复默认';
-    resetButton.style.backgroundColor = '#f44336';
+    resetButton.style.backgroundColor = '#6b3838';
     resetButton.style.color = 'white';
     resetButton.style.border = 'none';
     resetButton.style.padding = '8px 16px';
-    resetButton.style.marginRight = '10px';
     resetButton.style.borderRadius = '4px';
     resetButton.style.cursor = 'pointer';
+    resetButton.style.fontSize = '13px';
     resetButton.onclick = () => {
         (document.getElementById('libre-api-url') as HTMLInputElement).value = LIBRE_TRANSLATE_API;
         (document.getElementById('lingva-api-url') as HTMLInputElement).value = LINGVA_TRANSLATE_API;
         (document.getElementById('mymemory-api-url') as HTMLInputElement).value = MYMEMORY_API;
     };
-    form.appendChild(resetButton);
+    buttonContainer.appendChild(resetButton);
 
     // 添加保存按钮
     const saveButton = document.createElement('button');
     saveButton.type = 'submit';
     saveButton.textContent = '保存设置';
-    saveButton.style.backgroundColor = '#4CAF50';
+    saveButton.style.backgroundColor = '#3a5e3a';
     saveButton.style.color = 'white';
     saveButton.style.border = 'none';
     saveButton.style.padding = '8px 16px';
     saveButton.style.borderRadius = '4px';
     saveButton.style.cursor = 'pointer';
-    form.appendChild(saveButton);
+    saveButton.style.fontSize = '13px';
+    buttonContainer.appendChild(saveButton);
 
     // 添加取消按钮
     const cancelButton = document.createElement('button');
     cancelButton.type = 'button';
     cancelButton.textContent = '取消';
-    cancelButton.style.backgroundColor = '#ccc';
+    cancelButton.style.backgroundColor = '#444';
     cancelButton.style.color = 'white';
     cancelButton.style.border = 'none';
     cancelButton.style.padding = '8px 16px';
-    cancelButton.style.marginLeft = '10px';
     cancelButton.style.borderRadius = '4px';
     cancelButton.style.cursor = 'pointer';
+    cancelButton.style.fontSize = '13px';
     cancelButton.onclick = () => document.body.removeChild(modal);
-    form.appendChild(cancelButton);
+    buttonContainer.appendChild(cancelButton);
 
+    form.appendChild(buttonContainer);
     modalContent.appendChild(form);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
@@ -1303,4 +1167,4 @@ function showApiSettingsModal(): void {
 }
 
 // 导出函数供外部使用
-export { StartTranslate };
+export { startTranslation as StartTranslate };
