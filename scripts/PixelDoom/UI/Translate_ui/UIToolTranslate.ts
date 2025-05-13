@@ -10,19 +10,19 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 // real-time-translator.ts
 
 /**
- * 实时翻译与标记工具
+ * 实时翻译工具 - 本地翻译版
  * 持续监控DOM变化，自动处理新添加的文本
  */
 
 // 可用的语言列表
 const AVAILABLE_LANGUAGES = [
-    { code: 'en', name: 'English' },
     { code: 'zh-CN', name: '中文' },
+    { code: 'en', name: 'English' },
+    { code: 'ja', name: '日本語' },
+    { code: 'ko', name: '한국어' },
     { code: 'es', name: 'Español' },
     { code: 'fr', name: 'Français' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'ja', name: '日本語' },
-    { code: 'ko', name: '한국어' }
+    { code: 'de', name: 'Deutsch' }
 ];
 
 // 存储原始文本，以便可以切换回来
@@ -30,33 +30,96 @@ const originalTextContent = new WeakMap<Node, string>();
 const originalAttributeContent = new WeakMap<Element, Record<string, string>>();
 
 // 当前语言
-let currentLanguage = 'en';
+let currentLanguage = 'zh-CN';
 
 // 当前工作模式
 type WorkMode = 'mark' | 'translate' | 'off';
-let currentMode: WorkMode = 'mark';
+let currentMode: WorkMode = 'off';
+
+// 本地翻译字典
+const localTranslations: Record<string, Record<string, string>> = {};
+
+// 预设翻译数据 - 开发者可以在此处添加默认翻译
+const defaultTranslations: string = `开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego
+设置/Settings/設定/설정/Configuración
+退出/Exit/終了/종료/Salir
+继续/Continue/続ける/계속하기/Continuar
+返回/Back/戻る/돌아가기/Volver
+保存/Save/保存/저장/Guardar
+加载/Load/ロード/로드/Cargar
+菜单/Menu/メニュー/메뉴/Menú
+音量/Volume/音量/볼륨/Volumen
+音乐/Music/音楽/음악/Música
+音效/Sound/効果音/효과음/Efectos
+全屏/Fullscreen/全画面/전체 화면/Pantalla completa
+窗口/Window/ウィンドウ/창 모드/Ventana
+确认/Confirm/確認/확인/Confirmar
+取消/Cancel/キャンセル/취소/Cancelar
+是/Yes/はい/예/Sí
+否/No/いいえ/아니오/No
+关闭/Close/閉じる/닫기/Cerrar
+下一步/Next/次へ/다음/Siguiente
+上一步/Previous/前へ/이전/Anterior
+开始/Start/スタート/시작/Iniciar
+结束/End/終了/종료/Finalizar
+超过了这个物品的交互范围!/Exceeded the interaction range of this item!/このアイテムの操作範囲を超えました!/이 아이템의 상호작용 범위를 초과했습니다!/¡Se excedió el rango de interacción de este objeto!
+存档读取/Load Save/セーブデータ読み込み/저장 파일 불러오기/Cargar partida
+关于/About/について/정보/Acerca de
+语言/Language/言語/언어/Idioma
+寻找/Search/探す/찾기/Buscar
+闻/Smell/嗅ぐ/냄새 맡기/Oler
+标记/Mark/マーク/표시/Marcar
+在服务器上标记/Mark on Server/サーバー上でマーク/서버에 표시하기/Marcar en el servidor
+新游戏/New Game/新規ゲーム/새 게임/Nuevo juego
+设置/Settings/設定/설정/Configuración
+存档读取/Load Save/セーブデータ読み込み/저장 파일 불러오기/Cargar partida
+关于/About/について/정보/Acerca de
+语言/Language/言語/언어/Idioma
+从本地读取/Load from Local/ローカルから読み込む/로컬에서 불러오기/Cargar desde local
+暂无存档/No Save Data/セーブデータなし/저장 파일 없음/Sin datos guardados
+静音/Mute/ミュート/음소거/Silencio
+你正在使用/You are using/使用中です/사용 중입니다/Estás usando
+露营椅子/Camping Chair/キャンプチェア/캠핑 의자/Silla de camping
+此物品无法被破坏/This item cannot be destroyed/このアイテムは破壊できません/이 아이템은 파괴할 수 없습니다/*Este objeto no puede ser destruido
+一把普通的露营椅，被雨水打湿了/A regular camping chair, damp from the rain/雨に濡れた普通のキャンプチェア/비에 젖은 평범한 캠핑 의자/Una silla de camping común, mojada por la lluvia
+调查/Investigate/調査/조사/Investigar
+拔开灰烬检查/Sift Through Ashes/灰をかき分けて調べる/재를 헤집어 살펴보다/Examinar removiendo las cenizas
+`;
+
+/**
+ * 翻译表使用说明：
+ * 
+ * 1. 开发者可以直接在上面的defaultTranslations变量中添加游戏内的文本翻译
+ *    格式：中文/英文/日文/韩文/西班牙文
+ *    例如：开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego
+ * 
+ * 2. 玩家也可以通过翻译工具UI中的"编辑翻译表"按钮自行添加和修改翻译
+ * 
+ * 3. 系统会优先使用玩家自定义的翻译，如果没有找到，则使用默认翻译
+ * 
+ * 4. 支持的语言代码：
+ *    - zh-CN：中文
+ *    - en：英文
+ *    - ja：日文
+ *    - ko：韩文
+ *    - es：西班牙文
+ *    - fr：法文（可选）
+ *    - de：德文（可选）
+ * 
+ * 5. 测试翻译效果：
+ *    - 点击UI右上角的国旗按钮
+ *    - 选择目标语言
+ *    - 点击"Translate Game"按钮
+ */
 
 // 实时监控的MutationObserver
 let domObserver: MutationObserver | null = null;
-
-// 翻译API配置
-const LIBRE_TRANSLATE_API = 'https://libretranslate.com/translate';
-const LINGVA_TRANSLATE_API = 'https://lingva.ml/api/v1';
-const MYMEMORY_API = 'https://api.mymemory.translated.net/get';
-
-// 可修改的API URL
-let libreTranslateApiUrl = LIBRE_TRANSLATE_API;
-let lingvaApiUrl = LINGVA_TRANSLATE_API;
-let myMemoryApiUrl = MYMEMORY_API;
-
-// 缓存已翻译的文本，避免重复翻译
-const translationCache: Record<string, Record<string, string>> = {};
 
 // 应该跳过翻译的元素选择器
 const SKIP_ELEMENTS = [
     'script', 'style', 'iframe', 'code', 'pre',
     '[data-no-translate]', // 自定义属性，用于标记不需要翻译的元素
-    '#translation-controls', // 跳过我们自己的UI元素
+    '#translation-ui-container', // 跳过我们自己的UI元素
     '#translation-loader'
 ];
 
@@ -80,185 +143,6 @@ function shouldSkipElement(element: Element): boolean {
 }
 
 /**
- * 使用LibreTranslate API翻译文本
- */
-async function translateTextWithLibre(text: string, targetLang: string): Promise<string> {
-    if (!text || text.trim() === '') return text;
-
-    try {
-        const response = await fetch(libreTranslateApiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                q: text,
-                source: 'zh-CN',
-                target: targetLang
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Translation API error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.translatedText || text;
-    } catch (error) {
-        console.error('LibreTranslate API error:', error);
-        return text; // 出错时返回原文
-    }
-}
-
-/**
- * 使用Lingva API翻译文本 (备选方案1)
- */
-async function translateTextWithLingva(text: string, targetLang: string): Promise<string> {
-    if (!text || text.trim() === '') return text;
-
-    try {
-        const response = await fetch(`${lingvaApiUrl}/auto/${targetLang}/${encodeURIComponent(text)}`);
-
-        if (!response.ok) {
-            throw new Error(`Translation API error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.translation || text;
-    } catch (error) {
-        console.error('Lingva API error:', error);
-        return text;
-    }
-}
-
-/**
- * 使用MyMemory API翻译文本 (备选方案2)
- */
-async function translateTextWithMyMemory(text: string, targetLang: string): Promise<string> {
-    if (!text || text.trim() === '') return text;
-
-    try {
-        const url = `${myMemoryApiUrl}?q=${encodeURIComponent(text)}&langpair=zh-CN|${targetLang}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error(`Translation API error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.responseData.translatedText || text;
-    } catch (error) {
-        console.error('MyMemory API error:', error);
-        return text;
-    }
-}
-
-/**
- * 尝试使用多个翻译API，直到一个成功
- */
-async function translateText(text: string, targetLang: string): Promise<string> {
-    // 尝试第一个API
-    try {
-        return await translateTextWithLibre(text, targetLang);
-    } catch (error) {
-        console.warn('Primary translation API failed, trying backup 1:', error);
-
-        // 尝试第二个API
-        try {
-            return await translateTextWithLingva(text, targetLang);
-        } catch (error) {
-            console.warn('Backup translation API 1 failed, trying backup 2:', error);
-
-            // 尝试第三个API
-            try {
-                return await translateTextWithMyMemory(text, targetLang);
-            } catch (error) {
-                console.error('All translation APIs failed:', error);
-                return text; // 所有API都失败时返回原文
-            }
-        }
-    }
-}
-
-/**
- * 从缓存获取翻译，如果没有则调用API
- */
-async function getCachedTranslation(text: string, targetLang: string): Promise<string> {
-    // 如果文本为空或目标语言是英语，直接返回原文
-    if (!text || text.trim() === '' || targetLang === 'en') {
-        return text;
-    }
-
-    // 创建语言缓存对象（如果不存在）
-    if (!translationCache[targetLang]) {
-        translationCache[targetLang] = {};
-    }
-
-    // 检查内存缓存中是否已有此翻译
-    if (translationCache[targetLang][text]) {
-        return translationCache[targetLang][text];
-    }
-
-    // 检查localStorage缓存
-    const cachedTranslation = getTranslationFromCache(text, targetLang);
-    if (cachedTranslation) {
-        // 更新内存缓存
-        translationCache[targetLang][text] = cachedTranslation;
-        return cachedTranslation;
-    }
-
-    // 翻译并缓存结果
-    const translated = await translateText(text, targetLang);
-
-    // 更新内存缓存
-    translationCache[targetLang][text] = translated;
-
-    // 更新localStorage缓存
-    saveTranslationToCache(text, targetLang, translated);
-
-    return translated;
-}
-
-/**
- * 将翻译结果保存到localStorage缓存
- */
-function saveTranslationToCache(text: string, lang: string, translation: string): void {
-    try {
-        // 创建唯一的缓存键
-        const cacheKey = `translation_${lang}_${hashCode(text.substring(0, 100))}`;
-        localStorage.setItem(cacheKey, translation);
-    } catch (e) {
-        console.warn('Failed to cache translation:', e);
-    }
-}
-
-/**
- * 从localStorage缓存获取翻译
- */
-function getTranslationFromCache(text: string, lang: string): string | null {
-    try {
-        const cacheKey = `translation_${lang}_${hashCode(text.substring(0, 100))}`;
-        return localStorage.getItem(cacheKey);
-    } catch (e) {
-        console.warn('Failed to retrieve cached translation:', e);
-        return null;
-    }
-}
-
-/**
- * 简单的字符串哈希函数
- */
-function hashCode(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash.toString(36);
-}
-
-/**
  * 标记文本节点为已识别(调试模式)
  */
 function markTextNode(node: Node): void {
@@ -274,6 +158,35 @@ function markTextNode(node: Node): void {
 
     // 将文本替换为❤符号
     node.textContent = '❤' + node.textContent.length;
+}
+
+/**
+ * 查找本地翻译字典
+ */
+function findLocalTranslation(text: string, targetLang: string): string | null {
+    if (!text || text.trim() === '') return null;
+    
+    // 如果目标语言是中文，直接返回原文
+    if (targetLang === 'zh-CN') return text;
+
+    // 检查是否有精确匹配
+    if (localTranslations[text] && localTranslations[text][targetLang]) {
+        return localTranslations[text][targetLang];
+    }
+
+    // 如果没有精确匹配，检查是否是部分文本匹配
+    for (const key in localTranslations) {
+        if (text.includes(key)) {
+            const translation = localTranslations[key][targetLang];
+            if (translation) {
+                // 替换匹配的部分
+                return text.replace(key, translation);
+            }
+        }
+    }
+
+    // 没有找到翻译，返回null
+    return null;
 }
 
 /**
@@ -293,15 +206,22 @@ async function translateTextNode(node: Node, targetLang: string): Promise<void> 
     // 获取原始文本
     const originalText = originalTextContent.get(node) || node.textContent;
 
-    // 如果目标语言是英语，则恢复原始文本
-    if (targetLang === 'en') {
+    // 如果目标语言是中文，则恢复原始文本
+    if (targetLang === 'zh-CN') {
         node.textContent = originalText;
         return;
     }
 
-    // 翻译文本
-    const translatedText = await getCachedTranslation(originalText, targetLang);
-    node.textContent = translatedText;
+    // 查找本地翻译
+    const localTranslation = findLocalTranslation(originalText, targetLang);
+    
+    // 如果找到了翻译，使用本地翻译
+    if (localTranslation) {
+        node.textContent = localTranslation;
+    } else {
+        // 没有找到翻译，保持原文
+        node.textContent = originalText;
+    }
 }
 
 /**
@@ -361,15 +281,22 @@ async function translateElementAttributes(element: Element, targetLang: string):
 
     for (const attr of attributesToTranslate) {
         if (originalAttrs[attr]) {
-            // 如果目标语言是英语，则恢复原始值
-            if (targetLang === 'en') {
+            // 如果目标语言是中文，则恢复原始值
+            if (targetLang === 'zh-CN') {
                 element.setAttribute(attr, originalAttrs[attr]);
                 continue;
             }
 
-            // 翻译属性值
-            const translatedValue = await getCachedTranslation(originalAttrs[attr], targetLang);
-            element.setAttribute(attr, translatedValue);
+            // 查找本地翻译
+            const localTranslation = findLocalTranslation(originalAttrs[attr], targetLang);
+            
+            // 如果找到了翻译，使用本地翻译
+            if (localTranslation) {
+                element.setAttribute(attr, localTranslation);
+            } else {
+                // 没有找到翻译，保持原文
+                element.setAttribute(attr, originalAttrs[attr]);
+            }
         }
     }
 }
@@ -377,7 +304,7 @@ async function translateElementAttributes(element: Element, targetLang: string):
 /**
  * 递归处理DOM树的元素（标记或翻译）
  */
-async function processElement(element: Element, mode: WorkMode, targetLang: string = 'en'): Promise<void> {
+async function processElement(element: Element, mode: WorkMode, targetLang: string = 'zh-CN'): Promise<void> {
     // 检查是否应该跳过此元素
     if (shouldSkipElement(element)) {
         return;
@@ -438,7 +365,7 @@ function restoreOriginalContent(): void {
 /**
  * 处理整个页面
  */
-async function processPage(mode: WorkMode, targetLang: string = 'en'): Promise<void> {
+async function processPage(mode: WorkMode, targetLang: string = 'zh-CN'): Promise<void> {
     currentMode = mode;
     currentLanguage = targetLang;
 
@@ -530,7 +457,7 @@ function startObservingDOM(): void {
         for (const mutation of mutations) {
             // 忽略我们自己添加的元素导致的变化
             if (mutation.target.id === 'translation-loader' ||
-                mutation.target.id === 'translation-controls') {
+                mutation.target.id === 'translation-ui-container') {
                 continue;
             }
 
@@ -610,7 +537,7 @@ function createTranslateUI() {
         flagButton.title = '翻译工具';
         
         // 设置初始国旗样式
-        updateFlagButton(flagButton, 'en');
+        updateFlagButton(flagButton, 'zh-CN');
         
         // 添加鼠标悬停效果
         flagButton.addEventListener('mouseover', () => {
@@ -694,7 +621,7 @@ function createTranslateUI() {
         
         // 开始翻译按钮
         const translateButton = document.createElement('button');
-        translateButton.textContent = 'Translate For Game (beta)';
+        translateButton.textContent = 'Translate Game';
         translateButton.style.flex = '1';
         translateButton.style.padding = '7px 0';
         translateButton.style.backgroundColor = 'rgba(80, 80, 80, 0.8)';
@@ -734,8 +661,8 @@ function createTranslateUI() {
             // 停止翻译
             stopTranslation();
             
-            // 重置国旗为英文
-            updateFlagButton(flagButton, 'en');
+            // 重置国旗为中文
+            updateFlagButton(flagButton, 'zh-CN');
             
             // 收起面板
             togglePanel(false);
@@ -744,26 +671,60 @@ function createTranslateUI() {
         
         panel.appendChild(buttonsContainer);
         
-        // 添加API设置按钮
-        const apiSettingsButton = document.createElement('button');
-        apiSettingsButton.textContent = 'API设置';
-        apiSettingsButton.style.width = '100%';
-        apiSettingsButton.style.padding = '5px 0';
-        apiSettingsButton.style.backgroundColor = 'rgba(60, 80, 100, 0.6)';
-        apiSettingsButton.style.color = '#bbb';
-        apiSettingsButton.style.border = 'none';
-        apiSettingsButton.style.borderRadius = '4px';
-        apiSettingsButton.style.cursor = 'pointer';
-        apiSettingsButton.style.fontSize = '11px';
-        apiSettingsButton.style.display="none";
-        apiSettingsButton.addEventListener('click', () => {
-            showApiSettingsModal();
+        // 添加本地翻译设置按钮
+        const localTransButton = document.createElement('button');
+        localTransButton.textContent = '编辑翻译表';
+        localTransButton.style.width = '100%';
+        localTransButton.style.padding = '8px 0';
+        localTransButton.style.marginTop = '8px';
+        localTransButton.style.backgroundColor = 'rgba(60, 100, 80, 0.8)';
+        localTransButton.style.color = '#fff';
+        localTransButton.style.border = 'none';
+        localTransButton.style.borderRadius = '4px';
+        localTransButton.style.cursor = 'pointer';
+        localTransButton.style.fontSize = '12px';
+        localTransButton.addEventListener('click', () => {
+            showLocalTranslationEditor();
+            togglePanel(false);
         });
-        panel.appendChild(apiSettingsButton);
+        panel.appendChild(localTransButton);
+        
+        // 添加翻译统计
+        const statsDiv = document.createElement('div');
+        statsDiv.id = 'translation-stats';
+        statsDiv.style.color = '#aaa';
+        statsDiv.style.fontSize = '10px';
+        statsDiv.style.marginTop = '8px';
+        statsDiv.style.textAlign = 'center';
+        updateTranslationStats(statsDiv);
+        panel.appendChild(statsDiv);
+        
+        // 添加开发者模式按钮（重新加载默认翻译）
+        const devButton = document.createElement('button');
+        devButton.textContent = '重新加载默认翻译';
+        devButton.style.width = '100%';
+        devButton.style.padding = '6px 0';
+        devButton.style.marginTop = '8px';
+        devButton.style.backgroundColor = 'rgba(60, 40, 100, 0.8)';
+        devButton.style.color = '#fff';
+        devButton.style.border = 'none';
+        devButton.style.borderRadius = '4px';
+        devButton.style.cursor = 'pointer';
+        devButton.style.fontSize = '11px';
+        devButton.addEventListener('click', () => {
+            // 重新加载默认翻译和已保存的翻译
+            loadLocalTranslations();
+            updateTranslationStats(document.getElementById('translation-stats'));
+            showLoader(true, `已重新加载默认翻译 (${Object.keys(localTranslations).length}项)`);
+            
+            // 关闭面板
+            togglePanel(false);
+        });
+        panel.appendChild(devButton);
         
         // 添加版本信息
         const versionInfo = document.createElement('div');
-        versionInfo.textContent = 'v1.0';
+        versionInfo.textContent = 'v2.0 (Local Translation)';
         versionInfo.style.color = 'rgba(150, 150, 150, 0.6)';
         versionInfo.style.fontSize = '10px';
         versionInfo.style.textAlign = 'right';
@@ -782,6 +743,11 @@ function createTranslateUI() {
         flagButton.addEventListener('click', () => {
             isPanelVisible = !isPanelVisible;
             togglePanel(isPanelVisible);
+            
+            // 更新翻译统计
+            if (isPanelVisible) {
+                updateTranslationStats(document.getElementById('translation-stats'));
+            }
         });
         
         function togglePanel(show) {
@@ -813,15 +779,34 @@ function createTranslateUI() {
         
         // 点击外部区域关闭面板
         document.addEventListener('click', (event) => {
-            const target = event.target;
+            const target = event.target as Element;
             if (isPanelVisible && 
                 target !== flagButton && 
                 target !== panel &&
-                !panel.contains(target)) {
+                !panel.contains(target) && 
+                !isElementInsideModal(target)) {
                 isPanelVisible = false;
                 togglePanel(false);
             }
         });
+        
+        // 检查元素是否在模态框内部
+        function isElementInsideModal(element: Element): boolean {
+            let current = element;
+            while (current) {
+                if (current.id === 'local-translation-editor-modal') {
+                    return true;
+                }
+                const parent = current.parentElement;
+                if (!parent) break;
+                current = parent;
+            }
+            return false;
+        }
+        
+        // 加载本地翻译数据
+        loadLocalTranslations();
+        
     } catch (error) {
         console.error("创建翻译UI失败:", error);
     }
@@ -836,16 +821,6 @@ function updateFlagButton(button, langCode) {
     
     // 设置适合的背景和样式
     switch(langCode) {
-        case 'en': // 英国国旗
-            button.style.background = `
-                linear-gradient(rgba(0, 36, 125, 0.8), rgba(0, 36, 125, 0.8)),
-                linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(207, 20, 43, 0.8) 50%, transparent calc(50% + 1px))
-            `;
-            addFlagOverlay(button, `
-                <div style="position:absolute; width:100%; height:20%; top:40%; background:rgba(255,255,255,0.8);"></div>
-                <div style="position:absolute; width:20%; height:100%; left:40%; background:rgba(255,255,255,0.8);"></div>
-            `);
-            break;
         case 'zh-CN': // 中国国旗
             button.style.background = 'rgba(222, 41, 16, 0.8)';
             addFlagOverlay(button, `
@@ -854,6 +829,16 @@ function updateFlagButton(button, langCode) {
                 <div style="position:absolute; top:11px; left:14px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
                 <div style="position:absolute; top:15px; left:12px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
                 <div style="position:absolute; top:17px; left:6px; color:rgba(255,222,0,0.9); font-size:4px;">★</div>
+            `);
+            break;
+        case 'en': // 英国国旗
+            button.style.background = `
+                linear-gradient(rgba(0, 36, 125, 0.8), rgba(0, 36, 125, 0.8)),
+                linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(207, 20, 43, 0.8) 50%, transparent calc(50% + 1px))
+            `;
+            addFlagOverlay(button, `
+                <div style="position:absolute; width:100%; height:20%; top:40%; background:rgba(255,255,255,0.8);"></div>
+                <div style="position:absolute; width:20%; height:100%; left:40%; background:rgba(255,255,255,0.8);"></div>
             `);
             break;
         case 'es': // 西班牙国旗
@@ -910,11 +895,19 @@ function startTranslation(lang) {
     currentLanguage = lang;
     currentMode = 'translate';
     
-    // 先加载缓存的API设置
-    loadApiSettings();
+    // 检查是否有本地翻译
+    const translationCount = Object.keys(localTranslations).length;
+    if (translationCount === 0) {
+        showLoader(true, "没有翻译数据，请先添加翻译");
+        setTimeout(() => {
+            showLoader(false);
+            showLocalTranslationEditor();
+        }, 2000);
+        return;
+    }
     
     // 显示加载指示器
-    showLoader(true, `translate${lang}...`);
+    showLoader(true, `正在翻译为 ${getLangName(lang)}...(${translationCount}项)`);
     
     try {
         // 处理页面内容
@@ -931,6 +924,14 @@ function startTranslation(lang) {
             showLoader(false);
         }, 3000);
     }
+}
+
+/**
+ * 获取语言名称
+ */
+function getLangName(langCode: string): string {
+    const lang = AVAILABLE_LANGUAGES.find(l => l.code === langCode);
+    return lang ? lang.name : langCode;
 }
 
 /**
@@ -1126,7 +1127,6 @@ function showApiSettingsModal(): void {
     resetButton.style.padding = '8px 16px';
     resetButton.style.borderRadius = '4px';
     resetButton.style.cursor = 'pointer';
-    resetButton.style.fontSize = '13px';
     resetButton.onclick = () => {
         (document.getElementById('libre-api-url') as HTMLInputElement).value = LIBRE_TRANSLATE_API;
         (document.getElementById('lingva-api-url') as HTMLInputElement).value = LINGVA_TRANSLATE_API;
@@ -1166,12 +1166,407 @@ function showApiSettingsModal(): void {
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
-    // 点击背景关闭弹窗
+    // 自动聚焦到第一个输入框
+    libreInput.focus();
+}
+
+/**
+ * 更新翻译统计信息
+ */
+function updateTranslationStats(statsDiv: HTMLElement | null): void {
+    if (!statsDiv) return;
+    
+    const count = Object.keys(localTranslations).length;
+    statsDiv.textContent = `已加载 ${count} 条本地翻译`;
+}
+
+/**
+ * 显示本地翻译编辑器
+ */
+function showLocalTranslationEditor(): void {
+    // 创建模态框容器
+    const modal = document.createElement('div');
+    modal.id = 'local-translation-editor-modal';
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '10000';
+    
+    // 确保点击内容区域不会触发模态框关闭
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
             document.body.removeChild(modal);
         }
+        // 如果点击的是模态框内容区域，阻止事件冒泡
+        if (event.target !== modal) {
+            event.stopPropagation();
+        }
     });
+
+    // 创建模态框内容
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = 'rgba(30,30,30,0.95)';
+    modalContent.style.padding = '20px';
+    modalContent.style.borderRadius = '8px';
+    modalContent.style.width = '90%';
+    modalContent.style.maxWidth = '800px';
+    modalContent.style.maxHeight = '90%';
+    modalContent.style.overflow = 'auto';
+    modalContent.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+    modalContent.style.color = '#ddd';
+    
+    // 确保点击内容区域不会触发模态框关闭
+    modalContent.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+
+    // 添加标题
+    const title = document.createElement('h3');
+    title.textContent = '翻译表编辑器';
+    title.style.margin = '0 0 20px 0';
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    modalContent.appendChild(title);
+
+    // 添加说明
+    const description = document.createElement('p');
+    description.innerHTML = '每行一个翻译，格式：<strong>中文/英文/日文/韩文/西班牙文</strong>，使用斜杠分隔。<br>例如：<code>开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego</code>';
+    description.style.marginBottom = '15px';
+    description.style.fontSize = '14px';
+    description.style.color = '#aaa';
+    modalContent.appendChild(description);
+
+    // 创建表单
+    const form = document.createElement('form');
+    form.style.display = 'flex';
+    form.style.flexDirection = 'column';
+    form.style.gap = '15px';
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // 阻止冒泡
+        
+        try {
+            // 获取文本区域的内容
+            const content = (document.getElementById('local-translation-textarea') as HTMLTextAreaElement).value;
+            
+            // 解析并保存翻译
+            parseLocalTranslations(content);
+            
+            // 提示保存成功
+            alert(`成功保存了 ${Object.keys(localTranslations).length} 条翻译`);
+            
+            // 关闭模态框
+            document.body.removeChild(modal);
+            
+            // 更新翻译统计
+            updateTranslationStats(document.getElementById('translation-stats'));
+        } catch (error) {
+            console.error('保存翻译失败:', error);
+            alert(`保存失败: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    });
+
+    // 添加文本区域
+    const textarea = document.createElement('textarea');
+    textarea.id = 'local-translation-textarea';
+    textarea.style.width = '100%';
+    textarea.style.height = '350px';
+    textarea.style.backgroundColor = 'rgba(40, 40, 40, 0.9)';
+    textarea.style.color = '#fff';
+    textarea.style.border = '1px solid #555';
+    textarea.style.borderRadius = '4px';
+    textarea.style.padding = '10px';
+    textarea.style.fontFamily = 'monospace';
+    textarea.style.fontSize = '14px';
+    textarea.style.resize = 'vertical';
+    textarea.placeholder = '开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego\n设置/Settings/設定/설정/Configuración\n退出/Exit/終了/종료/Salir';
+    textarea.readOnly = false; // 确保textarea可编辑
+    textarea.disabled = false; // 确保textarea未被禁用
+    
+    // 确保textarea能够接收输入
+    textarea.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+    
+    // 处理Tab键，允许在文本区域内使用Tab
+    textarea.addEventListener('keydown', (event) => {
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            
+            // 获取当前光标位置
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            
+            // 在光标位置插入制表符
+            textarea.value = textarea.value.substring(0, start) + '\t' + textarea.value.substring(end);
+            
+            // 将光标移动到制表符后
+            textarea.selectionStart = textarea.selectionEnd = start + 1;
+        }
+        
+        // 阻止其他键盘事件冒泡
+        event.stopPropagation();
+    });
+    
+    // 填充现有翻译数据
+    textarea.value = formatLocalTranslationsForEdit();
+    
+    // 确保默认翻译已经被添加
+    addDefaultTranslationsToEditor(textarea);
+    
+    form.appendChild(textarea);
+    
+    // 添加示例按钮
+    const addExampleButton = document.createElement('button');
+    addExampleButton.type = 'button';
+    addExampleButton.textContent = '添加示例翻译';
+    addExampleButton.style.alignSelf = 'flex-start';
+    addExampleButton.style.padding = '8px 16px';
+    addExampleButton.style.backgroundColor = '#2c5a7c';
+    addExampleButton.style.color = 'white';
+    addExampleButton.style.border = 'none';
+    addExampleButton.style.borderRadius = '4px';
+    addExampleButton.style.cursor = 'pointer';
+    addExampleButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡
+        const examples = `开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego
+设置/Settings/設定/설정/Configuración
+退出/Exit/終了/종료/Salir
+继续/Continue/続ける/계속하기/Continuar
+返回/Back/戻る/돌아가기/Volver
+保存/Save/保存/저장/Guardar
+加载/Load/ロード/로드/Cargar
+菜单/Menu/メニュー/메뉴/Menú
+音量/Volume/音量/볼륨/Volumen
+音乐/Music/音楽/음악/Música
+音效/Sound/効果音/효과음/Efectos
+全屏/Fullscreen/全画面/전체 화면/Pantalla completa
+窗口/Window/ウィンドウ/창 모드/Ventana
+确认/Confirm/確認/확인/Confirmar
+取消/Cancel/キャンセル/취소/Cancelar
+是/Yes/はい/예/Sí
+否/No/いいえ/아니오/No
+关闭/Close/閉じる/닫기/Cerrar
+下一步/Next/次へ/다음/Siguiente
+上一步/Previous/前へ/이전/Anterior
+开始/Start/スタート/시작/Iniciar
+结束/End/終了/종료/Finalizar`;
+        
+        let currentText = textarea.value;
+        if (currentText && !currentText.endsWith('\n')) {
+            currentText += '\n';
+        }
+        textarea.value = currentText + examples;
+    });
+    form.appendChild(addExampleButton);
+
+    // 按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'flex-end';
+    buttonContainer.style.gap = '10px';
+    buttonContainer.style.marginTop = '15px';
+    
+    // 恢复默认翻译按钮
+    const resetButton = document.createElement('button');
+    resetButton.type = 'button';
+    resetButton.textContent = '恢复默认翻译';
+    resetButton.style.padding = '10px 20px';
+    resetButton.style.backgroundColor = '#8b4513';
+    resetButton.style.color = 'white';
+    resetButton.style.border = 'none';
+    resetButton.style.borderRadius = '4px';
+    resetButton.style.cursor = 'pointer';
+    resetButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡
+        
+        // 使用确认对话框，提供两个选项
+        const choice = confirm('选择操作方式:\n\n点击"确定"添加缺失的默认翻译\n点击"取消"完全替换为默认翻译');
+        
+        if (choice) {
+            // 添加缺失的默认翻译
+            addDefaultTranslationsToEditor(textarea);
+        } else {
+            // 完全替换为默认翻译
+            if (confirm('确定要完全替换为默认翻译吗？这将覆盖您所有的自定义翻译')) {
+                textarea.value = defaultTranslations;
+            }
+        }
+    });
+    buttonContainer.appendChild(resetButton);
+    
+    // 保存按钮
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.textContent = '保存翻译';
+    saveButton.style.padding = '10px 20px';
+    saveButton.style.backgroundColor = '#2e7d32';
+    saveButton.style.color = 'white';
+    saveButton.style.border = 'none';
+    saveButton.style.borderRadius = '4px';
+    saveButton.style.cursor = 'pointer';
+    saveButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡
+    });
+    buttonContainer.appendChild(saveButton);
+    
+    // 取消按钮
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = '取消';
+    cancelButton.style.padding = '10px 20px';
+    cancelButton.style.backgroundColor = '#555';
+    cancelButton.style.color = 'white';
+    cancelButton.style.border = 'none';
+    cancelButton.style.borderRadius = '4px';
+    cancelButton.style.cursor = 'pointer';
+    cancelButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡
+        document.body.removeChild(modal);
+    });
+    buttonContainer.appendChild(cancelButton);
+    
+    form.appendChild(buttonContainer);
+    modalContent.appendChild(form);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // 自动聚焦到文本区域
+    textarea.focus();
+}
+
+/**
+ * 解析本地翻译内容
+ */
+function parseLocalTranslations(content: string): void {
+    // 清空现有翻译
+    Object.keys(localTranslations).forEach(key => {
+        delete localTranslations[key];
+    });
+    
+    // 按行分割
+    const lines = content.split('\n');
+    
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue; // 跳过空行
+        
+        // 按斜杠分割
+        const parts = trimmedLine.split('/');
+        if (parts.length < 2) continue; // 至少需要中文和一种其他语言
+        
+        const chineseText = parts[0].trim();
+        if (!chineseText) continue; // 中文文本不能为空
+        
+        // 创建翻译映射
+        localTranslations[chineseText] = {};
+        
+        // 添加各语言翻译
+        if (parts[1] && parts[1].trim()) localTranslations[chineseText]['en'] = parts[1].trim();
+        if (parts[2] && parts[2].trim()) localTranslations[chineseText]['ja'] = parts[2].trim();
+        if (parts[3] && parts[3].trim()) localTranslations[chineseText]['ko'] = parts[3].trim();
+        if (parts[4] && parts[4].trim()) localTranslations[chineseText]['es'] = parts[4].trim();
+        if (parts.length > 5 && parts[5] && parts[5].trim()) localTranslations[chineseText]['fr'] = parts[5].trim();
+        if (parts.length > 6 && parts[6] && parts[6].trim()) localTranslations[chineseText]['de'] = parts[6].trim();
+    }
+    
+    // 保存到本地存储
+    saveLocalTranslations();
+}
+
+/**
+ * 将本地翻译格式化为编辑文本
+ */
+function formatLocalTranslationsForEdit(): string {
+    return Object.entries(localTranslations).map(([chineseText, translations]) => {
+        return `${chineseText}/${translations.en || ''}/${translations.ja || ''}/${translations.ko || ''}/${translations.es || ''}${translations.fr ? '/' + translations.fr : ''}${translations.de ? '/' + translations.de : ''}`;
+    }).join('\n');
+}
+
+/**
+ * 保存本地翻译到localStorage
+ */
+function saveLocalTranslations(): void {
+    try {
+        localStorage.setItem('pixelDoom_localTranslations', JSON.stringify(localTranslations));
+        console.log(`已保存 ${Object.keys(localTranslations).length} 条本地翻译到存储`);
+    } catch (error) {
+        console.error('保存本地翻译失败:', error);
+        throw new Error('无法保存翻译，可能是由于浏览器存储限制');
+    }
+}
+
+/**
+ * 从localStorage加载本地翻译
+ */
+function loadLocalTranslations(): void {
+    try {
+        // 首先加载默认翻译数据
+        parseLocalTranslations(defaultTranslations);
+        console.log(`已加载 ${Object.keys(localTranslations).length} 条默认翻译`);
+        
+        // 尝试从localStorage加载保存的翻译数据，合并到默认翻译中
+        const savedData = localStorage.getItem('pixelDoom_localTranslations');
+        if (savedData) {
+            const parsed = JSON.parse(savedData);
+            
+            // 合并保存的翻译到现有翻译
+            Object.entries(parsed).forEach(([key, value]) => {
+                localTranslations[key] = value as Record<string, string>;
+            });
+            
+            console.log(`已从存储合并 ${Object.keys(parsed).length} 条本地翻译`);
+        } else {
+            console.log("未找到已保存的翻译，仅使用默认翻译");
+        }
+    } catch (error) {
+        console.error('加载本地翻译失败:', error);
+        // 加载失败时，至少确保默认翻译可用
+        parseLocalTranslations(defaultTranslations);
+    }
+}
+
+/**
+ * 将默认翻译添加到编辑器中
+ */
+function addDefaultTranslationsToEditor(textarea: HTMLTextAreaElement): void {
+    // 获取当前文本
+    let currentText = textarea.value.trim();
+    // 获取默认翻译
+    const defaults = defaultTranslations.trim();
+    
+    // 如果当前已经有文本，并且末尾没有换行符，添加一个换行符
+    if (currentText && !currentText.endsWith('\n')) {
+        currentText += '\n';
+    }
+    
+    // 将默认翻译逐行合并到当前文本中
+    const defaultLines = defaults.split('\n');
+    
+    // 将当前文本拆分为行
+    const currentLines = currentText ? currentText.split('\n') : [];
+    const currentKeys = new Set(currentLines.map(line => {
+        const parts = line.split('/');
+        return parts[0]?.trim() || '';
+    }).filter(key => key));
+    
+    // 添加默认翻译中不存在的行
+    for (const line of defaultLines) {
+        const key = line.split('/')[0]?.trim();
+        if (key && !currentKeys.has(key)) {
+            currentText += line + '\n';
+        }
+    }
+    
+    // 更新文本区域
+    textarea.value = currentText;
 }
 
 // 导出函数供外部使用
