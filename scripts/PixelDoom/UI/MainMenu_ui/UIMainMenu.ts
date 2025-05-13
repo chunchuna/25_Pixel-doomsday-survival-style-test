@@ -10,6 +10,21 @@ class GameMainScene {
     private isFullscreen: boolean = false;
     private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
     private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
+    private titleElement: HTMLElement | null = null; // 存储游戏标题元素
+  
+    // 标题效果预设
+    private readonly TITLE_EFFECTS = {
+        PIXEL: 'pixel', // 像素风格
+        GLITCH: 'glitch', // 故障风格
+        NEON: 'neon'  // 霓虹风格
+    };
+
+    // 标题动画预设
+    private readonly TITLE_ANIMATIONS = {
+        PULSE: 'pulse', // 脉冲效果
+        FLOAT: 'float', // 浮动效果
+        FLICKER: 'flicker' // 闪烁效果
+    };
   
     private constructor() {
       this.htmlTemplate = this.getHTMLTemplate();
@@ -292,6 +307,164 @@ class GameMainScene {
           75% { transform: rotate(calc(-1 * var(--shake-size))); }
           100% { transform: rotate(0deg); }
         }
+
+        /* 游戏标题入场动画 */
+        @keyframes titleEntrance {
+          0% {
+            transform: scale(0.5);
+            opacity: 0;
+            filter: blur(10px);
+          }
+          70% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+            filter: blur(0);
+          }
+        }
+
+        /* 脉冲动画 */
+        @keyframes titlePulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+
+        /* 浮动动画 */
+        @keyframes titleFloat {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0); }
+        }
+
+        /* 闪烁动画 */
+        @keyframes titleFlicker {
+          0% { opacity: 1; }
+          7% { opacity: 0.8; }
+          10% { opacity: 1; }
+          27% { opacity: 1; }
+          30% { opacity: 0.6; }
+          35% { opacity: 1; }
+          52% { opacity: 1; }
+          55% { opacity: 0.9; }
+          60% { opacity: 1; }
+          67% { opacity: 1; }
+          70% { opacity: 0.7; }
+          75% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+
+        /* 像素风格字体阴影 */
+        .game-title-pixel {
+          font-family: 'Press Start 2P', monospace, Arial, sans-serif;
+          color: #ffffff;
+          text-shadow: 3px 3px 0 #000000;
+          letter-spacing: 1px;
+          font-size: 2.5rem;
+          font-weight: bold;
+          text-transform: uppercase;
+          image-rendering: pixelated;
+          position: absolute;
+          transform-origin: center;
+          white-space: nowrap;
+          animation: titleEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          z-index: 1000;
+        }
+
+        /* 故障风格 */
+        .game-title-glitch {
+          font-family: 'Courier New', monospace, Arial, sans-serif;
+          color: #ffffff;
+          text-shadow: 
+            -2px 0 #ff0000,
+            2px 2px #0000ff;
+          font-size: 2.5rem;
+          letter-spacing: 2px;
+          font-weight: bold;
+          text-transform: uppercase;
+          position: absolute;
+          transform-origin: center;
+          white-space: nowrap;
+          animation: titleEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          z-index: 1000;
+        }
+
+        .game-title-glitch::before,
+        .game-title-glitch::after {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .game-title-glitch::before {
+          left: 2px;
+          text-shadow: -1px 0 red;
+          animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .game-title-glitch::after {
+          left: -2px;
+          text-shadow: -1px 0 blue;
+          animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim-1 {
+          0% { clip-path: inset(30% 0 70% 0); }
+          20% { clip-path: inset(80% 0 10% 0); }
+          40% { clip-path: inset(50% 0 30% 0); }
+          60% { clip-path: inset(10% 0 90% 0); }
+          80% { clip-path: inset(40% 0 60% 0); }
+          100% { clip-path: inset(5% 0 95% 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+          0% { clip-path: inset(20% 0 60% 0); }
+          20% { clip-path: inset(60% 0 20% 0); }
+          40% { clip-path: inset(40% 0 40% 0); }
+          60% { clip-path: inset(70% 0 5% 0); }
+          80% { clip-path: inset(10% 0 90% 0); }
+          100% { clip-path: inset(30% 0 50% 0); }
+        }
+
+        /* 霓虹风格 */
+        .game-title-neon {
+          font-family: 'Arial', sans-serif;
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: #fff;
+          text-transform: uppercase;
+          text-shadow:
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #0073e6,
+            0 0 20px #0073e6,
+            0 0 25px #0073e6,
+            0 0 30px #0073e6,
+            0 0 35px #0073e6;
+          position: absolute;
+          transform-origin: center;
+          white-space: nowrap;
+          animation: titleEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          z-index: 1000;
+        }
+
+        /* 动画应用类 */
+        .title-animation-pulse {
+          animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        .title-animation-float {
+          animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        .title-animation-flicker {
+          animation: titleFlicker 4s linear infinite;
+        }
   
         .game-main-panel {
           position: absolute;
@@ -395,56 +568,43 @@ class GameMainScene {
   
         .modal-content {
           position: relative;
-          background-color: rgba(32, 32, 32, 0.9);
-          border-radius: 8px;
+          background-color: rgba(25, 25, 25, 0.85);
+          border-radius: 4px;
           width: 90%;
           max-width: 400px;
           max-height: 80vh;
           overflow: hidden;
-          box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
-                      inset 0 0 8px rgba(120, 120, 120, 0.5);
-          border: 1px solid rgba(80, 80, 80, 0.6);
-          border-top: 1px solid rgba(100, 100, 100, 0.8);
-          border-bottom: 1px solid rgba(50, 50, 50, 0.8);
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+          border: none;
           backdrop-filter: blur(10px);
           opacity: 0;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           animation: modalSlideIn 0.3s forwards;
         }
   
+        .modal-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+        }
+  
+        .modal-content::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+  
         .modal.active .modal-content {
           opacity: 1;
           animation: modalSlideIn 0.3s forwards;
-        }
-  
-        .modal.closing .modal-content {
-          animation: modalSlideOut 0.3s forwards;
-          opacity: 0;
-        }
-  
-        @keyframes modalBackgroundFadeIn {
-          from { background-color: rgba(0, 0, 0, 0); }
-          to { background-color: rgba(0, 0, 0, 0.7); }
-        }
-  
-        @keyframes modalBackgroundFadeOut {
-          from { background-color: rgba(0, 0, 0, 0.7); }
-          to { background-color: rgba(0, 0, 0, 0); }
-        }
-  
-        @keyframes modalContentGlow {
-          0% { 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
-                        inset 0 0 8px rgba(120, 120, 120, 0.5);
-          }
-          50% { 
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7),
-                        inset 0 0 12px rgba(140, 140, 140, 0.6);
-          }
-          100% { 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
-                        inset 0 0 8px rgba(120, 120, 120, 0.5);
-          }
         }
   
         .modal-body {
@@ -453,7 +613,7 @@ class GameMainScene {
           transform: translateY(10px);
           transition: all 0.3s ease;
           position: relative;
-          border-top: 1px solid rgba(60, 60, 60, 0.3);
+          border-top: none;
         }
   
         .modal-body::before {
@@ -461,138 +621,102 @@ class GameMainScene {
           position: absolute;
           top: 0;
           left: 0;
-          right: 0;
-          height: 8px;
-          background: linear-gradient(to bottom, 
-                      rgba(100, 100, 100, 0.2), 
-                      transparent);
-        }
-  
-        .modal.active .modal-body {
-          opacity: 1;
-          transform: translateY(0);
-          transition-delay: 0.2s;
-        }
-  
-        .scrollable {
-          max-height: 50vh;
-          overflow-y: auto;
-          padding-right: 0.5rem;
-        }
-  
-        .scrollable::-webkit-scrollbar {
-          width: 6px;
-        }
-  
-        .scrollable::-webkit-scrollbar-track {
-          background: #333;
-          border-radius: 10px;
-        }
-  
-        .scrollable::-webkit-scrollbar-thumb {
-          background: #555;
-          border-radius: 10px;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
         }
   
         .setting-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.8rem;
-          padding: 0.5rem;
-          border-radius: 4px;
-          background-color: rgba(50, 50, 50, 0.5);
-          box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-        }
-  
-        .switch {
+          margin-bottom: 1rem;
+          padding: 0.8rem;
+          border-radius: 2px;
+          background-color: rgba(40, 40, 40, 0.4);
           position: relative;
-          display: inline-block;
-          width: 46px;
-          height: 22px;
+          overflow: hidden;
         }
   
-        .switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-  
-        .slider {
+        .setting-item::after {
+          content: '';
           position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
           bottom: 0;
-          background-color: #444;
-          transition: .3s;
-        }
-  
-        .slider:before {
-          position: absolute;
-          content: "";
-          height: 14px;
-          width: 14px;
-          left: 4px;
-          bottom: 4px;
-          background-color: #e0e0e0;
-          transition: .3s;
-        }
-  
-        input:checked + .slider {
-          background-color: #666;
-        }
-  
-        input:checked + .slider:before {
-          transform: translateX(24px);
-        }
-  
-        .slider.round {
-          border-radius: 22px;
-        }
-  
-        .slider.round:before {
-          border-radius: 50%;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
         }
   
         .action-btn {
           padding: 0.6rem 0;
-          background-color: rgba(60, 60, 60, 0.5);
-          color: #e0e0e0;
+          background-color: rgba(50, 50, 50, 0.4);
+          color: #b0b0b0;
           border: none;
-          border-radius: 4px;
+          border-radius: 2px;
           font-size: 0.9rem;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           margin-bottom: 1rem;
           width: 100%;
-          text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+  
+        .action-btn::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          width: 0;
+          height: 1px;
+          background-color: #ffffff;
+          transition: width 0.3s ease;
         }
   
         .action-btn:hover {
           color: #ffffff;
-          background-color: rgba(70, 70, 70, 0.7);
-          text-shadow: 0 0 10px rgba(66, 134, 244, 0.7);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+          text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+  
+        .action-btn:hover::before {
+          width: 100%;
         }
   
         .action-btn:active {
-          transform: translateY(1px);
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+          transform: scale(0.98);
         }
   
         .save-slots {
-          margin-top: 0.8rem;
+          margin-top: 1rem;
           padding: 0.8rem;
-          background-color: rgba(40, 40, 40, 0.7);
-          border-radius: 4px;
+          background-color: rgba(35, 35, 35, 0.6);
+          border-radius: 2px;
           text-align: center;
           color: #aaa;
-          box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
-          border: 1px solid rgba(60, 60, 60, 0.5);
+          position: relative;
+          overflow: hidden;
+          border: none;
+        }
+  
+        .save-slots::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+        }
+  
+        .save-slots::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
         }
   
         h3 {
@@ -628,6 +752,105 @@ class GameMainScene {
             transform: translate(-50%, -50%) scale(2);
             opacity: 0;
           }
+        }
+  
+        .modal.closing .modal-content {
+          animation: modalSlideOut 0.3s forwards;
+          opacity: 0;
+        }
+  
+        @keyframes modalBackgroundFadeIn {
+          from { background-color: rgba(0, 0, 0, 0); }
+          to { background-color: rgba(0, 0, 0, 0.7); }
+        }
+  
+        @keyframes modalBackgroundFadeOut {
+          from { background-color: rgba(0, 0, 0, 0.7); }
+          to { background-color: rgba(0, 0, 0, 0); }
+        }
+  
+        .modal.active .modal-body {
+          opacity: 1;
+          transform: translateY(0);
+          transition-delay: 0.2s;
+        }
+  
+        .scrollable {
+          max-height: 50vh;
+          overflow-y: auto;
+          padding-right: 0.5rem;
+        }
+  
+        .scrollable::-webkit-scrollbar {
+          width: 4px;
+        }
+  
+        .scrollable::-webkit-scrollbar-track {
+          background: rgba(40, 40, 40, 0.3);
+          border-radius: 2px;
+        }
+  
+        .scrollable::-webkit-scrollbar-thumb {
+          background: rgba(80, 80, 80, 0.5);
+          border-radius: 2px;
+        }
+  
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 46px;
+          height: 22px;
+        }
+  
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+  
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #333;
+          transition: .3s;
+          border-radius: 22px;
+          overflow: hidden;
+        }
+  
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 14px;
+          width: 14px;
+          left: 4px;
+          bottom: 4px;
+          background-color: #d0d0d0;
+          transition: .3s;
+          border-radius: 50%;
+        }
+  
+        .slider:after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 10%;
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+  
+        input:checked + .slider {
+          background-color: #444;
+        }
+  
+        input:checked + .slider:before {
+          transform: translateX(24px);
+          background-color: #fff;
+          box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
       `;
     }
@@ -756,29 +979,119 @@ class GameMainScene {
         this.buttonShakeEffects.delete(buttonId);
       }
     }
-  }
-  
-  // 主入口点
-  function initGameMainScene(): void {
-    const gameMainScene = GameMainScene.getInstance();
-    gameMainScene.initialize();
 
-    GameMainScene.getInstance().MenuAddButton("语言",()=>{
+    /**
+     * 显示游戏标题
+     * @param titleString 游戏标题文本
+     * @param effect 标题效果（'pixel', 'glitch', 'neon'）
+     * @param animation 动画效果（'pulse', 'float', 'flicker'）
+     * @param x 水平位置（像素或百分比，例如 '50%'）
+     * @param y 垂直位置（像素或百分比，例如 '20%'）
+     */
+    public ShowGameTitle(titleString: string, effect: string, animation: string, x: string, y: string): void {
+        // 移除已有的标题
+        if (this.titleElement && this.titleElement.parentNode) {
+            this.titleElement.parentNode.removeChild(this.titleElement);
+        }
         
-    })
-    
-    // 在initialize之后添加晃动效果，确保DOM元素已经创建
-    setTimeout(() => {
-      // 使用角度作为晃动幅度，值改为5度
-      GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
-     
-    }, 1000); // 延迟1秒，确保按钮已经完全显示
-  }
+        // 创建标题元素
+        const title = document.createElement('div');
+        title.textContent = titleString;
+        title.setAttribute('data-text', titleString); // 用于故障效果
+        
+        // 设置标题样式
+        let effectClass = '';
+        switch (effect) {
+            case this.TITLE_EFFECTS.PIXEL:
+                effectClass = 'game-title-pixel';
+                break;
+            case this.TITLE_EFFECTS.GLITCH:
+                effectClass = 'game-title-glitch';
+                break;
+            case this.TITLE_EFFECTS.NEON:
+                effectClass = 'game-title-neon';
+                break;
+            default:
+                effectClass = 'game-title-pixel'; // 默认为像素风格
+        }
+        
+        // 添加基础类和效果类
+        title.className = effectClass;
+        
+        // 设置位置
+        title.style.left = x;
+        title.style.top = y;
+        
+        // 等待入场动画完成后添加持续动画
+        setTimeout(() => {
+            let animationClass = '';
+            switch (animation) {
+                case this.TITLE_ANIMATIONS.PULSE:
+                    animationClass = 'title-animation-pulse';
+                    break;
+                case this.TITLE_ANIMATIONS.FLOAT:
+                    animationClass = 'title-animation-float';
+                    break;
+                case this.TITLE_ANIMATIONS.FLICKER:
+                    animationClass = 'title-animation-flicker';
+                    break;
+                default:
+                    animationClass = 'title-animation-pulse'; // 默认为脉冲动画
+            }
+            
+            // 添加动画类
+            title.classList.add(animationClass);
+        }, 1000); // 等待1秒，入场动画结束后
+        
+        // 将标题添加到DOM
+        document.body.appendChild(title);
+        
+        // 保存标题元素引用
+        this.titleElement = title;
+    }
+
+    /**
+     * 移除游戏标题
+     */
+    public HideGameTitle(): void {
+        if (this.titleElement && this.titleElement.parentNode) {
+            // 添加淡出动画
+            this.titleElement.style.animation = 'fadeOut 0.5s forwards';
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                if (this.titleElement && this.titleElement.parentNode) {
+                    this.titleElement.parentNode.removeChild(this.titleElement);
+                    this.titleElement = null;
+                }
+            }, 500);
+        }
+    }
+}
   
-  // 使用SDK提供的初始化入口
-  pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    // 初始化游戏主场景
-    initGameMainScene();
-  });
+// 主入口点
+function initGameMainScene(): void {
+  const gameMainScene = GameMainScene.getInstance();
+  gameMainScene.initialize();
+
+  GameMainScene.getInstance().MenuAddButton("语言",()=>{
+      
+  })
   
-  export { GameMainScene };
+  // 在initialize之后添加晃动效果，确保DOM元素已经创建
+  setTimeout(() => {
+    // 使用角度作为晃动幅度，值改为5度
+    GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
+   
+    // 显示游戏标题示例
+    GameMainScene.getInstance().ShowGameTitle("The Park", "pixel", "pulse", "50%", "15%");
+  }, 1000); // 延迟1秒，确保按钮已经完全显示
+}
+  
+// 使用SDK提供的初始化入口
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+  // 初始化游戏主场景
+  initGameMainScene();
+});
+  
+export { GameMainScene };
