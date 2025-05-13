@@ -25,6 +25,17 @@ const AVAILABLE_LANGUAGES = [
     { code: 'de', name: 'Deutsch' }
 ];
 
+// 沉浸式翻译SDK支持的语言映射
+const SDK_LANGUAGE_MAP: Record<string, string> = {
+    'zh-CN': 'zh-CN',
+    'en': 'en',
+    'ja': 'ja',
+    'ko': 'ko',
+    'es': 'es',
+    'fr': 'fr',
+    'de': 'de'
+};
+
 // 存储原始文本，以便可以切换回来
 const originalTextContent = new WeakMap<Node, string>();
 const originalAttributeContent = new WeakMap<Element, Record<string, string>>();
@@ -671,6 +682,62 @@ function createTranslateUI() {
         
         panel.appendChild(buttonsContainer);
         
+        // 添加沉浸式翻译SDK按钮
+        const sdkButtonContainer = document.createElement('div');
+        sdkButtonContainer.style.display = 'flex';
+        sdkButtonContainer.style.marginBottom = '8px';
+        
+        const sdkTranslateButton = document.createElement('button');
+        sdkTranslateButton.textContent = 'SDK翻译';
+        sdkTranslateButton.style.flex = '1';
+        sdkTranslateButton.style.padding = '7px 0';
+        sdkTranslateButton.style.backgroundColor = 'rgba(60, 60, 100, 0.8)';
+        sdkTranslateButton.style.color = '#fff';
+        sdkTranslateButton.style.border = 'none';
+        sdkTranslateButton.style.borderRadius = '4px';
+        sdkTranslateButton.style.cursor = 'pointer';
+        sdkTranslateButton.style.fontSize = '12px';
+        sdkTranslateButton.style.fontWeight = 'bold';
+        sdkTranslateButton.addEventListener('click', () => {
+            const selectedLang = langSelect.value;
+            currentLanguage = selectedLang;
+            
+            // 更新国旗显示
+            updateFlagButton(flagButton, selectedLang);
+            
+            // 使用沉浸式翻译SDK
+            initImmersiveTranslateSDK(selectedLang);
+            
+            // 收起面板
+            togglePanel(false);
+        });
+        sdkButtonContainer.appendChild(sdkTranslateButton);
+        
+        // 停止SDK翻译按钮
+        const stopSdkButton = document.createElement('button');
+        stopSdkButton.textContent = '停止SDK';
+        stopSdkButton.style.flex = '1';
+        stopSdkButton.style.padding = '7px 0';
+        stopSdkButton.style.backgroundColor = 'rgba(100, 40, 130, 0.8)';
+        stopSdkButton.style.color = '#fff';
+        stopSdkButton.style.border = 'none';
+        stopSdkButton.style.borderRadius = '4px';
+        stopSdkButton.style.cursor = 'pointer';
+        stopSdkButton.style.fontSize = '12px';
+        stopSdkButton.addEventListener('click', () => {
+            // 停止沉浸式翻译SDK
+            stopImmersiveTranslateSDK();
+            
+            // 显示提示信息
+            showLoader(true, '已停止SDK翻译');
+            
+            // 收起面板
+            togglePanel(false);
+        });
+        sdkButtonContainer.appendChild(stopSdkButton);
+        
+        panel.appendChild(sdkButtonContainer);
+        
         // 添加本地翻译设置按钮
         const localTransButton = document.createElement('button');
         localTransButton.textContent = '编辑翻译表';
@@ -730,6 +797,15 @@ function createTranslateUI() {
         versionInfo.style.textAlign = 'right';
         versionInfo.style.marginTop = '8px';
         panel.appendChild(versionInfo);
+        
+        // 添加说明文本
+        const sdkInfoText = document.createElement('div');
+        sdkInfoText.textContent = 'SDK翻译使用沉浸式翻译，适用于复杂文本';
+        sdkInfoText.style.color = '#888';
+        sdkInfoText.style.fontSize = '10px';
+        sdkInfoText.style.marginBottom = '8px';
+        sdkInfoText.style.textAlign = 'center';
+        panel.appendChild(sdkInfoText);
         
         // 添加面板到容器
         container.appendChild(panel);
@@ -1634,6 +1710,78 @@ function addDefaultTranslationsToEditor(textarea: HTMLTextAreaElement): void {
     
     // 更新文本区域
     textarea.value = currentText;
+}
+
+/**
+ * 初始化沉浸式翻译SDK
+ */
+function initImmersiveTranslateSDK(targetLang: string): void {
+    // 移除之前可能存在的SDK脚本
+    const oldScript = document.getElementById('immersive-translate-sdk');
+    if (oldScript) {
+        oldScript.remove();
+    }
+    
+    // 设置SDK配置
+    const sdkConfig = {
+        isAutoTranslate: true,
+        targetLanguage: SDK_LANGUAGE_MAP[targetLang] || 'en',
+        pageRule: {
+            selectors: ["body"], // 翻译整个页面
+            excludeSelectors: [
+                "#translation-ui-container", 
+                "#translation-loader",
+                "script", 
+                "style"
+            ], // 排除翻译工具UI
+            atomicBlockSelectors: [".atomic-translation-block"], // 整体翻译的区域
+            containerMinTextCount: 1, // 降低最小字符数，确保短文本也能被翻译
+            paragraphMinTextCount: 1, // 降低段落最小字符数
+            urlChangeDelay: 100 // 降低延迟时间
+        }
+    };
+    
+    // 定义全局配置对象
+    (window as any).immersiveTranslateConfig = sdkConfig;
+    
+    // 创建脚本元素
+    const script = document.createElement('script');
+    script.id = 'immersive-translate-sdk';
+    script.async = true;
+    script.src = 'https://download.immersivetranslate.com/immersive-translate-sdk-latest.js';
+    
+    // 添加到文档头部
+    document.head.appendChild(script);
+    
+    // 显示加载提示
+    showLoader(true, `正在使用沉浸式翻译SDK翻译为${getLangName(targetLang)}...`);
+    
+    console.log(`已初始化沉浸式翻译SDK，目标语言: ${targetLang}`);
+}
+
+/**
+ * 停止沉浸式翻译SDK
+ */
+function stopImmersiveTranslateSDK(): void {
+    // 移除SDK脚本
+    const sdkScript = document.getElementById('immersive-translate-sdk');
+    if (sdkScript) {
+        sdkScript.remove();
+    }
+    
+    // 移除翻译相关元素
+    const translatedElements = document.querySelectorAll('.immersive-translate-target');
+    translatedElements.forEach(el => {
+        el.remove();
+    });
+    
+    // 移除翻译样式
+    const styleElements = document.querySelectorAll('style[id^="immersive-translate-"]');
+    styleElements.forEach(el => {
+        el.remove();
+    });
+    
+    console.log('已停止沉浸式翻译SDK');
 }
 
 // 导出函数供外部使用
