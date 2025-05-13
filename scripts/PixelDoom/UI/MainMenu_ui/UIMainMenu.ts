@@ -292,11 +292,11 @@ class GameMainScene {
         }
   
         @keyframes buttonShake {
-          0% { transform: translateX(0); }
-          25% { transform: translateX(var(--shake-size)); }
-          50% { transform: translateX(0); }
-          75% { transform: translateX(calc(-1 * var(--shake-size))); }
-          100% { transform: translateX(0); }
+          0% { transform: rotate(0deg); }
+          25% { transform: rotate(var(--shake-size)); }
+          50% { transform: rotate(0deg); }
+          75% { transform: rotate(calc(-1 * var(--shake-size))); }
+          100% { transform: rotate(0deg); }
         }
   
         .game-main-panel {
@@ -697,7 +697,7 @@ class GameMainScene {
     /**
      * 添加按钮晃动效果
      * @param buttonId 按钮的ID
-     * @param size 晃动幅度（像素）
+     * @param size 晃动幅度（角度）
      * @param interval 晃动间隔（毫秒）
      */
     public AddButtonShakeEffect(buttonId: string, size: number, interval: number): void {
@@ -706,8 +706,8 @@ class GameMainScene {
       
       const button = document.getElementById(buttonId);
       if (button) {
-        // 设置晃动幅度
-        button.style.setProperty('--shake-size', `${size}px`);
+        // 设置晃动幅度（现在是角度而不是像素）
+        button.style.setProperty('--shake-size', `${size}deg`);
         
         // 添加晃动样式类
         button.classList.add('shake');
@@ -743,6 +743,12 @@ class GameMainScene {
   function initGameMainScene(): void {
     const gameMainScene = GameMainScene.getInstance();
     gameMainScene.initialize();
+    
+    // 在initialize之后添加晃动效果，确保DOM元素已经创建
+    setTimeout(() => {
+      // 使用角度作为晃动幅度，值改为5度
+      GameMainScene.getInstance().AddButtonShakeEffect('new-game-btn', 5, 800);
+    }, 1000); // 延迟1秒，确保按钮已经完全显示
   }
   
   // 使用SDK提供的初始化入口
