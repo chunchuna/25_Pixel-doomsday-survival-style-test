@@ -203,7 +203,8 @@
 				"items": [
 					"interaction_panel_action_choose_ui",
 					"subtitle_ui",
-					"dialogue_ui"
+					"dialogue_ui",
+					"hudongtishi_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -236,7 +237,8 @@
 					"interaction_panel_action_choose_ui",
 					"subtitle_ui",
 					"dialogue_ui",
-					"mainmenu_ui"
+					"mainmenu_ui",
+					"hudongtishi_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -621,6 +623,14 @@
 									"name": "interaction_panel_action_choose_ui.css",
 									"type": "text/css",
 									"sid": 640873709287311,
+									"file-info": {
+										"purpose": "stylesheet"
+									}
+								},
+								{
+									"name": "hudongtishi_ui.css",
+									"type": "text/css",
+									"sid": 808454330475811,
 									"file-info": {
 										"purpose": "stylesheet"
 									}

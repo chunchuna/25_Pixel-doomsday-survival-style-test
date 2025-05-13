@@ -11,6 +11,22 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.getFirstInstance() == null) return
+
+
+    for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
+        var HuDongTishiInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+            .objects.hudongtishi_ui.createInstance("HuDongTiShi_ui", ClickObjects.x, ClickObjects.y - ClickObjects.height / 2, true)
+
+        ClickObjects.addChild(HuDongTishiInstance);
+    }
+})
+
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 鼠标悬浮在交互物体上
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseOverObject", (e: any) => {
@@ -35,9 +51,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     //点击对象 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
-        
+
         console.log("点击了交互物")
-        
+
         var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
         LastestChooseObject = GetChooseObject;
 
@@ -67,12 +83,22 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         if (DistanceFromLastestObject == null) return
         if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) {
-            
+
             UISubtitleMain.ShowSubtitles("超过了这个物品的交互范围!", 0.5)
             return
         }
 
-        
+        console.log(GetChooseObject.getChildAt(0)?.objectType.name)
+
+        if (GetChooseObject.getChildAt(0)?.objectType.name == "hudongtishi_ui") {
+            //@ts-ignore
+            var Child: InstanceType.HuDongTiShi = GetChooseObject.getChildAt(0);
+            GetChooseObject.removeChild(Child)
+            // 销毁这个元素
+            Child.setContent("", "html", "#HuDongTiShi");
+        }
+
+
         ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
 
 

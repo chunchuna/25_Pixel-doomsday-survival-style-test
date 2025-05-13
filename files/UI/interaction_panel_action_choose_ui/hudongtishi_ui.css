@@ -1,0 +1,108 @@
+#HuDongTiShi {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+/* 内部圆点 */
+.inner-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff27;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.7),
+              inset 0 0 4px #d0d2d3cc;
+  animation: pulseDot 2s infinite ease-in-out, 
+             twitch 3s infinite ease-in-out;
+  z-index: 12;
+}
+
+/* 脉冲环 */
+.pulse-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.192);
+  box-sizing: border-box;
+  animation: pulseRing 2s infinite ease-out;
+  z-index: 11;
+}
+
+.pulse-ring-1 {
+  animation-delay: 0s;
+}
+
+.pulse-ring-2 {
+  animation-delay: 1s;
+}
+
+/* 发光效果层 */
+.glow-effect {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.7) 0%, rgba(215, 241, 252, 0.644) 30%, transparent 70%);
+  border-radius: 50%;
+  animation: glowPulse 3s infinite alternate;
+  opacity: 0.7;
+  z-index: 9;
+}
+
+/* 内部圆点脉动动画 */
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* 内部圆点抖动动画 */
+@keyframes twitch {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  20% {
+    transform: translate(-2px, 1px) scale(1.1);
+  }
+  40% {
+    transform: translate(2px, -1px) scale(1.15);
+  }
+  60% {
+    transform: translate(-1px, -1px) scale(1.1);
+  }
+  80% {
+    transform: translate(1px, 2px) scale(1.05);
+  }
+}
+
+/* 脉冲环扩散动画 */
+@keyframes pulseRing {
+  0% {
+    width: 12px;
+    height: 12px;
+    opacity: 0.8;
+  }
+  100% {
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+  }
+}
+
+/* 发光效果呼吸动画 */
+@keyframes glowPulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
