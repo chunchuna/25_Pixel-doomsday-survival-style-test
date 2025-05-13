@@ -257,7 +257,10 @@ class UIMainMenu {
             <div class="modal-body scrollable">
             <div class="about-wrapper">
               <div class="version-tag">
-                <span class="version-number">v1001</span>
+                <span class="version-number">完全的Demo版本</span>
+                <div class="tech-demo-badge">
+                  <span class="badge-text">🚧 Tech Demo / Prototype 🚧</span>
+                </div>
                 <div class="version-glow"></div>
               </div>
 
@@ -289,9 +292,7 @@ class UIMainMenu {
 
               <div class="about-section">
                 <h2 class="section-title rainbow-text">🏷️About</h2>
-                <div class="tech-demo-badge">
-                  <span class="badge-text">🚧 Tech Demo / Prototype 🚧</span>
-                </div>
+                
                 <p class="about-text typewriter-text">
                   🔧 "这是一个用于测试核心游戏系统的早期版本，欢迎试玩并反馈！"
                 </p>
