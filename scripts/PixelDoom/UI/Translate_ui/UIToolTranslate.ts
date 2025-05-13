@@ -1209,44 +1209,48 @@ function showLocalTranslationEditor(): void {
         }
     });
 
-    // 创建模态框内容
+    // 创建模态框内容 - 缩小整体尺寸
     const modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = 'rgba(30,30,30,0.95)';
-    modalContent.style.padding = '20px';
-    modalContent.style.borderRadius = '8px';
-    modalContent.style.width = '90%';
-    modalContent.style.maxWidth = '800px';
-    modalContent.style.maxHeight = '90%';
+    modalContent.style.backgroundColor = 'rgba(25,25,25,0.95)';
+    modalContent.style.padding = '15px';
+    modalContent.style.borderRadius = '6px';
+    modalContent.style.width = '85%';
+    modalContent.style.maxWidth = '600px'; // 减小最大宽度
+    modalContent.style.maxHeight = '85%';
     modalContent.style.overflow = 'auto';
-    modalContent.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
-    modalContent.style.color = '#ddd';
+    modalContent.style.boxShadow = '0 3px 15px rgba(0,0,0,0.5)';
+    modalContent.style.color = '#ccc';
+    
+    // 添加滚动条样式
+    modalContent.style.scrollbarWidth = 'thin';
+    modalContent.style.scrollbarColor = '#444 #222';
     
     // 确保点击内容区域不会触发模态框关闭
     modalContent.addEventListener('click', (event) => {
         event.stopPropagation();
     });
 
-    // 添加标题
+    // 添加标题 - 减小字体
     const title = document.createElement('h3');
     title.textContent = '翻译表编辑器';
-    title.style.margin = '0 0 20px 0';
-    title.style.color = '#fff';
-    title.style.fontSize = '18px';
+    title.style.margin = '0 0 15px 0';
+    title.style.color = '#ddd';
+    title.style.fontSize = '16px';
     modalContent.appendChild(title);
 
-    // 添加说明
+    // 添加说明 - 减小字体
     const description = document.createElement('p');
     description.innerHTML = '每行一个翻译，格式：<strong>中文/英文/日文/韩文/西班牙文</strong>，使用斜杠分隔。<br>例如：<code>开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego</code>';
-    description.style.marginBottom = '15px';
-    description.style.fontSize = '14px';
-    description.style.color = '#aaa';
+    description.style.marginBottom = '12px';
+    description.style.fontSize = '12px';
+    description.style.color = '#999';
     modalContent.appendChild(description);
 
     // 创建表单
     const form = document.createElement('form');
     form.style.display = 'flex';
     form.style.flexDirection = 'column';
-    form.style.gap = '15px';
+    form.style.gap = '12px';
     
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1273,19 +1277,21 @@ function showLocalTranslationEditor(): void {
         }
     });
 
-    // 添加文本区域
+    // 添加文本区域 - 减小高度和调整样式
     const textarea = document.createElement('textarea');
     textarea.id = 'local-translation-textarea';
     textarea.style.width = '100%';
-    textarea.style.height = '350px';
-    textarea.style.backgroundColor = 'rgba(40, 40, 40, 0.9)';
-    textarea.style.color = '#fff';
-    textarea.style.border = '1px solid #555';
+    textarea.style.height = '300px'; // 减小高度
+    textarea.style.backgroundColor = 'rgba(35, 35, 35, 0.9)';
+    textarea.style.color = '#ccc';
+    textarea.style.border = '1px solid #444';
     textarea.style.borderRadius = '4px';
-    textarea.style.padding = '10px';
+    textarea.style.padding = '8px';
     textarea.style.fontFamily = 'monospace';
-    textarea.style.fontSize = '14px';
+    textarea.style.fontSize = '12px'; // 减小字体
     textarea.style.resize = 'vertical';
+    textarea.style.scrollbarWidth = 'thin';
+    textarea.style.scrollbarColor = '#444 #222';
     textarea.placeholder = '开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego\n设置/Settings/設定/설정/Configuración\n退出/Exit/終了/종료/Salir';
     textarea.readOnly = false; // 确保textarea可编辑
     textarea.disabled = false; // 确保textarea未被禁用
@@ -1323,17 +1329,27 @@ function showLocalTranslationEditor(): void {
     
     form.appendChild(textarea);
     
-    // 添加示例按钮
+    // 添加示例按钮 - 改为黑灰风格
     const addExampleButton = document.createElement('button');
     addExampleButton.type = 'button';
     addExampleButton.textContent = '添加示例翻译';
     addExampleButton.style.alignSelf = 'flex-start';
-    addExampleButton.style.padding = '8px 16px';
-    addExampleButton.style.backgroundColor = '#2c5a7c';
-    addExampleButton.style.color = 'white';
-    addExampleButton.style.border = 'none';
-    addExampleButton.style.borderRadius = '4px';
+    addExampleButton.style.padding = '6px 12px'; // 减小内边距
+    addExampleButton.style.backgroundColor = '#333';
+    addExampleButton.style.color = '#ccc';
+    addExampleButton.style.border = '1px solid #444';
+    addExampleButton.style.borderRadius = '3px';
     addExampleButton.style.cursor = 'pointer';
+    addExampleButton.style.fontSize = '11px'; // 减小字体
+    
+    // 悬停效果
+    addExampleButton.addEventListener('mouseover', () => {
+        addExampleButton.style.backgroundColor = '#3a3a3a';
+    });
+    addExampleButton.addEventListener('mouseout', () => {
+        addExampleButton.style.backgroundColor = '#333';
+    });
+    
     addExampleButton.addEventListener('click', (event) => {
         event.stopPropagation(); // 阻止事件冒泡
         const examples = `开始游戏/Start Game/ゲームスタート/게임 시작/Iniciar juego
@@ -1371,19 +1387,29 @@ function showLocalTranslationEditor(): void {
     const buttonContainer = document.createElement('div');
     buttonContainer.style.display = 'flex';
     buttonContainer.style.justifyContent = 'flex-end';
-    buttonContainer.style.gap = '10px';
-    buttonContainer.style.marginTop = '15px';
+    buttonContainer.style.gap = '8px'; // 减小间距
+    buttonContainer.style.marginTop = '12px';
     
-    // 恢复默认翻译按钮
+    // 恢复默认翻译按钮 - 改为黑灰风格
     const resetButton = document.createElement('button');
     resetButton.type = 'button';
     resetButton.textContent = '恢复默认翻译';
-    resetButton.style.padding = '10px 20px';
-    resetButton.style.backgroundColor = '#8b4513';
-    resetButton.style.color = 'white';
-    resetButton.style.border = 'none';
-    resetButton.style.borderRadius = '4px';
+    resetButton.style.padding = '7px 14px'; // 减小内边距
+    resetButton.style.backgroundColor = '#333';
+    resetButton.style.color = '#ccc';
+    resetButton.style.border = '1px solid #444';
+    resetButton.style.borderRadius = '3px';
     resetButton.style.cursor = 'pointer';
+    resetButton.style.fontSize = '11px'; // 减小字体
+    
+    // 悬停效果
+    resetButton.addEventListener('mouseover', () => {
+        resetButton.style.backgroundColor = '#3a3a3a';
+    });
+    resetButton.addEventListener('mouseout', () => {
+        resetButton.style.backgroundColor = '#333';
+    });
+    
     resetButton.addEventListener('click', (event) => {
         event.stopPropagation(); // 阻止事件冒泡
         
@@ -1402,31 +1428,51 @@ function showLocalTranslationEditor(): void {
     });
     buttonContainer.appendChild(resetButton);
     
-    // 保存按钮
+    // 保存按钮 - 改为黑灰风格
     const saveButton = document.createElement('button');
     saveButton.type = 'submit';
     saveButton.textContent = '保存翻译';
-    saveButton.style.padding = '10px 20px';
-    saveButton.style.backgroundColor = '#2e7d32';
-    saveButton.style.color = 'white';
-    saveButton.style.border = 'none';
-    saveButton.style.borderRadius = '4px';
+    saveButton.style.padding = '7px 14px'; // 减小内边距
+    saveButton.style.backgroundColor = '#444';
+    saveButton.style.color = '#ddd';
+    saveButton.style.border = '1px solid #555';
+    saveButton.style.borderRadius = '3px';
     saveButton.style.cursor = 'pointer';
+    saveButton.style.fontSize = '11px'; // 减小字体
+    
+    // 悬停效果
+    saveButton.addEventListener('mouseover', () => {
+        saveButton.style.backgroundColor = '#4c4c4c';
+    });
+    saveButton.addEventListener('mouseout', () => {
+        saveButton.style.backgroundColor = '#444';
+    });
+    
     saveButton.addEventListener('click', (event) => {
         event.stopPropagation(); // 阻止事件冒泡
     });
     buttonContainer.appendChild(saveButton);
     
-    // 取消按钮
+    // 取消按钮 - 改为黑灰风格
     const cancelButton = document.createElement('button');
     cancelButton.type = 'button';
     cancelButton.textContent = '取消';
-    cancelButton.style.padding = '10px 20px';
-    cancelButton.style.backgroundColor = '#555';
-    cancelButton.style.color = 'white';
-    cancelButton.style.border = 'none';
-    cancelButton.style.borderRadius = '4px';
+    cancelButton.style.padding = '7px 14px'; // 减小内边距
+    cancelButton.style.backgroundColor = '#333';
+    cancelButton.style.color = '#ccc';
+    cancelButton.style.border = '1px solid #444';
+    cancelButton.style.borderRadius = '3px';
     cancelButton.style.cursor = 'pointer';
+    cancelButton.style.fontSize = '11px'; // 减小字体
+    
+    // 悬停效果
+    cancelButton.addEventListener('mouseover', () => {
+        cancelButton.style.backgroundColor = '#3a3a3a';
+    });
+    cancelButton.addEventListener('mouseout', () => {
+        cancelButton.style.backgroundColor = '#333';
+    });
+    
     cancelButton.addEventListener('click', (event) => {
         event.stopPropagation(); // 阻止事件冒泡
         document.body.removeChild(modal);
@@ -1440,6 +1486,27 @@ function showLocalTranslationEditor(): void {
     
     // 自动聚焦到文本区域
     textarea.focus();
+    
+    // 添加全局样式以修改webkit滚动条样式
+    const style = document.createElement('style');
+    style.textContent = `
+        #local-translation-editor-modal ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #local-translation-editor-modal ::-webkit-scrollbar-track {
+            background: #222;
+            border-radius: 4px;
+        }
+        #local-translation-editor-modal ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        #local-translation-editor-modal ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 /**
