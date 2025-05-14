@@ -51,6 +51,15 @@ export var DIA_CONTENT_test002 = `
 		左->choose:你好4
 左->结束测试`
 
+
+export var DIA_CONTENT_LUYINGYI_01=`左->一张湿漉漉的露营椅子...
+右->choose:蹲下来查看
+	左->昨晚下了雨，露营椅子沾满了雨水
+右->choose:挪动
+	左->被固定在了泥土里，无法挪动
+右->choose:离开
+`
+
 async function code_goto_testscript_002() {
 	try {
 		// 第一步：关闭当前对话

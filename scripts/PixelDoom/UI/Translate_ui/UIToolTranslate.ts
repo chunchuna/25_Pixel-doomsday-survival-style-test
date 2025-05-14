@@ -3,18 +3,11 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("开始初始化翻译工具");
-    // 直接调用创建按钮的函数
+    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="MainMenu") return
     createTranslateUI();
     ShowArrowPointLanague();
     
 })
-
-// real-time-translator.ts
-
-/**
- * 实时翻译工具 - 本地翻译版
- * 持续监控DOM变化，自动处理新添加的文本
- */
 
 // 可用的语言列表
 const AVAILABLE_LANGUAGES = [

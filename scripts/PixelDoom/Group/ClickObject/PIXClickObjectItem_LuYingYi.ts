@@ -6,7 +6,7 @@ import { DialogueSystem } from "../../UI/dialogue_ui/UIDialogue.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
-import { DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
+import { DIA_CONTENT_LUYINGYI_01, DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -53,7 +53,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
             // @ts-ignore
-            DialogueMainController.ShowDialogue(DIA_CONTENT_test001)
+            DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
 
         }
 
