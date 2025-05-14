@@ -15,20 +15,19 @@ function initGameMainScene(): void {
   const gameMainScene = UIMainMenu.getInstance();
   gameMainScene.initialize();
   UIMainMenu.getInstance().MenuAddButton("语言", () => {
-
   })
 
 
   setTimeout(() => {
 
     UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800);
-    const aboutModal = document.getElementById('about-modal');
-    //@ts-ignore
-    aboutModal.classList.remove('closing');
-    //@ts-ignore
-    aboutModal.classList.add('active');
+    // const aboutModal = document.getElementById('about-modal');
+    // //@ts-ignore
+    // aboutModal.classList.remove('closing');
+    // //@ts-ignore
+    // aboutModal.classList.add('active');
 
-    UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
+    //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
   }, 1000); // 延迟1秒，确保按钮已经完全显示
 
 
