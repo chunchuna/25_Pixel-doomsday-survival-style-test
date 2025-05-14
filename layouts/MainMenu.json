@@ -22,12 +22,12 @@
 						1
 					],
 					"backgroundColor": [
-						0.3686274509803922,
-						0.3686274509803922,
-						0.3686274509803922,
+						0,
+						0,
+						0,
 						1
 					],
-					"isTransparent": true,
+					"isTransparent": false,
 					"parallaxX": 1,
 					"parallaxY": 1,
 					"scaleRate": 1,
