@@ -26,7 +26,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
         var ButtonConetent: string = e.data.ButtonContent_;
-        if (ButtonConetent == "use") {
+        if (ButtonConetent == "使用") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
 
@@ -41,7 +41,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             UISubtitleMain.ShowSubtitles("你正在使用 [露营椅子]", 5)
         }
 
-        if (ButtonConetent == "destroy") {
+        if (ButtonConetent == "销毁") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
             //GL_COMMAND_.ACTION_OPEN_();
@@ -49,7 +49,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             UISubtitleMain.ShowSubtitles('<span style="color: red;">*此物品无法被破坏</span>', 5)
         }
 
-        if (ButtonConetent == "find") {
+        if (ButtonConetent == "调查") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
             // @ts-ignore
