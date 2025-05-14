@@ -746,5 +746,5 @@
 	},
 	"viewportWidth": 640,
 	"viewportHeight": 480,
-	"firstLayout": "Level"
+	"firstLayout": "MainMenu"
 }

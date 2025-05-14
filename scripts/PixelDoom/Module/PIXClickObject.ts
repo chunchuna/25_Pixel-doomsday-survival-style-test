@@ -84,7 +84,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (DistanceFromLastestObject == null) return
         if (DistanceFromLastestObject > ClickObject.ClickObjectClickMaxDistance) {
 
-            UISubtitleMain.ShowSubtitles("超过了这个物品的交互范围!", 0.5)
+            UISubtitleMain.ShowSubtitles("超过了这个物品的交互范围!", 2)
             return
         }
 
