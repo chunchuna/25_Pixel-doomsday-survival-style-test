@@ -579,7 +579,7 @@ function createTranslateUI() {
         
         // 添加面板标题
         const title = document.createElement('div');
-        title.textContent = 'Immersive Translate';
+        title.textContent = 'Translate';
         title.style.color = '#ddd';
         title.style.fontSize = '14px';
         title.style.fontWeight = 'bold';
@@ -589,50 +589,13 @@ function createTranslateUI() {
         title.style.paddingBottom = '8px';
         panel.appendChild(title);
         
-        // 添加语言选择
-        const langLabel = document.createElement('div');
-        langLabel.textContent = 'Select target language:';
-        langLabel.style.color = '#bbb';
-        langLabel.style.fontSize = '12px';
-        langLabel.style.marginBottom = '5px';
-        panel.appendChild(langLabel);
-        
-        const langSelect = document.createElement('select');
-        langSelect.id = 'lang-select';
-        langSelect.style.width = '100%';
-        langSelect.style.padding = '6px';
-        langSelect.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
-        langSelect.style.color = '#fff';
-        langSelect.style.border = '1px solid rgba(80, 80, 80, 0.5)';
-        langSelect.style.borderRadius = '4px';
-        langSelect.style.marginBottom = '12px';
-        langSelect.style.fontSize = '12px';
-        
-        // 添加语言选项
-        AVAILABLE_LANGUAGES.forEach(lang => {
-            const option = document.createElement('option');
-            option.value = lang.code;
-            option.text = lang.name;
-            if (lang.code === currentLanguage) {
-                option.selected = true;
-            }
-            langSelect.appendChild(option);
-        });
-        
-        // 当语言改变时更新国旗
-        langSelect.addEventListener('change', () => {
-            updateFlagButton(flagButton, langSelect.value);
-        });
-        
-        panel.appendChild(langSelect);
-        
         // SDK翻译按钮容器
         const sdkButtonContainer = document.createElement('div');
         sdkButtonContainer.style.marginBottom = '12px';
         
-        // SDK翻译按钮
+        // SDK翻译按钮 - 修改为"Launch translation"
         const sdkTranslateButton = document.createElement('button');
-        sdkTranslateButton.textContent = 'Start Translation';
+        sdkTranslateButton.textContent = 'Launch translation';
         sdkTranslateButton.style.width = '100%';
         sdkTranslateButton.style.padding = '10px 0';
         sdkTranslateButton.style.backgroundColor = '#333';
@@ -654,100 +617,24 @@ function createTranslateUI() {
         });
         
         sdkTranslateButton.addEventListener('click', () => {
-            const selectedLang = langSelect.value;
-            
-            // 如果选择的是中文，提示用户选择其他语言
-            if (selectedLang === 'zh-CN') {
-                //alert('Please select a non-Chinese target language');
-                return;
-            }
-            
-            currentLanguage = selectedLang;
-            
-            // 更新国旗显示
-            updateFlagButton(flagButton, selectedLang);
+            // 默认使用英语作为目标语言
+            const targetLang = 'en';
             
             // 使用沉浸式翻译SDK
-            initImmersiveTranslateSDK(selectedLang);
+            initImmersiveTranslateSDK(targetLang);
             
             // 收起面板
             togglePanel(false);
+            
+            // 显示提示弹窗
+            showTranslationTipsModal();
         });
         sdkButtonContainer.appendChild(sdkTranslateButton);
         panel.appendChild(sdkButtonContainer);
         
-        // 添加停止翻译按钮
-        const stopSdkButton = document.createElement('button');
-        stopSdkButton.textContent = 'Stop Translation';
-        stopSdkButton.style.width = '100%';
-        stopSdkButton.style.padding = '8px 0';
-        stopSdkButton.style.backgroundColor = '#333';
-        stopSdkButton.style.color = '#ddd';
-        stopSdkButton.style.border = '1px solid #444';
-        stopSdkButton.style.borderRadius = '4px';
-        stopSdkButton.style.cursor = 'pointer';
-        stopSdkButton.style.fontSize = '12px';
-        stopSdkButton.style.marginBottom = '12px';
-        stopSdkButton.style.transition = 'all 0.2s ease';
-        
-        // 添加悬停效果
-        stopSdkButton.addEventListener('mouseover', () => {
-            stopSdkButton.style.backgroundColor = '#444';
-        });
-        
-        stopSdkButton.addEventListener('mouseout', () => {
-            stopSdkButton.style.backgroundColor = '#333';
-        });
-        
-        stopSdkButton.addEventListener('click', () => {
-            // 停止沉浸式翻译SDK
-            stopImmersiveTranslateSDK();
-            
-            // 显示提示信息
-            showLoader(true, 'Translation stopped');
-            
-            // 收起面板
-            togglePanel(false);
-        });
-        panel.appendChild(stopSdkButton);
-        
-        // 添加翻译使用教程按钮
-        const tutorialButton = document.createElement('button');
-        tutorialButton.textContent = 'Translation Guide';
-        tutorialButton.style.width = '100%';
-        tutorialButton.style.padding = '8px 0';
-        tutorialButton.style.backgroundColor = '#222';
-        tutorialButton.style.color = '#bbb';
-        tutorialButton.style.border = '1px solid #444';
-        tutorialButton.style.borderRadius = '4px';
-        tutorialButton.style.cursor = 'pointer';
-        tutorialButton.style.fontSize = '12px';
-        tutorialButton.style.marginBottom = '10px';
-        tutorialButton.style.transition = 'all 0.2s ease';
-        
-        // 添加悬停效果
-        tutorialButton.addEventListener('mouseover', () => {
-            tutorialButton.style.backgroundColor = '#333';
-            tutorialButton.style.color = '#ddd';
-        });
-        
-        tutorialButton.addEventListener('mouseout', () => {
-            tutorialButton.style.backgroundColor = '#222';
-            tutorialButton.style.color = '#bbb';
-        });
-        
-        tutorialButton.addEventListener('click', () => {
-            // 打开沉浸式翻译使用教程页面
-            window.open('https://immersivetranslate.com/en/docs/usage/', '_blank');
-            
-            // 收起面板
-            togglePanel(false);
-        });
-        panel.appendChild(tutorialButton);
-        
         // 添加版本信息
         const versionInfo = document.createElement('div');
-        versionInfo.textContent = 'Immersive Translate v3.0';
+        versionInfo.textContent = 'by chunchun';
         versionInfo.style.color = 'rgba(150, 150, 150, 0.6)';
         versionInfo.style.fontSize = '10px';
         versionInfo.style.textAlign = 'center';
@@ -813,6 +700,144 @@ function createTranslateUI() {
     } catch (error) {
         console.error("Failed to create translation UI:", error);
     }
+}
+
+/**
+ * 显示翻译提示弹窗
+ */
+function showTranslationTipsModal(): void {
+    // 创建模态框容器
+    const modal = document.createElement('div');
+    modal.id = 'translation-tips-modal';
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '10000';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.4s ease';
+    
+    // 创建模态框内容
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = 'rgba(30,30,30,0.95)';
+    modalContent.style.padding = '20px';
+    modalContent.style.borderRadius = '8px';
+    modalContent.style.maxWidth = '500px';
+    modalContent.style.width = '85%';
+    modalContent.style.transform = 'translateY(-20px)';
+    modalContent.style.transition = 'transform 0.4s ease';
+    modalContent.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+    modalContent.style.color = '#ddd';
+    
+    // 添加内容
+    const content = document.createElement('div');
+    content.style.marginBottom = '15px';
+    content.style.lineHeight = '1.5';
+    content.style.fontSize = '14px';
+    content.innerHTML = `<div class="translation-guide" style="animation: fadeIn 0.5s ease-in;">
+  <h3 style="color: #4CAF50; animation: pulse 2s infinite;">❗ addon Setup Guide</h3>
+  <ol style="list-style-type: decimal; padding-left: 20px;">
+    <li>After activation, locate the <span style="color: #FF5722;">addon icon</span> in the <span style="background: blue;">lower-right corner</span></li>
+    <li>Click the icon and select the <span style="color: #2196F3;">⚙ settings gear</span></li>
+    <li>Choose your native language in the configuration panel</li>
+    <li style="border-left: 3px solid #9C27B0; padding-left: 10px;">
+      Enable <span style="font-weight: bold;">Bilingual Mode</span> 
+      <span style="color: #888;">(located left of "Show Original" button)</span>
+    </li>
+  </ol>
+
+  <div style="background: #f8f9fa; padding: 10px; margin-top: 15px;">
+    <p>✨ All features are <span style="color: #4CAF50; text-decoration: underline;">FREE</span> to use</p>
+    <p>📧 Support: <a href="mailto:578806739@qq.com" style="color: #2196F3;"> chunchun_ 578806739@qq.com</a></p>
+  </div>
+</div>
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.translation-guide {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #eee;
+}
+</style>`;
+    modalContent.appendChild(content);
+    
+    // 添加确认按钮
+    const okButton = document.createElement('button');
+    okButton.textContent = 'OK';
+    okButton.style.backgroundColor = '#333';
+    okButton.style.color = '#fff';
+    okButton.style.border = '1px solid #444';
+    okButton.style.padding = '8px 20px';
+    okButton.style.borderRadius = '4px';
+    okButton.style.cursor = 'pointer';
+    okButton.style.float = 'right';
+    okButton.style.marginTop = '5px';
+    okButton.style.transition = 'background-color 0.2s ease';
+    
+    // 添加悬停效果
+    okButton.addEventListener('mouseover', () => {
+        okButton.style.backgroundColor = '#444';
+    });
+    
+    okButton.addEventListener('mouseout', () => {
+        okButton.style.backgroundColor = '#333';
+    });
+    
+    // 关闭模态框
+    okButton.addEventListener('click', () => {
+        modal.style.opacity = '0';
+        modalContent.style.transform = 'translateY(-20px)';
+        
+        // 延迟移除元素
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        }, 400);
+    });
+    
+    modalContent.appendChild(okButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // 触发过渡效果
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modalContent.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // 点击模态框背景关闭
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.opacity = '0';
+            modalContent.style.transform = 'translateY(-20px)';
+            
+            // 延迟移除元素
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 400);
+        }
+    });
 }
 
 /**
@@ -1665,6 +1690,7 @@ function initImmersiveTranslateSDK(targetLang: string): void {
             excludeSelectors: [
                 "#translation-ui-container", 
                 "#translation-loader",
+                "#translation-tips-modal",
                 "script", 
                 "style"
             ], // 排除翻译工具UI
@@ -1700,15 +1726,7 @@ function initImmersiveTranslateSDK(targetLang: string): void {
     // 添加到文档头部
     document.head.appendChild(script);
     
-    // 显示加载提示
-    showLoader(true, `Translating Chinese to ${getLangName(targetLang)} (dual-language mode)...`);
-    
     console.log(`Initialized Immersive Translate SDK, source: Chinese, target: ${targetLang}, dual-language mode`);
-    
-    // 不再调用hideSDKUIElements，允许SDK UI显示
-    // setTimeout(() => {
-    //     hideSDKUIElements();
-    // }, 5000);
 }
 
 /**
@@ -1773,9 +1791,10 @@ function stopImmersiveTranslateSDK(): void {
  * 显示指向语言切换按钮的气泡提示
  */
 function ShowArrowPointLanague(): void {
-    console.log("Showing language selection bubble tooltip");
+    // console.log("Function ShowArrowPointLanague disabled");
+    // // 该功能已禁用，不再显示气泡提示
     
-    // 先检查气泡是否已存在
+    // // 先检查气泡是否已存在
     if (document.getElementById('language-bubble-tooltip')) {
         return; // 如果气泡已存在，不再创建
     }
@@ -1903,6 +1922,7 @@ function ShowArrowPointLanague(): void {
     
     // 窗口大小改变时更新气泡位置
     window.addEventListener('resize', updateBubblePosition);
+    return;
 }
 
 /**
