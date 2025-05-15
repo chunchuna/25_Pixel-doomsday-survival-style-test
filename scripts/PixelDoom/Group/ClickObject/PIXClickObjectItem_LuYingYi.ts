@@ -11,9 +11,13 @@ import { inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UI
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
-
+var ZhangPengInventory: Item[] = [
+    
+]
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    ZhangPengInventory =[{ itemName: "温暖的衣服", itemDescribe: "充满温度的衣服，可以保暖", itemLevel: ItemLevel.B },
+        { itemName: "手机", itemDescribe: "可以用于通讯和照明的只能工具", itemLevel: ItemLevel.S }]
     // @ts-ignore
     PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
 })
@@ -63,11 +67,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
-            var ZhangPengInventory :Item[]=[
-                { itemName: "温暖的衣服", itemDescribe: "充满温度的衣服，可以保暖", itemLevel: ItemLevel.B },
-                { itemName: "手机", itemDescribe: "可以用于通讯和照明的只能工具", itemLevel: ItemLevel.S }
-            ]
-            inventoryManager.ShowOtherInventory(ZhangPengInventory,10,5)
+
+            inventoryManager.ShowOtherInventory(ZhangPengInventory, 10, 5)
             alert("点击查看库存")
 
         }
@@ -75,6 +76,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     })
 })
+
 
 
 /** 使用GL_COMMAND 的交互 */

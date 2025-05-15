@@ -28,6 +28,21 @@ interface SlotPosition {
     count: number;
 }
 
+// 库存数据接口（用于序列化）
+interface SerializedInventory {
+    items: SerializedItem[];
+    rows: number;
+    columns: number;
+}
+
+// 序列化的物品接口
+interface SerializedItem {
+    name: string;
+    desc: string;
+    level: string;
+    count: number;
+}
+
 // 库存UI管理类
 class UIInventory {
     private static instance: UIInventory;
@@ -96,7 +111,9 @@ class UIInventory {
 
     // 显示其他库存（如NPC或箱子库存）
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
-        this.otherInventoryData = [...inventoryArray]; // 创建数组副本
+        // 创建深拷贝，避免引用共享问题
+        this.otherInventoryData = inventoryArray.map(item => ({...item}));
+        
         // 保存行列信息，用于渲染和后续操作
         this.otherInventoryRows = rows;
         this.otherInventoryColumns = columns;
@@ -1556,7 +1573,7 @@ class UIInventory {
         if (action === 'add') {
             // 添加物品到其他库存数组
             for (let i = 0; i < count; i++) {
-                this.otherInventoryData.push({ ...item }); // 使用对象浅拷贝，确保不共享引用
+                this.otherInventoryData.push({...item}); // 使用对象深拷贝，确保不共享引用
             }
         } else {
             // 从其他库存数组移除物品
@@ -1571,9 +1588,124 @@ class UIInventory {
             }
         }
     }
+
+    // 序列化库存数据为字符串
+    public SerializeInventory(inventoryArray: Item[], rows: number, columns: number): string {
+        // 分组处理物品，统计数量
+        const groupedItems = this.groupItems(inventoryArray);
+        const serializedItems: SerializedItem[] = [];
+        
+        // 将分组后的物品转为序列化格式
+        for (const [itemName, items] of groupedItems) {
+            if (items.length > 0) {
+                const item = items[0]; // 取第一个物品作为模板
+                serializedItems.push({
+                    name: item.itemName,
+                    desc: item.itemDescribe,
+                    level: item.itemLevel,
+                    count: items.length
+                });
+            }
+        }
+        
+        // 创建完整的序列化数据
+        const data: SerializedInventory = {
+            items: serializedItems,
+            rows: rows,
+            columns: columns
+        };
+        
+        // 返回JSON字符串
+        return JSON.stringify(data);
+    }
+    
+    // 从字符串反序列化库存数据
+    public DeserializeInventory(data: string): { inventory: Item[], rows: number, columns: number } {
+        try {
+            // 解析JSON数据
+            const parsedData = JSON.parse(data) as SerializedInventory;
+            const items: Item[] = [];
+            
+            // 重建物品数组
+            for (const serializedItem of parsedData.items) {
+                // 创建物品模板
+                const item: Item = {
+                    itemName: serializedItem.name,
+                    itemDescribe: serializedItem.desc,
+                    itemLevel: serializedItem.level as ItemLevel
+                };
+                
+                // 按数量添加物品
+                for (let i = 0; i < serializedItem.count; i++) {
+                    // 创建物品的深拷贝，避免共享引用
+                    items.push({...item});
+                }
+            }
+            
+            return {
+                inventory: items,
+                rows: parsedData.rows,
+                columns: parsedData.columns
+            };
+        } catch (error) {
+            console.error("反序列化库存数据失败:", error);
+            return { inventory: [], rows: 4, columns: 6 }; // 默认值
+        }
+    }
+
+    // 简化版序列化函数 - 仅序列化物品数组
+    public SerializeItemsOnly(inventoryArray: Item[]): string {
+        // 分组处理物品，统计数量
+        const groupedItems = this.groupItems(inventoryArray);
+        const serializedItems: SerializedItem[] = [];
+        
+        // 将分组后的物品转为序列化格式
+        for (const [itemName, items] of groupedItems) {
+            if (items.length > 0) {
+                const item = items[0]; // 取第一个物品作为模板
+                serializedItems.push({
+                    name: item.itemName,
+                    desc: item.itemDescribe,
+                    level: item.itemLevel,
+                    count: items.length
+                });
+            }
+        }
+        
+        // 直接返回物品数组的JSON字符串
+        return JSON.stringify(serializedItems);
+    }
+
+    // 简化版反序列化函数 - 仅处理物品数组
+    public DeserializeItemsOnly(data: string): Item[] {
+        try {
+            // 解析JSON数据
+            const serializedItems = JSON.parse(data) as SerializedItem[];
+            const items: Item[] = [];
+            
+            // 重建物品数组
+            for (const serializedItem of serializedItems) {
+                // 创建物品模板
+                const item: Item = {
+                    itemName: serializedItem.name,
+                    itemDescribe: serializedItem.desc,
+                    itemLevel: serializedItem.level as ItemLevel
+                };
+                
+                // 按数量添加物品
+                for (let i = 0; i < serializedItem.count; i++) {
+                    // 创建物品的深拷贝，避免共享引用
+                    items.push({...item});
+                }
+            }
+            
+            return items;
+        } catch (error) {
+            console.error("反序列化物品数据失败:", error);
+            return []; // 返回空数组
+        }
+    }
 }
-
-
 
 // 导出公共接口
 export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): void {
@@ -1582,6 +1714,24 @@ export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, co
 
 export function ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
     return inventoryManager.ShowOtherInventory(inventoryArray, rows, columns);
+}
+
+// 添加序列化和反序列化函数到导出接口
+export function SerializeInventory(inventoryArray: Item[], rows: number, columns: number): string {
+    return inventoryManager.SerializeInventory(inventoryArray, rows, columns);
+}
+
+export function DeserializeInventory(data: string): { inventory: Item[], rows: number, columns: number } {
+    return inventoryManager.DeserializeInventory(data);
+}
+
+// 添加简化版序列化和反序列化函数到导出接口（仅物品数组）
+export function SerializeItemsOnly(inventoryArray: Item[]): string {
+    return inventoryManager.SerializeItemsOnly(inventoryArray);
+}
+
+export function DeserializeItemsOnly(data: string): Item[] {
+    return inventoryManager.DeserializeItemsOnly(data);
 }
 
 // 添加一个清理函数，用于测试时重置库存系统
