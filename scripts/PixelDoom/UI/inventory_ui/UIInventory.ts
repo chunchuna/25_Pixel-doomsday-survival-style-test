@@ -327,80 +327,23 @@ class UIInventory {
             return;
         }
         
-        // 计算从点击到释放的时间
-        const clickDuration = Date.now() - this.clickStartTime;
-        
-        // 如果没有拖拽项或没有开始拖拽，则不处理
+        // 如果没有临时拖拽处理器，则清理全局状态
+        // 注意：物品拖拽主要由startDrag中创建的mouseUpHandler处理
         if (!this.draggedItem) {
             this.clickStartPos = null;
             this.isDragging = false;
-            return;
         }
-        
-        // 如果是单击而不是拖拽（短时间内且未移动太多）
-        if (!this.isDragging && clickDuration < 300) {
-            // 这里可以添加单击物品的处理逻辑，例如使用物品等
-            console.log("物品被单击:", this.draggedItem.data.itemName);
-            
-            // 清理拖拽状态
-            if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
-                this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
-            }
-            
-            // 移除拖拽样式
-            if (this.draggedItem.element) {
-                this.draggedItem.element.classList.remove('dragging');
-            }
-            
-            this.draggedItem = null;
-            this.draggedItemGhost = null;
-            this.clickStartPos = null;
-            this.isDragging = false;
-            return;
-        }
-        
-        // 处理拖拽放置
-        if (this.draggedItemGhost) {
-            // 查找目标格子
-            const targetInfo = this.findSlotUnderMouse(event);
-            
-            if (targetInfo && targetInfo.slotIndex !== null) {
-                // 同一库存内的物品交换
-                if (targetInfo.inventoryType === this.draggedItem.inventoryType) {
-                    // 处理主库存的拖拽
-                    if (this.draggedItem.inventoryType === 'main') {
-                        this.handleMainInventoryDrop(targetInfo.slotIndex);
-                    } 
-                    // 处理其他库存的拖拽
-                    else if (this.draggedItem.inventoryType === 'other') {
-                        this.handleOtherInventoryDrop(targetInfo.slotIndex);
-                    }
-                } 
-                // 从主库存到其他库存
-                else if (this.draggedItem.inventoryType === 'main' && targetInfo.inventoryType === 'other') {
-                    this.handleItemTransfer('main-to-other', this.draggedItem.sourceSlot, targetInfo.slotIndex);
-                }
-                // 从其他库存到主库存
-                else if (this.draggedItem.inventoryType === 'other' && targetInfo.inventoryType === 'main') {
-                    this.handleItemTransfer('other-to-main', this.draggedItem.sourceSlot, targetInfo.slotIndex);
-                }
-            }
-            
-            // 清理拖拽状态
-            if (this.draggedItemGhost.parentNode) {
-                this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
-            }
-        }
-        
-        this.draggedItem = null;
-        this.draggedItemGhost = null;
-        this.clickStartPos = null;
-        this.isDragging = false;
     }
 
     // 处理主库存拖拽
     private handleMainInventoryDrop(targetSlot: number): void {
         if (!this.draggedItem) return;
+        
+        // 如果源格子和目标格子相同，不做任何处理（避免物品消失）
+        if (targetSlot === this.draggedItem.sourceSlot) {
+            console.log("源格子和目标格子相同，不进行操作");
+            return;
+        }
         
         // 如果目标格子有物品
         if (this.slotPositions[targetSlot].item) {
@@ -451,20 +394,54 @@ class UIInventory {
     private findSlotUnderMouse(event: MouseEvent): { slotIndex: number | null, inventoryType: 'main' | 'other' | null } {
         const slots = document.querySelectorAll('.inventory-slot');
         
+        // 添加容错距离（像素）
+        const tolerance = 5;
+        
         for (let i = 0; i < slots.length; i++) {
             const rect = slots[i].getBoundingClientRect();
             
+            // 使用容错扩展区域检查
             if (
-                event.clientX >= rect.left &&
-                event.clientX <= rect.right &&
-                event.clientY >= rect.top &&
-                event.clientY <= rect.bottom
+                event.clientX >= rect.left - tolerance &&
+                event.clientX <= rect.right + tolerance &&
+                event.clientY >= rect.top - tolerance &&
+                event.clientY <= rect.bottom + tolerance
             ) {
                 const slotIndex = parseInt(slots[i].getAttribute('data-slot-index') || '-1');
                 const inventoryType = slots[i].getAttribute('data-inventory-type') as 'main' | 'other';
                 
                 return { slotIndex, inventoryType };
             }
+        }
+        
+        // 如果没有找到匹配的格子，尝试找到最近的一个格子
+        let closestSlot = null;
+        let minDistance = Number.MAX_VALUE;
+        
+        for (let i = 0; i < slots.length; i++) {
+            const rect = slots[i].getBoundingClientRect();
+            
+            // 计算鼠标与格子中心的距离
+            const centerX = (rect.left + rect.right) / 2;
+            const centerY = (rect.top + rect.bottom) / 2;
+            const distance = Math.sqrt(
+                Math.pow(event.clientX - centerX, 2) + 
+                Math.pow(event.clientY - centerY, 2)
+            );
+            
+            // 如果距离在一定范围内(约30px)且比之前找到的更近
+            if (distance < minDistance && distance < 30) {
+                minDistance = distance;
+                closestSlot = slots[i];
+            }
+        }
+        
+        // 如果找到了最近的格子
+        if (closestSlot) {
+            const slotIndex = parseInt(closestSlot.getAttribute('data-slot-index') || '-1');
+            const inventoryType = closestSlot.getAttribute('data-inventory-type') as 'main' | 'other';
+            
+            return { slotIndex, inventoryType };
         }
         
         return { slotIndex: null, inventoryType: null };
@@ -476,6 +453,12 @@ class UIInventory {
         this.clickStartPos = { x: event.clientX, y: event.clientY };
         this.clickStartTime = Date.now();
         this.isDragging = false;
+        
+        // 标记源格子的样式
+        const sourceSlotElement = element.closest('.inventory-slot');
+        if (sourceSlotElement) {
+            sourceSlotElement.classList.add('source-slot');
+        }
         
         // 创建拖拽时的物品幽灵元素
         this.draggedItemGhost = document.createElement('div');
@@ -503,6 +486,155 @@ class UIInventory {
             sourceSlot: sourceSlot,
             inventoryType: inventoryType // 添加标记来源库存类型
         };
+        
+        // 添加鼠标移动监听，用于高亮可以放置的格子
+        const mouseMoveHandler = (e: MouseEvent) => {
+            if (this.isDragging) {
+                // 移除所有格子的目标高亮
+                document.querySelectorAll('.inventory-slot.target-slot').forEach(slot => {
+                    slot.classList.remove('target-slot');
+                });
+                
+                // 获取当前鼠标下的格子并高亮
+                const targetInfo = this.findSlotUnderMouse(e);
+                if (targetInfo && targetInfo.slotIndex !== null) {
+                    const targetSlots = document.querySelectorAll('.inventory-slot');
+                    for (let i = 0; i < targetSlots.length; i++) {
+                        const slot = targetSlots[i];
+                        const slotIndex = parseInt(slot.getAttribute('data-slot-index') || '-1');
+                        const slotInventoryType = slot.getAttribute('data-inventory-type');
+                        
+                        if (slotIndex === targetInfo.slotIndex && slotInventoryType === targetInfo.inventoryType) {
+                            slot.classList.add('target-slot');
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        
+        // 添加一次性鼠标移动监听
+        document.addEventListener('mousemove', mouseMoveHandler);
+        
+        // 添加鼠标释放的事件监听，用于清理
+        const mouseUpHandler = (e: MouseEvent) => {
+            // 移除监听器
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+            
+            // 移除所有格子的目标高亮
+            document.querySelectorAll('.inventory-slot.target-slot').forEach(slot => {
+                slot.classList.remove('target-slot');
+            });
+            
+            // 移除源格子样式
+            document.querySelectorAll('.inventory-slot.source-slot').forEach(slot => {
+                slot.classList.remove('source-slot');
+            });
+            
+            // 计算从点击到释放的时间
+            const clickDuration = Date.now() - this.clickStartTime;
+            
+            // 如果是单击而不是拖拽（短时间内且未移动太多）
+            if (!this.isDragging && clickDuration < 300) {
+                // 这里可以添加单击物品的处理逻辑，例如使用物品等
+                console.log("物品被单击:", item.itemName);
+                
+                // 清理拖拽状态
+                if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
+                    this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+                }
+                
+                // 清理全局状态
+                this.draggedItem = null;
+                this.draggedItemGhost = null;
+                this.clickStartPos = null;
+                this.isDragging = false;
+                return;
+            }
+            
+            // 处理拖拽放置
+            if (this.draggedItemGhost && this.draggedItem) {
+                // 查找目标格子
+                const targetInfo = this.findSlotUnderMouse(e);
+                
+                if (targetInfo && targetInfo.slotIndex !== null) {
+                    // 检查是否拖回原来的格子（来源格子与目标格子相同）
+                    if (targetInfo.inventoryType === this.draggedItem.inventoryType && 
+                        targetInfo.slotIndex === this.draggedItem.sourceSlot) {
+                        // 拖回原位置，不需要任何操作，只需重新渲染以确保物品显示正确
+                        console.log("物品放回原位置");
+                        if (this.draggedItem.inventoryType === 'main') {
+                            this.renderMainInventory();
+                        } else {
+                            this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                        }
+                        
+                        // 添加回弹动画效果
+                        if (this.draggedItem.element) {
+                            this.draggedItem.element.classList.add('slot-bounce');
+                            setTimeout(() => {
+                                const elements = document.querySelectorAll('.inventory-item.slot-bounce');
+                                elements.forEach(el => el.classList.remove('slot-bounce'));
+                            }, 300);
+                        }
+                    }
+                    // 同一库存内的物品交换
+                    else if (targetInfo.inventoryType === this.draggedItem.inventoryType) {
+                        // 处理主库存的拖拽
+                        if (this.draggedItem.inventoryType === 'main') {
+                            this.handleMainInventoryDrop(targetInfo.slotIndex);
+                        } 
+                        // 处理其他库存的拖拽
+                        else if (this.draggedItem.inventoryType === 'other') {
+                            this.handleOtherInventoryDrop(targetInfo.slotIndex);
+                        }
+                    } 
+                    // 从主库存到其他库存
+                    else if (this.draggedItem.inventoryType === 'main' && targetInfo.inventoryType === 'other') {
+                        this.handleItemTransfer('main-to-other', this.draggedItem.sourceSlot, targetInfo.slotIndex);
+                    }
+                    // 从其他库存到主库存
+                    else if (this.draggedItem.inventoryType === 'other' && targetInfo.inventoryType === 'main') {
+                        this.handleItemTransfer('other-to-main', this.draggedItem.sourceSlot, targetInfo.slotIndex);
+                    }
+                } else {
+                    // 未找到目标格子，物品回到原位置
+                    console.log("物品回到原位置");
+                    // 检查是主库存还是其他库存
+                    if (this.draggedItem.inventoryType === 'main') {
+                        // 主库存不需要做任何事情，物品已经在原位置
+                        this.renderMainInventory(); // 重新渲染确保显示正确
+                    } else if (this.draggedItem.inventoryType === 'other') {
+                        // 其他库存不需要做任何事情，物品已经在原位置
+                        this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                    }
+                    
+                    // 添加回弹动画效果
+                    if (this.draggedItem.element) {
+                        this.draggedItem.element.classList.add('slot-bounce');
+                        setTimeout(() => {
+                            const elements = document.querySelectorAll('.inventory-item.slot-bounce');
+                            elements.forEach(el => el.classList.remove('slot-bounce'));
+                        }, 300);
+                    }
+                }
+                
+                // 清理拖拽状态
+                if (this.draggedItemGhost.parentNode) {
+                    this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+                }
+                
+                // 清理全局状态
+                this.draggedItem = null;
+                this.draggedItemGhost = null;
+                this.clickStartPos = null;
+                this.isDragging = false;
+            }
+        };
+        
+        // 添加一次性鼠标释放监听
+        document.addEventListener('mouseup', mouseUpHandler);
     }
 
     // 根据品质排序库存
@@ -1099,6 +1231,23 @@ class UIInventory {
                 }
             }
             
+            /* 物品回弹动画 */
+            @keyframes slotBounce {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.15);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+            
+            .slot-bounce {
+                animation: slotBounce 0.3s ease;
+            }
+            
             /* 滚动条容器 */
             .inventory-scroll-container {
                 overflow-y: auto;
@@ -1201,6 +1350,20 @@ class UIInventory {
             
             .slot-highlight.empty {
                 background-color: #3a3a3a;
+            }
+            
+            /* 源格子样式（拖拽来源） */
+            .source-slot {
+                background-color: rgba(70, 70, 90, 0.5);
+                border: 1px dashed #777;
+                opacity: 0.8;
+            }
+            
+            /* 目标格子样式（可放置区域） */
+            .target-slot {
+                background-color: rgba(70, 90, 70, 0.5);
+                border: 2px solid #88aa88;
+                box-shadow: 0 0 8px rgba(100, 255, 100, 0.3);
             }
             
             /* 物品样式 */
@@ -1348,6 +1511,9 @@ class UIInventory {
     // 处理从一个库存到另一个库存的物品转移
     private handleItemTransfer(direction: 'main-to-other' | 'other-to-main', sourceSlot: number, targetSlot: number): void {
         if (!this.draggedItem) return;
+        
+        // 添加调试日志
+        console.log(`物品传输: ${direction}，从槽位 ${sourceSlot} 到槽位 ${targetSlot}`);
         
         // 找到当前正在显示的其他库存，并获取其数据
         if (!this.otherInventoryInstance) {
@@ -1602,6 +1768,12 @@ class UIInventory {
     // 处理其他库存内部的拖拽
     private handleOtherInventoryDrop(targetSlot: number): void {
         if (!this.draggedItem) return;
+        
+        // 如果源格子和目标格子相同，不做任何处理（避免物品消失）
+        if (targetSlot === this.draggedItem.sourceSlot) {
+            console.log("源格子和目标格子相同，不进行操作");
+            return;
+        }
         
         const otherInventorySlots = this.getOtherInventorySlots();
         const sourceSlot = this.draggedItem.sourceSlot;

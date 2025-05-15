@@ -57,14 +57,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         }
 
-        if (ButtonConetent == "查看库存") {
-            if (LastestChooseObject == null) return
-            if (LastestChooseObject.instVars.ID != "ZhangPeng") return
-            // @ts-ignore
-            //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
-           
-        }
-
     })
 })
 

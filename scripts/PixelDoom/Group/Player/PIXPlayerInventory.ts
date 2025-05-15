@@ -32,10 +32,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     const updatePlayerInventory = (items: Item[]) => {
         // 更新内存中的库存数组
         PLAYER_INVENTORY_ITEMS = items;
-        
         // 将最新库存数据序列化并更新全局变量
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
-        console.log("玩家库存已更新", items.length, "个物品");
     };
     
     // 绑定主库存，并监听物品变化
@@ -56,7 +54,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         e.saveData = {
             "PlayerInventoryData": PLAYER_INVENTORY_ITEMS
         }
-        console.log("保存库存数据:", PLAYER_INVENTORY_ITEMS.length, "个物品");
     });
     
     // 加载游戏数据
@@ -70,7 +67,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = 
                 SerializeItemsOnly(PLAYER_INVENTORY_ITEMS);
             
-            console.log("已加载库存数据:", PLAYER_INVENTORY_ITEMS.length, "个物品");
             
             // 重新绑定库存UI，确保UI与数据同步
             if (inventoryManager) {
@@ -83,15 +79,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             }
         } else {
             console.warn("加载的存档中没有库存数据");
-        }
-    });
-
-
-    document.addEventListener('keydown', (event: KeyboardEvent) => {
-        // 示例检测
-        if (event.key === 'm') {
-            console.log("当前库存字符串:", pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
-            console.log("当前库存物品数:", PLAYER_INVENTORY_ITEMS.length);
         }
     });
 })
