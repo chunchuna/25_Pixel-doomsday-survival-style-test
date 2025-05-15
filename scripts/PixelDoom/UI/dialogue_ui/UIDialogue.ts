@@ -24,20 +24,18 @@ interface DialogueChoice {
 
 
 export class DialogueSystem {
-    private dialoguePanel: HTMLElement;
-    private dialogueContent: HTMLElement;
-    private choicesContainer: HTMLElement;
-    private closeButton: HTMLElement;
+    private dialoguePanel!: HTMLElement;
+    private dialogueContent!: HTMLElement;
+    private choicesContainer!: HTMLElement;
+    private closeButton!: HTMLElement;
     private isTyping: boolean = false;
     private typewriterSpeed: number = 30; // 打字机效果速度 (ms)
     private mainDialogueLines: DialogueLine[] = []; // 存储主对话流程
     private currentMainIndex: number = 0; // 当前主对话索引
 
     constructor() {
-        this.dialoguePanel = document.getElementById('dialogue-panel') as HTMLElement;
-        this.dialogueContent = document.getElementById('dialogue-content') as HTMLElement;
-        this.choicesContainer = document.getElementById('choices-container') as HTMLElement;
-        this.closeButton = document.getElementById('close-button') as HTMLElement;
+        // 创建对话UI元素
+        this.createDialogueUI();
         
         // 添加关闭按钮事件
         this.closeButton.addEventListener('click', () => {
@@ -65,6 +63,244 @@ export class DialogueSystem {
         document.getElementById('close-dialogue')?.addEventListener('click', () => {
             this.CloseDialogue();
         });
+    }
+
+    // 创建对话UI元素
+    private createDialogueUI(): void {
+        // 创建对话面板
+        this.dialoguePanel = document.createElement('div');
+        this.dialoguePanel.id = 'dialogue-panel';
+        
+        // 创建对话头部
+        const dialogueHeader = document.createElement('div');
+        dialogueHeader.id = 'dialogue-header';
+        
+        // 创建标题
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = '调查';
+        dialogueHeader.appendChild(title);
+        
+        // 创建关闭按钮
+        this.closeButton = document.createElement('button');
+        this.closeButton.id = 'close-button';
+        this.closeButton.textContent = '×';
+        dialogueHeader.appendChild(this.closeButton);
+        
+        // 创建对话内容区域
+        this.dialogueContent = document.createElement('div');
+        this.dialogueContent.id = 'dialogue-content';
+        
+        // 创建选择容器
+        this.choicesContainer = document.createElement('div');
+        this.choicesContainer.id = 'choices-container';
+        
+        // 组装对话面板
+        this.dialoguePanel.appendChild(dialogueHeader);
+        this.dialoguePanel.appendChild(this.dialogueContent);
+        this.dialoguePanel.appendChild(this.choicesContainer);
+        
+        // 添加到文档
+        document.body.appendChild(this.dialoguePanel);
+        
+        // 添加样式
+        this.addDialogueStyles();
+    }
+    
+    // 添加对话系统的样式
+    private addDialogueStyles(): void {
+        const style = document.createElement('style');
+        style.textContent = `/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #222;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+} */
+
+#dialogue-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 10%;
+    max-width: 800px;
+    min-width: 300px;
+    height: 60vh;
+    min-height: 400px;
+    background-color: rgba(10, 10, 10, 0.9);
+    border: 2px solid #555;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1001;
+}
+
+#dialogue-panel.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#dialogue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: rgba(34, 34, 34, 0.95);
+    border-bottom: 1px solid #333;
+    height: 15px;
+}
+
+.title {
+    font-weight: 200;
+    color: #ddd;
+    font-size: 0.5em;
+}
+
+#close-button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 0.5em;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 2px 6px;
+    line-height: 1;
+}
+
+#close-button:hover {
+    color: #fff;
+}
+
+#dialogue-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: #666 #222;
+}
+
+#dialogue-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#dialogue-content::-webkit-scrollbar-track {
+    background: #222;
+}
+
+#dialogue-content::-webkit-scrollbar-thumb {
+    background-color: #666;
+    border-radius: 4px;
+}
+
+.dialogue-line {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    max-width: 80%;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+    font-size: 16px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.dialogue-left {
+    background-color: #2a2a2a;
+    color: #ddd;
+    align-self: flex-start;
+    margin-right: auto;
+    border-left: 3px solid #6a9955;
+}
+
+.dialogue-right {
+    background-color: #3a3a3a;
+    color: #fff;
+    align-self: flex-end;
+    margin-left: auto;
+    border-right: 3px solid #569cd6;
+    text-align: right;
+}
+
+.character-name {
+    font-weight: bold;
+    color: #f0db4f;
+    margin-right: 5px;
+}
+
+#choices-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    gap: 8px;
+    background-color: #1c1c1c;
+}
+
+.choice-button {
+    background-color: #3c3c3c;
+    color: #ddd;
+    border: 1px solid #555;
+    border-left: 3px solid #f0db4f;
+    padding: 10px 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.choice-button:hover {
+    background-color: #4c4c4c;
+    color: #fff;
+}
+
+/* Demo controls */
+#demo-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#demo-controls button {
+    background-color: #444;
+    color: #ddd;
+    border: 1px solid #666;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#demo-controls button:hover {
+    background-color: #555;
+}
+            `;
+        document.head.appendChild(style);
     }
 
     // 解析对话文本并显示对话面板

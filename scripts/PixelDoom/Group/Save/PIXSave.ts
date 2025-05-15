@@ -10,20 +10,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     })
 })
 
-
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
    
-    
     document.addEventListener('keydown', (event: KeyboardEvent) => {
         // 示例检测
         if (event.key === 'p') {
             Save.SaveGame("test2")
         }
-
         if (event.key === 'o') {
             Save.LoadGame("test2")
         }
-
     });
 
 })
@@ -34,7 +30,6 @@ export class Save {
         return pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.LastestSaveGameJson;
 
     }
-
     static LoadGame(Slot: string) {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("LoadGame", Slot)
     }
@@ -43,6 +38,5 @@ export class Save {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("LoadGameByJson",Json)
 
     }
-
 
 }

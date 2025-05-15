@@ -5,67 +5,7 @@
 			"name": "dialogue_ui",
 			"overriden": 0,
 			"subLayers": [],
-			"instances": [
-				{
-					"type": "dialogue_ui",
-					"properties": {
-						"tag": "div",
-						"content": "\n<body>\n    <div id=\"dialogue-panel\">\n        <div id=\"dialogue-header\">\n            <div class=\"title\">调查</div>\n            <button id=\"close-button\">×</button>\n        </div>\n        <div id=\"dialogue-content\">\n            <!-- Dialogue content will be inserted here -->\n        </div>\n        <div id=\"choices-container\">\n            <!-- Choices will be inserted here -->\n        </div>\n    </div>\n   \n\n</body>\n",
-						"content-type": "html",
-						"initially-visible": true,
-						"id": "",
-						"class": "",
-						"allow-context-menu": false,
-						"stop-input-events": "no",
-						"origin": "top-left",
-						"set-color": true,
-						"default-color": [
-							0,
-							0,
-							0,
-							0
-						],
-						"set-background-color": false,
-						"default-background-color": [
-							1,
-							1,
-							1,
-							0
-						],
-						"auto-font-size": true,
-						"allow-text-selection": false,
-						"style-attribute": ""
-					},
-					"uid": 119,
-					"sid": 157196742590236,
-					"tags": "",
-					"instanceVariables": {},
-					"behaviors": {},
-					"instanceFolderItem": {
-						"sid": 157196742590236,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
-					},
-					"showing": true,
-					"locked": false,
-					"world": {
-						"x": 191,
-						"y": 172,
-						"width": 173,
-						"height": 83,
-						"originX": 0,
-						"originY": 0,
-						"color": [
-							1,
-							1,
-							1,
-							1
-						]
-					}
-				}
-			],
+			"instances": [],
 			"sid": 716552535626073,
 			"effectTypes": [],
 			"isInitiallyVisible": true,
@@ -97,15 +37,7 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [
-			{
-				"sid": 157196742590236,
-				"expanded": true,
-				"folderName": "",
-				"indexInFolder": -1,
-				"folderNestingLevel": -1
-			}
-		],
+		"items": [],
 		"subfolders": []
 	},
 	"sid": 565074524041951,

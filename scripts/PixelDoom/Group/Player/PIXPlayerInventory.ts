@@ -1,11 +1,11 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UIInventory.js";
 
-export var  PLAYER_INVENTORY_ITEMS :Item[];
+export var PLAYER_INVENTORY_ITEMS: Item[];
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 定义玩家的初始库存 
-    PLAYER_INVENTORY_ITEMS =[{ itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
+    PLAYER_INVENTORY_ITEMS = [{ itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
     { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
@@ -23,7 +23,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS,30,5,"I");
-    
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS, 30, 5, "I");
+
+})
+
+// 处理数据保存 
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("save", (e) => {
+        e.saveData = {
+            "PlayerInventoryData": PLAYER_INVENTORY_ITEMS
+        }
+    })
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load", (e) => {
+        PLAYER_INVENTORY_ITEMS = e.saveData.PlayerInventoryData;
+    })
+
 })

@@ -210,8 +210,6 @@
 			{
 				"items": [
 					"interaction_panel_action_choose_ui",
-					"subtitle_ui",
-					"dialogue_ui",
 					"hudongtishi_ui"
 				],
 				"subfolders": [],
