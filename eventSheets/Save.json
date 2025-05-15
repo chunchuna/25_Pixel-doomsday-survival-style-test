@@ -24,7 +24,6 @@
 					"id": "save",
 					"objectClass": "System",
 					"sid": 477696047037866,
-					"disabled": true,
 					"parameters": {
 						"slot": "Slot"
 					}
@@ -32,7 +31,8 @@
 				{
 					"id": "save-to-json",
 					"objectClass": "System",
-					"sid": 988649875725063
+					"sid": 988649875725063,
+					"disabled": true
 				}
 			],
 			"sid": 517356097953300
@@ -89,7 +89,16 @@
 				{
 					"id": "load-from-json",
 					"objectClass": "System",
-					"sid": 116857005378357,
+					"sid": 165428442641166,
+					"parameters": {
+						"json": "Slot"
+					}
+				},
+				{
+					"id": "load-from-json",
+					"objectClass": "System",
+					"sid": 772911548557146,
+					"disabled": true,
 					"parameters": {
 						"json": "LastestSaveGameJsonFromLoad"
 					}
@@ -117,14 +126,17 @@
 					}
 				},
 				{
-					"type": "script",
-					"language": "typescript",
-					"script": [
-						"alert(\"成功保存\")"
-					]
+					"id": "log",
+					"objectClass": "Web",
+					"sid": 424522204769928,
+					"parameters": {
+						"type": "log",
+						"message": "SaveStateJSON"
+					}
 				}
 			],
-			"sid": 256538913300807
+			"sid": 256538913300807,
+			"disabled": true
 		}
 	],
 	"sid": 966362096878495
