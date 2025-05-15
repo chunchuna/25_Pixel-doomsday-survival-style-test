@@ -7,7 +7,7 @@ import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
 import { DIA_CONTENT_LUYINGYI_01, DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
-import { DeserializeItemsOnly, inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UIInventory.js";
+import { DeserializeItemsOnly, inventoryManager, ItemLevel, type Item, SerializeItemsOnly, type InventoryUpdateCallback } from "../../UI/inventory_ui/UIInventory.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -71,11 +71,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
             var InventoryInstance: InstanceType.InventoryData = LastestChooseObject;
-            var InventoryData =DeserializeItemsOnly(InventoryInstance.instVars.InventoryData);
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 5)
-
-
-
+            var InventoryData = DeserializeItemsOnly(InventoryInstance.instVars.InventoryData);
+            
+            // 创建更新回调，指定实例和变量名
+            const updateInfo: InventoryUpdateCallback = {
+                instance: InventoryInstance,
+                varName: "InventoryData"
+            };
+            
+            // 传入更新回调参数
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 5, updateInfo);
         }
 
 

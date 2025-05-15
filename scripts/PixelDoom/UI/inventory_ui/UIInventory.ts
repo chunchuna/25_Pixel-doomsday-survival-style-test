@@ -43,6 +43,13 @@ interface SerializedItem {
     count: number;
 }
 
+// 添加实例更新回调接口
+interface InventoryUpdateCallback {
+    instance: any;
+    varName?: string;
+    updateMethod?: (instance: any, items: Item[]) => void;
+}
+
 // 库存UI管理类
 class UIInventory {
     private static instance: UIInventory;
@@ -76,6 +83,9 @@ class UIInventory {
     
     // 添加一个变量来存储关闭其他库存的函数
     private closeOtherInventoryFunc: (() => any) | null = null;
+
+    // 添加一个变量来存储更新回调
+    private updateCallback: InventoryUpdateCallback | null = null;
 
     private constructor() {
         this.initStyles();
@@ -116,11 +126,14 @@ class UIInventory {
     }
 
     // 显示其他库存（如NPC或箱子库存）
-    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
+    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback): { close: () => void } {
         // 如果已有打开的其他库存，先关闭它
         if (this.closeOtherInventoryFunc) {
             this.closeOtherInventoryFunc();
         }
+        
+        // 保存实例更新信息
+        this.updateCallback = updateInfo || null;
         
         // 保存原始库存数组的引用
         this.originalInventoryArray = inventoryArray;
@@ -191,6 +204,9 @@ class UIInventory {
             
             // 同步更新原始数组
             this.syncOriginalInventoryArray();
+            
+            // 调用实例更新回调，将数据更新回实例变量
+            this.updateInstanceInventory();
             
             // 清空关闭函数引用
             this.closeOtherInventoryFunc = null;
@@ -1771,6 +1787,25 @@ class UIInventory {
     private findCloseOtherInventoryFunction(): (() => any) | null {
         return this.closeOtherInventoryFunc;
     }
+
+    // 添加更新实例变量的方法
+    private updateInstanceInventory(): void {
+        if (!this.updateCallback) return;
+        
+        const instance = this.updateCallback.instance;
+        if (!instance) return;
+        
+        // 将当前库存数据序列化后更新到实例变量
+        const serializedData = this.SerializeItemsOnly(this.otherInventoryData);
+        
+        if (this.updateCallback.updateMethod) {
+            // 使用自定义更新方法
+            this.updateCallback.updateMethod(instance, this.otherInventoryData);
+        } else if (this.updateCallback.varName) {
+            // 使用变量名更新实例变量
+            instance.instVars[this.updateCallback.varName] = serializedData;
+        }
+    }
 }
 
 // 导出公共接口
@@ -1778,8 +1813,13 @@ export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, co
     inventoryManager.BindPlayerMainInventory(inventoryArray, rows, columns, key);
 }
 
-export function ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
-    return inventoryManager.ShowOtherInventory(inventoryArray, rows, columns);
+export function ShowOtherInventory(
+    inventoryArray: Item[], 
+    rows: number, 
+    columns: number, 
+    updateInfo?: InventoryUpdateCallback
+): { close: () => void } {
+    return inventoryManager.ShowOtherInventory(inventoryArray, rows, columns, updateInfo);
 }
 
 // 添加序列化和反序列化函数到导出接口
@@ -1848,3 +1888,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     // BindPlayerMainInventory(PlayerItems, 5, 6, "i");
 });
+
+// 导出实例更新回调接口
+export type { InventoryUpdateCallback };
