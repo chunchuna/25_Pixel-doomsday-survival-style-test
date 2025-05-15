@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 /** 使用 UI 交互 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 用于存储当前打开的库存关闭函数
-    let currentInventoryCloser: (() => void) | null = null;
+   
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
@@ -71,15 +71,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
 
-            // 关闭之前可能打开的库存
-            if (currentInventoryCloser) {
-                currentInventoryCloser();
-            }
-
             // 保存关闭函数，当库存关闭时会更新ZhangPengInventory数组
-            const { close } = inventoryManager.ShowOtherInventory(ZhangPengInventory, 10, 5)
-            currentInventoryCloser = close;
-            //alert("点击查看库存")
+            inventoryManager.ShowOtherInventory(ZhangPengInventory, 10, 5)
+           
+           
 
         }
 

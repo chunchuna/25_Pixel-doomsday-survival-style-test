@@ -73,6 +73,9 @@ class UIInventory {
     
     // 添加一个变量来存储原始库存数组的引用
     private originalInventoryArray: Item[] | null = null;
+    
+    // 添加一个变量来存储关闭其他库存的函数
+    private closeOtherInventoryFunc: (() => any) | null = null;
 
     private constructor() {
         this.initStyles();
@@ -114,9 +117,14 @@ class UIInventory {
 
     // 显示其他库存（如NPC或箱子库存）
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
+        // 如果已有打开的其他库存，先关闭它
+        if (this.closeOtherInventoryFunc) {
+            this.closeOtherInventoryFunc();
+        }
+        
         // 保存原始库存数组的引用
         this.originalInventoryArray = inventoryArray;
-
+        
         // 创建深拷贝，避免引用共享问题
         this.otherInventoryData = inventoryArray.map(item => ({...item}));
         
@@ -153,8 +161,20 @@ class UIInventory {
             }
         }, 10); // 短延迟以确保DOM更新
 
+        // 添加Escape键关闭库存的监听
+        const escapeListener = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && this.otherInventoryInstance) {
+                closeOtherInventory();
+                document.removeEventListener('keydown', escapeListener);
+            }
+        };
+        document.addEventListener('keydown', escapeListener);
+
         // 创建关闭函数
         const closeOtherInventory = () => {
+            // 移除Escape键监听
+            document.removeEventListener('keydown', escapeListener);
+            
             if (this.otherInventoryInstance) {
                 // 添加关闭动画
                 this.otherInventoryInstance.classList.remove('inventory-open');
@@ -172,9 +192,15 @@ class UIInventory {
             // 同步更新原始数组
             this.syncOriginalInventoryArray();
             
+            // 清空关闭函数引用
+            this.closeOtherInventoryFunc = null;
+            
             // 返回更新后的库存数组
             return this.otherInventoryData;
         };
+        
+        // 保存关闭函数的引用
+        this.closeOtherInventoryFunc = closeOtherInventory;
 
         // 返回关闭方法和获取当前库存数据的方法
         return { 
@@ -575,7 +601,9 @@ class UIInventory {
             this.mainInventoryContainer,
             this.mainInventoryData,
             this.mainInventoryRows,
-            this.mainInventoryColumns
+            this.mainInventoryColumns,
+            // 传递一个标识，表示这是主库存
+            false
         );
     }
 
@@ -586,47 +614,15 @@ class UIInventory {
                 this.otherInventoryInstance,
                 this.otherInventoryData,
                 rows,
-                columns
+                columns,
+                // 传递一个标识，表示这是其他库存
+                true
             );
-            
-            // 获取关闭按钮并添加关闭处理
-            const closeButton = this.otherInventoryInstance.querySelector('.close-button') as HTMLButtonElement;
-            if (closeButton) {
-                // 移除可能存在的旧事件处理器
-                const newCloseButton = closeButton.cloneNode(true) as HTMLButtonElement;
-                closeButton.parentNode?.replaceChild(newCloseButton, closeButton);
-                
-                // 添加点击事件，确保在关闭时更新外部数组
-                newCloseButton.addEventListener('click', () => {
-                    if (this.otherInventoryInstance) {
-                        // 更新外部数组
-                        const originalArray = this.getOriginalInventoryArray();
-                        if (originalArray) {
-                            originalArray.length = 0; // 清空原数组
-                            this.otherInventoryData.forEach(item => {
-                                originalArray.push({...item}); // 添加最新的物品数据（深拷贝）
-                            });
-                        }
-                        
-                        // 添加关闭动画
-                        this.otherInventoryInstance.classList.remove('inventory-open');
-                        this.otherInventoryInstance.classList.add('inventory-close');
-                        
-                        // 监听动画结束后移除元素
-                        this.otherInventoryInstance.addEventListener('animationend', () => {
-                            if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
-                                this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
-                                this.otherInventoryInstance = null;
-                            }
-                        }, { once: true });
-                    }
-                });
-            }
         }
     }
 
     // 通用渲染库存方法
-    private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number): void {
+    private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number, isOtherInventory: boolean = false): void {
         // 清空容器，但保留拖拽句柄
         const dragHandle = container.querySelector('.inventory-drag-handle');
         container.innerHTML = '';
@@ -639,7 +635,7 @@ class UIInventory {
         headerDiv.className = 'inventory-header';
 
         // 根据容器类型创建不同的标题和按钮
-        if (container === this.mainInventoryContainer) {
+        if (!isOtherInventory) {
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
             titleSpan.textContent = '物品库存';
@@ -651,7 +647,7 @@ class UIInventory {
 
             headerDiv.appendChild(titleSpan);
             headerDiv.appendChild(sortButton);
-        } else if (this.otherInventoryInstance === container) {
+        } else {
             // 添加其他库存的标题
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
@@ -662,18 +658,10 @@ class UIInventory {
             closeButton.className = 'close-button';
             closeButton.textContent = '关闭';
             closeButton.onclick = () => {
-                if (this.otherInventoryInstance) {
-                    // 添加关闭动画
-                    this.otherInventoryInstance.classList.remove('inventory-open');
-                    this.otherInventoryInstance.classList.add('inventory-close');
-                    
-                    // 监听动画结束后移除元素
-                    this.otherInventoryInstance.addEventListener('animationend', () => {
-                        if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
-                            this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
-                            this.otherInventoryInstance = null;
-                        }
-                    }, { once: true });
+                // 获取关闭函数，这是一个全局函数
+                const closeFunc = this.findCloseOtherInventoryFunction();
+                if (closeFunc) {
+                    closeFunc();
                 }
             };
 
@@ -1777,6 +1765,11 @@ class UIInventory {
                 this.originalInventoryArray!.push({...item});
             });
         }
+    }
+
+    // 获取关闭其他库存的函数
+    private findCloseOtherInventoryFunction(): (() => any) | null {
+        return this.closeOtherInventoryFunc;
     }
 }
 
