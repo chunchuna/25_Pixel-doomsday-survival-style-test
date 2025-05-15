@@ -401,6 +401,20 @@
 									],
 									"subfolders": [],
 									"name": "ClickObject"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXPlayerInventory.ts",
+											"type": "application/typescript",
+											"sid": 672261203235743,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "Player"
 								}
 							],
 							"name": "Group"

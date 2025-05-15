@@ -18,6 +18,8 @@ import "./PixelDoom/Module/PIXCharacterAudio.js"
 import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js"
 import "./PixelDoom/Module/PIXSortObject.js"
 
+import "./PixelDoom/Group/Player/PIXPlayerInventory.js"
+
 import "./PixelDoom/Module/PIXClickObject.js"
 // ClickObject
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
