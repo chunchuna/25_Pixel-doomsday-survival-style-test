@@ -44,6 +44,10 @@ class UIInventory {
     private slotPositions: SlotPosition[] = []; // 存储每个格子的位置和物品信息
     private draggedItem: { element: HTMLElement, data: Item, count: number, sourceSlot: number } | null = null;
     private draggedItemGhost: HTMLElement | null = null;
+    // 添加新变量跟踪点击状态
+    private clickStartPos: { x: number, y: number } | null = null;
+    private clickStartTime: number = 0;
+    private isDragging: boolean = false;
 
     private constructor() {
         this.initStyles();
@@ -156,70 +160,119 @@ class UIInventory {
         
         // 处理物品拖拽
         if (this.draggedItem && this.draggedItemGhost) {
-            this.draggedItemGhost.style.left = `${event.clientX - 30}px`;
-            this.draggedItemGhost.style.top = `${event.clientY - 30}px`;
+            // 检查是否应该开始拖拽（移动超过5像素）
+            if (!this.isDragging && this.clickStartPos) {
+                const dx = Math.abs(event.clientX - this.clickStartPos.x);
+                const dy = Math.abs(event.clientY - this.clickStartPos.y);
+                
+                if (dx > 5 || dy > 5) {
+                    this.isDragging = true;
+                    // 显示拖拽幽灵元素
+                    if (this.draggedItemGhost) {
+                        this.draggedItemGhost.style.display = 'flex';
+                    }
+                }
+            }
+            
+            if (this.isDragging) {
+                this.draggedItemGhost.style.left = `${event.clientX - 30}px`;
+                this.draggedItemGhost.style.top = `${event.clientY - 30}px`;
+            }
         }
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
     private handleMouseUp(event: MouseEvent): void {
-        if (!this.draggedItem || !this.draggedItemGhost) return;
+        // 计算从点击到释放的时间
+        const clickDuration = Date.now() - this.clickStartTime;
         
-        // 查找目标格子
-        const targetSlot = this.findSlotUnderMouse(event);
+        // 如果没有拖拽项或没有开始拖拽，则不处理
+        if (!this.draggedItem) {
+            this.clickStartPos = null;
+            this.isDragging = false;
+            return;
+        }
         
-        if (targetSlot !== null) {
-            // 如果目标格子有物品
-            if (this.slotPositions[targetSlot].item) {
-                // 相同物品，合并数量
-                if (this.slotPositions[targetSlot].item!.itemName === this.draggedItem.data.itemName) {
-                    // 检查合并后是否超过64
-                    const totalCount = this.slotPositions[targetSlot].count + this.draggedItem.count;
-                    if (totalCount <= 64) {
-                        // 可以完全合并
-                        this.slotPositions[targetSlot].count = totalCount;
-                        // 清空原始格子
-                        this.slotPositions[this.draggedItem.sourceSlot].item = null;
-                        this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+        // 如果是单击而不是拖拽（短时间内且未移动太多）
+        if (!this.isDragging && clickDuration < 300) {
+            // 这里可以添加单击物品的处理逻辑，例如使用物品等
+            console.log("物品被单击:", this.draggedItem.data.itemName);
+            
+            // 清理拖拽状态
+            if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
+                this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+            }
+            
+            // 移除拖拽样式
+            if (this.draggedItem.element) {
+                this.draggedItem.element.classList.remove('dragging');
+            }
+            
+            this.draggedItem = null;
+            this.draggedItemGhost = null;
+            this.clickStartPos = null;
+            this.isDragging = false;
+            return;
+        }
+        
+        // 处理拖拽放置
+        if (this.draggedItemGhost) {
+            // 查找目标格子
+            const targetSlot = this.findSlotUnderMouse(event);
+            
+            if (targetSlot !== null) {
+                // 如果目标格子有物品
+                if (this.slotPositions[targetSlot].item) {
+                    // 相同物品，合并数量
+                    if (this.slotPositions[targetSlot].item!.itemName === this.draggedItem.data.itemName) {
+                        // 检查合并后是否超过64
+                        const totalCount = this.slotPositions[targetSlot].count + this.draggedItem.count;
+                        if (totalCount <= 64) {
+                            // 可以完全合并
+                            this.slotPositions[targetSlot].count = totalCount;
+                            // 清空原始格子
+                            this.slotPositions[this.draggedItem.sourceSlot].item = null;
+                            this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+                        } else {
+                            // 部分合并
+                            this.slotPositions[targetSlot].count = 64;
+                            this.slotPositions[this.draggedItem.sourceSlot].count = totalCount - 64;
+                        }
                     } else {
-                        // 部分合并
-                        this.slotPositions[targetSlot].count = 64;
-                        this.slotPositions[this.draggedItem.sourceSlot].count = totalCount - 64;
+                        // 不同物品，交换位置
+                        const tempItem = this.slotPositions[targetSlot].item;
+                        const tempCount = this.slotPositions[targetSlot].count;
+                        
+                        this.slotPositions[targetSlot].item = this.draggedItem.data;
+                        this.slotPositions[targetSlot].count = this.draggedItem.count;
+                        
+                        this.slotPositions[this.draggedItem.sourceSlot].item = tempItem;
+                        this.slotPositions[this.draggedItem.sourceSlot].count = tempCount;
                     }
                 } else {
-                    // 不同物品，交换位置
-                    const tempItem = this.slotPositions[targetSlot].item;
-                    const tempCount = this.slotPositions[targetSlot].count;
-                    
+                    // 目标格子为空，直接放置
                     this.slotPositions[targetSlot].item = this.draggedItem.data;
                     this.slotPositions[targetSlot].count = this.draggedItem.count;
                     
-                    this.slotPositions[this.draggedItem.sourceSlot].item = tempItem;
-                    this.slotPositions[this.draggedItem.sourceSlot].count = tempCount;
+                    // 清空原始格子
+                    this.slotPositions[this.draggedItem.sourceSlot].item = null;
+                    this.slotPositions[this.draggedItem.sourceSlot].count = 0;
                 }
-            } else {
-                // 目标格子为空，直接放置
-                this.slotPositions[targetSlot].item = this.draggedItem.data;
-                this.slotPositions[targetSlot].count = this.draggedItem.count;
                 
-                // 清空原始格子
-                this.slotPositions[this.draggedItem.sourceSlot].item = null;
-                this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+                // 重新渲染库存
+                this.renderMainInventory();
             }
             
-            // 重新渲染库存
-            this.renderMainInventory();
-        } else {
-            // 如果没有放在有效格子上，物品返回原位
-            // 可选：实现物品丢弃逻辑
+            // 清理拖拽状态
+            if (this.draggedItemGhost.parentNode) {
+                this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+            }
         }
         
-        // 清理拖拽状态
-        if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
-            this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
-        }
         this.draggedItem = null;
         this.draggedItemGhost = null;
+        this.clickStartPos = null;
+        this.isDragging = false;
     }
     
     // 查找鼠标下方的格子
@@ -243,7 +296,12 @@ class UIInventory {
     }
     
     // 开始拖拽物品
-    private startDrag(item: Item, count: number, sourceSlot: number, element: HTMLElement): void {
+    private startDrag(item: Item, count: number, sourceSlot: number, element: HTMLElement, event: MouseEvent): void {
+        // 记录点击开始位置和时间
+        this.clickStartPos = { x: event.clientX, y: event.clientY };
+        this.clickStartTime = Date.now();
+        this.isDragging = false;
+        
         // 创建拖拽时的物品幽灵元素
         this.draggedItemGhost = document.createElement('div');
         this.draggedItemGhost.className = 'dragged-item';
@@ -256,6 +314,9 @@ class UIInventory {
         this.draggedItemGhost.style.left = `${rect.left}px`;
         this.draggedItemGhost.style.top = `${rect.top}px`;
         
+        // 初始时隐藏幽灵元素，直到确认是拖拽而非点击
+        this.draggedItemGhost.style.display = 'none';
+        
         // 添加到文档中
         document.body.appendChild(this.draggedItemGhost);
         
@@ -266,9 +327,6 @@ class UIInventory {
             count: count,
             sourceSlot: sourceSlot
         };
-        
-        // 添加正在拖拽的视觉效果
-        element.classList.add('dragging');
     }
 
     // 根据品质排序库存
@@ -577,7 +635,7 @@ class UIInventory {
         slot.addEventListener('mousedown', (e) => {
             // 只响应左键点击
             if (e.button === 0) {
-                this.startDrag(item, count, slotIndex, itemElement);
+                this.startDrag(item, count, slotIndex, itemElement, e);
                 e.preventDefault(); // 防止选中文本
             }
         });
@@ -1013,7 +1071,8 @@ export function CleanupInventorySystem(): void {
 }
 
 // 重新导出类型
-export type { ItemLevel, Item };
+export type {Item}
+export {ItemLevel}
 export let inventoryManager: any;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
