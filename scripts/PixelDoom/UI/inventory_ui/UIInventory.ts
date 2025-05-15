@@ -70,6 +70,9 @@ class UIInventory {
     private isDraggingWindow: boolean = false;
     private draggedWindow: HTMLDivElement | null = null;
     private windowDragStartPos: { x: number, y: number, windowX: number, windowY: number } | null = null;
+    
+    // 添加一个变量来存储原始库存数组的引用
+    private originalInventoryArray: Item[] | null = null;
 
     private constructor() {
         this.initStyles();
@@ -111,6 +114,9 @@ class UIInventory {
 
     // 显示其他库存（如NPC或箱子库存）
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
+        // 保存原始库存数组的引用
+        this.originalInventoryArray = inventoryArray;
+
         // 创建深拷贝，避免引用共享问题
         this.otherInventoryData = inventoryArray.map(item => ({...item}));
         
@@ -162,6 +168,9 @@ class UIInventory {
                     }
                 }, { once: true });
             }
+            
+            // 同步更新原始数组
+            this.syncOriginalInventoryArray();
             
             // 返回更新后的库存数组
             return this.otherInventoryData;
@@ -579,6 +588,40 @@ class UIInventory {
                 rows,
                 columns
             );
+            
+            // 获取关闭按钮并添加关闭处理
+            const closeButton = this.otherInventoryInstance.querySelector('.close-button') as HTMLButtonElement;
+            if (closeButton) {
+                // 移除可能存在的旧事件处理器
+                const newCloseButton = closeButton.cloneNode(true) as HTMLButtonElement;
+                closeButton.parentNode?.replaceChild(newCloseButton, closeButton);
+                
+                // 添加点击事件，确保在关闭时更新外部数组
+                newCloseButton.addEventListener('click', () => {
+                    if (this.otherInventoryInstance) {
+                        // 更新外部数组
+                        const originalArray = this.getOriginalInventoryArray();
+                        if (originalArray) {
+                            originalArray.length = 0; // 清空原数组
+                            this.otherInventoryData.forEach(item => {
+                                originalArray.push({...item}); // 添加最新的物品数据（深拷贝）
+                            });
+                        }
+                        
+                        // 添加关闭动画
+                        this.otherInventoryInstance.classList.remove('inventory-open');
+                        this.otherInventoryInstance.classList.add('inventory-close');
+                        
+                        // 监听动画结束后移除元素
+                        this.otherInventoryInstance.addEventListener('animationend', () => {
+                            if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
+                                this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
+                                this.otherInventoryInstance = null;
+                            }
+                        }, { once: true });
+                    }
+                });
+            }
         }
     }
 
@@ -1406,6 +1449,9 @@ class UIInventory {
                 // 更新其他库存数组数据
                 this.updateOtherInventoryData(sourceItem, sourceCount, 'remove');
                 
+                // 同步更新原始库存数组
+                this.syncOriginalInventoryArray();
+                
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
@@ -1426,6 +1472,9 @@ class UIInventory {
                     
                     // 更新其他库存数组数据
                     this.updateOtherInventoryData(sourceItem, sourceCount, 'remove');
+                    
+                    // 同步更新原始库存数组
+                    this.syncOriginalInventoryArray();
                 } 
                 // 如果合并后超过上限
                 else {
@@ -1437,6 +1486,9 @@ class UIInventory {
                     
                     // 更新其他库存数组数据
                     this.updateOtherInventoryData(sourceItem, sourceCount - (totalCount - 64), 'remove');
+                    
+                    // 同步更新原始库存数组
+                    this.syncOriginalInventoryArray();
                 }
                 
                 // 重新渲染两个库存
@@ -1460,6 +1512,9 @@ class UIInventory {
                 // 更新其他库存数组数据
                 this.updateOtherInventoryData(sourceItem, sourceCount, 'remove');
                 this.updateOtherInventoryData(targetItem, targetCount, 'add');
+                
+                // 同步更新原始库存数组
+                this.syncOriginalInventoryArray();
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
@@ -1563,6 +1618,9 @@ class UIInventory {
                 }
             }
         }
+        
+        // 同步更新原始库存数组
+        this.syncOriginalInventoryArray();
         
         // 重新渲染其他库存，保持行列不变
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
@@ -1705,6 +1763,21 @@ class UIInventory {
             return []; // 返回空数组
         }
     }
+
+    // 获取原始库存数组的引用
+    private getOriginalInventoryArray(): Item[] | null {
+        return this.originalInventoryArray;
+    }
+
+    // 同步更新原始库存数组
+    private syncOriginalInventoryArray(): void {
+        if (this.originalInventoryArray) {
+            this.originalInventoryArray.length = 0;
+            this.otherInventoryData.forEach(item => {
+                this.originalInventoryArray!.push({...item});
+            });
+        }
+    }
 }
 
 // 导出公共接口
@@ -1761,24 +1834,24 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();
 
-    //测试item组
-    var PlayerItems: Item[] = [
-        { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-        { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-        { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-        { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
-        { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
-        { itemName: "手枪", itemDescribe: "标准手枪，伤害一般但射速较快", itemLevel: ItemLevel.C },
-        { itemName: "霰弹枪", itemDescribe: "近距离威力巨大的武器", itemLevel: ItemLevel.B },
-        { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
-        { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
-        { itemName: "破损的部件", itemDescribe: "看起来已经无法使用了", itemLevel: ItemLevel.Break },
-        { itemName: "神秘宝石", itemDescribe: "散发着奇异光芒的宝石，似乎有特殊价值", itemLevel: ItemLevel.S },
-        { itemName: "防弹衣", itemDescribe: "减少受到的伤害", itemLevel: ItemLevel.A },
-        { itemName: "地图", itemDescribe: "显示周围地区的详细信息", itemLevel: ItemLevel.C },
-        { itemName: "眼镜", itemDescribe: "普通的眼镜，似乎没什么特别之处", itemLevel: ItemLevel.Low },
-        { itemName: "密码本", itemDescribe: "记录着一些重要的密码", itemLevel: ItemLevel.B },
-    ];
+    // //测试item组
+    // var PlayerItems: Item[] = [
+    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
+    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
+    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
+    //     { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
+    //     { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
+    //     { itemName: "手枪", itemDescribe: "标准手枪，伤害一般但射速较快", itemLevel: ItemLevel.C },
+    //     { itemName: "霰弹枪", itemDescribe: "近距离威力巨大的武器", itemLevel: ItemLevel.B },
+    //     { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
+    //     { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
+    //     { itemName: "破损的部件", itemDescribe: "看起来已经无法使用了", itemLevel: ItemLevel.Break },
+    //     { itemName: "神秘宝石", itemDescribe: "散发着奇异光芒的宝石，似乎有特殊价值", itemLevel: ItemLevel.S },
+    //     { itemName: "防弹衣", itemDescribe: "减少受到的伤害", itemLevel: ItemLevel.A },
+    //     { itemName: "地图", itemDescribe: "显示周围地区的详细信息", itemLevel: ItemLevel.C },
+    //     { itemName: "眼镜", itemDescribe: "普通的眼镜，似乎没什么特别之处", itemLevel: ItemLevel.Low },
+    //     { itemName: "密码本", itemDescribe: "记录着一些重要的密码", itemLevel: ItemLevel.B },
+    // ];
 
-    BindPlayerMainInventory(PlayerItems, 5, 6, "i");
+    // BindPlayerMainInventory(PlayerItems, 5, 6, "i");
 });

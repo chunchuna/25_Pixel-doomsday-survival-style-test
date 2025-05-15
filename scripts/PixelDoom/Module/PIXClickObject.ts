@@ -162,7 +162,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 export class ClickObject {
 
     /** 最大的交互距离 */
-    static ClickObjectClickMaxDistance = 50;
+    static ClickObjectClickMaxDistance = 200;
 
 
     static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
