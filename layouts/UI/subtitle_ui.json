@@ -5,67 +5,7 @@
 			"name": "subtitle_ui",
 			"overriden": 0,
 			"subLayers": [],
-			"instances": [
-				{
-					"type": "subtitle_ui",
-					"properties": {
-						"tag": "div",
-						"content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>游戏字幕系统</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <div id=\"subtitle-container\"></div>\n</body>\n</html>",
-						"content-type": "html",
-						"initially-visible": true,
-						"id": "",
-						"class": "",
-						"allow-context-menu": false,
-						"stop-input-events": "no",
-						"origin": "bottom-right",
-						"set-color": true,
-						"default-color": [
-							0,
-							0,
-							0,
-							0
-						],
-						"set-background-color": false,
-						"default-background-color": [
-							1,
-							1,
-							1,
-							0
-						],
-						"auto-font-size": true,
-						"allow-text-selection": false,
-						"style-attribute": ""
-					},
-					"uid": 114,
-					"sid": 762278385365312,
-					"tags": "",
-					"instanceVariables": {},
-					"behaviors": {},
-					"instanceFolderItem": {
-						"sid": 762278385365312,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
-					},
-					"showing": true,
-					"locked": false,
-					"world": {
-						"x": 635,
-						"y": 471,
-						"width": 200,
-						"height": 100,
-						"originX": 1,
-						"originY": 1,
-						"color": [
-							1,
-							1,
-							1,
-							1
-						]
-					}
-				}
-			],
+			"instances": [],
 			"sid": 147087986603089,
 			"effectTypes": [],
 			"isInitiallyVisible": true,
@@ -97,15 +37,7 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [
-			{
-				"sid": 762278385365312,
-				"expanded": true,
-				"folderName": "",
-				"indexInFolder": -1,
-				"folderNestingLevel": -1
-			}
-		],
+		"items": [],
 		"subfolders": []
 	},
 	"sid": 235391870345754,

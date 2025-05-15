@@ -10,15 +10,52 @@ var container: HTMLElement;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("[UISubtitle] init")
-    container = document.getElementById('subtitle-container') as HTMLElement;
+    
+    // 创建字幕容器
+    container = document.createElement('div');
+    container.id = 'subtitle-container';
+    container.style.position = 'fixed';
+    container.style.bottom = '10%';
+    container.style.left = '50%';
+    container.style.transform = 'translateX(-50%)';
+    container.style.zIndex = '1000';
+    container.style.width = '80%';
+    container.style.textAlign = 'center';
+    document.body.appendChild(container);
+
+    // 添加字幕样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .subtitle-item {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            font-size: 18px;
+        }
+        .subtitle-item.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .subtitle-item.hide {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    `;
+    document.head.appendChild(style);
 
     // UISubtitleMain.ShowSubtitles("测试字幕")
     // UISubtitleMain.ShowSubtitles("测试字幕2", 3)
+
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load",(e)=>{
+        console.log(container)
+    })
+    
 })
-
-
-
-
 
 export class UISubtitleMain {
 

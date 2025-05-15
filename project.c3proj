@@ -703,20 +703,6 @@
 						{
 							"items": [
 								{
-									"name": "subtitle_ui.css",
-									"type": "text/css",
-									"sid": 224566511549273,
-									"file-info": {
-										"purpose": "stylesheet"
-									}
-								}
-							],
-							"subfolders": [],
-							"name": "subtitle_ui"
-						},
-						{
-							"items": [
-								{
 									"name": "dialogue_ui.css",
 									"type": "text/css",
 									"sid": 393602241245802,
