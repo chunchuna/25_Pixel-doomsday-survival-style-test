@@ -42,7 +42,7 @@ class UIInventory {
     private isMainInventoryVisible: boolean = false;
     private otherInventoryInstance: HTMLDivElement | null = null;
     private slotPositions: SlotPosition[] = []; // 存储每个格子的位置和物品信息
-    private draggedItem: { element: HTMLElement, data: Item, count: number, sourceSlot: number } | null = null;
+    private draggedItem: { element: HTMLElement, data: Item, count: number, sourceSlot: number, inventoryType: 'main' | 'other' | null } | null = null;
     private draggedItemGhost: HTMLElement | null = null;
     // 添加新变量跟踪点击状态
     private clickStartPos: { x: number, y: number } | null = null;
@@ -125,24 +125,25 @@ class UIInventory {
             }
         }, 10); // 短延迟以确保DOM更新
 
-        // 返回关闭方法
-        return {
-            close: () => {
-                if (this.otherInventoryInstance) {
-                    // 添加关闭动画
-                    this.otherInventoryInstance.classList.remove('inventory-open');
-                    this.otherInventoryInstance.classList.add('inventory-close');
-                    
-                    // 监听动画结束后移除元素
-                    this.otherInventoryInstance.addEventListener('animationend', () => {
-                        if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
-                            this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
-                            this.otherInventoryInstance = null;
-                        }
-                    }, { once: true });
-                }
+        // 创建关闭函数
+        const closeOtherInventory = () => {
+            if (this.otherInventoryInstance) {
+                // 添加关闭动画
+                this.otherInventoryInstance.classList.remove('inventory-open');
+                this.otherInventoryInstance.classList.add('inventory-close');
+                
+                // 监听动画结束后移除元素
+                this.otherInventoryInstance.addEventListener('animationend', () => {
+                    if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
+                        this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
+                        this.otherInventoryInstance = null;
+                    }
+                }, { once: true });
             }
         };
+
+        // 返回关闭方法
+        return { close: closeOtherInventory };
     }
 
     // 处理键盘按键
@@ -238,6 +239,7 @@ class UIInventory {
             this.isDraggingWindow = false;
             this.draggedWindow = null;
             this.windowDragStartPos = null;
+            return;
         }
         
         // 计算从点击到释放的时间
@@ -275,49 +277,25 @@ class UIInventory {
         // 处理拖拽放置
         if (this.draggedItemGhost) {
             // 查找目标格子
-            const targetSlot = this.findSlotUnderMouse(event);
+            const targetInfo = this.findSlotUnderMouse(event);
             
-            if (targetSlot !== null) {
-                // 如果目标格子有物品
-                if (this.slotPositions[targetSlot].item) {
-                    // 相同物品，合并数量
-                    if (this.slotPositions[targetSlot].item!.itemName === this.draggedItem.data.itemName) {
-                        // 检查合并后是否超过64
-                        const totalCount = this.slotPositions[targetSlot].count + this.draggedItem.count;
-                        if (totalCount <= 64) {
-                            // 可以完全合并
-                            this.slotPositions[targetSlot].count = totalCount;
-                            // 清空原始格子
-                            this.slotPositions[this.draggedItem.sourceSlot].item = null;
-                            this.slotPositions[this.draggedItem.sourceSlot].count = 0;
-                        } else {
-                            // 部分合并
-                            this.slotPositions[targetSlot].count = 64;
-                            this.slotPositions[this.draggedItem.sourceSlot].count = totalCount - 64;
-                        }
-                    } else {
-                        // 不同物品，交换位置
-                        const tempItem = this.slotPositions[targetSlot].item;
-                        const tempCount = this.slotPositions[targetSlot].count;
-                        
-                        this.slotPositions[targetSlot].item = this.draggedItem.data;
-                        this.slotPositions[targetSlot].count = this.draggedItem.count;
-                        
-                        this.slotPositions[this.draggedItem.sourceSlot].item = tempItem;
-                        this.slotPositions[this.draggedItem.sourceSlot].count = tempCount;
+            if (targetInfo && targetInfo.slotIndex !== null) {
+                // 确保只有同一库存内的物品可以交换
+                if (targetInfo.inventoryType === this.draggedItem.inventoryType) {
+                    // 处理主库存的拖拽
+                    if (this.draggedItem.inventoryType === 'main') {
+                        this.handleMainInventoryDrop(targetInfo.slotIndex);
+                    } 
+                    // 处理其他库存的拖拽（未来可以实现）
+                    else if (this.draggedItem.inventoryType === 'other') {
+                        // 将来可以为其他库存添加拖拽逻辑
+                        console.log("其他库存的物品拖拽暂未实现");
                     }
                 } else {
-                    // 目标格子为空，直接放置
-                    this.slotPositions[targetSlot].item = this.draggedItem.data;
-                    this.slotPositions[targetSlot].count = this.draggedItem.count;
-                    
-                    // 清空原始格子
-                    this.slotPositions[this.draggedItem.sourceSlot].item = null;
-                    this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+                    console.log("不能在不同库存之间拖拽物品");
+                    // 未来可以在这里实现从其他库存移动到主库存的逻辑，
+                    // 或者从主库存移动到其他库存的逻辑
                 }
-                
-                // 重新渲染库存
-                this.renderMainInventory();
             }
             
             // 清理拖拽状态
@@ -331,9 +309,55 @@ class UIInventory {
         this.clickStartPos = null;
         this.isDragging = false;
     }
-    
+
+    // 处理主库存拖拽
+    private handleMainInventoryDrop(targetSlot: number): void {
+        if (!this.draggedItem) return;
+        
+        // 如果目标格子有物品
+        if (this.slotPositions[targetSlot].item) {
+            // 相同物品，合并数量
+            if (this.slotPositions[targetSlot].item!.itemName === this.draggedItem.data.itemName) {
+                // 检查合并后是否超过64
+                const totalCount = this.slotPositions[targetSlot].count + this.draggedItem.count;
+                if (totalCount <= 64) {
+                    // 可以完全合并
+                    this.slotPositions[targetSlot].count = totalCount;
+                    // 清空原始格子
+                    this.slotPositions[this.draggedItem.sourceSlot].item = null;
+                    this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+                } else {
+                    // 部分合并
+                    this.slotPositions[targetSlot].count = 64;
+                    this.slotPositions[this.draggedItem.sourceSlot].count = totalCount - 64;
+                }
+            } else {
+                // 不同物品，交换位置
+                const tempItem = this.slotPositions[targetSlot].item;
+                const tempCount = this.slotPositions[targetSlot].count;
+                
+                this.slotPositions[targetSlot].item = this.draggedItem.data;
+                this.slotPositions[targetSlot].count = this.draggedItem.count;
+                
+                this.slotPositions[this.draggedItem.sourceSlot].item = tempItem;
+                this.slotPositions[this.draggedItem.sourceSlot].count = tempCount;
+            }
+        } else {
+            // 目标格子为空，直接放置
+            this.slotPositions[targetSlot].item = this.draggedItem.data;
+            this.slotPositions[targetSlot].count = this.draggedItem.count;
+            
+            // 清空原始格子
+            this.slotPositions[this.draggedItem.sourceSlot].item = null;
+            this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+        }
+        
+        // 重新渲染主库存
+        this.renderMainInventory();
+    }
+
     // 查找鼠标下方的格子
-    private findSlotUnderMouse(event: MouseEvent): number | null {
+    private findSlotUnderMouse(event: MouseEvent): { slotIndex: number | null, inventoryType: 'main' | 'other' | null } {
         const slots = document.querySelectorAll('.inventory-slot');
         
         for (let i = 0; i < slots.length; i++) {
@@ -345,15 +369,18 @@ class UIInventory {
                 event.clientY >= rect.top &&
                 event.clientY <= rect.bottom
             ) {
-                return parseInt(slots[i].getAttribute('data-slot-index') || '-1');
+                const slotIndex = parseInt(slots[i].getAttribute('data-slot-index') || '-1');
+                const inventoryType = slots[i].getAttribute('data-inventory-type') as 'main' | 'other';
+                
+                return { slotIndex, inventoryType };
             }
         }
         
-        return null;
+        return { slotIndex: null, inventoryType: null };
     }
-    
+
     // 开始拖拽物品
-    private startDrag(item: Item, count: number, sourceSlot: number, element: HTMLElement, event: MouseEvent): void {
+    private startDrag(item: Item, count: number, sourceSlot: number, element: HTMLElement, event: MouseEvent, inventoryType: 'main' | 'other'): void {
         // 记录点击开始位置和时间
         this.clickStartPos = { x: event.clientX, y: event.clientY };
         this.clickStartTime = Date.now();
@@ -382,7 +409,8 @@ class UIInventory {
             element: element,
             data: item,
             count: count,
-            sourceSlot: sourceSlot
+            sourceSlot: sourceSlot,
+            inventoryType: inventoryType // 添加标记来源库存类型
         };
     }
 
@@ -533,11 +561,12 @@ class UIInventory {
             container.appendChild(dragHandle);
         }
 
-        // 创建标题和整理按钮区域
-        if (container === this.mainInventoryContainer) {
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'inventory-header';
+        // 创建标题和按钮区域
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'inventory-header';
 
+        // 根据容器类型创建不同的标题和按钮
+        if (container === this.mainInventoryContainer) {
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
             titleSpan.textContent = '物品库存';
@@ -549,19 +578,37 @@ class UIInventory {
 
             headerDiv.appendChild(titleSpan);
             headerDiv.appendChild(sortButton);
-            container.appendChild(headerDiv);
         } else if (this.otherInventoryInstance === container) {
             // 添加其他库存的标题
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'inventory-header';
-
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
             titleSpan.textContent = '其他库存';
+            
+            // 添加关闭按钮
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-button';
+            closeButton.textContent = '关闭';
+            closeButton.onclick = () => {
+                if (this.otherInventoryInstance) {
+                    // 添加关闭动画
+                    this.otherInventoryInstance.classList.remove('inventory-open');
+                    this.otherInventoryInstance.classList.add('inventory-close');
+                    
+                    // 监听动画结束后移除元素
+                    this.otherInventoryInstance.addEventListener('animationend', () => {
+                        if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
+                            this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
+                            this.otherInventoryInstance = null;
+                        }
+                    }, { once: true });
+                }
+            };
 
             headerDiv.appendChild(titleSpan);
-            container.appendChild(headerDiv);
+            headerDiv.appendChild(closeButton);
         }
+
+        container.appendChild(headerDiv);
 
         // 创建库存网格
         const gridContainer = document.createElement('div');
@@ -571,9 +618,10 @@ class UIInventory {
         // 计算需要多少个格子
         const totalSlots = rows * columns;
 
-        // 初始化或重置槽位数组
+        // 为不同库存使用不同的数据结构和处理逻辑
         if (container === this.mainInventoryContainer) {
-            // 如果是第一次渲染或者格子数量发生了变化，重新初始化
+            // 主库存的逻辑
+            // 初始化或重置槽位数组
             if (this.slotPositions.length !== totalSlots) {
                 this.slotPositions = [];
                 for (let i = 0; i < totalSlots; i++) {
@@ -612,19 +660,29 @@ class UIInventory {
                 let slot;
 
                 if (slotInfo.item !== null) {
-                    slot = this.createItemSlot([slotInfo.item], slotInfo.count, i);
+                    slot = this.createItemSlot([slotInfo.item], slotInfo.count, i, 'main');
                 } else {
-                    slot = this.createEmptySlot(i);
+                    slot = this.createEmptySlot(i, 'main');
                 }
 
                 gridContainer.appendChild(slot);
             }
         } else {
-            // 其他库存（如NPC库存）的渲染方式
+            // 其他库存的逻辑
             // 分组物品，同名物品放在一起
             const groupedItems = this.groupItems(items);
 
-            // 渲染物品到格子
+            // 创建临时槽位数据，不影响主库存
+            const otherSlotPositions: SlotPosition[] = [];
+            for (let i = 0; i < totalSlots; i++) {
+                otherSlotPositions.push({
+                    index: i,
+                    item: null,
+                    count: 0
+                });
+            }
+
+            // 填充物品到临时槽位
             let slotIndex = 0;
             for (const [itemName, itemList] of groupedItems) {
                 // 根据数量分组（每组最多64个）
@@ -632,21 +690,32 @@ class UIInventory {
 
                 for (const group of itemGroups) {
                     if (slotIndex < totalSlots) {
-                        const slot = this.createItemSlot(group, group.length, slotIndex);
-                        gridContainer.appendChild(slot);
+                        otherSlotPositions[slotIndex].item = group[0];
+                        otherSlotPositions[slotIndex].count = group.length;
                         slotIndex++;
                     } else {
-                        console.warn('库存格子不足以显示所有物品');
+                        console.warn('其他库存格子不足以显示所有物品');
                         break;
                     }
                 }
             }
 
-            // 填充剩余的空格子
-            for (let i = slotIndex; i < totalSlots; i++) {
-                const emptySlot = this.createEmptySlot(i);
-                gridContainer.appendChild(emptySlot);
+            // 渲染其他库存格子
+            for (let i = 0; i < totalSlots; i++) {
+                const slotInfo = otherSlotPositions[i];
+                let slot;
+
+                if (slotInfo.item !== null) {
+                    slot = this.createItemSlot([slotInfo.item], slotInfo.count, i, 'other');
+                } else {
+                    slot = this.createEmptySlot(i, 'other');
+                }
+
+                gridContainer.appendChild(slot);
             }
+
+            // 存储其他库存的数据到otherInventoryData属性中
+            this.otherInventoryData = items;
         }
 
         // 添加滚动条容器
@@ -683,9 +752,9 @@ class UIInventory {
     }
 
     // 创建物品格子
-    private createItemSlot(items: Item[], count: number, slotIndex: number): HTMLDivElement {
+    private createItemSlot(items: Item[], count: number, slotIndex: number, inventoryType: 'main' | 'other'): HTMLDivElement {
         if (items.length === 0) {
-            return this.createEmptySlot(slotIndex);
+            return this.createEmptySlot(slotIndex, inventoryType);
         }
 
         const item = items[0]; // 同一组中所有物品都是相同的，所以取第一个
@@ -693,6 +762,7 @@ class UIInventory {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
         slot.setAttribute('data-slot-index', slotIndex.toString());
+        slot.setAttribute('data-inventory-type', inventoryType);
 
         // 创建物品元素
         const itemElement = document.createElement('div');
@@ -733,7 +803,7 @@ class UIInventory {
         slot.addEventListener('mousedown', (e) => {
             // 只响应左键点击
             if (e.button === 0) {
-                this.startDrag(item, count, slotIndex, itemElement, e);
+                this.startDrag(item, count, slotIndex, itemElement, e, inventoryType);
                 e.preventDefault(); // 防止选中文本
             }
         });
@@ -743,10 +813,11 @@ class UIInventory {
     }
 
     // 创建空格子
-    private createEmptySlot(slotIndex: number): HTMLDivElement {
+    private createEmptySlot(slotIndex: number, inventoryType: 'main' | 'other'): HTMLDivElement {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot empty';
         slot.setAttribute('data-slot-index', slotIndex.toString());
+        slot.setAttribute('data-inventory-type', inventoryType);
 
         // 添加鼠标悬停事件，即使是空格子也有高亮效果
         slot.addEventListener('mouseenter', () => {
@@ -844,7 +915,7 @@ class UIInventory {
                 font-weight: bold;
             }
             
-            .sort-button {
+            .sort-button, .close-button {
                 background-color: #333;
                 color: #ccc;
                 border: 1px solid #555;
@@ -855,9 +926,17 @@ class UIInventory {
                 z-index: 103;
             }
             
-            .sort-button:hover {
+            .sort-button:hover, .close-button:hover {
                 background-color: #444;
                 color: #fff;
+            }
+            
+            .close-button {
+                background-color: #553333;
+            }
+            
+            .close-button:hover {
+                background-color: #774444;
             }
             
             /* 库存打开动画 */
