@@ -23,6 +23,16 @@
 		},
 		{
 			"eventType": "variable",
+			"name": "PlayerInventory",
+			"type": "string",
+			"initialValue": "",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 310981583827141
+		},
+		{
+			"eventType": "variable",
 			"name": "LastestSaveGameJsonFromLoad",
 			"type": "string",
 			"initialValue": "",

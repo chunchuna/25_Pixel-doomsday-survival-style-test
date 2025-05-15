@@ -87,6 +87,8 @@ class UIInventory {
     // 添加一个变量来存储更新回调
     private updateCallback: InventoryUpdateCallback | null = null;
 
+    private mainInventoryCallback: ((items: Item[]) => void) | null = null;
+
     private constructor() {
         this.initStyles();
         this.mainInventoryContainer = this.createInventoryContainer('main-inventory');
@@ -117,6 +119,11 @@ class UIInventory {
 
     // 绑定主库存
     public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): void {
+        // 重置主库存数据，避免叠加
+        this.mainInventoryData = [];
+        this.slotPositions = [];
+        
+        // 重新赋值
         this.mainInventoryData = inventoryArray;
         this.mainInventoryRows = rows;
         this.mainInventoryColumns = columns;
@@ -435,6 +442,9 @@ class UIInventory {
         
         // 重新渲染主库存
         this.renderMainInventory();
+        
+        // 触发主库存更新回调
+        this.triggerMainInventoryCallback();
     }
 
     // 查找鼠标下方的格子
@@ -552,6 +562,9 @@ class UIInventory {
         
         // 重新渲染库存
         this.renderMainInventory();
+        
+        // 触发主库存更新回调
+        this.triggerMainInventoryCallback();
         
         // 添加整理完成的提示效果
         const notification = document.createElement('div');
@@ -1370,6 +1383,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
             // 如果目标格子有相同物品，尝试合并
             else if (targetItemInfo.item.itemName === sourceItem.itemName) {
@@ -1403,6 +1419,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
             // 如果目标格子有不同物品，交换位置
             else {
@@ -1425,6 +1444,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
         }
         // 从其他库存转移到主库存
@@ -1459,6 +1481,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
             // 如果目标格子有相同物品，尝试合并
             else if (targetItemInfo.item.itemName === sourceItem.itemName) {
@@ -1498,6 +1523,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
             // 如果目标格子有不同物品，交换位置
             else {
@@ -1523,6 +1551,9 @@ class UIInventory {
                 // 重新渲染两个库存
                 this.renderMainInventory();
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
             }
         }
     }
@@ -1804,6 +1835,29 @@ class UIInventory {
         } else if (this.updateCallback.varName) {
             // 使用变量名更新实例变量
             instance.instVars[this.updateCallback.varName] = serializedData;
+        }
+    }
+
+    // 新增方法：为主库存设置更新回调
+    public SetMainInventoryUpdateCallback(callback: { updateMethod: (items: Item[]) => void }): void {
+        this.mainInventoryCallback = callback.updateMethod;
+    }
+
+    // 添加触发主库存回调的辅助方法
+    private triggerMainInventoryCallback(): void {
+        if (this.mainInventoryCallback) {
+            // 从格子数据中提取所有物品
+            const items: Item[] = [];
+            for (const slot of this.slotPositions) {
+                if (slot.item) {
+                    // 根据数量添加物品
+                    for (let i = 0; i < slot.count; i++) {
+                        items.push({...slot.item});
+                    }
+                }
+            }
+            // 触发回调函数
+            this.mainInventoryCallback(items);
         }
     }
 }
