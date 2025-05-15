@@ -31,6 +31,8 @@ import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
 import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"
 import "./PixelDoom/UI/MainMenu_ui/UIMainMenu.js"
 
+import "./PixelDoom/UI/inventory_ui/UIInventory.js"
+
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.
 	// Note layouts, objects etc. are not yet available.

@@ -238,7 +238,8 @@
 					"subtitle_ui",
 					"dialogue_ui",
 					"mainmenu_ui",
-					"hudongtishi_ui"
+					"hudongtishi_ui",
+					"inventory_ui"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -498,6 +499,20 @@
 									],
 									"subfolders": [],
 									"name": "MainMenu_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIInventory.ts",
+											"type": "application/typescript",
+											"sid": 113790007102661,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "inventory_ui"
 								}
 							],
 							"name": "UI"
