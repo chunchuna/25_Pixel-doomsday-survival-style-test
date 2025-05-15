@@ -7,6 +7,7 @@ import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
 import { DIA_CONTENT_LUYINGYI_01, DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
+import { inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UIInventory.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -54,6 +55,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "LuYingYiZi") return
             // @ts-ignore
             DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
+
+        }
+
+        if (ButtonConetent == "查看库存") {
+            if (LastestChooseObject == null) return
+            if (LastestChooseObject.instVars.ID != "ZhangPeng") return
+            // @ts-ignore
+            //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
+            var ZhangPengInventory :Item[]=[
+                { itemName: "温暖的衣服", itemDescribe: "充满温度的衣服，可以保暖", itemLevel: ItemLevel.B },
+                { itemName: "手机", itemDescribe: "可以用于通讯和照明的只能工具", itemLevel: ItemLevel.S }
+            ]
+            inventoryManager.ShowOtherInventory(ZhangPengInventory,10,5)
+            alert("点击查看库存")
 
         }
 

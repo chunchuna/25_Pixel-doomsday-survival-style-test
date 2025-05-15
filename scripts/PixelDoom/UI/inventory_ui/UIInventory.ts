@@ -48,6 +48,11 @@ class UIInventory {
     private clickStartPos: { x: number, y: number } | null = null;
     private clickStartTime: number = 0;
     private isDragging: boolean = false;
+    
+    // 窗口拖拽相关变量
+    private isDraggingWindow: boolean = false;
+    private draggedWindow: HTMLDivElement | null = null;
+    private windowDragStartPos: { x: number, y: number, windowX: number, windowY: number } | null = null;
 
     private constructor() {
         this.initStyles();
@@ -99,16 +104,42 @@ class UIInventory {
         // 创建新的其他库存
         this.otherInventoryInstance = this.createInventoryContainer('other-inventory');
         document.body.appendChild(this.otherInventoryInstance);
+        
+        // 设置其他库存的初始位置（右侧）
+        this.otherInventoryInstance.style.left = 'auto';
+        this.otherInventoryInstance.style.right = '50px';
+        this.otherInventoryInstance.style.top = '50%';
+        this.otherInventoryInstance.style.transform = 'translateY(-50%)';
+        this.otherInventoryInstance.style.display = 'flex';
+        
+        // 确保容器初始可见
+        this.otherInventoryInstance.style.opacity = '0';
 
         // 渲染其他库存
         this.renderOtherInventory(rows, columns);
+        
+        // 添加动画效果
+        setTimeout(() => {
+            if (this.otherInventoryInstance) {
+                this.otherInventoryInstance.classList.add('inventory-open');
+            }
+        }, 10); // 短延迟以确保DOM更新
 
         // 返回关闭方法
         return {
             close: () => {
-                if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
-                    this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
-                    this.otherInventoryInstance = null;
+                if (this.otherInventoryInstance) {
+                    // 添加关闭动画
+                    this.otherInventoryInstance.classList.remove('inventory-open');
+                    this.otherInventoryInstance.classList.add('inventory-close');
+                    
+                    // 监听动画结束后移除元素
+                    this.otherInventoryInstance.addEventListener('animationend', () => {
+                        if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
+                            this.otherInventoryInstance.parentNode.removeChild(this.otherInventoryInstance);
+                            this.otherInventoryInstance = null;
+                        }
+                    }, { once: true });
                 }
             }
         };
@@ -129,7 +160,12 @@ class UIInventory {
         this.isMainInventoryVisible = !this.isMainInventoryVisible;
 
         if (this.isMainInventoryVisible) {
+            // 设置初始位置（左侧）
+            this.mainInventoryContainer.style.left = '50px';
+            this.mainInventoryContainer.style.top = '50%';
+            this.mainInventoryContainer.style.transform = 'translateY(-50%)';
             this.mainInventoryContainer.style.display = 'flex';
+            
             // 添加动画效果
             this.mainInventoryContainer.classList.remove('inventory-close');
             void this.mainInventoryContainer.offsetWidth; // 强制重绘
@@ -179,10 +215,31 @@ class UIInventory {
                 this.draggedItemGhost.style.top = `${event.clientY - 30}px`;
             }
         }
+        
+        // 处理窗口拖拽
+        if (this.isDraggingWindow && this.draggedWindow && this.windowDragStartPos) {
+            const dx = event.clientX - this.windowDragStartPos.x;
+            const dy = event.clientY - this.windowDragStartPos.y;
+            
+            const newX = this.windowDragStartPos.windowX + dx;
+            const newY = this.windowDragStartPos.windowY + dy;
+            
+            this.draggedWindow.style.left = `${newX}px`;
+            this.draggedWindow.style.top = `${newY}px`;
+            // 移除默认的居中transform
+            this.draggedWindow.style.transform = 'none';
+        }
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
     private handleMouseUp(event: MouseEvent): void {
+        // 处理窗口拖拽结束
+        if (this.isDraggingWindow) {
+            this.isDraggingWindow = false;
+            this.draggedWindow = null;
+            this.windowDragStartPos = null;
+        }
+        
         // 计算从点击到释放的时间
         const clickDuration = Date.now() - this.clickStartTime;
         
@@ -409,6 +466,32 @@ class UIInventory {
         const container = document.createElement('div');
         container.id = id;
         container.className = 'inventory-container';
+        
+        // 添加标题栏用于拖拽
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'inventory-drag-handle';
+        
+        // 添加鼠标按下事件以开始拖拽窗口
+        dragHandle.addEventListener('mousedown', (e) => {
+            // 只响应左键点击
+            if (e.button === 0) {
+                this.isDraggingWindow = true;
+                this.draggedWindow = container;
+                
+                // 获取容器当前位置
+                const rect = container.getBoundingClientRect();
+                this.windowDragStartPos = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    windowX: rect.left,
+                    windowY: rect.top
+                };
+                
+                e.preventDefault(); // 防止选中文本
+            }
+        });
+        
+        container.appendChild(dragHandle);
         return container;
     }
 
@@ -443,8 +526,12 @@ class UIInventory {
 
     // 通用渲染库存方法
     private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number): void {
-        // 清空容器
+        // 清空容器，但保留拖拽句柄
+        const dragHandle = container.querySelector('.inventory-drag-handle');
         container.innerHTML = '';
+        if (dragHandle) {
+            container.appendChild(dragHandle);
+        }
 
         // 创建标题和整理按钮区域
         if (container === this.mainInventoryContainer) {
@@ -462,6 +549,17 @@ class UIInventory {
 
             headerDiv.appendChild(titleSpan);
             headerDiv.appendChild(sortButton);
+            container.appendChild(headerDiv);
+        } else if (this.otherInventoryInstance === container) {
+            // 添加其他库存的标题
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'inventory-header';
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'inventory-title';
+            titleSpan.textContent = '其他库存';
+
+            headerDiv.appendChild(titleSpan);
             container.appendChild(headerDiv);
         }
 
@@ -686,9 +784,6 @@ class UIInventory {
             /* 库存容器样式 */
             .inventory-container {
                 position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
                 background-color: rgba(25, 25, 25, 0.95);
                 border: 2px solid #444;
                 border-radius: 5px;
@@ -697,9 +792,25 @@ class UIInventory {
                 z-index: 100;
                 display: flex;
                 flex-direction: column;
-                max-height: 80vh;
-                max-width: 90vw;
-                opacity: 0;
+                width: 390px; /* 固定宽度 (6格 * 60px + 间隙) */
+                height: 450px; /* 固定高度 */
+                opacity: 1; /* 默认设置为可见 */
+            }
+            
+            /* 新创建的库存容器初始状态 */
+            .inventory-container:not(.inventory-open):not(.inventory-close) {
+                opacity: 1; /* 确保默认可见 */
+            }
+            
+            /* 库存拖拽句柄 */
+            .inventory-drag-handle {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 40px;
+                cursor: move;
+                z-index: 101;
             }
             
             /* 库存头部样式 */
@@ -711,6 +822,21 @@ class UIInventory {
                 padding-bottom: 10px;
                 border-bottom: 1px solid #444;
                 color: #ccc;
+                z-index: 102;
+                pointer-events: auto;
+                /* 添加明显的背景色以便区分 */
+                background-color: rgba(40, 40, 40, 0.8);
+                padding: 10px;
+                border-radius: 3px;
+            }
+            
+            /* 为库存类型添加不同的颜色 */
+            #main-inventory .inventory-header {
+                border-bottom-color: #446688;
+            }
+            
+            #other-inventory .inventory-header {
+                border-bottom-color: #884466;
             }
             
             .inventory-title {
@@ -726,6 +852,7 @@ class UIInventory {
                 padding: 5px 10px;
                 cursor: pointer;
                 transition: all 0.2s ease;
+                z-index: 103;
             }
             
             .sort-button:hover {
@@ -737,11 +864,9 @@ class UIInventory {
             @keyframes fadeIn {
                 from {
                     opacity: 0;
-                    transform: translate(-50%, -50%) scale(0.9);
                 }
                 to {
                     opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
                 }
             }
             
@@ -749,11 +874,9 @@ class UIInventory {
             @keyframes fadeOut {
                 from {
                     opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
                 }
                 to {
                     opacity: 0;
-                    transform: translate(-50%, -50%) scale(0.9);
                 }
             }
             
@@ -810,7 +933,7 @@ class UIInventory {
             /* 滚动条容器 */
             .inventory-scroll-container {
                 overflow-y: auto;
-                max-height: calc(80vh - 70px); /* 减去标题和边距的高度 */
+                flex-grow: 1;
                 padding-right: 10px;
                 margin-right: -10px; /* 防止滚动条占用空间 */
                 scrollbar-width: thin; /* Firefox */
@@ -847,8 +970,20 @@ class UIInventory {
                 display: grid;
                 gap: 8px;
                 width: 100%;
-                grid-template-rows: repeat(auto-fill, minmax(60px, 60px));
                 grid-auto-rows: 60px;
+            }
+            
+            /* 为主库存和其他库存设置不同的默认位置和视觉样式 */
+            #main-inventory {
+                left: 50px;
+                top: 50%;
+                border-color: #446688;
+            }
+            
+            #other-inventory {
+                right: 50px;
+                top: 50%;
+                border-color: #884466;
             }
             
             /* 物品格子 */
@@ -1073,7 +1208,7 @@ export function CleanupInventorySystem(): void {
 // 重新导出类型
 export type {Item}
 export {ItemLevel}
-export let inventoryManager: any;
+export let inventoryManager: UIInventory;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 

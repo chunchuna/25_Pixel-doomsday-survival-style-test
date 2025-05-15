@@ -24,6 +24,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS,30,6,"I");
+    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS,30,5,"I");
     
 })

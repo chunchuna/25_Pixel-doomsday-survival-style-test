@@ -20,7 +20,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
         var ButtonConetent: string = e.data.ButtonContent_;
-        if (ButtonConetent == "check") {
+        if (ButtonConetent == "检查") {
             //GL_COMMAND_.ACTION_OPEN_();
             GL_COMMAND_._draw(LastestChooseObject.instVars.CheckDescribe)
             UISubtitleMain.ShowSubtitles(LastestChooseObject.instVars.CheckDescribe, 10)
