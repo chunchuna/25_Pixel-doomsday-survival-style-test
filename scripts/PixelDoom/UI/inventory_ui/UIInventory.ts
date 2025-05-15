@@ -39,10 +39,12 @@ class UIInventory {
     private mainInventoryKey: string = '';
     private mainInventoryRows: number = 0;
     private mainInventoryColumns: number = 0;
+    private otherInventoryRows: number = 0;
+    private otherInventoryColumns: number = 0;
     private isMainInventoryVisible: boolean = false;
     private otherInventoryInstance: HTMLDivElement | null = null;
     private slotPositions: SlotPosition[] = []; // 存储每个格子的位置和物品信息
-    private draggedItem: { element: HTMLElement, data: Item, count: number, sourceSlot: number, inventoryType: 'main' | 'other' | null } | null = null;
+    private draggedItem: { element: HTMLElement, data: Item, count: number, sourceSlot: number, inventoryType: 'main' | 'other' } | null = null;
     private draggedItemGhost: HTMLElement | null = null;
     // 添加新变量跟踪点击状态
     private clickStartPos: { x: number, y: number } | null = null;
@@ -95,6 +97,9 @@ class UIInventory {
     // 显示其他库存（如NPC或箱子库存）
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number): { close: () => void } {
         this.otherInventoryData = [...inventoryArray]; // 创建数组副本
+        // 保存行列信息，用于渲染和后续操作
+        this.otherInventoryRows = rows;
+        this.otherInventoryColumns = columns;
 
         // 清除之前的其他库存实例
         if (this.otherInventoryInstance && this.otherInventoryInstance.parentNode) {
@@ -1300,7 +1305,7 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
             // 如果目标格子有相同物品，尝试合并
             else if (targetItemInfo.item.itemName === sourceItem.itemName) {
@@ -1333,7 +1338,7 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
             // 如果目标格子有不同物品，交换位置
             else {
@@ -1355,7 +1360,7 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
         }
         // 从其他库存转移到主库存
@@ -1386,7 +1391,7 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
             // 如果目标格子有相同物品，尝试合并
             else if (targetItemInfo.item.itemName === sourceItem.itemName) {
@@ -1419,7 +1424,7 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
             // 如果目标格子有不同物品，交换位置
             else {
@@ -1441,35 +1446,15 @@ class UIInventory {
                 
                 // 重新渲染两个库存
                 this.renderMainInventory();
-                this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
-            }
-        }
-    }
-
-    // 更新其他库存的数据数组
-    private updateOtherInventoryData(item: Item, count: number, action: 'add' | 'remove'): void {
-        if (action === 'add') {
-            // 添加物品到其他库存数组
-            for (let i = 0; i < count; i++) {
-                this.otherInventoryData.push(item);
-            }
-        } else {
-            // 从其他库存数组移除物品
-            let removedCount = 0;
-            for (let i = this.otherInventoryData.length - 1; i >= 0; i--) {
-                if (this.otherInventoryData[i].itemName === item.itemName && removedCount < count) {
-                    this.otherInventoryData.splice(i, 1);
-                    removedCount++;
-                }
-                if (removedCount >= count) break;
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
             }
         }
     }
 
     // 获取其他库存的格子数据
     private getOtherInventorySlots(): SlotPosition[] {
-        const rows = this.getOtherInventoryRows();
-        const cols = this.getOtherInventoryColumns();
+        const rows = this.otherInventoryRows;
+        const cols = this.otherInventoryColumns;
         const totalSlots = rows * cols;
         
         const otherInventorySlots: SlotPosition[] = [];
@@ -1505,20 +1490,6 @@ class UIInventory {
         }
         
         return otherInventorySlots;
-    }
-
-    // 获取其他库存的行数
-    private getOtherInventoryRows(): number {
-        // 这里需要根据实际情况返回其他库存的行数
-        // 可以是固定值或者根据其他库存容器的尺寸计算
-        return Math.ceil(Math.sqrt(this.otherInventoryData.length));
-    }
-
-    // 获取其他库存的列数
-    private getOtherInventoryColumns(): number {
-        // 这里需要根据实际情况返回其他库存的列数
-        // 可以是固定值或者根据其他库存容器的尺寸计算
-        return 6; // 默认为6列，与主库存相同
     }
 
     // 处理其他库存内部的拖拽
@@ -1576,8 +1547,29 @@ class UIInventory {
             }
         }
         
-        // 重新渲染其他库存
-        this.renderOtherInventory(this.getOtherInventoryRows(), this.getOtherInventoryColumns());
+        // 重新渲染其他库存，保持行列不变
+        this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+    }
+
+    // 更新其他库存的数据数组
+    private updateOtherInventoryData(item: Item, count: number, action: 'add' | 'remove'): void {
+        if (action === 'add') {
+            // 添加物品到其他库存数组
+            for (let i = 0; i < count; i++) {
+                this.otherInventoryData.push({ ...item }); // 使用对象浅拷贝，确保不共享引用
+            }
+        } else {
+            // 从其他库存数组移除物品
+            let removedCount = 0;
+            // 从后向前遍历以避免删除元素时索引变化的问题
+            for (let i = this.otherInventoryData.length - 1; i >= 0; i--) {
+                if (this.otherInventoryData[i].itemName === item.itemName && removedCount < count) {
+                    this.otherInventoryData.splice(i, 1);
+                    removedCount++;
+                }
+                if (removedCount >= count) break;
+            }
+        }
     }
 }
 
