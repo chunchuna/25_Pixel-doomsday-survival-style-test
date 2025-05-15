@@ -398,6 +398,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "PIXClickObjectItem_ZhangPeng.ts",
+											"type": "application/typescript",
+											"sid": 357735676488683,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

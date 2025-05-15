@@ -24,6 +24,7 @@ import "./PixelDoom/Module/PIXClickObject.js"
 // ClickObject
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
+import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_ZhangPeng.js"
 
 //UI
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"

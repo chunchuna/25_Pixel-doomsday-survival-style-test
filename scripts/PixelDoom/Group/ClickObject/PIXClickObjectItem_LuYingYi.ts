@@ -70,6 +70,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
+            
             var InventoryInstance: InstanceType.InventoryData = LastestChooseObject;
             var InventoryData = DeserializeItemsOnly(InventoryInstance.instVars.InventoryData);
             
