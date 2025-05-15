@@ -11,18 +11,10 @@ import { DeserializeItemsOnly, inventoryManager, ItemLevel, type Item, Serialize
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
-var ZhangPengInventory: Item[] = [
-]
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // @ts-ignore
     PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-})
-
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    // 处理库存系统测试 
-    ZhangPengInventory = [{ itemName: "温暖的衣服", itemDescribe: "充满温度的衣服，可以保暖", itemLevel: ItemLevel.B },
-    { itemName: "手机", itemDescribe: "可以用于通讯和照明的只能工具", itemLevel: ItemLevel.S }]
 })
 
 
@@ -70,24 +62,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
-            
-            var InventoryInstance: InstanceType.InventoryData = LastestChooseObject;
-            var InventoryData = DeserializeItemsOnly(InventoryInstance.instVars.InventoryData);
-            
-            // 创建更新回调，指定实例和变量名
-            const updateInfo: InventoryUpdateCallback = {
-                instance: InventoryInstance,
-                varName: "InventoryData"
-            };
-            
-            // 传入更新回调参数
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 5, updateInfo);
+           
         }
-
 
     })
 })
-
 
 
 /** 使用GL_COMMAND 的交互 */
