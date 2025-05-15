@@ -7,7 +7,7 @@ import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 
 import { DIA_CONTENT_LUYINGYI_01, DIA_CONTENT_test001, DIA_CONTENT_test002 } from "../../UI/dialogue_ui/DialogueScript.js";
-import { inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UIInventory.js";
+import { DeserializeItemsOnly, inventoryManager, ItemLevel, type Item } from "../../UI/inventory_ui/UIInventory.js";
 
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 /** 使用 UI 交互 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 用于存储当前打开的库存关闭函数
-   
+
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
@@ -70,11 +70,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
             // @ts-ignore
             //DialogueMainController.ShowDialogue(DIA_CONTENT_LUYINGYI_01)
+            var InventoryInstance: InstanceType.InventoryData = LastestChooseObject;
+            var InventoryData =DeserializeItemsOnly(InventoryInstance.instVars.InventoryData);
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 5)
 
-            // 保存关闭函数，当库存关闭时会更新ZhangPengInventory数组
-            inventoryManager.ShowOtherInventory(ZhangPengInventory, 10, 5)
-           
-           
+
 
         }
 

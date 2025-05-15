@@ -1,0 +1,19 @@
+{
+	"name": "InventoryData",
+	"plugin-id": "Sprite",
+	"sid": 557062188246049,
+	"instanceVariables": [
+		{
+			"name": "InventoryData",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 147599763941054
+		}
+	],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"members": [
+		"ZhangPeng2"
+	]
+}

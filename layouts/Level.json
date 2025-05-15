@@ -450,7 +450,8 @@
 										"ObjectName": "帐篷",
 										"ID": "ZhangPeng",
 										"Actions": "查看库存,使用,破坏,检查",
-										"CheckDescribe": "充满了各种物资的帐篷，是谁留下来了的呢？"
+										"CheckDescribe": "充满了各种物资的帐篷，是谁留下来了的呢？",
+										"InventoryData": "[{ itemName: \"温暖的衣服\", itemDescribe: \"充满温度的衣服，可以保暖\", itemLevel: ItemLevel.B ,count:5}]\n "
 									},
 									"behaviors": {},
 									"effects": {
