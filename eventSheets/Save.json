@@ -1,0 +1,131 @@
+{
+	"name": "Save",
+	"events": [
+		{
+			"functionName": "SaveGame",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "Slot",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 161146898976703
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "save",
+					"objectClass": "System",
+					"sid": 477696047037866,
+					"disabled": true,
+					"parameters": {
+						"slot": "Slot"
+					}
+				},
+				{
+					"id": "save-to-json",
+					"objectClass": "System",
+					"sid": 988649875725063
+				}
+			],
+			"sid": 517356097953300
+		},
+		{
+			"functionName": "LoadGame",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "Slot",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 887364698591991
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "load",
+					"objectClass": "System",
+					"sid": 226587960444749,
+					"parameters": {
+						"slot": "Slot"
+					}
+				}
+			],
+			"sid": 690164876942927
+		},
+		{
+			"functionName": "LoadGameByJson",
+			"functionDescription": "",
+			"functionCategory": "",
+			"functionReturnType": "none",
+			"functionCopyPicked": false,
+			"functionIsAsync": false,
+			"functionParameters": [
+				{
+					"name": "Slot",
+					"type": "string",
+					"initialValue": "",
+					"comment": "",
+					"sid": 903928793596695
+				}
+			],
+			"eventType": "function-block",
+			"conditions": [],
+			"actions": [
+				{
+					"id": "load-from-json",
+					"objectClass": "System",
+					"sid": 116857005378357,
+					"parameters": {
+						"json": "LastestSaveGameJsonFromLoad"
+					}
+				}
+			],
+			"sid": 354399834406819
+		},
+		{
+			"eventType": "block",
+			"conditions": [
+				{
+					"id": "on-save-complete",
+					"objectClass": "System",
+					"sid": 178405726259920
+				}
+			],
+			"actions": [
+				{
+					"id": "set-eventvar-value",
+					"objectClass": "System",
+					"sid": 935890281380815,
+					"parameters": {
+						"variable": "LastestSaveGameJson",
+						"value": "SaveStateJSON"
+					}
+				},
+				{
+					"type": "script",
+					"language": "typescript",
+					"script": [
+						"alert(\"成功保存\")"
+					]
+				}
+			],
+			"sid": 256538913300807
+		}
+	],
+	"sid": 966362096878495
+}

@@ -10,6 +10,26 @@
 			"isStatic": false,
 			"isConstant": false,
 			"sid": 124410482799593
+		},
+		{
+			"eventType": "variable",
+			"name": "LastestSaveGameJson",
+			"type": "string",
+			"initialValue": "",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 666440663198664
+		},
+		{
+			"eventType": "variable",
+			"name": "LastestSaveGameJsonFromLoad",
+			"type": "string",
+			"initialValue": "",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 502587503804581
 		}
 	],
 	"sid": 510648612448094

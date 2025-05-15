@@ -255,7 +255,8 @@
 			"Console",
 			"Audio",
 			"ClickObject",
-			"MainMenu"
+			"MainMenu",
+			"Save"
 		],
 		"subfolders": []
 	},
@@ -424,6 +425,20 @@
 									],
 									"subfolders": [],
 									"name": "Player"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXSave.ts",
+											"type": "application/typescript",
+											"sid": 336515554497213,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "Save"
 								}
 							],
 							"name": "Group"

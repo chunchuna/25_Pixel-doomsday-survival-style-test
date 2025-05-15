@@ -5,7 +5,7 @@
 import "./engine.js"
 
 import "./PixelDoom/Module/PIXCommandAddon.js"
-
+import "./PixelDoom/Group/Save/PIXSave.js"
 
 import "./PixelDoom/Module/PIXLevel.js"
 import "./PixelDoom/Module/PIXCharacterController.js"

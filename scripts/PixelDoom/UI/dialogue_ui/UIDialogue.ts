@@ -69,6 +69,7 @@ export class DialogueSystem {
 
     // 解析对话文本并显示对话面板
     public ShowDialogue(content: string): void {
+        
         // 先彻底清理当前状态
         this.cleanupAllState();
         
@@ -81,6 +82,7 @@ export class DialogueSystem {
 
         // 显示主对话内容
         this.displayMainDialogue();
+        
     }
 
     // 清理所有状态和事件监听器
@@ -132,6 +134,7 @@ export class DialogueSystem {
     private displayMainDialogue(): void {
         if (this.currentMainIndex < this.mainDialogueLines.length) {
             this.displayDialogueLine(this.mainDialogueLines[this.currentMainIndex]);
+            
         }
     }
 
@@ -146,6 +149,7 @@ export class DialogueSystem {
                 this.waitForPlayerAction(() => {
                     this.currentMainIndex++;
                     this.displayMainDialogue();
+                   
                 });
             }
         });
