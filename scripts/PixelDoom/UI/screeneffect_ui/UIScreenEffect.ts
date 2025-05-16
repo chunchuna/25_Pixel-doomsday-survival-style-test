@@ -941,14 +941,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 });
 
 // 导出枚举类型以便外部使用
-export type {
+export {
     TransitionEffectType,
     HitEffectType,
     HorrorEffectType,
-    TextAnimationType,
-    SpecialEffectOptions
+    TextAnimationType
 };
 
+export type {
+    SpecialEffectOptions
+};
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     UIScreenEffect.FadeIn(3000,TransitionEffectType.WIPE_RADIAL,undefined)
