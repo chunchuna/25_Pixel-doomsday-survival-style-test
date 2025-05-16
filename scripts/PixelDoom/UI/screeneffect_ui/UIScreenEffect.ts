@@ -86,7 +86,7 @@ export class UIScreenEffect {
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 9999;
+        z-index: 999999999;
         overflow: hidden;
       }
       .ui-screen-effect-overlay {
@@ -669,14 +669,238 @@ export class UIScreenEffect {
       }
     });
   }
+
+  /**
+   * 仅淡入效果（从黑屏慢慢过渡到显示整个场景）
+   * @param fadeInTime 淡入时间（毫秒）
+   * @param effect 过渡效果类型
+   * @param special 特殊效果选项
+   * @returns Promise 在效果完成时解析
+   */
+  public static async FadeIn(
+    fadeInTime: number,
+    effect: TransitionEffectType = TransitionEffectType.FADE,
+    special?: SpecialEffectOptions
+  ): Promise<void> {
+    this.initialize();
+    
+    if (!this.overlay || !this.container || !this.textElement) return;
+    
+    const effectId = `fadein-${Date.now()}`;
+    this.activeEffects.add(effectId);
+    
+    // 重置样式
+    this.overlay.style.cssText = '';
+    this.textElement.style.cssText = '';
+    this.textElement.innerHTML = '';
+    
+    // 设置基础样式 - 初始状态为黑色不透明
+    this.overlay.style.opacity = '1';
+    this.overlay.style.backgroundColor = '#000';
+    
+    // 应用效果
+    switch (effect) {
+      case TransitionEffectType.FADE:
+        this.overlay.style.transition = `opacity ${fadeInTime}ms ease-out`;
+        this.overlay.style.opacity = '0';
+        break;
+        
+      case TransitionEffectType.WIPE_LEFT:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.clipPath = 'inset(0 0 0 0)';
+        this.overlay.style.animation = `wipeLeftOut ${fadeInTime}ms forwards`;
+        break;
+        
+      case TransitionEffectType.WIPE_RADIAL:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.clipPath = 'circle(150% at center)';
+        this.overlay.style.animation = `wipeRadialOut ${fadeInTime}ms forwards`;
+        break;
+        
+      case TransitionEffectType.PIXELATE:
+        this.container.style.filter = 'blur(10px)';
+        this.overlay.style.opacity = '1';
+        this.overlay.style.backgroundColor = '#000';
+        this.container.style.animation = `pixelateIn ${fadeInTime}ms reverse forwards`;
+        break;
+        
+      case TransitionEffectType.GLITCH:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.backgroundColor = '#000';
+        this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
+        break;
+    }
+    
+    // 处理特殊效果（文本）
+    if (special?.text) {
+      const { text, textPosition, textColor, textSize, textAnimation, customCss } = special;
+      
+      this.textElement.textContent = text;
+      this.textElement.style.opacity = '0';
+      
+      // 设置位置
+      const x = textPosition?.x ?? 0.5; // 默认在屏幕中央
+      const y = textPosition?.y ?? 0.5; // 默认在屏幕中央
+      this.textElement.style.left = `${x * 100}%`;
+      this.textElement.style.top = `${y * 100}%`;
+      
+      // 设置样式
+      this.textElement.style.color = textColor || 'white';
+      this.textElement.style.fontSize = textSize || '32px';
+      
+      // 应用自定义CSS
+      if (customCss) {
+        this.textElement.style.cssText += customCss;
+      }
+      
+      // 文本动画
+      if (textAnimation) {
+        const delay = textAnimation.delay || 0;
+        
+        setTimeout(() => {
+          if (!this.textElement) return;
+          
+          switch (textAnimation.type) {
+            case TextAnimationType.FADE_IN:
+              this.textElement.style.animation = `textFadeIn ${textAnimation.duration}ms forwards`;
+              break;
+              
+            case TextAnimationType.TYPE_WRITER:
+              // 打字机效果需要特殊处理
+              this.textElement.textContent = '';
+              this.textElement.style.opacity = '1';
+              
+              const characters = text.split('');
+              const typeDelay = textAnimation.duration / characters.length;
+              
+              characters.forEach((char, index) => {
+                setTimeout(() => {
+                  if (this.textElement) {
+                    this.textElement.textContent += char;
+                  }
+                }, index * typeDelay);
+              });
+              break;
+              
+            case TextAnimationType.GLITCH_TEXT:
+              this.textElement.style.opacity = '1';
+              this.textElement.style.animation = `textGlitch ${textAnimation.duration}ms infinite`;
+              break;
+              
+            case TextAnimationType.PULSE:
+              this.textElement.style.opacity = '1';
+              this.textElement.style.animation = `textPulse ${textAnimation.duration}ms infinite`;
+              break;
+              
+            case TextAnimationType.SHAKE_TEXT:
+              this.textElement.style.opacity = '1';
+              this.textElement.style.animation = `textShake ${textAnimation.duration}ms infinite`;
+              break;
+          }
+        }, delay);
+      }
+    }
+    
+    // 等待淡入完成
+    await new Promise(resolve => setTimeout(resolve, fadeInTime));
+    
+    // 如果效果已被取消，提前返回
+    if (!this.activeEffects.has(effectId)) return;
+    
+    // 完成淡入后，保持当前效果状态
+    this.activeEffects.delete(effectId);
+  }
+
+  /**
+   * 仅淡出效果
+   * @param fadeOutTime 淡出时间（毫秒）
+   * @param effect 过渡效果类型
+   * @returns Promise 在效果完成时解析
+   */
+  public static async FadeOut(
+    fadeOutTime: number,
+    effect: TransitionEffectType = TransitionEffectType.FADE
+  ): Promise<void> {
+    this.initialize();
+    
+    if (!this.overlay || !this.container || !this.textElement) return;
+    
+    const effectId = `fadeout-${Date.now()}`;
+    this.activeEffects.add(effectId);
+    
+    // 重置样式并确保遮罩层可见
+    this.overlay.style.cssText = '';
+    this.overlay.style.opacity = '1';
+    this.overlay.style.backgroundColor = '#000';
+    
+    // 开始淡出
+    switch (effect) {
+      case TransitionEffectType.FADE:
+        this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-in`;
+        this.overlay.style.opacity = '1';
+        // 强制重绘
+        this.overlay.offsetHeight;
+        this.overlay.style.opacity = '0';
+        break;
+        
+      case TransitionEffectType.WIPE_LEFT:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.clipPath = 'inset(0 0 0 0)';
+        // 强制重绘
+        this.overlay.offsetHeight;
+        this.overlay.style.animation = `wipeLeftIn ${fadeOutTime}ms forwards`;
+        break;
+        
+      case TransitionEffectType.WIPE_RADIAL:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.clipPath = 'circle(0% at center)';
+        // 强制重绘
+        this.overlay.offsetHeight;
+        this.overlay.style.animation = `wipeRadialIn ${fadeOutTime}ms forwards`;
+        break;
+        
+      case TransitionEffectType.PIXELATE:
+        this.container.style.filter = 'blur(0px)';
+        this.overlay.style.opacity = '1';
+        this.overlay.style.backgroundColor = '#000';
+        // 强制重绘
+        this.overlay.offsetHeight;
+        this.container.style.animation = `pixelateIn ${fadeOutTime}ms forwards`;
+        break;
+        
+      case TransitionEffectType.GLITCH:
+        this.overlay.style.opacity = '1';
+        this.overlay.style.backgroundColor = '#000';
+        // 强制重绘
+        this.overlay.offsetHeight;
+        this.container.style.animation = `glitchEffect ${fadeOutTime}ms forwards`;
+        break;
+    }
+    
+    // 淡出文本
+    if (this.textElement) {
+      this.textElement.style.transition = `opacity ${fadeOutTime}ms ease-in`;
+      this.textElement.style.opacity = '0';
+    }
+    
+    // 等待淡出完成
+    await new Promise(resolve => setTimeout(resolve, fadeOutTime));
+    
+    // 清除效果
+    this.activeEffects.delete(effectId);
+    
+    // 重置文本元素
+    this.textElement.style.cssText = '';
+    this.textElement.innerHTML = '';
+  }
 }
 
 // 初始化代码
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
   // 初始化屏幕效果系统
   // 系统会在第一次调用效果时自动初始化，所以这里不需要额外操作
-  console.log('屏幕效果系统已准备就绪');
-  UIScreenEffect.ShowTransition(500, 500, 1000, TransitionEffectType.WIPE_LEFT);
+  //UIScreenEffect.ShowTransition(500, 500, 1000, TransitionEffectType.WIPE_LEFT);
+  UIScreenEffect.FadeOut(3000,TransitionEffectType.WIPE_RADIAL)
 });
 
 // 导出枚举类型以便外部使用
