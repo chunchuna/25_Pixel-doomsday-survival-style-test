@@ -1091,7 +1091,7 @@ class UIInventory {
                 padding: 15px;
                 display: flex;
                 flex-direction: column;
-                width: 222px;
+                width: 225px;
                 height: 380px;
                 opacity: 0.1;
                 z-index: 5000;
@@ -1381,7 +1381,7 @@ class UIInventory {
                 align-items: center;
                 justify-content: center;
                 color: #fff;
-                font-size: 14px;
+                font-size: 10px;
                 text-align: center;
                 word-break: break-word;
                 transition: all 0.2s ease;
@@ -1408,7 +1408,7 @@ class UIInventory {
                 align-items: center;
                 justify-content: center;
                 box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-                transform: scale(1.1);
+                transform: scale(0.8);
                 cursor: grabbing;
             }
             
@@ -1425,7 +1425,7 @@ class UIInventory {
                 left: 2px;
                 background-color: rgba(0, 0, 0, 0.7);
                 color: white;
-                font-size: 12px;
+                font-size: 8px;
                 padding: 1px 4px;
                 border-radius: 3px;
                 pointer-events: none;

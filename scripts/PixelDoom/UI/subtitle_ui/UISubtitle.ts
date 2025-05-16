@@ -37,6 +37,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             transition: opacity 0.3s, transform 0.3s;
             font-size: 18px;
             width:150px;
+            z-index:1000;
         }
         .subtitle-item.show {
             opacity: 1;
