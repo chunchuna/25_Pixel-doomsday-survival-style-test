@@ -9,76 +9,76 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 
 // 过渡效果枚举
 enum TransitionEffectType {
-  FADE = 'fade',               // 简单淡入淡出
-  WIPE_LEFT = 'wipeLeft',      // 从左到右擦除
-  WIPE_RADIAL = 'wipeRadial',  // 圆形扩散
-  PIXELATE = 'pixelate',       // 像素化效果
-  GLITCH = 'glitch'            // 故障效果
+    FADE = 'fade',               // 简单淡入淡出
+    WIPE_LEFT = 'wipeLeft',      // 从左到右擦除
+    WIPE_RADIAL = 'wipeRadial',  // 圆形扩散
+    PIXELATE = 'pixelate',       // 像素化效果
+    GLITCH = 'glitch'            // 故障效果
 }
 
 // 受击效果枚举
 enum HitEffectType {
-  FLASH_RED = 'flashRed',      // 红色闪烁
-  BLOOD_SPLATTER = 'bloodSplatter', // 血液飞溅
-  SHAKE = 'shake',             // 屏幕震动
-  GRAYSCALE = 'grayscale',     // 短暂变成灰度
-  BLUR = 'blur'                // 视野模糊
+    FLASH_RED = 'flashRed',      // 红色闪烁
+    BLOOD_SPLATTER = 'bloodSplatter', // 血液飞溅
+    SHAKE = 'shake',             // 屏幕震动
+    GRAYSCALE = 'grayscale',     // 短暂变成灰度
+    BLUR = 'blur'                // 视野模糊
 }
 
 // 恐怖效果枚举
 enum HorrorEffectType {
-  VIGNETTE = 'vignette',       // 暗角效果
-  DISTORTION = 'distortion',   // 画面扭曲
-  NOISE = 'noise',             // 噪点效果
-  INVERTED = 'inverted',       // 颜色反转
-  WHISPER = 'whisper'          // 低语效果
+    VIGNETTE = 'vignette',       // 暗角效果
+    DISTORTION = 'distortion',   // 画面扭曲
+    NOISE = 'noise',             // 噪点效果
+    INVERTED = 'inverted',       // 颜色反转
+    WHISPER = 'whisper'          // 低语效果
 }
 
 // 文本动画效果枚举
 enum TextAnimationType {
-  FADE_IN = 'fadeIn',          // 淡入
-  TYPE_WRITER = 'typeWriter',  // 打字机效果
-  GLITCH_TEXT = 'glitchText',  // 故障文字
-  PULSE = 'pulse',             // 脉冲效果
-  SHAKE_TEXT = 'shakeText'     // 震动文字
+    FADE_IN = 'fadeIn',          // 淡入
+    TYPE_WRITER = 'typeWriter',  // 打字机效果
+    GLITCH_TEXT = 'glitchText',  // 故障文字
+    PULSE = 'pulse',             // 脉冲效果
+    SHAKE_TEXT = 'shakeText'     // 震动文字
 }
 
 // 特殊效果参数接口
 interface SpecialEffectOptions {
-  text?: string;               // 要显示的文本
-  textPosition?: {             // 文本位置
-    x: number;                 // 横坐标 (0-1，相对于屏幕宽度的比例)
-    y: number;                 // 纵坐标 (0-1，相对于屏幕高度的比例)
-  };
-  textColor?: string;          // 文本颜色
-  textSize?: string;           // 文本大小
-  textAnimation?: {
-    type: TextAnimationType;   // 文本动画类型
-    duration: number;          // 动画持续时间（毫秒）
-    delay?: number;            // 动画延迟（毫秒）
-  };
-  customCss?: string;          // 自定义CSS
+    text?: string;               // 要显示的文本
+    textPosition?: {             // 文本位置
+        x: number;                 // 横坐标 (0-1，相对于屏幕宽度的比例)
+        y: number;                 // 纵坐标 (0-1，相对于屏幕高度的比例)
+    };
+    textColor?: string;          // 文本颜色
+    textSize?: string;           // 文本大小
+    textAnimation?: {
+        type: TextAnimationType;   // 文本动画类型
+        duration: number;          // 动画持续时间（毫秒）
+        delay?: number;            // 动画延迟（毫秒）
+    };
+    customCss?: string;          // 自定义CSS
 }
 
 /**
  * 屏幕特效管理器静态类
  */
 export class UIScreenEffect {
-  private static container: HTMLDivElement | null = null;
-  private static overlay: HTMLDivElement | null = null;
-  private static textElement: HTMLDivElement | null = null;
-  private static activeEffects: Set<string> = new Set();
-  private static styleElement: HTMLStyleElement | null = null;
+    private static container: HTMLDivElement | null = null;
+    private static overlay: HTMLDivElement | null = null;
+    private static textElement: HTMLDivElement | null = null;
+    private static activeEffects: Set<string> = new Set();
+    private static styleElement: HTMLStyleElement | null = null;
 
-  /**
-   * 初始化屏幕特效系统
-   */
-  private static initialize(): void {
-    if (this.container) return; // 已初始化
+    /**
+     * 初始化屏幕特效系统
+     */
+    private static initialize(): void {
+        if (this.container) return; // 已初始化
 
-    // 添加CSS样式
-    this.styleElement = document.createElement('style');
-    this.styleElement.textContent = `
+        // 添加CSS样式
+        this.styleElement = document.createElement('style');
+        this.styleElement.textContent = `
       .ui-screen-effect-container {
         position: fixed;
         top: 0;
@@ -311,603 +311,645 @@ export class UIScreenEffect {
         20%, 40%, 60%, 80% { transform: translateX(5px); }
       }
     `;
-    document.head.appendChild(this.styleElement);
+        document.head.appendChild(this.styleElement);
 
-    // 创建容器
-    this.container = document.createElement('div');
-    this.container.className = 'ui-screen-effect-container';
-    document.body.appendChild(this.container);
+        // 创建容器
+        this.container = document.createElement('div');
+        this.container.className = 'ui-screen-effect-container';
+        document.body.appendChild(this.container);
 
-    // 创建遮罩层
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'ui-screen-effect-overlay';
-    this.container.appendChild(this.overlay);
+        // 创建遮罩层
+        this.overlay = document.createElement('div');
+        this.overlay.className = 'ui-screen-effect-overlay';
+        this.container.appendChild(this.overlay);
 
-    // 创建文本元素
-    this.textElement = document.createElement('div');
-    this.textElement.className = 'ui-screen-effect-text';
-    this.container.appendChild(this.textElement);
-  }
-
-  /**
-   * 显示过渡效果
-   * @param fadeInTime 淡入时间（毫秒）
-   * @param holdTime 持续时间（毫秒）
-   * @param fadeOutTime 淡出时间（毫秒）
-   * @param effect 过渡效果类型
-   * @param special 特殊效果选项
-   * @returns Promise 在效果完成时解析
-   */
-  public static async ShowTransition(
-    fadeInTime: number,
-    holdTime: number,
-    fadeOutTime: number,
-    effect: TransitionEffectType = TransitionEffectType.FADE,
-    special?: SpecialEffectOptions
-  ): Promise<void> {
-    this.initialize();
-    
-    if (!this.overlay || !this.container || !this.textElement) return;
-    
-    const effectId = `transition-${Date.now()}`;
-    this.activeEffects.add(effectId);
-    
-    // 重置样式
-    this.overlay.style.cssText = '';
-    this.textElement.style.cssText = '';
-    this.textElement.innerHTML = '';
-    
-    // 设置基础样式
-    this.overlay.style.opacity = '0';
-    this.overlay.style.backgroundColor = '#000';
-    
-    // 应用效果
-    switch (effect) {
-      case TransitionEffectType.FADE:
-        this.overlay.style.transition = `opacity ${fadeInTime}ms ease-in`;
-        this.overlay.style.opacity = '1';
-        break;
-        
-      case TransitionEffectType.WIPE_LEFT:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'inset(0 100% 0 0)';
-        this.overlay.style.animation = `wipeLeftIn ${fadeInTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.WIPE_RADIAL:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'circle(0% at center)';
-        this.overlay.style.animation = `wipeRadialIn ${fadeInTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.PIXELATE:
-        this.container.style.filter = 'blur(0px)';
-        this.overlay.style.opacity = '1';
-        this.overlay.style.backgroundColor = '#000';
-        this.container.style.animation = `pixelateIn ${fadeInTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.GLITCH:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.backgroundColor = '#000';
-        this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
-        break;
+        // 创建文本元素
+        this.textElement = document.createElement('div');
+        this.textElement.className = 'ui-screen-effect-text';
+        this.container.appendChild(this.textElement);
     }
-    
-    // 处理特殊效果（文本）
-    if (special?.text) {
-      const { text, textPosition, textColor, textSize, textAnimation, customCss } = special;
-      
-      this.textElement.textContent = text;
-      this.textElement.style.opacity = '0';
-      
-      // 设置位置
-      const x = textPosition?.x ?? 0.5; // 默认在屏幕中央
-      const y = textPosition?.y ?? 0.5; // 默认在屏幕中央
-      this.textElement.style.left = `${x * 100}%`;
-      this.textElement.style.top = `${y * 100}%`;
-      
-      // 设置样式
-      this.textElement.style.color = textColor || 'white';
-      this.textElement.style.fontSize = textSize || '32px';
-      
-      // 应用自定义CSS
-      if (customCss) {
-        this.textElement.style.cssText += customCss;
-      }
-      
-      // 文本动画
-      if (textAnimation) {
-        const delay = textAnimation.delay || 0;
-        
-        setTimeout(() => {
-          if (!this.textElement) return;
-          
-          switch (textAnimation.type) {
-            case TextAnimationType.FADE_IN:
-              this.textElement.style.animation = `textFadeIn ${textAnimation.duration}ms forwards`;
-              break;
-              
-            case TextAnimationType.TYPE_WRITER:
-              // 打字机效果需要特殊处理
-              this.textElement.textContent = '';
-              this.textElement.style.opacity = '1';
-              
-              const characters = text.split('');
-              const typeDelay = textAnimation.duration / characters.length;
-              
-              characters.forEach((char, index) => {
-                setTimeout(() => {
-                  if (this.textElement) {
-                    this.textElement.textContent += char;
-                  }
-                }, index * typeDelay);
-              });
-              break;
-              
-            case TextAnimationType.GLITCH_TEXT:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textGlitch ${textAnimation.duration}ms infinite`;
-              break;
-              
-            case TextAnimationType.PULSE:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textPulse ${textAnimation.duration}ms infinite`;
-              break;
-              
-            case TextAnimationType.SHAKE_TEXT:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textShake ${textAnimation.duration}ms infinite`;
-              break;
-          }
-        }, delay);
-      }
-    }
-    
-    // 等待淡入完成
-    await new Promise(resolve => setTimeout(resolve, fadeInTime));
-    
-    // 如果效果已被取消，提前返回
-    if (!this.activeEffects.has(effectId)) return;
-    
-    // 等待持续时间
-    await new Promise(resolve => setTimeout(resolve, holdTime));
-    
-    // 如果效果已被取消，提前返回
-    if (!this.activeEffects.has(effectId)) return;
-    
-    // 开始淡出
-    switch (effect) {
-      case TransitionEffectType.FADE:
-        this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-out`;
+
+    /**
+     * 显示过渡效果
+     * @param fadeInTime 淡入时间（毫秒）
+     * @param holdTime 持续时间（毫秒）
+     * @param fadeOutTime 淡出时间（毫秒）
+     * @param effect 过渡效果类型
+     * @param special 特殊效果选项
+     * @param onComplete 效果完成时的回调函数
+     * @returns Promise 在效果完成时解析
+     */
+    public static async ShowTransition(
+        fadeInTime: number,
+        holdTime: number,
+        fadeOutTime: number,
+        effect: TransitionEffectType = TransitionEffectType.FADE,
+        special?: SpecialEffectOptions,
+        onComplete?: () => void
+    ): Promise<void> {
+        this.initialize();
+
+        if (!this.overlay || !this.container || !this.textElement) return;
+
+        const effectId = `transition-${Date.now()}`;
+        this.activeEffects.add(effectId);
+
+        // 重置样式
+        this.overlay.style.cssText = '';
+        this.textElement.style.cssText = '';
+        this.textElement.innerHTML = '';
+
+        // 设置基础样式
         this.overlay.style.opacity = '0';
-        break;
-        
-      case TransitionEffectType.WIPE_LEFT:
-        this.overlay.style.animation = `wipeLeftOut ${fadeOutTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.WIPE_RADIAL:
-        this.overlay.style.animation = `wipeRadialOut ${fadeOutTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.PIXELATE:
-      case TransitionEffectType.GLITCH:
-        this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-out`;
-        this.overlay.style.opacity = '0';
-        this.container.style.animation = 'none';
-        break;
-    }
-    
-    // 淡出文本
-    if (special?.text && this.textElement) {
-      this.textElement.style.transition = `opacity ${fadeOutTime}ms ease-out`;
-      this.textElement.style.opacity = '0';
-    }
-    
-    // 等待淡出完成
-    await new Promise(resolve => setTimeout(resolve, fadeOutTime));
-    
-    // 清除效果
-    this.activeEffects.delete(effectId);
-  }
+        this.overlay.style.backgroundColor = '#000';
 
-  /**
-   * 显示受击效果
-   * @param duration 持续时间（毫秒）
-   * @param effect 效果类型
-   * @returns Promise 在效果完成时解析
-   */
-  public static async ShowHitEffect(
-    duration: number,
-    effect: HitEffectType = HitEffectType.FLASH_RED
-  ): Promise<void> {
-    this.initialize();
-    
-    if (!this.overlay || !this.container) return;
-    
-    const effectId = `hit-${Date.now()}`;
-    this.activeEffects.add(effectId);
-    
-    // 重置样式
-    this.overlay.style.cssText = '';
-    
-    // 应用效果
-    switch (effect) {
-      case HitEffectType.FLASH_RED:
-        this.overlay.style.backgroundColor = 'rgba(255, 0, 0, 0)';
-        this.overlay.style.animation = `flashRed ${duration}ms`;
-        break;
-        
-      case HitEffectType.BLOOD_SPLATTER:
-        this.overlay.style.animation = `bloodSplatter ${duration}ms`;
-        this.overlay.style.backgroundSize = 'cover';
-        this.overlay.style.backgroundRepeat = 'no-repeat';
-        break;
-        
-      case HitEffectType.SHAKE:
-        this.container.style.animation = `screenShake ${duration}ms`;
-        break;
-        
-      case HitEffectType.GRAYSCALE:
-        this.container.style.animation = `grayscaleEffect ${duration}ms`;
-        break;
-        
-      case HitEffectType.BLUR:
-        this.container.style.animation = `blurEffect ${duration}ms`;
-        break;
-    }
-    
-    // 等待效果完成
-    await new Promise(resolve => setTimeout(resolve, duration));
-    
-    // 清除效果
-    this.activeEffects.delete(effectId);
-    
-    // 重置样式
-    if (!this.activeEffects.size) {
-      this.overlay.style.cssText = '';
-      this.container.style.cssText = '';
-    }
-  }
+        // 应用效果
+        switch (effect) {
+            case TransitionEffectType.FADE:
+                this.overlay.style.transition = `opacity ${fadeInTime}ms ease-in`;
+                this.overlay.style.opacity = '1';
+                break;
 
-  /**
-   * 显示恐怖效果
-   * @param duration 持续时间（毫秒）
-   * @param effect 效果类型
-   * @returns Promise 在效果完成时解析
-   */
-  public static async ShowHorrorEffect(
-    duration: number,
-    effect: HorrorEffectType = HorrorEffectType.VIGNETTE
-  ): Promise<void> {
-    this.initialize();
-    
-    if (!this.overlay || !this.container) return;
-    
-    const effectId = `horror-${Date.now()}`;
-    this.activeEffects.add(effectId);
-    
-    // 重置样式
-    this.overlay.style.cssText = '';
-    
-    // 应用效果
-    switch (effect) {
-      case HorrorEffectType.VIGNETTE:
-        this.overlay.style.animation = `vignetteEffect ${duration / 2}ms forwards`;
-        break;
-        
-      case HorrorEffectType.DISTORTION:
-        this.container.style.animation = `distortionEffect ${duration}ms infinite`;
-        break;
-        
-      case HorrorEffectType.NOISE:
-        this.overlay.style.animation = `noiseEffect ${duration}ms infinite`;
-        this.overlay.style.backgroundSize = 'cover';
-        break;
-        
-      case HorrorEffectType.INVERTED:
-        this.container.style.animation = `invertedEffect ${duration}ms`;
-        break;
-        
-      case HorrorEffectType.WHISPER:
-        // 随机的低语音效（通过随机位置文本实现视觉效果）
-        for (let i = 0; i < 5; i++) {
-          const whisper = document.createElement('div');
-          whisper.className = 'ui-screen-effect-text';
-          whisper.textContent = ['别看', '快跑', '死亡', '恐惧', '黑暗', '它来了'][Math.floor(Math.random() * 6)];
-          whisper.style.opacity = '0.3';
-          whisper.style.color = 'rgba(255, 255, 255, 0.7)';
-          whisper.style.fontSize = '24px';
-          whisper.style.left = `${Math.random() * 90 + 5}%`;
-          whisper.style.top = `${Math.random() * 90 + 5}%`;
-          whisper.style.animation = `textFadeIn ${duration / 3}ms forwards, textFadeIn ${duration / 3}ms reverse forwards ${duration * 2 / 3}ms`;
-          
-          if (this.container) {
-            this.container.appendChild(whisper);
-            
-            // 删除元素
-            setTimeout(() => {
-              if (whisper.parentNode) {
-                whisper.parentNode.removeChild(whisper);
-              }
-            }, duration);
-          }
+            case TransitionEffectType.WIPE_LEFT:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'inset(0 100% 0 0)';
+                this.overlay.style.animation = `wipeLeftIn ${fadeInTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.WIPE_RADIAL:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'circle(0% at center)';
+                this.overlay.style.animation = `wipeRadialIn ${fadeInTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.PIXELATE:
+                this.container.style.filter = 'blur(0px)';
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                this.container.style.animation = `pixelateIn ${fadeInTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.GLITCH:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
+                break;
         }
-        break;
-    }
-    
-    // 等待效果完成
-    await new Promise(resolve => setTimeout(resolve, duration));
-    
-    // 清除效果
-    this.activeEffects.delete(effectId);
-    
-    // 重置样式
-    if (!this.activeEffects.size) {
-      this.overlay.style.cssText = '';
-      this.container.style.cssText = '';
-    }
-  }
 
-  /**
-   * 清除所有活动效果
-   */
-  public static ClearAllEffects(): void {
-    if (!this.container || !this.overlay || !this.textElement) return;
-    
-    this.activeEffects.clear();
-    this.overlay.style.cssText = '';
-    this.container.style.cssText = '';
-    this.textElement.style.cssText = '';
-    this.textElement.innerHTML = '';
-    
-    // 删除所有额外添加的文本元素
-    Array.from(this.container.children).forEach(child => {
-      if (child !== this.overlay && child !== this.textElement) {
-        this.container?.removeChild(child);
-      }
-    });
-  }
+        // 处理特殊效果（文本）
+        if (special?.text) {
+            const { text, textPosition, textColor, textSize, textAnimation, customCss } = special;
 
-  /**
-   * 仅淡入效果（从黑屏慢慢过渡到显示整个场景）
-   * @param fadeInTime 淡入时间（毫秒）
-   * @param effect 过渡效果类型
-   * @param special 特殊效果选项
-   * @returns Promise 在效果完成时解析
-   */
-  public static async FadeIn(
-    fadeInTime: number,
-    effect: TransitionEffectType = TransitionEffectType.FADE,
-    special?: SpecialEffectOptions
-  ): Promise<void> {
-    this.initialize();
-    
-    if (!this.overlay || !this.container || !this.textElement) return;
-    
-    const effectId = `fadein-${Date.now()}`;
-    this.activeEffects.add(effectId);
-    
-    // 重置样式
-    this.overlay.style.cssText = '';
-    this.textElement.style.cssText = '';
-    this.textElement.innerHTML = '';
-    
-    // 设置基础样式 - 初始状态为黑色不透明
-    this.overlay.style.opacity = '1';
-    this.overlay.style.backgroundColor = '#000';
-    
-    // 应用效果
-    switch (effect) {
-      case TransitionEffectType.FADE:
-        this.overlay.style.transition = `opacity ${fadeInTime}ms ease-out`;
-        this.overlay.style.opacity = '0';
-        break;
-        
-      case TransitionEffectType.WIPE_LEFT:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'inset(0 0 0 0)';
-        this.overlay.style.animation = `wipeLeftOut ${fadeInTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.WIPE_RADIAL:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'circle(150% at center)';
-        this.overlay.style.animation = `wipeRadialOut ${fadeInTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.PIXELATE:
-        this.container.style.filter = 'blur(10px)';
-        this.overlay.style.opacity = '1';
-        this.overlay.style.backgroundColor = '#000';
-        this.container.style.animation = `pixelateIn ${fadeInTime}ms reverse forwards`;
-        break;
-        
-      case TransitionEffectType.GLITCH:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.backgroundColor = '#000';
-        this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
-        break;
-    }
-    
-    // 处理特殊效果（文本）
-    if (special?.text) {
-      const { text, textPosition, textColor, textSize, textAnimation, customCss } = special;
-      
-      this.textElement.textContent = text;
-      this.textElement.style.opacity = '0';
-      
-      // 设置位置
-      const x = textPosition?.x ?? 0.5; // 默认在屏幕中央
-      const y = textPosition?.y ?? 0.5; // 默认在屏幕中央
-      this.textElement.style.left = `${x * 100}%`;
-      this.textElement.style.top = `${y * 100}%`;
-      
-      // 设置样式
-      this.textElement.style.color = textColor || 'white';
-      this.textElement.style.fontSize = textSize || '32px';
-      
-      // 应用自定义CSS
-      if (customCss) {
-        this.textElement.style.cssText += customCss;
-      }
-      
-      // 文本动画
-      if (textAnimation) {
-        const delay = textAnimation.delay || 0;
-        
-        setTimeout(() => {
-          if (!this.textElement) return;
-          
-          switch (textAnimation.type) {
-            case TextAnimationType.FADE_IN:
-              this.textElement.style.animation = `textFadeIn ${textAnimation.duration}ms forwards`;
-              break;
-              
-            case TextAnimationType.TYPE_WRITER:
-              // 打字机效果需要特殊处理
-              this.textElement.textContent = '';
-              this.textElement.style.opacity = '1';
-              
-              const characters = text.split('');
-              const typeDelay = textAnimation.duration / characters.length;
-              
-              characters.forEach((char, index) => {
+            this.textElement.textContent = text;
+            this.textElement.style.opacity = '0';
+
+            // 设置位置
+            const x = textPosition?.x ?? 0.5; // 默认在屏幕中央
+            const y = textPosition?.y ?? 0.5; // 默认在屏幕中央
+            this.textElement.style.left = `${x * 100}%`;
+            this.textElement.style.top = `${y * 100}%`;
+
+            // 设置样式
+            this.textElement.style.color = textColor || 'white';
+            this.textElement.style.fontSize = textSize || '32px';
+
+            // 应用自定义CSS
+            if (customCss) {
+                this.textElement.style.cssText += customCss;
+            }
+
+            // 文本动画
+            if (textAnimation) {
+                const delay = textAnimation.delay || 0;
+
                 setTimeout(() => {
-                  if (this.textElement) {
-                    this.textElement.textContent += char;
-                  }
-                }, index * typeDelay);
-              });
-              break;
-              
-            case TextAnimationType.GLITCH_TEXT:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textGlitch ${textAnimation.duration}ms infinite`;
-              break;
-              
-            case TextAnimationType.PULSE:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textPulse ${textAnimation.duration}ms infinite`;
-              break;
-              
-            case TextAnimationType.SHAKE_TEXT:
-              this.textElement.style.opacity = '1';
-              this.textElement.style.animation = `textShake ${textAnimation.duration}ms infinite`;
-              break;
-          }
-        }, delay);
-      }
-    }
-    
-    // 等待淡入完成
-    await new Promise(resolve => setTimeout(resolve, fadeInTime));
-    
-    // 如果效果已被取消，提前返回
-    if (!this.activeEffects.has(effectId)) return;
-    
-    // 完成淡入后，保持当前效果状态
-    this.activeEffects.delete(effectId);
-  }
+                    if (!this.textElement) return;
 
-  /**
-   * 仅淡出效果
-   * @param fadeOutTime 淡出时间（毫秒）
-   * @param effect 过渡效果类型
-   * @returns Promise 在效果完成时解析
-   */
-  public static async FadeOut(
-    fadeOutTime: number,
-    effect: TransitionEffectType = TransitionEffectType.FADE
-  ): Promise<void> {
-    this.initialize();
-    
-    if (!this.overlay || !this.container || !this.textElement) return;
-    
-    const effectId = `fadeout-${Date.now()}`;
-    this.activeEffects.add(effectId);
-    
-    // 重置样式并确保遮罩层可见
-    this.overlay.style.cssText = '';
-    this.overlay.style.opacity = '1';
-    this.overlay.style.backgroundColor = '#000';
-    
-    // 开始淡出
-    switch (effect) {
-      case TransitionEffectType.FADE:
-        this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-in`;
-        this.overlay.style.opacity = '1';
-        // 强制重绘
-        this.overlay.offsetHeight;
-        this.overlay.style.opacity = '0';
-        break;
-        
-      case TransitionEffectType.WIPE_LEFT:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'inset(0 0 0 0)';
-        // 强制重绘
-        this.overlay.offsetHeight;
-        this.overlay.style.animation = `wipeLeftIn ${fadeOutTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.WIPE_RADIAL:
-        this.overlay.style.opacity = '1';
-        this.overlay.style.clipPath = 'circle(0% at center)';
-        // 强制重绘
-        this.overlay.offsetHeight;
-        this.overlay.style.animation = `wipeRadialIn ${fadeOutTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.PIXELATE:
-        this.container.style.filter = 'blur(0px)';
+                    switch (textAnimation.type) {
+                        case TextAnimationType.FADE_IN:
+                            this.textElement.style.animation = `textFadeIn ${textAnimation.duration}ms forwards`;
+                            break;
+
+                        case TextAnimationType.TYPE_WRITER:
+                            // 打字机效果需要特殊处理
+                            this.textElement.textContent = '';
+                            this.textElement.style.opacity = '1';
+
+                            const characters = text.split('');
+                            const typeDelay = textAnimation.duration / characters.length;
+
+                            characters.forEach((char, index) => {
+                                setTimeout(() => {
+                                    if (this.textElement) {
+                                        this.textElement.textContent += char;
+                                    }
+                                }, index * typeDelay);
+                            });
+                            break;
+
+                        case TextAnimationType.GLITCH_TEXT:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textGlitch ${textAnimation.duration}ms infinite`;
+                            break;
+
+                        case TextAnimationType.PULSE:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textPulse ${textAnimation.duration}ms infinite`;
+                            break;
+
+                        case TextAnimationType.SHAKE_TEXT:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textShake ${textAnimation.duration}ms infinite`;
+                            break;
+                    }
+                }, delay);
+            }
+        }
+
+        // 等待淡入完成
+        await new Promise(resolve => setTimeout(resolve, fadeInTime));
+
+        // 如果效果已被取消，提前返回
+        if (!this.activeEffects.has(effectId)) return;
+
+        // 等待持续时间
+        await new Promise(resolve => setTimeout(resolve, holdTime));
+
+        // 如果效果已被取消，提前返回
+        if (!this.activeEffects.has(effectId)) return;
+
+        // 开始淡出
+        switch (effect) {
+            case TransitionEffectType.FADE:
+                this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-out`;
+                this.overlay.style.opacity = '0';
+                break;
+
+            case TransitionEffectType.WIPE_LEFT:
+                this.overlay.style.animation = `wipeLeftOut ${fadeOutTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.WIPE_RADIAL:
+                this.overlay.style.animation = `wipeRadialOut ${fadeOutTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.PIXELATE:
+            case TransitionEffectType.GLITCH:
+                this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-out`;
+                this.overlay.style.opacity = '0';
+                this.container.style.animation = 'none';
+                break;
+        }
+
+        // 淡出文本
+        if (special?.text && this.textElement) {
+            this.textElement.style.transition = `opacity ${fadeOutTime}ms ease-out`;
+            this.textElement.style.opacity = '0';
+        }
+
+        // 等待淡出完成
+        await new Promise(resolve => setTimeout(resolve, fadeOutTime));
+
+        // 清除效果
+        this.activeEffects.delete(effectId);
+
+        // 调用完成回调
+        if (onComplete) {
+            onComplete();
+        }
+    }
+
+    /**
+     * 显示受击效果
+     * @param duration 持续时间（毫秒）
+     * @param effect 效果类型
+     * @param onComplete 效果完成时的回调函数
+     * @returns Promise 在效果完成时解析
+     */
+    public static async ShowHitEffect(
+        duration: number,
+        effect: HitEffectType = HitEffectType.FLASH_RED,
+        onComplete?: () => void
+    ): Promise<void> {
+        this.initialize();
+
+        if (!this.overlay || !this.container) return;
+
+        const effectId = `hit-${Date.now()}`;
+        this.activeEffects.add(effectId);
+
+        // 重置样式
+        this.overlay.style.cssText = '';
+
+        // 应用效果
+        switch (effect) {
+            case HitEffectType.FLASH_RED:
+                this.overlay.style.backgroundColor = 'rgba(255, 0, 0, 0)';
+                this.overlay.style.animation = `flashRed ${duration}ms`;
+                break;
+
+            case HitEffectType.BLOOD_SPLATTER:
+                this.overlay.style.animation = `bloodSplatter ${duration}ms`;
+                this.overlay.style.backgroundSize = 'cover';
+                this.overlay.style.backgroundRepeat = 'no-repeat';
+                break;
+
+            case HitEffectType.SHAKE:
+                this.container.style.animation = `screenShake ${duration}ms`;
+                break;
+
+            case HitEffectType.GRAYSCALE:
+                this.container.style.animation = `grayscaleEffect ${duration}ms`;
+                break;
+
+            case HitEffectType.BLUR:
+                this.container.style.animation = `blurEffect ${duration}ms`;
+                break;
+        }
+
+        // 等待效果完成
+        await new Promise(resolve => setTimeout(resolve, duration));
+
+        // 清除效果
+        this.activeEffects.delete(effectId);
+
+        // 重置样式
+        if (!this.activeEffects.size) {
+            this.overlay.style.cssText = '';
+            this.container.style.cssText = '';
+        }
+
+        // 调用完成回调
+        if (onComplete) {
+            onComplete();
+        }
+    }
+
+    /**
+     * 显示恐怖效果
+     * @param duration 持续时间（毫秒）
+     * @param effect 效果类型
+     * @param onComplete 效果完成时的回调函数
+     * @returns Promise 在效果完成时解析
+     */
+    public static async ShowHorrorEffect(
+        duration: number,
+        effect: HorrorEffectType = HorrorEffectType.VIGNETTE,
+        onComplete?: () => void
+    ): Promise<void> {
+        this.initialize();
+
+        if (!this.overlay || !this.container) return;
+
+        const effectId = `horror-${Date.now()}`;
+        this.activeEffects.add(effectId);
+
+        // 重置样式
+        this.overlay.style.cssText = '';
+
+        // 应用效果
+        switch (effect) {
+            case HorrorEffectType.VIGNETTE:
+                this.overlay.style.animation = `vignetteEffect ${duration / 2}ms forwards`;
+                break;
+
+            case HorrorEffectType.DISTORTION:
+                this.container.style.animation = `distortionEffect ${duration}ms infinite`;
+                break;
+
+            case HorrorEffectType.NOISE:
+                this.overlay.style.animation = `noiseEffect ${duration}ms infinite`;
+                this.overlay.style.backgroundSize = 'cover';
+                break;
+
+            case HorrorEffectType.INVERTED:
+                this.container.style.animation = `invertedEffect ${duration}ms`;
+                break;
+
+            case HorrorEffectType.WHISPER:
+                // 随机的低语音效（通过随机位置文本实现视觉效果）
+                for (let i = 0; i < 5; i++) {
+                    const whisper = document.createElement('div');
+                    whisper.className = 'ui-screen-effect-text';
+                    whisper.textContent = ['别看', '快跑', '死亡', '恐惧', '黑暗', '它来了'][Math.floor(Math.random() * 6)];
+                    whisper.style.opacity = '0.3';
+                    whisper.style.color = 'rgba(255, 255, 255, 0.7)';
+                    whisper.style.fontSize = '24px';
+                    whisper.style.left = `${Math.random() * 90 + 5}%`;
+                    whisper.style.top = `${Math.random() * 90 + 5}%`;
+                    whisper.style.animation = `textFadeIn ${duration / 3}ms forwards, textFadeIn ${duration / 3}ms reverse forwards ${duration * 2 / 3}ms`;
+
+                    if (this.container) {
+                        this.container.appendChild(whisper);
+
+                        // 删除元素
+                        setTimeout(() => {
+                            if (whisper.parentNode) {
+                                whisper.parentNode.removeChild(whisper);
+                            }
+                        }, duration);
+                    }
+                }
+                break;
+        }
+
+        // 等待效果完成
+        await new Promise(resolve => setTimeout(resolve, duration));
+
+        // 清除效果
+        this.activeEffects.delete(effectId);
+
+        // 重置样式
+        if (!this.activeEffects.size) {
+            this.overlay.style.cssText = '';
+            this.container.style.cssText = '';
+        }
+
+        // 调用完成回调
+        if (onComplete) {
+            onComplete();
+        }
+    }
+
+    /**
+     * 清除所有活动效果
+     */
+    public static ClearAllEffects(): void {
+        if (!this.container || !this.overlay || !this.textElement) return;
+
+        this.activeEffects.clear();
+        this.overlay.style.cssText = '';
+        this.container.style.cssText = '';
+        this.textElement.style.cssText = '';
+        this.textElement.innerHTML = '';
+
+        // 删除所有额外添加的文本元素
+        Array.from(this.container.children).forEach(child => {
+            if (child !== this.overlay && child !== this.textElement) {
+                this.container?.removeChild(child);
+            }
+        });
+    }
+
+    /**
+     * 仅淡入效果（从黑屏慢慢过渡到显示整个场景）
+     * @param fadeInTime 淡入时间（毫秒）
+     * @param effect 过渡效果类型
+     * @param special 特殊效果选项
+     * @param onComplete 效果完成时的回调函数
+     * @returns Promise 在效果完成时解析
+     */
+    public static async FadeIn(
+        fadeInTime: number,
+        effect: TransitionEffectType = TransitionEffectType.FADE,
+        special?: SpecialEffectOptions,
+        onComplete?: () => void
+    ): Promise<void> {
+        this.initialize();
+
+        if (!this.overlay || !this.container || !this.textElement) return;
+
+        const effectId = `fadein-${Date.now()}`;
+        this.activeEffects.add(effectId);
+
+        // 重置样式
+        this.overlay.style.cssText = '';
+        this.textElement.style.cssText = '';
+        this.textElement.innerHTML = '';
+
+        // 设置基础样式 - 初始状态为黑色不透明
         this.overlay.style.opacity = '1';
         this.overlay.style.backgroundColor = '#000';
-        // 强制重绘
-        this.overlay.offsetHeight;
-        this.container.style.animation = `pixelateIn ${fadeOutTime}ms forwards`;
-        break;
-        
-      case TransitionEffectType.GLITCH:
+
+        // 应用效果
+        switch (effect) {
+            case TransitionEffectType.FADE:
+                this.overlay.style.transition = `opacity ${fadeInTime}ms ease-out`;
+                this.overlay.style.opacity = '0';
+                break;
+
+            case TransitionEffectType.WIPE_LEFT:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'inset(0 0 0 0)';
+                this.overlay.style.animation = `wipeLeftOut ${fadeInTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.WIPE_RADIAL:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'circle(150% at center)';
+                this.overlay.style.animation = `wipeRadialOut ${fadeInTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.PIXELATE:
+                this.container.style.filter = 'blur(10px)';
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                this.container.style.animation = `pixelateIn ${fadeInTime}ms reverse forwards`;
+                break;
+
+            case TransitionEffectType.GLITCH:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
+                break;
+        }
+
+        // 处理特殊效果（文本）
+        if (special?.text) {
+            const { text, textPosition, textColor, textSize, textAnimation, customCss } = special;
+
+            this.textElement.textContent = text;
+            this.textElement.style.opacity = '0';
+
+            // 设置位置
+            const x = textPosition?.x ?? 0.5; // 默认在屏幕中央
+            const y = textPosition?.y ?? 0.5; // 默认在屏幕中央
+            this.textElement.style.left = `${x * 100}%`;
+            this.textElement.style.top = `${y * 100}%`;
+
+            // 设置样式
+            this.textElement.style.color = textColor || 'white';
+            this.textElement.style.fontSize = textSize || '32px';
+
+            // 应用自定义CSS
+            if (customCss) {
+                this.textElement.style.cssText += customCss;
+            }
+
+            // 文本动画
+            if (textAnimation) {
+                const delay = textAnimation.delay || 0;
+
+                setTimeout(() => {
+                    if (!this.textElement) return;
+
+                    switch (textAnimation.type) {
+                        case TextAnimationType.FADE_IN:
+                            this.textElement.style.animation = `textFadeIn ${textAnimation.duration}ms forwards`;
+                            break;
+
+                        case TextAnimationType.TYPE_WRITER:
+                            // 打字机效果需要特殊处理
+                            this.textElement.textContent = '';
+                            this.textElement.style.opacity = '1';
+
+                            const characters = text.split('');
+                            const typeDelay = textAnimation.duration / characters.length;
+
+                            characters.forEach((char, index) => {
+                                setTimeout(() => {
+                                    if (this.textElement) {
+                                        this.textElement.textContent += char;
+                                    }
+                                }, index * typeDelay);
+                            });
+                            break;
+
+                        case TextAnimationType.GLITCH_TEXT:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textGlitch ${textAnimation.duration}ms infinite`;
+                            break;
+
+                        case TextAnimationType.PULSE:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textPulse ${textAnimation.duration}ms infinite`;
+                            break;
+
+                        case TextAnimationType.SHAKE_TEXT:
+                            this.textElement.style.opacity = '1';
+                            this.textElement.style.animation = `textShake ${textAnimation.duration}ms infinite`;
+                            break;
+                    }
+                }, delay);
+            }
+        }
+
+        // 等待淡入完成
+        await new Promise(resolve => setTimeout(resolve, fadeInTime));
+
+        // 如果效果已被取消，提前返回
+        if (!this.activeEffects.has(effectId)) return;
+
+        // 完成淡入后，保持当前效果状态
+        this.activeEffects.delete(effectId);
+
+        // 调用完成回调
+        if (onComplete) {
+            onComplete();
+        }
+    }
+
+    /**
+     * 仅淡出效果
+     * @param fadeOutTime 淡出时间（毫秒）
+     * @param effect 过渡效果类型
+     * @param onComplete 效果完成时的回调函数
+     * @returns Promise 在效果完成时解析
+     */
+    public static async FadeOut(
+        fadeOutTime: number,
+        effect: TransitionEffectType = TransitionEffectType.FADE,
+        onComplete?: () => void
+    ): Promise<void> {
+        this.initialize();
+
+        if (!this.overlay || !this.container || !this.textElement) return;
+
+        const effectId = `fadeout-${Date.now()}`;
+        this.activeEffects.add(effectId);
+
+        // 重置样式并确保遮罩层可见
+        this.overlay.style.cssText = '';
         this.overlay.style.opacity = '1';
         this.overlay.style.backgroundColor = '#000';
-        // 强制重绘
-        this.overlay.offsetHeight;
-        this.container.style.animation = `glitchEffect ${fadeOutTime}ms forwards`;
-        break;
+
+        // 开始淡出
+        switch (effect) {
+            case TransitionEffectType.FADE:
+                this.overlay.style.transition = `opacity ${fadeOutTime}ms ease-in`;
+                this.overlay.style.opacity = '1';
+                // 强制重绘
+                this.overlay.offsetHeight;
+                this.overlay.style.opacity = '0';
+                break;
+
+            case TransitionEffectType.WIPE_LEFT:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'inset(0 0 0 0)';
+                // 强制重绘
+                this.overlay.offsetHeight;
+                this.overlay.style.animation = `wipeLeftIn ${fadeOutTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.WIPE_RADIAL:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.clipPath = 'circle(0% at center)';
+                // 强制重绘
+                this.overlay.offsetHeight;
+                this.overlay.style.animation = `wipeRadialIn ${fadeOutTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.PIXELATE:
+                this.container.style.filter = 'blur(0px)';
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                // 强制重绘
+                this.overlay.offsetHeight;
+                this.container.style.animation = `pixelateIn ${fadeOutTime}ms forwards`;
+                break;
+
+            case TransitionEffectType.GLITCH:
+                this.overlay.style.opacity = '1';
+                this.overlay.style.backgroundColor = '#000';
+                // 强制重绘
+                this.overlay.offsetHeight;
+                this.container.style.animation = `glitchEffect ${fadeOutTime}ms forwards`;
+                break;
+        }
+
+        // 淡出文本
+        if (this.textElement) {
+            this.textElement.style.transition = `opacity ${fadeOutTime}ms ease-in`;
+            this.textElement.style.opacity = '0';
+        }
+
+        // 等待淡出完成
+        await new Promise(resolve => setTimeout(resolve, fadeOutTime));
+
+        // 清除效果
+        this.activeEffects.delete(effectId);
+
+        // 重置文本元素
+        this.textElement.style.cssText = '';
+        this.textElement.innerHTML = '';
+
+        // 调用完成回调
+        if (onComplete) {
+            onComplete();
+        }
     }
-    
-    // 淡出文本
-    if (this.textElement) {
-      this.textElement.style.transition = `opacity ${fadeOutTime}ms ease-in`;
-      this.textElement.style.opacity = '0';
-    }
-    
-    // 等待淡出完成
-    await new Promise(resolve => setTimeout(resolve, fadeOutTime));
-    
-    // 清除效果
-    this.activeEffects.delete(effectId);
-    
-    // 重置文本元素
-    this.textElement.style.cssText = '';
-    this.textElement.innerHTML = '';
-  }
 }
 
 // 初始化代码
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-  // 初始化屏幕效果系统
-  // 系统会在第一次调用效果时自动初始化，所以这里不需要额外操作
-  //UIScreenEffect.ShowTransition(500, 500, 1000, TransitionEffectType.WIPE_LEFT);
-  UIScreenEffect.FadeOut(3000,TransitionEffectType.WIPE_RADIAL)
+    // 初始化屏幕效果系统
+    // 系统会在第一次调用效果时自动初始化，所以这里不需要额外操作
+    //UIScreenEffect.ShowTransition(500, 500, 1000, TransitionEffectType.WIPE_LEFT);
+    //   UIScreenEffect.FadeOut(2000,TransitionEffectType.WIPE_RADIAL,()=>{
+    //     alert("完成")
+    //   })
 });
 
 // 导出枚举类型以便外部使用
 export type {
-  TransitionEffectType,
-  HitEffectType,
-  HorrorEffectType,
-  TextAnimationType,
-  SpecialEffectOptions
+    TransitionEffectType,
+    HitEffectType,
+    HorrorEffectType,
+    TextAnimationType,
+    SpecialEffectOptions
 };
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    UIScreenEffect.FadeIn(3000,TransitionEffectType.WIPE_RADIAL,undefined)
+})
