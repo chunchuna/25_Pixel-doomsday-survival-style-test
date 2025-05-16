@@ -25,13 +25,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 获取初始库存数据
-    const initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
-    PLAYER_INVENTORY_ITEMS = initialItems;
+     const initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
+    // PLAYER_INVENTORY_ITEMS = initialItems;
     
     // 创建更新函数，用于在库存操作后更新全局变量
     const updatePlayerInventory = (items: Item[]) => {
         // 更新内存中的库存数组
-        PLAYER_INVENTORY_ITEMS = items;
+        //PLAYER_INVENTORY_ITEMS = items;
         // 将最新库存数据序列化并更新全局变量
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
@@ -51,21 +51,21 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 保存游戏数据
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("save", (e) => {
         // 将当前内存中的库存数据保存到存档
-        e.saveData = {
-            "PlayerInventoryData": PLAYER_INVENTORY_ITEMS
-        }
+        // e.saveData = {
+        //     "PlayerInventoryData": PLAYER_INVENTORY_ITEMS
+        // }
     });
     
     // 加载游戏数据
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load", (e) => {
         // 从存档加载库存数据到内存中
         if (e.saveData && e.saveData.PlayerInventoryData) {
-            // 更新内存中的库存数组
-            PLAYER_INVENTORY_ITEMS = e.saveData.PlayerInventoryData;
+            // // 更新内存中的库存数组
+            // PLAYER_INVENTORY_ITEMS = e.saveData.PlayerInventoryData;
             
-            // 更新全局变量中的序列化字符串
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = 
-                SerializeItemsOnly(PLAYER_INVENTORY_ITEMS);
+            // // 更新全局变量中的序列化字符串
+            // pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = 
+            //     SerializeItemsOnly(PLAYER_INVENTORY_ITEMS);
             
             
             // 重新绑定库存UI，确保UI与数据同步
@@ -73,7 +73,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 // 给一个短暂延迟，确保UI系统已经准备好
                 setTimeout(() => {
                     // 重置并重新绑定库存
-                    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS, 30, 6, "I");
+                    inventoryManager.BindPlayerMainInventory(DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory), 30, 6, "I");
                     console.log("已重新绑定库存UI");
                 }, 100);
             }
