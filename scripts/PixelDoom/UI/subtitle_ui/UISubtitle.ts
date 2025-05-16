@@ -21,6 +21,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     container.style.zIndex = '1000';
     container.style.width = '80%';
     container.style.textAlign = 'center';
+    container.style.pointerEvents = 'none';
     document.body.appendChild(container);
 
     // 添加字幕样式
@@ -36,8 +37,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
             font-size: 18px;
-            width:150px;
-            z-index:1000;
+            width: auto;
+            max-width: 300px;
+            z-index: 1000;
+            pointer-events: none;
         }
         .subtitle-item.show {
             opacity: 1;
