@@ -842,7 +842,7 @@ class UIInventory {
         // 创建库存网格
         const gridContainer = document.createElement('div');
         gridContainer.className = 'inventory-grid';
-        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 60px)`;
+        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 45px)`;
 
         // 计算需要多少个格子
         const totalSlots = rows * columns;
@@ -1091,7 +1091,7 @@ class UIInventory {
                 padding: 15px;
                 display: flex;
                 flex-direction: column;
-                width: 300px;
+                width: 222px;
                 height: 380px;
                 opacity: 0.1;
                 z-index: 5000;
@@ -1293,9 +1293,9 @@ class UIInventory {
             /* 库存网格 */
             .inventory-grid {
                 display: grid;
-                gap: 8px;
+                gap: -10;
                 width: 100%;
-                grid-auto-rows: 60px;
+                grid-auto-rows: 48px;
             }
             
             /* 为主库存和其他库存设置不同的默认位置和视觉样式 */
@@ -1317,8 +1317,8 @@ class UIInventory {
                 border: 1px solid rgba(85, 85, 85, 0.3);
                 border-radius: 4px;
                 aspect-ratio: 1 / 1;
-                width: 60px;
-                height: 60px;
+                width: 40px;
+                height: 40px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
