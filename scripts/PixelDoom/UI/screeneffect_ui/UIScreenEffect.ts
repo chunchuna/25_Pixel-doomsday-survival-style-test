@@ -132,8 +132,12 @@ export class UIScreenEffect {
       
       /* 圆形扩散 */
       @keyframes wipeRadialIn {
-        0% { clip-path: circle(0% at center); }
-        100% { clip-path: circle(150% at center); }
+        0% { 
+          clip-path: circle(0% at center);
+        }
+        100% { 
+          clip-path: circle(150% at center);
+        }
       }
       @keyframes wipeRadialOut {
         0% { clip-path: circle(150% at center); }
@@ -720,23 +724,32 @@ export class UIScreenEffect {
         // 设置基础样式 - 初始状态为黑色不透明
         this.overlay.style.opacity = '1';
         this.overlay.style.backgroundColor = '#000';
+        
+        // 强制重绘，确保样式生效
+        this.overlay.offsetHeight;
 
         // 应用效果
         switch (effect) {
             case TransitionEffectType.FADE:
                 this.overlay.style.transition = `opacity ${fadeInTime}ms ease-out`;
+                // 强制重绘
+                this.overlay.offsetHeight;
                 this.overlay.style.opacity = '0';
                 break;
 
             case TransitionEffectType.WIPE_LEFT:
                 this.overlay.style.opacity = '1';
                 this.overlay.style.clipPath = 'inset(0 0 0 0)';
+                // 强制重绘
+                this.overlay.offsetHeight;
                 this.overlay.style.animation = `wipeLeftOut ${fadeInTime}ms forwards`;
                 break;
 
             case TransitionEffectType.WIPE_RADIAL:
                 this.overlay.style.opacity = '1';
                 this.overlay.style.clipPath = 'circle(150% at center)';
+                // 强制重绘
+                this.overlay.offsetHeight;
                 this.overlay.style.animation = `wipeRadialOut ${fadeInTime}ms forwards`;
                 break;
 
@@ -744,12 +757,16 @@ export class UIScreenEffect {
                 this.container.style.filter = 'blur(10px)';
                 this.overlay.style.opacity = '1';
                 this.overlay.style.backgroundColor = '#000';
+                // 强制重绘
+                this.overlay.offsetHeight;
                 this.container.style.animation = `pixelateIn ${fadeInTime}ms reverse forwards`;
                 break;
 
             case TransitionEffectType.GLITCH:
                 this.overlay.style.opacity = '1';
                 this.overlay.style.backgroundColor = '#000';
+                // 强制重绘
+                this.overlay.offsetHeight;
                 this.container.style.animation = `glitchEffect ${fadeInTime}ms forwards`;
                 break;
         }
