@@ -3,6 +3,9 @@ var CameraZoomValue: number = 0.5;
 var CameraZoomTarget = 0.5;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    
+    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
+    
     // 初始化时设置初始值
     CameraZoomValue = 10;
     CameraZoomTarget = 0.5; // 确保两个值初始一致
@@ -24,6 +27,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+
+    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     // 使用更合适的插值系数(0.05)来实现平滑过渡
     CameraZoomValue = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.Justlerp(CameraZoomValue, CameraZoomTarget, 0.05);
     //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
