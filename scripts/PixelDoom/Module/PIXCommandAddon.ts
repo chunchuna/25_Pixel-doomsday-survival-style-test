@@ -5,7 +5,6 @@ export class GL_COMMAND_ {
 
     public static GET_LAST_ACTION: string;
     public static IN_GAME_CONSOLE_INSTANCE: any;
-
     public static COMMAND_OPEN = false;
 
 

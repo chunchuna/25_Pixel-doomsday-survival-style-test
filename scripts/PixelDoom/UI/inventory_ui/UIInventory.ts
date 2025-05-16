@@ -1082,12 +1082,12 @@ class UIInventory {
                 border-radius: 5px;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
                 padding: 15px;
-                z-index: 100;
                 display: flex;
                 flex-direction: column;
-                width: 390px; /* 固定宽度 (6格 * 60px + 间隙) */
-                height: 450px; /* 固定高度 */
+                width: 300px; /* 固定宽度 (6格 * 60px + 间隙) */
+                height: 380px; /* 固定高度 */
                 opacity: 1; /* 默认设置为可见 */
+                z-index:5000;
             }
             
             /* 新创建的库存容器初始状态 */
@@ -1103,7 +1103,7 @@ class UIInventory {
                 width: 100%;
                 height: 40px;
                 cursor: move;
-                z-index: 101;
+                z-index: 5002;
             }
             
             /* 库存头部样式 */
@@ -1115,7 +1115,7 @@ class UIInventory {
                 padding-bottom: 10px;
                 border-bottom: 1px solid #444;
                 color: #ccc;
-                z-index: 102;
+                z-index: 5001;
                 pointer-events: auto;
                 /* 添加明显的背景色以便区分 */
                 background-color: rgba(40, 40, 40, 0.8);
@@ -1145,7 +1145,7 @@ class UIInventory {
                 padding: 5px 10px;
                 cursor: pointer;
                 transition: all 0.2s ease;
-                z-index: 103;
+                z-index: 5001;
             }
             
             .sort-button:hover, .close-button:hover {
@@ -1200,7 +1200,7 @@ class UIInventory {
                 padding: 10px 20px;
                 border-radius: 5px;
                 font-size: 16px;
-                z-index: 200;
+                z-index: 5001;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
                 animation: notification-appear 0.3s ease-out;
             }
@@ -1343,7 +1343,7 @@ class UIInventory {
             
             .slot-highlight {
                 animation: pulseGlow 1.5s infinite;
-                z-index: 5;
+                z-index: 5001;
                 border-color: #888;
                 background-color: #444;
             }
@@ -1393,7 +1393,7 @@ class UIInventory {
             .dragged-item {
                 position: fixed;
                 pointer-events: none;
-                z-index: 1000;
+                z-index: 5001;
                 background-color: rgba(80, 80, 80, 0.9);
                 border: 1px solid #888;
                 border-radius: 4px;
@@ -1433,7 +1433,7 @@ class UIInventory {
                 padding: 10px;
                 min-width: 200px;
                 max-width: 300px;
-                z-index: 200;
+                z-index: 5002;
                 color: #fff;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
                 pointer-events: none;

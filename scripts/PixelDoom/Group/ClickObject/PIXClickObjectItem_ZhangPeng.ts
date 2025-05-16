@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             };
 
             // 传入更新回调参数
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 5, updateInfo);
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo);
         }
     })
 })

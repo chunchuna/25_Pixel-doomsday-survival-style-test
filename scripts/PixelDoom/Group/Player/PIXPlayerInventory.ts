@@ -73,7 +73,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 // 给一个短暂延迟，确保UI系统已经准备好
                 setTimeout(() => {
                     // 重置并重新绑定库存
-                    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS, 30, 5, "I");
+                    inventoryManager.BindPlayerMainInventory(PLAYER_INVENTORY_ITEMS, 30, 6, "I");
                     console.log("已重新绑定库存UI");
                 }, 100);
             }
