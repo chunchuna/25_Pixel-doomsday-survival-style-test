@@ -1084,22 +1084,23 @@ class UIInventory {
             /* 库存容器样式 */
             .inventory-container {
                 position: fixed;
-                background-color: rgba(25, 25, 25, 0.95);
-                border: 2px solid #444;
+                background-color: rgba(25, 25, 25, 0.1);
+                border: 2px solid rgba(68, 68, 68, 0.1);
                 border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                 padding: 15px;
                 display: flex;
                 flex-direction: column;
-                width: 300px; /* 固定宽度 (6格 * 60px + 间隙) */
-                height: 380px; /* 固定高度 */
-                opacity: 1; /* 默认设置为可见 */
-                z-index:5000;
+                width: 300px;
+                height: 380px;
+                opacity: 0.1;
+                z-index: 5000;
+                backdrop-filter: blur(5px);
             }
             
             /* 新创建的库存容器初始状态 */
             .inventory-container:not(.inventory-open):not(.inventory-close) {
-                opacity: 1; /* 确保默认可见 */
+                opacity: 0.1;
             }
             
             /* 库存拖拽句柄 */
@@ -1120,12 +1121,11 @@ class UIInventory {
                 align-items: center;
                 margin-bottom: 15px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid #444;
+                border-bottom: 1px solid rgba(68, 68, 68, 0.3);
                 color: #ccc;
                 z-index: 5001;
                 pointer-events: auto;
-                /* 添加明显的背景色以便区分 */
-                background-color: rgba(40, 40, 40, 0.8);
+                background-color: rgba(40, 40, 40, 0.3);
                 padding: 10px;
                 border-radius: 3px;
             }
@@ -1174,14 +1174,14 @@ class UIInventory {
                     opacity: 0;
                 }
                 to {
-                    opacity: 1;
+                    opacity: 0.1;
                 }
             }
             
             /* 库存关闭动画 */
             @keyframes fadeOut {
                 from {
-                    opacity: 1;
+                    opacity: 0.1;
                 }
                 to {
                     opacity: 0;
@@ -1302,19 +1302,19 @@ class UIInventory {
             #main-inventory {
                 left: 50px;
                 top: 50%;
-                border-color: #446688;
+                border-color:rgba(68, 102, 136, 0.08);
             }
             
             #other-inventory {
                 right: 50px;
                 top: 50%;
-                border-color: #884466;
+                border-color:rgba(136, 68, 102, 0.08);
             }
             
             /* 物品格子 */
             .inventory-slot {
-                background-color: #333;
-                border: 1px solid #555;
+                background-color: rgba(51, 51, 51, 0.3);
+                border: 1px solid rgba(85, 85, 85, 0.3);
                 border-radius: 4px;
                 aspect-ratio: 1 / 1;
                 width: 60px;
@@ -1325,11 +1325,11 @@ class UIInventory {
                 position: relative;
                 overflow: hidden;
                 transition: all 0.3s ease;
-                box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
             }
             
             .inventory-slot.empty {
-                background-color: #2a2a2a;
+                background-color: rgba(42, 42, 42, 0.5);
             }
             
             /* 格子高亮效果 */
@@ -1401,7 +1401,7 @@ class UIInventory {
                 position: fixed;
                 pointer-events: none;
                 z-index: 5001;
-                background-color: rgba(80, 80, 80, 0.9);
+                background-color: rgba(80, 80, 80, 0.3);
                 border: 1px solid #888;
                 border-radius: 4px;
                 display: flex;
@@ -1434,19 +1434,19 @@ class UIInventory {
             /* 物品描述面板 */
             .item-description-panel {
                 position: fixed;
-                background-color: rgba(25, 25, 25, 0.95);
-                border: 1px solid #444;
+                background-color: rgba(25, 25, 25, 0.8);
+                border: 1px solid rgba(68, 68, 68, 0.8);
                 border-radius: 5px;
                 padding: 10px;
                 min-width: 200px;
                 max-width: 300px;
                 z-index: 5002;
                 color: #fff;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
                 pointer-events: none;
                 opacity: 0;
                 transition: opacity 0.2s ease;
-                backdrop-filter: blur(2px);
+                backdrop-filter: blur(5px);
             }
             
             .item-description-panel[style*="display: block"] {
