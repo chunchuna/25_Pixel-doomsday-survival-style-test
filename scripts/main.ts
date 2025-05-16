@@ -35,6 +35,7 @@ import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"
 import "./PixelDoom/UI/MainMenu_ui/UIMainMenu.js"
 
 import "./PixelDoom/UI/inventory_ui/UIInventory.js"
+import "./PixelDoom/UI/screeneffect_ui/UIScreenEffect.js"
 
 runOnStartup(async runtime => {
 	// Code to run on the loading screen.

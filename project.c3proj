@@ -557,6 +557,20 @@
 									],
 									"subfolders": [],
 									"name": "inventory_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIScreenEffect.ts",
+											"type": "application/typescript",
+											"sid": 577723871454830,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "screeneffect_ui"
 								}
 							],
 							"name": "UI"
