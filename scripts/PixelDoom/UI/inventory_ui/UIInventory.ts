@@ -133,7 +133,7 @@ class UIInventory {
     }
 
     // 显示其他库存（如NPC或箱子库存）
-    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback): { close: () => void } {
+    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback,InventoryName?:string): { close: () => void } {
         // 如果已有打开的其他库存，先关闭它
         if (this.closeOtherInventoryFunc) {
             this.closeOtherInventoryFunc();
@@ -172,7 +172,7 @@ class UIInventory {
         this.otherInventoryInstance.style.opacity = '0';
 
         // 渲染其他库存
-        this.renderOtherInventory(rows, columns);
+        this.renderOtherInventory(rows, columns,InventoryName);
         
         // 添加动画效果
         setTimeout(() => {
@@ -769,7 +769,7 @@ class UIInventory {
     }
 
     // 渲染其他库存
-    private renderOtherInventory(rows: number, columns: number): void {
+    private renderOtherInventory(rows: number, columns: number,InventoryName?:string): void {
         if (this.otherInventoryInstance) {
             this.renderInventory(
                 this.otherInventoryInstance,
@@ -777,13 +777,14 @@ class UIInventory {
                 rows,
                 columns,
                 // 传递一个标识，表示这是其他库存
-                true
+                true,
+                InventoryName,
             );
         }
     }
 
     // 通用渲染库存方法
-    private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number, isOtherInventory: boolean = false): void {
+    private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number, isOtherInventory: boolean = false,InventoryName?:string): void {
         // 清空容器，但保留拖拽句柄
         const dragHandle = container.querySelector('.inventory-drag-handle');
         container.innerHTML = '';
@@ -799,7 +800,7 @@ class UIInventory {
         if (!isOtherInventory) {
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
-            titleSpan.textContent = '物品库存';
+            titleSpan.textContent = '我的';
 
             const sortButton = document.createElement('button');
             sortButton.className = 'sort-button';
@@ -812,7 +813,13 @@ class UIInventory {
             // 添加其他库存的标题
             const titleSpan = document.createElement('span');
             titleSpan.className = 'inventory-title';
-            titleSpan.textContent = '其他库存';
+            if(InventoryName)
+            {
+                titleSpan.textContent = InventoryName;
+            }else{
+                titleSpan.textContent = "正在查看其它库存";
+            }
+            
             
             // 添加关闭按钮
             const closeButton = document.createElement('button');

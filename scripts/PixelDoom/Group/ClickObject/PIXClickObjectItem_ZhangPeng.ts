@@ -12,7 +12,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
             // 打开库存面板
             // 使用类型断言来避免类型错误
-            var InventoryInstance = LastestChooseObject as any;
+            //@ts-ignore
+            var InventoryInstance = LastestChooseObject as InstanceType.InventoryData;
             
             // 确保实例有InventoryData属性，如果没有则进行处理
             if (!InventoryInstance.instVars.InventoryData) {
@@ -29,7 +30,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             };
 
             // 传入更新回调参数
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo);
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo,InventoryInstance.instVars.InventoryName);
         }
     })
 })

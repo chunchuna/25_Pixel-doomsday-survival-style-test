@@ -9,6 +9,13 @@
 			"desc": "",
 			"show": true,
 			"sid": 147599763941054
+		},
+		{
+			"name": "InventoryName",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 388410626000214
 		}
 	],
 	"behaviorTypes": [],
