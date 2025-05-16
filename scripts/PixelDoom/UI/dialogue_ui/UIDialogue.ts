@@ -131,7 +131,7 @@ body {
 #dialogue-panel {
     position: fixed;
     bottom: 20px;
-    left: 0;
+    left: 10%;
     width: 10%;
     max-width: 800px;
     min-width: 300px;

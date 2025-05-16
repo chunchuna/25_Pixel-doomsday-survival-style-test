@@ -1,8 +1,8 @@
 /* CSS */
 .interaction-panel {
   position:fixed;
-  bottom: 0;
-  right: 0;
+  bottom:5%;
+  right: 5%;
   width: 300px;
   max-height: 350px;
   background-color: rgba(40, 40, 40, 0.5);

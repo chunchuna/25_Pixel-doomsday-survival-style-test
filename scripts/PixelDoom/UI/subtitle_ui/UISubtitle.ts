@@ -31,11 +31,12 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             color: white;
             padding: 10px 15px;
             margin: 5px 0;
-            border-radius: 5px;
-            opacity: 0;
+            border-radius: 20px;
+            opacity: 50%;
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
             font-size: 18px;
+            width:150px;
         }
         .subtitle-item.show {
             opacity: 1;
