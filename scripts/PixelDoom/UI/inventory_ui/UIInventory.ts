@@ -208,7 +208,7 @@ class UIInventory {
 
         // 添加鼠标按下事件以开始调整大小
         resizeButton.addEventListener('mousedown', (e) => {
-            console.log('其他库存角标被点击');
+            //console.log('其他库存角标被点击');
 
             // 只响应左键点击
             if (e.button === 0) {
@@ -230,7 +230,7 @@ class UIInventory {
         });
 
         this.otherInventoryInstance.appendChild(resizeButton);
-        console.log('直接添加了其他库存的大小调整按钮');
+        //console.log('直接添加了其他库存的大小调整按钮');
 
         // 渲染其他库存
         this.renderOtherInventory(rows, columns, InventoryName);
@@ -408,7 +408,7 @@ class UIInventory {
             // 添加resizing类以应用样式
             if (!this.resizedWindow.classList.contains('resizing')) {
                 this.resizedWindow.classList.add('resizing');
-                console.log('窗口正在调整大小'); // 添加调试信息
+                //console.log('窗口正在调整大小'); // 添加调试信息
             }
 
             const dx = event.clientX - this.windowResizeStartPos.x;
@@ -425,10 +425,10 @@ class UIInventory {
             // 保存窗口大小信息
             if (this.resizedWindow.id === 'main-inventory') {
                 this.MainInventoryWindowSize = [newWidth, newHeight];
-                console.log('主库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
+                //console.log('主库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
             } else if (this.resizedWindow.id === 'other-inventory') {
                 this.OtherInventoryWindowSize = [newWidth, newHeight];
-                console.log('其他库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
+                //console.log('其他库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
             }
 
             // 自动调整网格容器
@@ -2397,27 +2397,27 @@ class UIInventory {
         // 先移除容器中已存在的所有调整大小按钮
         const existingButtons = container.querySelectorAll('.inventory-resize-button');
         existingButtons.forEach(button => container.removeChild(button));
-        
+
         // 创建一个新的调整大小按钮
-        console.log(`为容器 ${container.id} 创建调整大小按钮`);
-        
+        //console.log(`为容器 ${container.id} 创建调整大小按钮`);
+
         const resizeButton = document.createElement('button');
         resizeButton.className = 'inventory-resize-button';
         resizeButton.innerHTML = `<div class="resize-icon">
             <span></span>
         </div>`;
         resizeButton.title = '拖拽调整窗口大小';
-        
+
         // 设置按钮样式确保可见
         resizeButton.style.display = 'flex';
-        
+
         // 添加鼠标按下事件以开始调整大小
         resizeButton.addEventListener('mousedown', (e) => {
             // 只响应左键点击
             if (e.button === 0) {
                 this.isResizingWindow = true;
                 this.resizedWindow = container;
-                
+
                 // 获取容器当前大小
                 const rect = container.getBoundingClientRect();
                 this.windowResizeStartPos = {
@@ -2426,12 +2426,12 @@ class UIInventory {
                     windowWidth: rect.width,
                     windowHeight: rect.height
                 };
-                
+
                 e.preventDefault();
                 e.stopPropagation();
             }
         });
-        
+
         container.appendChild(resizeButton);
     }
 }
