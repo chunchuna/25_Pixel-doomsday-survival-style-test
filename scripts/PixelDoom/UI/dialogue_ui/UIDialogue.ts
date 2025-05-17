@@ -110,6 +110,7 @@ export class DialogueSystem {
     // 添加对话系统的样式
     private addDialogueStyles(): void {
         const style = document.createElement('style');
+        style.setAttribute('data-dialogue-style', 'true');
         style.textContent = `/* * {
     margin: 0;
     padding: 0;
@@ -958,6 +959,28 @@ body {
         
         // 关闭对话面板
         this.dialoguePanel.classList.remove('active');
+    }
+
+    // 完全销毁对话面板
+    public DestroyDialogue(): void {
+        // 先关闭对话面板并清理状态
+        this.CloseDialogue();
+        
+        // 移除事件监听器
+        this.closeButton.removeEventListener('click', this.CloseDialogue.bind(this));
+        document.removeEventListener('keydown', this.handleGlobalKeydown);
+        this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
+        
+        // 从DOM中移除整个对话面板
+        if (this.dialoguePanel && this.dialoguePanel.parentNode) {
+            this.dialoguePanel.parentNode.removeChild(this.dialoguePanel);
+        }
+        
+        // 移除添加的样式
+        const dialogueStyle = document.head.querySelector('style[data-dialogue-style]');
+        if (dialogueStyle) {
+            dialogueStyle.remove();
+        }
     }
 }
 

@@ -4,21 +4,26 @@ import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScree
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { data } from "../../Group/Save/PIXSave.js"
 
+
+var IsInitGameMainMenu = false
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
+    UIMainMenu.getInstance().ShowMainMenu()
+    if (IsInitGameMainMenu) return;
+    IsInitGameMainMenu = true;
+
     initGameMainScene();
 
 });
 
 
 
-function initGameMainScene(): void {
+async function initGameMainScene(): Promise<void> {
     const gameMainScene = UIMainMenu.getInstance();
     gameMainScene.initialize();
     UIMainMenu.getInstance().MenuAddButton("语言", () => {
     })
-
 
     setTimeout(() => {
 
@@ -32,6 +37,9 @@ function initGameMainScene(): void {
         //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
     }, 1000); // 延迟1秒，确保按钮已经完全显示
 
+    UIMainMenu.getInstance().HideALLMainMenuUI();
+    await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1);
+    UIMainMenu.getInstance().ShowMainMenu();
 
     (window as any).HideALLMainMenuUI = (callback?: () => void) => {
         UIMainMenu.getInstance().HideALLMainMenuUI(callback);
@@ -106,7 +114,8 @@ class UIMainMenu {
         const newGameBtn = document.getElementById('new-game-btn');
         if (newGameBtn) {
             newGameBtn.addEventListener('click', () => {
-                //console.log('新游戏按钮点击 - 等待实现');
+
+                console.log('新游戏按钮点击 - 等待实现');
                 //@ts-ignore
                 //pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.destroy();
                 this.HideALLMainMenuUI(() => {
@@ -2039,7 +2048,7 @@ class UIMainMenu {
 
                 // 设置按钮点击事件
                 useDataBtn.onclick = () => {
-                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏",5)
+                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏", 5)
                     this.HideALLMainMenuUI(() => {
                         UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
                             SaveSetting.isUseDataEnterNewGame = true;

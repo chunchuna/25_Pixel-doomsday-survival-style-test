@@ -27,19 +27,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.GameType != GAME_TYPE.LEVEL) return
 
-    //@ts-ignore
 
-    if (GAME$_KEYBOARD_INSTAHCE == null) {
-        GAME$_KEYBOARD_INSTAHCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.Keyboard;
-        console.log(GAME$_KEYBOARD_INSTAHCE)
-    }
-    //@ts-ignore
-    if (GAME$_CHARACTER_CONTROLLER == null) {
 
-        //@ts-ignore
-        GAME$_CHARACTER_CONTROLLER = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.CharacterController.getFirstInstance();
-        console.log(GAME$_CHARACTER_CONTROLLER)
-    }
+    //@ts-ignore
+    GAME$_KEYBOARD_INSTAHCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.Keyboard;
+    console.log(GAME$_KEYBOARD_INSTAHCE)
+
+
+    //@ts-ignore
+    GAME$_CHARACTER_CONTROLLER = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.CharacterController.getFirstInstance();
+    console.log(GAME$_CHARACTER_CONTROLLER)
+
 })
 
 
@@ -67,9 +65,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (GAME$_KEYBOARD_INSTAHCE == null) return
     if (GAME$_CHARACTER_CONTROLLER == null) return
 
-    
-
     if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyW")) {
+        console.log("player up")
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("up");
     }
     if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyS")) {
@@ -81,7 +78,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyD")) {
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("right");
     }
-})  
+})
 
 
 

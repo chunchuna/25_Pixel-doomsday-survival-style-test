@@ -16,7 +16,7 @@ export class _Audio {
 
     }
 
-    public static AudioStopAll(TAG: string) {
+    public static AudioStopAll() {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("AudioStopAll")
 
     }

@@ -1,5 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
-import { UIDebug } from "../../UI/debug_ui/UIDebug.js";
+import { DEBUG, UIDebug } from "../../UI/debug_ui/UIDebug.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 export let data = {
@@ -61,27 +61,24 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         UISubtitleMain.ShowSubtitles("正在从数据载入游戏..", 5)
     })
 })
-var IsCreatDebugPanel = false;
 
+var isBindButtonIntoDebugPanel = false;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    //DEBUG 测试 
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel=true
+    //DEBUG 面板绘制 
+    if (!DEBUG.DebugMainUI) return
 
-    if (IsCreatDebugPanel) return
-    IsCreatDebugPanel = true
-
-    var DebugTest = UIDebug.InitDebugPanel("m")
-    DebugTest.InitConsoleCapture()
-
-    DebugTest.DebuPanelAddButton("存档-标识符和json同时存档", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("存档-标识符和json同时存档", () => {
         UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
         MixC3Save.SaveGame('cundang-001')
     })
-    DebugTest.DebuPanelAddButton("读取测试-通过标识符读取", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("读取测试-通过标识符读取", () => {
         UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
         MixC3Save.LoadGame("cundang-001")
     })
 
-    DebugTest.DebuPanelAddButton("读取测试-通过json", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("读取测试-通过json", () => {
         UISubtitleMain.ShowSubtitles("读取测试-通过json", 5)
         // 通过 data.LevelGameData 来加载关卡存档
         if (!data.LevelGameData) {
@@ -91,17 +88,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         MixC3Save.LoadGameFromJson(data.LevelGameData)
     })
 
-    DebugTest.DebuPanelAddButton("下载数据", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("下载数据", () => {
         UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
         LocalSave.DataDownload()
     })
 
-    DebugTest.DebuPanelAddButton("读取本地数据", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("读取本地数据", () => {
         UISubtitleMain.ShowSubtitles("读取本地数据", 5)
         LocalSave.DataRead();
     })
 
-    DebugTest.DebuPanelAddButton("清空data 并把数据存到localstoreg", () => {
+    DEBUG.DebugMainUI.DebuPanelAddButton("清空data 并把数据存到localstoreg", () => {
         UISubtitleMain.ShowSubtitles("清空data", 5)
         data.LevelGameData = ""
         data.RunGameTiems = 0;
