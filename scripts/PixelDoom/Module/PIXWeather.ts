@@ -52,8 +52,8 @@ async function Rain() {
                 for (let i = 0; i < 20; i++) { 
                     RainDropSpriteClass.createInstance(
                         "Rain",
-                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth),
-                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(10, GameLayoutHeight/2),
+                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-5000, GameLayoutdth),
+                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-500, GameLayoutHeight/2),
                         false
                     );
                 }
@@ -64,8 +64,8 @@ async function Rain() {
                     for (let i = 0; i < 15; i++) {
                         RainDropSpriteClass.createInstance(
                             "Rain",
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-100, GameLayoutdth),
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(0, 20),
+                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-5000, GameLayoutdth),
+                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-500, 20),
                             false
                         );
                     }

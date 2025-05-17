@@ -475,6 +475,7 @@ class UIInventory {
             (slot as HTMLElement).style.height = `${slotSize}px`;
             // 不设置格子之间的间距，由网格容器统一控制
         });
+        
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
@@ -1039,7 +1040,17 @@ class UIInventory {
             sortButton.onclick = () => this.sortInventoryByQuality();
 
             headerDiv.appendChild(titleSpan);
-            headerDiv.appendChild(sortButton);
+            //headerDiv.appendChild(sortButton);
+            
+            // 添加R键整理背包的提示文本
+            const sortPromptSpan = document.createElement('span');
+            sortPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
+            sortPromptSpan.style.fontSize = '12px';
+            sortPromptSpan.style.color = '#aaaaaa';
+            sortPromptSpan.style.fontStyle = 'italic';
+            sortPromptSpan.textContent = '[R]整理背包';
+            
+            headerDiv.appendChild(sortPromptSpan);
         } else {
             // 添加其他库存的标题
             const titleSpan = document.createElement('span');
@@ -1050,21 +1061,17 @@ class UIInventory {
                 titleSpan.textContent = "正在查看其它库存";
             }
 
-
-            // 添加关闭按钮
-            const closeButton = document.createElement('button');
-            closeButton.className = 'close-button';
-            closeButton.textContent = '关闭';
-            closeButton.onclick = () => {
-                // 获取关闭函数，这是一个全局函数
-                const closeFunc = this.findCloseOtherInventoryFunction();
-                if (closeFunc) {
-                    closeFunc();
-                }
-            };
-
             headerDiv.appendChild(titleSpan);
-            headerDiv.appendChild(closeButton);
+            
+            // 创建ESC提示文本，放在header里
+            const escPromptSpan = document.createElement('span');
+            escPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
+            escPromptSpan.style.fontSize = '12px';
+            escPromptSpan.style.color = '#aaaaaa';
+            escPromptSpan.style.fontStyle = 'italic';
+            escPromptSpan.textContent = '[ESC]关闭';
+            
+            headerDiv.appendChild(escPromptSpan);
         }
 
         container.appendChild(headerDiv);
@@ -1487,12 +1494,12 @@ class UIInventory {
                 color: #ccc;
                 border: 1px solid #555;
                 border-radius: 3px;
-                padding: 5% 10%; 
+                padding: 5% 10% !important; 
                 cursor: pointer;
                 transition: all 0.2s ease;
                 z-index: 5001;
-                width: 20%; 
-                height: 15%; 
+                width: 20% !important; 
+                height: 15% !important; 
                 box-sizing: border-box; 
                 display: flex;
                 align-items: center;

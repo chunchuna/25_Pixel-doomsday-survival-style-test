@@ -7,7 +7,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     
     // 初始化时设置初始值
-    CameraZoomValue = 10;
+    CameraZoomValue = 1;
     CameraZoomTarget = 0.5; // 确保两个值初始一致
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.scale = CameraZoomValue;
 
