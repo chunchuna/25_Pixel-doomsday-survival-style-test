@@ -37,7 +37,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
             font-size: 18px;
-            width: auto;
+            width: 200px;
             max-width: 300px;
             z-index: 1000;
             pointer-events: none;
