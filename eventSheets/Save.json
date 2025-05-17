@@ -31,8 +31,7 @@
 				{
 					"id": "save-to-json",
 					"objectClass": "System",
-					"sid": 988649875725063,
-					"disabled": true
+					"sid": 988649875725063
 				}
 			],
 			"sid": 517356097953300
@@ -133,10 +132,17 @@
 						"type": "log",
 						"message": "SaveStateJSON"
 					}
+				},
+				{
+					"type": "script",
+					"language": "typescript",
+					"script": [
+						"//@ts-ignore",
+						"gl$_run_eventhandle_(\"Save:SavetoJson\")"
+					]
 				}
 			],
-			"sid": 256538913300807,
-			"disabled": true
+			"sid": 256538913300807
 		}
 	],
 	"sid": 966362096878495
