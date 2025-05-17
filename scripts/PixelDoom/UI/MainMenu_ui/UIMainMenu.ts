@@ -2039,7 +2039,7 @@ class UIMainMenu {
 
                 // 设置按钮点击事件
                 useDataBtn.onclick = () => {
-                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏")
+                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏",5)
                     this.HideALLMainMenuUI(() => {
                         UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
                             SaveSetting.isUseDataEnterNewGame = true;
