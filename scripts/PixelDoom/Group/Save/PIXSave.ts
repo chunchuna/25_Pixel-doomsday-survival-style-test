@@ -70,6 +70,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     IsCreatDebugPanel = true
 
     var DebugTest = UIDebug.InitDebugPanel("m")
+    DebugTest.InitConsoleCapture()
 
     DebugTest.DebuPanelAddButton("存档-标识符和json同时存档", () => {
         UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)

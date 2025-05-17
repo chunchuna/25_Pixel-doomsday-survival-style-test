@@ -14,6 +14,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 interface DebugPanelInstance {
     DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance;
+    InitConsoleCapture(): DebugPanelInstance;
 }
 
 export class UIDebug {
@@ -26,6 +27,9 @@ export class UIDebug {
     private static width: number = 200;
     private static height: number = 600;
     private static resizer: HTMLDivElement | null = null;
+    private static consoleContainer: HTMLDivElement | null = null;
+    private static originalConsole: any = {};
+    private static isConsoleEnabled: boolean = false;
     
     /**
      * 初始化调试面板
@@ -38,6 +42,9 @@ export class UIDebug {
             return {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                InitConsoleCapture: () => {
+                    return UIDebug.InitConsoleCapture();
                 }
             };
         }
@@ -63,6 +70,9 @@ export class UIDebug {
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            InitConsoleCapture: () => {
+                return UIDebug.InitConsoleCapture();
             }
         };
     }
@@ -79,6 +89,9 @@ export class UIDebug {
             return {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                InitConsoleCapture: () => {
+                    return UIDebug.InitConsoleCapture();
                 }
             };
         }
@@ -93,8 +106,202 @@ export class UIDebug {
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            InitConsoleCapture: () => {
+                return UIDebug.InitConsoleCapture();
             }
         };
+    }
+    
+    /**
+     * 初始化控制台捕获功能
+     * @returns 调试面板实例
+     */
+    public static InitConsoleCapture(): DebugPanelInstance {
+        if (this.isConsoleEnabled) {
+            console.warn('Console capture already initialized');
+            return {
+                DebuPanelAddButton: (name: string, callback: () => void) => {
+                    return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                InitConsoleCapture: () => {
+                    return UIDebug.InitConsoleCapture();
+                }
+            };
+        }
+        
+        this.isConsoleEnabled = true;
+        
+        // 创建console显示容器
+        this.createConsoleContainer();
+        
+        // 替换原始console方法
+        this.overrideConsoleMethods();
+        
+        // 添加清除控制台按钮
+        this.DebuPanelAddButton('清除控制台', () => {
+            if (this.consoleContainer) {
+                this.consoleContainer.innerHTML = '';
+            }
+        });
+        
+        return {
+            DebuPanelAddButton: (name: string, callback: () => void) => {
+                return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            InitConsoleCapture: () => {
+                return UIDebug.InitConsoleCapture();
+            }
+        };
+    }
+    
+    /**
+     * 创建控制台容器
+     */
+    private static createConsoleContainer(): void {
+        if (!this.panel) return;
+        
+        // 创建tab容器
+        const tabContainer = document.createElement('div');
+        tabContainer.className = 'debug-panel-tabs';
+        
+        // 创建按钮tab
+        const buttonsTab = document.createElement('div');
+        buttonsTab.className = 'debug-panel-tab active';
+        buttonsTab.textContent = '调试按钮';
+        buttonsTab.addEventListener('click', () => {
+            if (this.buttonsContainer && this.consoleContainer) {
+                buttonsTab.classList.add('active');
+                consoleTab.classList.remove('active');
+                this.buttonsContainer.style.display = 'flex';
+                this.consoleContainer.style.display = 'none';
+            }
+        });
+        
+        // 创建控制台tab
+        const consoleTab = document.createElement('div');
+        consoleTab.className = 'debug-panel-tab';
+        consoleTab.textContent = '控制台';
+        consoleTab.addEventListener('click', () => {
+            if (this.buttonsContainer && this.consoleContainer) {
+                consoleTab.classList.add('active');
+                buttonsTab.classList.remove('active');
+                this.buttonsContainer.style.display = 'none';
+                this.consoleContainer.style.display = 'block';
+            }
+        });
+        
+        tabContainer.appendChild(buttonsTab);
+        tabContainer.appendChild(consoleTab);
+        
+        // 在header之后添加tab
+        if (this.panel.firstChild && this.panel.firstChild.nextSibling) {
+            this.panel.insertBefore(tabContainer, this.panel.firstChild.nextSibling);
+        }
+        
+        // 创建控制台容器
+        this.consoleContainer = document.createElement('div');
+        this.consoleContainer.className = 'debug-panel-console';
+        this.consoleContainer.style.display = 'none';
+        
+        // 在tab之后添加控制台容器
+        this.panel.insertBefore(this.consoleContainer, tabContainer.nextSibling);
+    }
+    
+    /**
+     * 替换原始console方法以捕获输出
+     */
+    private static overrideConsoleMethods(): void {
+        // 保存原始方法
+        this.originalConsole = {
+            log: console.log,
+            info: console.info,
+            warn: console.warn,
+            error: console.error,
+            debug: console.debug
+        };
+        
+        // 替换log方法
+        console.log = (...args: any[]) => {
+            this.addConsoleMessage('log', args);
+            this.originalConsole.log(...args);
+        };
+        
+        // 替换info方法
+        console.info = (...args: any[]) => {
+            this.addConsoleMessage('info', args);
+            this.originalConsole.info(...args);
+        };
+        
+        // 替换warn方法
+        console.warn = (...args: any[]) => {
+            this.addConsoleMessage('warn', args);
+            this.originalConsole.warn(...args);
+        };
+        
+        // 替换error方法
+        console.error = (...args: any[]) => {
+            this.addConsoleMessage('error', args);
+            this.originalConsole.error(...args);
+        };
+        
+        // 替换debug方法
+        console.debug = (...args: any[]) => {
+            this.addConsoleMessage('debug', args);
+            this.originalConsole.debug(...args);
+        };
+    }
+    
+    /**
+     * 添加控制台消息到显示容器
+     */
+    private static addConsoleMessage(type: string, args: any[]): void {
+        if (!this.consoleContainer || !this.isConsoleEnabled) return;
+        
+        // 创建消息元素
+        const messageElement = document.createElement('div');
+        messageElement.className = `console-message console-${type}`;
+        
+        // 处理不同类型的参数
+        let messageContent = '';
+        args.forEach((arg, index) => {
+            if (typeof arg === 'object') {
+                try {
+                    const jsonStr = JSON.stringify(arg, null, 2);
+                    messageContent += jsonStr;
+                } catch (e) {
+                    messageContent += String(arg);
+                }
+            } else {
+                messageContent += String(arg);
+            }
+            
+            if (index < args.length - 1) {
+                messageContent += ' ';
+            }
+        });
+        
+        messageElement.textContent = messageContent;
+        
+        // 添加时间戳
+        const timestamp = document.createElement('span');
+        timestamp.className = 'console-timestamp';
+        const now = new Date();
+        timestamp.textContent = `[${now.toLocaleTimeString()}] `;
+        messageElement.prepend(timestamp);
+        
+        // 添加到容器
+        this.consoleContainer.appendChild(messageElement);
+        
+        // 自动滚动到底部
+        this.consoleContainer.scrollTop = this.consoleContainer.scrollHeight;
+        
+        // 限制最大消息数量，防止内存过度使用
+        while (this.consoleContainer.childElementCount > 1000) {
+            if (this.consoleContainer.firstChild) {
+                this.consoleContainer.removeChild(this.consoleContainer.firstChild);
+            }
+        }
     }
     
     /**
@@ -331,6 +538,7 @@ export class UIDebug {
                 scale:1;
                 display: flex;
                 flex-direction: column;
+                scale:1.32;
             }
             
             .debug-panel.hidden {
@@ -358,6 +566,33 @@ export class UIDebug {
                 height: 20px;
             }
             
+            .debug-panel-tabs {
+                display: flex;
+                height: 24px;
+                background-color: rgba(30, 30, 30, 0.85);
+                border-bottom: 1px solid #555;
+                flex-shrink: 0;
+            }
+            
+            .debug-panel-tab {
+                padding: 4px 10px;
+                font-size: 9px;
+                cursor: pointer;
+                user-select: none;
+                border-right: 1px solid #555;
+                display: flex;
+                align-items: center;
+            }
+            
+            .debug-panel-tab.active {
+                background-color: rgba(60, 60, 60, 0.9);
+                color: #fff;
+            }
+            
+            .debug-panel-tab:hover:not(.active) {
+                background-color: rgba(50, 50, 50, 0.9);
+            }
+            
             .debug-panel-close {
                 background: none;
                 border: none;
@@ -382,14 +617,27 @@ export class UIDebug {
                 flex-grow: 1;
             }
             
+            .debug-panel-console {
+                overflow-y: auto;
+                padding: 5px;
+                flex-grow: 1;
+                font-size: 9px;
+                word-break: break-word;
+                white-space: pre-wrap;
+                height: calc(100% - 54px); /* 减去头部和tabs高度 */
+            }
+            
+            .debug-panel-console::-webkit-scrollbar,
             .debug-panel-buttons::-webkit-scrollbar {
                 width: 4px;
             }
             
+            .debug-panel-console::-webkit-scrollbar-track,
             .debug-panel-buttons::-webkit-scrollbar-track {
                 background: rgba(30, 30, 30, 0.3);
             }
             
+            .debug-panel-console::-webkit-scrollbar-thumb,
             .debug-panel-buttons::-webkit-scrollbar-thumb {
                 background-color: #555;
                 border-radius: 4px;
@@ -429,6 +677,41 @@ export class UIDebug {
                 background: linear-gradient(135deg, transparent 50%, #888 50%, #aaa 75%, #ccc 100%);
                 border-radius: 0 0 4px 0;
                 z-index: 10001;
+            }
+            
+            .console-message {
+                margin: 2px 0;
+                border-bottom: 1px dotted #444;
+                padding-bottom: 2px;
+                font-family: monospace;
+            }
+            
+            .console-timestamp {
+                color: #888;
+                font-size: 8px;
+                margin-right: 4px;
+            }
+            
+            .console-log {
+                color: #ccc;
+            }
+            
+            .console-info {
+                color: #7bb8ff;
+            }
+            
+            .console-warn {
+                color: #ffda77;
+                background-color: rgba(70, 60, 0, 0.2);
+            }
+            
+            .console-error {
+                color: #ff7777;
+                background-color: rgba(70, 0, 0, 0.2);
+            }
+            
+            .console-debug {
+                color: #77ffb1;
             }
         `;
         
