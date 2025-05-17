@@ -1,217 +1,220 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { LocalSave, readFromFile } from "../../Group/Save/PIXSave.js";
+import { data } from "../../Group/Save/PIXSave.js"
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
+import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-  if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
-  initGameMainScene();
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
+    initGameMainScene();
 
 });
 
 
 
 function initGameMainScene(): void {
-  const gameMainScene = UIMainMenu.getInstance();
-  gameMainScene.initialize();
-  UIMainMenu.getInstance().MenuAddButton("语言", () => {
-  })
+    const gameMainScene = UIMainMenu.getInstance();
+    gameMainScene.initialize();
+    UIMainMenu.getInstance().MenuAddButton("语言", () => {
+    })
 
 
-  setTimeout(() => {
+    setTimeout(() => {
 
-    UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800);
-    // const aboutModal = document.getElementById('about-modal');
-    // //@ts-ignore
-    // aboutModal.classList.remove('closing');
-    // //@ts-ignore
-    // aboutModal.classList.add('active');
+        UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800);
+        // const aboutModal = document.getElementById('about-modal');
+        // //@ts-ignore
+        // aboutModal.classList.remove('closing');
+        // //@ts-ignore
+        // aboutModal.classList.add('active');
 
-    //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
-  }, 1000); // 延迟1秒，确保按钮已经完全显示
+        //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
+    }, 1000); // 延迟1秒，确保按钮已经完全显示
 
 
-  (window as any).HideALLMainMenuUI = (callback?: () => void) => {
-    UIMainMenu.getInstance().HideALLMainMenuUI(callback);
-  };
+    (window as any).HideALLMainMenuUI = (callback?: () => void) => {
+        UIMainMenu.getInstance().HideALLMainMenuUI(callback);
+    };
 }
 
 
 class UIMainMenu {
-  private static instance: UIMainMenu;
-  private htmlTemplate: string;
-  private cssStyles: string;
-  private mainContainer: HTMLElement | null = null;
-  private isMuted: boolean = false;
-  private isFullscreen: boolean = false;
-  private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
-  private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
-  private titleElement: HTMLElement | null = null; // 存储游戏标题元素
+    private static instance: UIMainMenu;
+    private htmlTemplate: string;
+    private cssStyles: string;
+    private mainContainer: HTMLElement | null = null;
+    private isMuted: boolean = false;
+    private isFullscreen: boolean = false;
+    private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
+    private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
+    private titleElement: HTMLElement | null = null; // 存储游戏标题元素
 
-  // 标题效果预设
-  private readonly TITLE_EFFECTS = {
-    PIXEL: 'pixel', // 像素风格
-    GLITCH: 'glitch', // 故障风格
-    NEON: 'neon'  // 霓虹风格
-  };
+    // 标题效果预设
+    private readonly TITLE_EFFECTS = {
+        PIXEL: 'pixel', // 像素风格
+        GLITCH: 'glitch', // 故障风格
+        NEON: 'neon'  // 霓虹风格
+    };
 
-  // 标题动画预设
-  private readonly TITLE_ANIMATIONS = {
-    PULSE: 'pulse', // 脉冲效果
-    FLOAT: 'float', // 浮动效果
-    FLICKER: 'flicker' // 闪烁效果
-  };
+    // 标题动画预设
+    private readonly TITLE_ANIMATIONS = {
+        PULSE: 'pulse', // 脉冲效果
+        FLOAT: 'float', // 浮动效果
+        FLICKER: 'flicker' // 闪烁效果
+    };
 
-  private constructor() {
-    this.htmlTemplate = this.getHTMLTemplate();
-    this.cssStyles = this.getCSSStyles();
-  }
-
-  public static getInstance(): UIMainMenu {
-    if (!UIMainMenu.instance) {
-      UIMainMenu.instance = new UIMainMenu();
-    }
-    return UIMainMenu.instance;
-  }
-
-  public initialize(): void {
-    // 创建样式元素
-    const styleElement = document.createElement('style');
-    styleElement.textContent = this.cssStyles;
-    document.head.appendChild(styleElement);
-
-    // 创建主容器
-    this.mainContainer = document.createElement('div');
-    this.mainContainer.id = 'game-main-scene';
-    this.mainContainer.innerHTML = this.htmlTemplate;
-    document.body.appendChild(this.mainContainer);
-
-    // 绑定事件
-    this.bindEvents();
-
-    // 添加按钮动画
-    setTimeout(() => {
-      this.animateMenuButtons();
-    }, 500); // 等待500ms后开始按钮动画
-  }
-
-  private bindEvents(): void {
-    // 新游戏按钮
-    const newGameBtn = document.getElementById('new-game-btn');
-    if (newGameBtn) {
-      newGameBtn.addEventListener('click', () => {
-        //console.log('新游戏按钮点击 - 等待实现');
-        //@ts-ignore
-        //pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.destroy();
-        this.HideALLMainMenuUI(() => {
-          UIScreenEffect.FadeOut(3000,TransitionEffectType.WIPE_RADIAL,()=>{
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
-          })
-          
-        })
-
-      });
+    private constructor() {
+        this.htmlTemplate = this.getHTMLTemplate();
+        this.cssStyles = this.getCSSStyles();
     }
 
-    // 设置按钮
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-
-    if (settingsBtn && settingsModal) {
-      settingsBtn.addEventListener('click', () => {
-        settingsModal.classList.remove('closing');
-        settingsModal.classList.add('active');
-      });
-    }
-
-    // 存档读取按钮
-    const loadGameBtn = document.getElementById('load-game-btn');
-    const loadGameModal = document.getElementById('load-game-modal');
-
-    if (loadGameBtn && loadGameModal) {
-      loadGameBtn.addEventListener('click', () => {
-        loadGameModal.classList.remove('closing');
-        loadGameModal.classList.add('active');
-      });
-    }
-
-    // 关于按钮
-    const aboutBtn = document.getElementById('about-btn');
-    const aboutModal = document.getElementById('about-modal');
-
-    if (aboutBtn && aboutModal) {
-      aboutBtn.addEventListener('click', () => {
-        aboutModal.classList.remove('closing');
-        aboutModal.classList.add('active');
-        
-        // 初始化💩生成
-        this.initPoopAnimation();
-      });
-    }
-
-    // 静音切换
-    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
-    if (muteToggle) {
-      muteToggle.addEventListener('change', () => {
-        this.isMuted = muteToggle.checked;
-        console.log('静音状态:', this.isMuted);
-      });
-    }
-
-    // 全屏切换
-    const fullscreenToggle = document.getElementById('fullscreen-toggle') as HTMLInputElement;
-    if (fullscreenToggle) {
-      fullscreenToggle.addEventListener('change', () => {
-        this.isFullscreen = fullscreenToggle.checked;
-        this.toggleFullscreen();
-      });
-    }
-
-    // 本地读取按钮
-    const loadLocalBtn = document.getElementById('load-local-btn');
-    if (loadLocalBtn) {
-      loadLocalBtn.addEventListener('click', () => {
-        console.log('从本地读取存档 - 等待实现');
-      });
-    }
-
-    // 统一处理所有模态框的关闭
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-      // 点击背景关闭
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('closing');
-          setTimeout(() => {
-            modal.classList.remove('active', 'closing');
-          }, 300);
+    public static getInstance(): UIMainMenu {
+        if (!UIMainMenu.instance) {
+            UIMainMenu.instance = new UIMainMenu();
         }
-      });
-
-      // 防止点击内容区域关闭
-      const modalContent = modal.querySelector('.modal-content');
-      if (modalContent) {
-        modalContent.addEventListener('click', (e) => {
-          e.stopPropagation();
-        });
-      }
-    });
-  }
-
-  private toggleFullscreen(): void {
-    if (this.isFullscreen) {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+        return UIMainMenu.instance;
     }
-  }
 
-  // HTML模板
-  private getHTMLTemplate(): string {
-    return `
+    public initialize(): void {
+        // 创建样式元素
+        const styleElement = document.createElement('style');
+        styleElement.textContent = this.cssStyles;
+        document.head.appendChild(styleElement);
+
+        // 创建主容器
+        this.mainContainer = document.createElement('div');
+        this.mainContainer.id = 'game-main-scene';
+        this.mainContainer.innerHTML = this.htmlTemplate;
+        document.body.appendChild(this.mainContainer);
+
+        // 绑定事件
+        this.bindEvents();
+
+        // 添加按钮动画
+        setTimeout(() => {
+            this.animateMenuButtons();
+        }, 500); // 等待500ms后开始按钮动画
+    }
+
+    private bindEvents(): void {
+        // 新游戏按钮
+        const newGameBtn = document.getElementById('new-game-btn');
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                //console.log('新游戏按钮点击 - 等待实现');
+                //@ts-ignore
+                //pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.destroy();
+                this.HideALLMainMenuUI(() => {
+                    UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
+                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                    })
+
+                })
+
+            });
+        }
+
+        // 设置按钮
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+
+        if (settingsBtn && settingsModal) {
+            settingsBtn.addEventListener('click', () => {
+                settingsModal.classList.remove('closing');
+                settingsModal.classList.add('active');
+            });
+        }
+
+        // 存档读取按钮
+        const loadGameBtn = document.getElementById('load-game-btn');
+        const loadGameModal = document.getElementById('load-game-modal');
+
+        if (loadGameBtn && loadGameModal) {
+            loadGameBtn.addEventListener('click', () => {
+                loadGameModal.classList.remove('closing');
+                loadGameModal.classList.add('active');
+            });
+        }
+
+        // 关于按钮
+        const aboutBtn = document.getElementById('about-btn');
+        const aboutModal = document.getElementById('about-modal');
+
+        if (aboutBtn && aboutModal) {
+            aboutBtn.addEventListener('click', () => {
+                aboutModal.classList.remove('closing');
+                aboutModal.classList.add('active');
+
+                // 初始化💩生成
+                this.initPoopAnimation();
+            });
+        }
+
+        // 静音切换
+        const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
+        if (muteToggle) {
+            muteToggle.addEventListener('change', () => {
+                this.isMuted = muteToggle.checked;
+                console.log('静音状态:', this.isMuted);
+            });
+        }
+
+        // 全屏切换
+        const fullscreenToggle = document.getElementById('fullscreen-toggle') as HTMLInputElement;
+        if (fullscreenToggle) {
+            fullscreenToggle.addEventListener('change', () => {
+                this.isFullscreen = fullscreenToggle.checked;
+                this.toggleFullscreen();
+            });
+        }
+
+        // 本地读取按钮
+        const loadLocalBtn = document.getElementById('load-local-btn');
+        if (loadLocalBtn) {
+            loadLocalBtn.addEventListener('click', () => {
+                LocalSave.DataRead();
+            });
+        }
+
+        // 统一处理所有模态框的关闭
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            // 点击背景关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('closing');
+                    setTimeout(() => {
+                        modal.classList.remove('active', 'closing');
+                    }, 300);
+                }
+            });
+
+            // 防止点击内容区域关闭
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    }
+
+    private toggleFullscreen(): void {
+        if (this.isFullscreen) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    // HTML模板
+    private getHTMLTemplate(): string {
+        return `
         <div class="game-main-panel">
           
           <div class="main-menu">
@@ -282,11 +285,11 @@ class UIMainMenu {
           </div>
         </div>
       `;
-  }
+    }
 
-  // CSS样式
-  private getCSSStyles(): string {
-    return `
+    // CSS样式
+    private getCSSStyles(): string {
+        return `
         * {
           margin: 0;
           padding: 0;
@@ -1464,519 +1467,521 @@ class UIMainMenu {
           100% { transform: translateY(400px); }
         }
       `;
-  }
+    }
 
-  private animateMenuButtons(): void {
-    const buttons = document.querySelectorAll('.menu-btn');
+    private animateMenuButtons(): void {
+        const buttons = document.querySelectorAll('.menu-btn');
 
-    buttons.forEach((button, index) => {
-      setTimeout(() => {
-        button.classList.add('show');
+        buttons.forEach((button, index) => {
+            setTimeout(() => {
+                button.classList.add('show');
 
-        // 添加按钮点击特效
-        button.addEventListener('click', (e) => {
-          const ripple = document.createElement('div');
-          ripple.classList.add('ripple');
+                // 添加按钮点击特效
+                button.addEventListener('click', (e) => {
+                    const ripple = document.createElement('div');
+                    ripple.classList.add('ripple');
 
-          const rect = (e.target as HTMLElement).getBoundingClientRect();
-          // @ts-ignore
-          const x = e.clientX - rect.left;
-          // @ts-ignore
-          const y = e.clientY - rect.top;
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    // @ts-ignore
+                    const x = e.clientX - rect.left;
+                    // @ts-ignore
+                    const y = e.clientY - rect.top;
 
-          ripple.style.left = x + 'px';
-          ripple.style.top = y + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
 
-          button.appendChild(ripple);
+                    button.appendChild(ripple);
 
-          setTimeout(() => ripple.remove(), 1000);
+                    setTimeout(() => ripple.remove(), 1000);
+                });
+
+            }, 200 * (index + 1)); // 每个按钮延迟200ms出现
         });
-
-      }, 200 * (index + 1)); // 每个按钮延迟200ms出现
-    });
-  }
-
-  // 新增显示/隐藏菜单方法
-  public ShowMainMenu(): void {
-    if (this.mainContainer) {
-      this.mainContainer.style.display = 'block';
-      const panel = this.mainContainer.querySelector('.game-main-panel');
-      if (panel) {
-        (panel as HTMLElement).style.animation = 'panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards, panelGlow 3s ease-in-out infinite';
-      }
-      // 重新触发按钮动画
-      setTimeout(() => {
-        this.animateMenuButtons();
-      }, 500);
-    }
-  }
-
-  public HideMainMenu(): void {
-    if (this.mainContainer) {
-      const panel = this.mainContainer.querySelector('.game-main-panel');
-      if (panel) {
-        (panel as HTMLElement).style.animation = 'panelSlideOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-        setTimeout(() => {
-          this.mainContainer!.style.display = 'none';
-        }, 800);
-      }
-    }
-  }
-
-  // 新增添加按钮方法
-  public MenuAddButton(buttonText: string, callback: () => void): void {
-    // 创建新按钮
-    const button = document.createElement('button');
-    button.textContent = buttonText;
-    button.className = 'menu-btn';
-
-    // 存储回调函数
-    this.menuButtons.set(buttonText, callback);
-
-    // 添加点击事件
-    button.addEventListener('click', callback);
-
-    // 添加到菜单
-    const mainMenu = document.querySelector('.main-menu');
-    if (mainMenu) {
-      mainMenu.appendChild(button);
-      // 立即触发按钮动画
-      setTimeout(() => {
-        button.classList.add('show');
-      }, 100);
-    }
-  }
-
-  /**
-   * 添加按钮晃动效果
-   * @param buttonId 按钮的ID
-   * @param size 晃动幅度（角度）
-   * @param interval 晃动间隔（毫秒）
-   */
-  public AddButtonShakeEffect(buttonId: string, size: number, interval: number): void {
-    // 先清除已有的晃动效果
-    this.RemoveButtonShakeEffect(buttonId);
-
-    const button = document.getElementById(buttonId);
-    if (button) {
-      // 设置晃动幅度（现在是角度而不是像素）
-      button.style.setProperty('--shake-size', `${size}deg`);
-
-      // 添加晃动样式类
-      button.classList.add('shake');
-
-      // 如果提供了自定义的晃动间隔，则应用
-      if (interval && interval !== 500) { // 默认动画是500ms
-        button.style.animationDuration = `${interval}ms`;
-      }
-
-      // 存储晃动效果的ID，以便后续可以移除
-      this.buttonShakeEffects.set(buttonId, 1);
-    }
-  }
-
-  /**
-   * 移除按钮晃动效果
-   * @param buttonId 按钮的ID
-   */
-  public RemoveButtonShakeEffect(buttonId: string): void {
-    if (this.buttonShakeEffects.has(buttonId)) {
-      const button = document.getElementById(buttonId);
-      if (button) {
-        button.classList.remove('shake');
-        button.style.removeProperty('--shake-size');
-        button.style.removeProperty('animation-duration');
-      }
-      this.buttonShakeEffects.delete(buttonId);
-    }
-  }
-
-  /**
-   * 显示游戏标题
-   * @param titleString 游戏标题文本
-   * @param effect 标题效果（'pixel', 'glitch', 'neon'）
-   * @param animation 动画效果（'pulse', 'float', 'flicker'）
-   * @param x 水平位置（像素或百分比，例如 '50%'）
-   * @param y 垂直位置（像素或百分比，例如 '20%'）
-   */
-  public ShowGameTitle(titleString: string, effect: string, animation: string, x: string, y: string): void {
-    // 移除已有的标题
-    if (this.titleElement && this.titleElement.parentNode) {
-      this.titleElement.parentNode.removeChild(this.titleElement);
     }
 
-    // 创建标题元素
-    const title = document.createElement('div');
-    title.textContent = titleString;
-    title.setAttribute('data-text', titleString); // 用于故障效果
-
-    // 设置标题样式
-    let effectClass = '';
-    switch (effect) {
-      case this.TITLE_EFFECTS.PIXEL:
-        effectClass = 'game-title-pixel';
-        break;
-      case this.TITLE_EFFECTS.GLITCH:
-        effectClass = 'game-title-glitch';
-        break;
-      case this.TITLE_EFFECTS.NEON:
-        effectClass = 'game-title-neon';
-        break;
-      default:
-        effectClass = 'game-title-pixel'; // 默认为像素风格
-    }
-
-    // 添加基础类和效果类
-    title.className = effectClass;
-
-    // 设置位置
-    title.style.left = x;
-    title.style.top = y;
-    title.style.scale = "2.0";
-
-    // 等待入场动画完成后添加持续动画
-    setTimeout(() => {
-      let animationClass = '';
-      switch (animation) {
-        case this.TITLE_ANIMATIONS.PULSE:
-          animationClass = 'title-animation-pulse';
-          break;
-        case this.TITLE_ANIMATIONS.FLOAT:
-          animationClass = 'title-animation-float';
-          break;
-        case this.TITLE_ANIMATIONS.FLICKER:
-          animationClass = 'title-animation-flicker';
-          break;
-        default:
-          animationClass = 'title-animation-pulse'; // 默认为脉冲动画
-      }
-
-      // 添加动画类
-      title.classList.add(animationClass);
-    }, 1000); // 等待1秒，入场动画结束后
-
-    // 将标题添加到DOM
-    document.body.appendChild(title);
-
-    // 保存标题元素引用
-    this.titleElement = title;
-  }
-
-  /**
-   * 移除游戏标题
-   */
-  public HideGameTitle(): void {
-    if (this.titleElement && this.titleElement.parentNode) {
-      // 添加淡出动画
-      this.titleElement.style.animation = 'fadeOut 0.5s forwards';
-
-      // 动画结束后移除元素
-      setTimeout(() => {
-        if (this.titleElement && this.titleElement.parentNode) {
-          this.titleElement.parentNode.removeChild(this.titleElement);
-          this.titleElement = null;
-        }
-      }, 500);
-    }
-  }
-
-  /**
-   * 隐藏所有主菜单UI，并提供动画效果和回调
-   * @param callback 动画结束后的回调函数
-   */
-  public HideALLMainMenuUI(callback?: () => void): void {
-    // 创建一个标记，确保回调只被执行一次
-    let callbackExecuted = false;
-    let elementsToAnimate = 0;
-    let animatedElements = 0;
-
-    // 隐藏主菜单面板
-    if (this.mainContainer) {
-      const panel = this.mainContainer.querySelector('.game-main-panel');
-      if (panel) {
-        elementsToAnimate++;
-        (panel as HTMLElement).style.animation = 'panelSlideOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-
-        // 监听动画结束事件
-        const handlePanelAnimationEnd = () => {
-          panel.removeEventListener('animationend', handlePanelAnimationEnd);
-          animatedElements++;
-          this.mainContainer!.style.display = 'none';
-          checkAllAnimationsComplete();
-        };
-
-        panel.addEventListener('animationend', handlePanelAnimationEnd);
-      }
-    }
-
-    // 隐藏游戏标题
-    if (this.titleElement && this.titleElement.parentNode) {
-      elementsToAnimate++;
-      this.titleElement.classList.add('fade-out-animation');
-
-      // 监听动画结束事件
-      const handleTitleAnimationEnd = () => {
-        this.titleElement!.removeEventListener('animationend', handleTitleAnimationEnd);
-        if (this.titleElement && this.titleElement.parentNode) {
-          this.titleElement.parentNode.removeChild(this.titleElement);
-          this.titleElement = null;
-        }
-        animatedElements++;
-        checkAllAnimationsComplete();
-      };
-
-      this.titleElement.addEventListener('animationend', handleTitleAnimationEnd);
-    }
-
-    // 隐藏所有弹窗
-    const modals = document.querySelectorAll('.modal.active');
-    if (modals.length > 0) {
-      modals.forEach(modal => {
-        elementsToAnimate++;
-        modal.classList.add('closing');
-
-        // 监听动画结束事件
-        const handleModalAnimationEnd = () => {
-          modal.removeEventListener('animationend', handleModalAnimationEnd);
-          modal.classList.remove('active', 'closing');
-          animatedElements++;
-          checkAllAnimationsComplete();
-        };
-
-        modal.addEventListener('animationend', handleModalAnimationEnd);
-      });
-    }
-
-    // 检查是否所有动画都完成了
-    const checkAllAnimationsComplete = () => {
-      if (callbackExecuted) return;
-
-      if (animatedElements >= elementsToAnimate) {
-        callbackExecuted = true;
-        // 如果提供了回调，则执行回调
-        if (callback && typeof callback === 'function') {
-          // 通过setTimeout确保DOM操作完成后再执行回调
-          setTimeout(callback, 0);
-        }
-      }
-    };
-
-    // 如果没有任何需要动画的元素，直接执行回调
-    if (elementsToAnimate === 0 && !callbackExecuted) {
-      callbackExecuted = true;
-      if (callback && typeof callback === 'function') {
-        setTimeout(callback, 0);
-      }
-    }
-
-    // 设置超时保障，确保即使动画事件没有触发，回调也会执行
-    setTimeout(() => {
-      if (!callbackExecuted) {
-        console.log('动画超时保障触发');
-        callbackExecuted = true;
-
-        // 清理可能未完成的动画元素
+    // 新增显示/隐藏菜单方法
+    public ShowMainMenu(): void {
         if (this.mainContainer) {
-          this.mainContainer.style.display = 'none';
+            this.mainContainer.style.display = 'block';
+            const panel = this.mainContainer.querySelector('.game-main-panel');
+            if (panel) {
+                (panel as HTMLElement).style.animation = 'panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards, panelGlow 3s ease-in-out infinite';
+            }
+            // 重新触发按钮动画
+            setTimeout(() => {
+                this.animateMenuButtons();
+            }, 500);
         }
+    }
 
+    public HideMainMenu(): void {
+        if (this.mainContainer) {
+            const panel = this.mainContainer.querySelector('.game-main-panel');
+            if (panel) {
+                (panel as HTMLElement).style.animation = 'panelSlideOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                setTimeout(() => {
+                    this.mainContainer!.style.display = 'none';
+                }, 800);
+            }
+        }
+    }
+
+    // 新增添加按钮方法
+    public MenuAddButton(buttonText: string, callback: () => void): void {
+        // 创建新按钮
+        const button = document.createElement('button');
+        button.textContent = buttonText;
+        button.className = 'menu-btn';
+
+        // 存储回调函数
+        this.menuButtons.set(buttonText, callback);
+
+        // 添加点击事件
+        button.addEventListener('click', callback);
+
+        // 添加到菜单
+        const mainMenu = document.querySelector('.main-menu');
+        if (mainMenu) {
+            mainMenu.appendChild(button);
+            // 立即触发按钮动画
+            setTimeout(() => {
+                button.classList.add('show');
+            }, 100);
+        }
+    }
+
+    /**
+     * 添加按钮晃动效果
+     * @param buttonId 按钮的ID
+     * @param size 晃动幅度（角度）
+     * @param interval 晃动间隔（毫秒）
+     */
+    public AddButtonShakeEffect(buttonId: string, size: number, interval: number): void {
+        // 先清除已有的晃动效果
+        this.RemoveButtonShakeEffect(buttonId);
+
+        const button = document.getElementById(buttonId);
+        if (button) {
+            // 设置晃动幅度（现在是角度而不是像素）
+            button.style.setProperty('--shake-size', `${size}deg`);
+
+            // 添加晃动样式类
+            button.classList.add('shake');
+
+            // 如果提供了自定义的晃动间隔，则应用
+            if (interval && interval !== 500) { // 默认动画是500ms
+                button.style.animationDuration = `${interval}ms`;
+            }
+
+            // 存储晃动效果的ID，以便后续可以移除
+            this.buttonShakeEffects.set(buttonId, 1);
+        }
+    }
+
+    /**
+     * 移除按钮晃动效果
+     * @param buttonId 按钮的ID
+     */
+    public RemoveButtonShakeEffect(buttonId: string): void {
+        if (this.buttonShakeEffects.has(buttonId)) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.classList.remove('shake');
+                button.style.removeProperty('--shake-size');
+                button.style.removeProperty('animation-duration');
+            }
+            this.buttonShakeEffects.delete(buttonId);
+        }
+    }
+
+    /**
+     * 显示游戏标题
+     * @param titleString 游戏标题文本
+     * @param effect 标题效果（'pixel', 'glitch', 'neon'）
+     * @param animation 动画效果（'pulse', 'float', 'flicker'）
+     * @param x 水平位置（像素或百分比，例如 '50%'）
+     * @param y 垂直位置（像素或百分比，例如 '20%'）
+     */
+    public ShowGameTitle(titleString: string, effect: string, animation: string, x: string, y: string): void {
+        // 移除已有的标题
         if (this.titleElement && this.titleElement.parentNode) {
-          this.titleElement.parentNode.removeChild(this.titleElement);
-          this.titleElement = null;
+            this.titleElement.parentNode.removeChild(this.titleElement);
         }
 
-        document.querySelectorAll('.modal.active, .modal.closing').forEach(modal => {
-          modal.classList.remove('active', 'closing');
-        });
+        // 创建标题元素
+        const title = document.createElement('div');
+        title.textContent = titleString;
+        title.setAttribute('data-text', titleString); // 用于故障效果
 
-        // 执行回调
-        if (callback && typeof callback === 'function') {
-          callback();
+        // 设置标题样式
+        let effectClass = '';
+        switch (effect) {
+            case this.TITLE_EFFECTS.PIXEL:
+                effectClass = 'game-title-pixel';
+                break;
+            case this.TITLE_EFFECTS.GLITCH:
+                effectClass = 'game-title-glitch';
+                break;
+            case this.TITLE_EFFECTS.NEON:
+                effectClass = 'game-title-neon';
+                break;
+            default:
+                effectClass = 'game-title-pixel'; // 默认为像素风格
         }
-      }
-    }, 1000); // 1秒超时
-  }
 
-  /**
-   * 初始化💩动画效果
-   */
-  private initPoopAnimation(): void {
-    console.log('初始化💩动画');
-    // 获取💩容器和联系方式容器
-    const poopContainer = document.getElementById('poop-container');
-    const contactInfo = document.getElementById('contact-info');
-    
-    if (!poopContainer || !contactInfo) {
-      console.error('找不到必要的DOM元素:', {poopContainer, contactInfo});
-      return;
-    }
-    
-    // 清空容器，防止重复生成
-    poopContainer.innerHTML = '';
-    contactInfo.style.display = 'none';
-    contactInfo.classList.remove('pop-in'); // 移除动画类，以便下次可以再次触发
-    
-    // 重新添加联系方式到容器中
-    poopContainer.appendChild(contactInfo);
-    console.log('联系方式已添加到💩容器中');
-    
-    // 容器尺寸
-    const containerWidth = poopContainer.clientWidth;
-    const containerHeight = poopContainer.clientHeight;
-    console.log('容器尺寸:', {width: containerWidth, height: containerHeight});
-    
-    // 💩元素集合和物理属性
-    const poops: { 
-      element: HTMLElement; 
-      x: number; 
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      rotation: number;
-      rotationSpeed: number;
-    }[] = [];
-    
-    // 创建一个💩元素
-    const createPoop = () => {
-      // 随机位置（覆盖整个容器区域）
-      const x = Math.random() * containerWidth;
-      const y = Math.random() * containerHeight * 0.4; // 从上方40%区域开始掉落
-      
-      // 随机大小
-      const size = 20 + Math.random() * 20; // 20-40px
-      
-      // 创建元素
-      const poopElement = document.createElement('div');
-      poopElement.className = 'poop';
-      poopElement.textContent = '💩';
-      poopElement.style.fontSize = `${size}px`;
-      poopElement.style.left = `${x}px`;
-      poopElement.style.top = `${y}px`;
-      poopElement.style.opacity = '0';
-      poopContainer.appendChild(poopElement);
-      
-      // 随机速度 - 增加速度范围使emoji更活跃
-      const vx = (Math.random() - 0.5) * 4; // 水平速度±2
-      const vy = 1 + Math.random() * 3; // 垂直速度1-4
-      
-      // 随机旋转 - 增加旋转速度
-      const rotation = Math.random() * 360;
-      const rotationSpeed = (Math.random() - 0.5) * 20; // 增加旋转速度
-      
-      // 添加到集合
-      poops.push({
-        element: poopElement,
-        x, y, vx, vy, size, rotation, rotationSpeed
-      });
-      
-      // 淡入动画
-      setTimeout(() => {
-        poopElement.style.opacity = '1';
-        poopElement.style.animation = 'poopFadeIn 0.3s forwards';
-      }, 10);
-    };
-    
-    // 更新💩位置
-    const updatePoops = () => {
-      const gravity = 0.2;
-      const friction = 0.95; // 减小摩擦力，让它们移动更久
-      const bounce = 0.8; // 增加弹性，让它们弹跳更多
-      
-      poops.forEach(poop => {
-        // 应用重力
-        poop.vy += gravity;
-        
-        // 更新位置
-        poop.x += poop.vx;
-        poop.y += poop.vy;
-        
-        // 更新旋转
-        poop.rotation += poop.rotationSpeed;
-        
-        // 边界碰撞检测 - 改进碰撞处理，使其更有活力
-        // 底部碰撞
-        if (poop.y + poop.size > containerHeight) {
-          poop.y = containerHeight - poop.size;
-          // 反弹时给一个随机的水平速度扰动，使其行为更不可预测
-          poop.vy = -poop.vy * bounce;
-          poop.vx = poop.vx * friction + (Math.random() - 0.5) * 2;
-        }
-        
-        // 左右边界碰撞
-        if (poop.x < 0) {
-          poop.x = 0;
-          poop.vx = -poop.vx * bounce + Math.random() * 1; // 增加随机性
-        } else if (poop.x + poop.size > containerWidth) {
-          poop.x = containerWidth - poop.size;
-          poop.vx = -poop.vx * bounce - Math.random() * 1; // 增加随机性
-        }
-        
-        // 顶部碰撞（防止飞得太高）
-        if (poop.y < 0) {
-          poop.y = 0;
-          poop.vy = Math.abs(poop.vy) * 0.5; // 向下反弹，但减少能量
-        }
-        
-        // 偶尔随机更改速度，使运动更混乱
-        if (Math.random() < 0.01) { // 1%的几率
-          poop.vx += (Math.random() - 0.5) * 1;
-          poop.rotationSpeed += (Math.random() - 0.5) * 5;
-        }
-        
-        // 更新DOM元素位置
-        poop.element.style.transform = `translate(${poop.x}px, ${poop.y}px) rotate(${poop.rotation}deg)`;
-      });
-    };
-    
-    // 创建💩的定时器
-    let poopCreationCount = 0;
-    const maxPoops = 500; // 最多生成30个💩
-    
-    const poopIntervalId = setInterval(() => {
-      createPoop();
-      poopCreationCount++;
-      
-      if (poopCreationCount >= maxPoops) {
-        clearInterval(poopIntervalId);
-        
-        // 1秒后显示联系方式
+        // 添加基础类和效果类
+        title.className = effectClass;
+
+        // 设置位置
+        title.style.left = x;
+        title.style.top = y;
+        title.style.scale = "2.0";
+
+        // 等待入场动画完成后添加持续动画
         setTimeout(() => {
-          console.log('准备显示联系方式');
-          // 显示联系方式并添加弹出动画
-          contactInfo.style.display = 'block';
-          setTimeout(() => {
-            console.log('添加弹出动画');
-            contactInfo.classList.add('pop-in');
-          }, 50);
-          
-          // 不清除💩，让它们继续存在并移动
-        }, 20);
-      }
-    }, 2); // 每22ms生成一个💩
-    
-    // 动画循环
-    const animationId = setInterval(updatePoops, 16); // 约60fps
-    
-    // 清理函数
-    const cleanup = () => {
-      clearInterval(poopIntervalId);
-      clearInterval(animationId);
-    };
-    
-    // 当弹窗关闭时清理资源
-    const aboutModal = document.getElementById('about-modal');
-    if (aboutModal) {
-      const handleModalClose = () => {
-        if (!aboutModal.classList.contains('active')) {
-          cleanup();
-          aboutModal.removeEventListener('transitionend', handleModalClose);
-        }
-      };
-      
-      aboutModal.addEventListener('transitionend', handleModalClose);
+            let animationClass = '';
+            switch (animation) {
+                case this.TITLE_ANIMATIONS.PULSE:
+                    animationClass = 'title-animation-pulse';
+                    break;
+                case this.TITLE_ANIMATIONS.FLOAT:
+                    animationClass = 'title-animation-float';
+                    break;
+                case this.TITLE_ANIMATIONS.FLICKER:
+                    animationClass = 'title-animation-flicker';
+                    break;
+                default:
+                    animationClass = 'title-animation-pulse'; // 默认为脉冲动画
+            }
+
+            // 添加动画类
+            title.classList.add(animationClass);
+        }, 1000); // 等待1秒，入场动画结束后
+
+        // 将标题添加到DOM
+        document.body.appendChild(title);
+
+        // 保存标题元素引用
+        this.titleElement = title;
     }
-  }
+
+    /**
+     * 移除游戏标题
+     */
+    public HideGameTitle(): void {
+        if (this.titleElement && this.titleElement.parentNode) {
+            // 添加淡出动画
+            this.titleElement.style.animation = 'fadeOut 0.5s forwards';
+
+            // 动画结束后移除元素
+            setTimeout(() => {
+                if (this.titleElement && this.titleElement.parentNode) {
+                    this.titleElement.parentNode.removeChild(this.titleElement);
+                    this.titleElement = null;
+                }
+            }, 500);
+        }
+    }
+
+    /**
+     * 隐藏所有主菜单UI，并提供动画效果和回调
+     * @param callback 动画结束后的回调函数
+     */
+    public HideALLMainMenuUI(callback?: () => void): void {
+        // 创建一个标记，确保回调只被执行一次
+        let callbackExecuted = false;
+        let elementsToAnimate = 0;
+        let animatedElements = 0;
+
+        // 隐藏主菜单面板
+        if (this.mainContainer) {
+            const panel = this.mainContainer.querySelector('.game-main-panel');
+            if (panel) {
+                elementsToAnimate++;
+                (panel as HTMLElement).style.animation = 'panelSlideOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+
+                // 监听动画结束事件
+                const handlePanelAnimationEnd = () => {
+                    panel.removeEventListener('animationend', handlePanelAnimationEnd);
+                    animatedElements++;
+                    this.mainContainer!.style.display = 'none';
+                    checkAllAnimationsComplete();
+                };
+
+                panel.addEventListener('animationend', handlePanelAnimationEnd);
+            }
+        }
+
+        // 隐藏游戏标题
+        if (this.titleElement && this.titleElement.parentNode) {
+            elementsToAnimate++;
+            this.titleElement.classList.add('fade-out-animation');
+
+            // 监听动画结束事件
+            const handleTitleAnimationEnd = () => {
+                this.titleElement!.removeEventListener('animationend', handleTitleAnimationEnd);
+                if (this.titleElement && this.titleElement.parentNode) {
+                    this.titleElement.parentNode.removeChild(this.titleElement);
+                    this.titleElement = null;
+                }
+                animatedElements++;
+                checkAllAnimationsComplete();
+            };
+
+            this.titleElement.addEventListener('animationend', handleTitleAnimationEnd);
+        }
+
+
+
+        // 隐藏所有弹窗
+        const modals = document.querySelectorAll('.modal.active');
+        if (modals.length > 0) {
+            modals.forEach(modal => {
+                elementsToAnimate++;
+                modal.classList.add('closing');
+
+                // 监听动画结束事件
+                const handleModalAnimationEnd = () => {
+                    modal.removeEventListener('animationend', handleModalAnimationEnd);
+                    modal.classList.remove('active', 'closing');
+                    animatedElements++;
+                    checkAllAnimationsComplete();
+                };
+
+                modal.addEventListener('animationend', handleModalAnimationEnd);
+            });
+        }
+
+        // 检查是否所有动画都完成了
+        const checkAllAnimationsComplete = () => {
+            if (callbackExecuted) return;
+
+            if (animatedElements >= elementsToAnimate) {
+                callbackExecuted = true;
+                // 如果提供了回调，则执行回调
+                if (callback && typeof callback === 'function') {
+                    // 通过setTimeout确保DOM操作完成后再执行回调
+                    setTimeout(callback, 0);
+                }
+            }
+        };
+
+        // 如果没有任何需要动画的元素，直接执行回调
+        if (elementsToAnimate === 0 && !callbackExecuted) {
+            callbackExecuted = true;
+            if (callback && typeof callback === 'function') {
+                setTimeout(callback, 0);
+            }
+        }
+
+        // 设置超时保障，确保即使动画事件没有触发，回调也会执行
+        setTimeout(() => {
+            if (!callbackExecuted) {
+                console.log('动画超时保障触发');
+                callbackExecuted = true;
+
+                // 清理可能未完成的动画元素
+                if (this.mainContainer) {
+                    this.mainContainer.style.display = 'none';
+                }
+
+                if (this.titleElement && this.titleElement.parentNode) {
+                    this.titleElement.parentNode.removeChild(this.titleElement);
+                    this.titleElement = null;
+                }
+
+                document.querySelectorAll('.modal.active, .modal.closing').forEach(modal => {
+                    modal.classList.remove('active', 'closing');
+                });
+
+                // 执行回调
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+            }
+        }, 1000); // 1秒超时
+    }
+
+    /**
+     * 初始化💩动画效果
+     */
+    private initPoopAnimation(): void {
+        console.log('初始化💩动画');
+        // 获取💩容器和联系方式容器
+        const poopContainer = document.getElementById('poop-container');
+        const contactInfo = document.getElementById('contact-info');
+
+        if (!poopContainer || !contactInfo) {
+            console.error('找不到必要的DOM元素:', { poopContainer, contactInfo });
+            return;
+        }
+
+        // 清空容器，防止重复生成
+        poopContainer.innerHTML = '';
+        contactInfo.style.display = 'none';
+        contactInfo.classList.remove('pop-in'); // 移除动画类，以便下次可以再次触发
+
+        // 重新添加联系方式到容器中
+        poopContainer.appendChild(contactInfo);
+        console.log('联系方式已添加到💩容器中');
+
+        // 容器尺寸
+        const containerWidth = poopContainer.clientWidth;
+        const containerHeight = poopContainer.clientHeight;
+        console.log('容器尺寸:', { width: containerWidth, height: containerHeight });
+
+        // 💩元素集合和物理属性
+        const poops: {
+            element: HTMLElement;
+            x: number;
+            y: number;
+            vx: number;
+            vy: number;
+            size: number;
+            rotation: number;
+            rotationSpeed: number;
+        }[] = [];
+
+        // 创建一个💩元素
+        const createPoop = () => {
+            // 随机位置（覆盖整个容器区域）
+            const x = Math.random() * containerWidth;
+            const y = Math.random() * containerHeight * 0.4; // 从上方40%区域开始掉落
+
+            // 随机大小
+            const size = 20 + Math.random() * 20; // 20-40px
+
+            // 创建元素
+            const poopElement = document.createElement('div');
+            poopElement.className = 'poop';
+            poopElement.textContent = '💩';
+            poopElement.style.fontSize = `${size}px`;
+            poopElement.style.left = `${x}px`;
+            poopElement.style.top = `${y}px`;
+            poopElement.style.opacity = '0';
+            poopContainer.appendChild(poopElement);
+
+            // 随机速度 - 增加速度范围使emoji更活跃
+            const vx = (Math.random() - 0.5) * 4; // 水平速度±2
+            const vy = 1 + Math.random() * 3; // 垂直速度1-4
+
+            // 随机旋转 - 增加旋转速度
+            const rotation = Math.random() * 360;
+            const rotationSpeed = (Math.random() - 0.5) * 20; // 增加旋转速度
+
+            // 添加到集合
+            poops.push({
+                element: poopElement,
+                x, y, vx, vy, size, rotation, rotationSpeed
+            });
+
+            // 淡入动画
+            setTimeout(() => {
+                poopElement.style.opacity = '1';
+                poopElement.style.animation = 'poopFadeIn 0.3s forwards';
+            }, 10);
+        };
+
+        // 更新💩位置
+        const updatePoops = () => {
+            const gravity = 0.2;
+            const friction = 0.95; // 减小摩擦力，让它们移动更久
+            const bounce = 0.8; // 增加弹性，让它们弹跳更多
+
+            poops.forEach(poop => {
+                // 应用重力
+                poop.vy += gravity;
+
+                // 更新位置
+                poop.x += poop.vx;
+                poop.y += poop.vy;
+
+                // 更新旋转
+                poop.rotation += poop.rotationSpeed;
+
+                // 边界碰撞检测 - 改进碰撞处理，使其更有活力
+                // 底部碰撞
+                if (poop.y + poop.size > containerHeight) {
+                    poop.y = containerHeight - poop.size;
+                    // 反弹时给一个随机的水平速度扰动，使其行为更不可预测
+                    poop.vy = -poop.vy * bounce;
+                    poop.vx = poop.vx * friction + (Math.random() - 0.5) * 2;
+                }
+
+                // 左右边界碰撞
+                if (poop.x < 0) {
+                    poop.x = 0;
+                    poop.vx = -poop.vx * bounce + Math.random() * 1; // 增加随机性
+                } else if (poop.x + poop.size > containerWidth) {
+                    poop.x = containerWidth - poop.size;
+                    poop.vx = -poop.vx * bounce - Math.random() * 1; // 增加随机性
+                }
+
+                // 顶部碰撞（防止飞得太高）
+                if (poop.y < 0) {
+                    poop.y = 0;
+                    poop.vy = Math.abs(poop.vy) * 0.5; // 向下反弹，但减少能量
+                }
+
+                // 偶尔随机更改速度，使运动更混乱
+                if (Math.random() < 0.01) { // 1%的几率
+                    poop.vx += (Math.random() - 0.5) * 1;
+                    poop.rotationSpeed += (Math.random() - 0.5) * 5;
+                }
+
+                // 更新DOM元素位置
+                poop.element.style.transform = `translate(${poop.x}px, ${poop.y}px) rotate(${poop.rotation}deg)`;
+            });
+        };
+
+        // 创建💩的定时器
+        let poopCreationCount = 0;
+        const maxPoops = 500; // 最多生成30个💩
+
+        const poopIntervalId = setInterval(() => {
+            createPoop();
+            poopCreationCount++;
+
+            if (poopCreationCount >= maxPoops) {
+                clearInterval(poopIntervalId);
+
+                // 1秒后显示联系方式
+                setTimeout(() => {
+                    console.log('准备显示联系方式');
+                    // 显示联系方式并添加弹出动画
+                    contactInfo.style.display = 'block';
+                    setTimeout(() => {
+                        console.log('添加弹出动画');
+                        contactInfo.classList.add('pop-in');
+                    }, 50);
+
+                    // 不清除💩，让它们继续存在并移动
+                }, 20);
+            }
+        }, 2); // 每22ms生成一个💩
+
+        // 动画循环
+        const animationId = setInterval(updatePoops, 16); // 约60fps
+
+        // 清理函数
+        const cleanup = () => {
+            clearInterval(poopIntervalId);
+            clearInterval(animationId);
+        };
+
+        // 当弹窗关闭时清理资源
+        const aboutModal = document.getElementById('about-modal');
+        if (aboutModal) {
+            const handleModalClose = () => {
+                if (!aboutModal.classList.contains('active')) {
+                    cleanup();
+                    aboutModal.removeEventListener('transitionend', handleModalClose);
+                }
+            };
+
+            aboutModal.addEventListener('transitionend', handleModalClose);
+        }
+    }
 }
 
 export { UIMainMenu as GameMainScene };

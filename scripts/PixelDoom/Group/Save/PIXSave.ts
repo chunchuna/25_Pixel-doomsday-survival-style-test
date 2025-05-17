@@ -1,7 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
-export var data = {
+export let data = {
     RunGameTiems: 0,
     LevelGameData: "",
 }
@@ -24,7 +24,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         data.LevelGameData = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.LastestSaveGameJson;
         localStorage.setItem("level_data", data.LevelGameData)
         localStorage.setItem("run_game_times", String(data.RunGameTiems))
-        
+
         UISubtitleMain.ShowSubtitles("json数据被存下来了", 5)
     })
 })
@@ -62,12 +62,19 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
 
     if (event.key == "z") {
         // 下载数据
-        saveToFile(data, "game_data.json")
-        UISubtitleMain.ShowSubtitles("开始下载游戏数据", 5)
+        LocalSave.DataDownload()
+
     }
 
     if (event.key == "q") {
         // 读取数据
+        LocalSave.DataRead();
+    }
+});
+
+export class LocalSave {
+
+    static DataRead() {
         readFromFile().then(_data => {
             if (_data) {
                 data = _data
@@ -75,10 +82,15 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
             }
         });
     }
-});
+
+    static DataDownload() {
+        saveToFile(data, "game_data.json")
+        UISubtitleMain.ShowSubtitles("开始下载游戏数据", 5)
+    }
+}
 
 // 下载文件
-function saveToFile(data: any, filename: string, type = 'application/json') {
+export function saveToFile(data: any, filename: string, type = 'application/json') {
     // 创建Blob对象
     const blob = new Blob([JSON.stringify(data, null, 2)], { type });
 
@@ -100,7 +112,7 @@ function saveToFile(data: any, filename: string, type = 'application/json') {
 }
 
 // 上传文件
-function readFromFile(): Promise<any> {
+export function readFromFile(): Promise<any> {
     return new Promise((resolve) => {
         // 创建文件输入元素
         const input = document.createElement('input');
