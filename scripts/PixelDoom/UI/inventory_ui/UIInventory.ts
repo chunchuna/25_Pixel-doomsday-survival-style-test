@@ -82,7 +82,7 @@ class UIInventory {
     private originalInventoryArray: Item[] | null = null;
 
     // 添加一个变量来存储关闭其他库存的函数
-    private closeOtherInventoryFunc: (() => any) | null = null;
+    public closeOtherInventoryFunc: (() => any) | null = null;
 
     // 添加一个变量来存储更新回调
     private updateCallback: InventoryUpdateCallback | null = null;
@@ -307,7 +307,7 @@ class UIInventory {
 
     // 显示/隐藏主库存
     // todo 库存窗口操作相关
-    private toggleMainInventory(): void {
+    public toggleMainInventory(): void {
         this.isMainInventoryVisible = !this.isMainInventoryVisible;
 
         if (this.isMainInventoryVisible) {
@@ -475,7 +475,7 @@ class UIInventory {
             (slot as HTMLElement).style.height = `${slotSize}px`;
             // 不设置格子之间的间距，由网格容器统一控制
         });
-        
+
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
@@ -744,7 +744,7 @@ class UIInventory {
 
             // 处理拖拽放置
             if (this.draggedItemGhost && this.draggedItem) {
-                // 查找目标格子
+                // 查找目标格子                 
                 const targetInfo = this.findSlotUnderMouse(e);
 
                 if (targetInfo && targetInfo.slotIndex !== null) {
@@ -1041,7 +1041,7 @@ class UIInventory {
 
             headerDiv.appendChild(titleSpan);
             //headerDiv.appendChild(sortButton);
-            
+
             // 添加R键整理背包的提示文本
             const sortPromptSpan = document.createElement('span');
             sortPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
@@ -1049,7 +1049,7 @@ class UIInventory {
             sortPromptSpan.style.color = '#aaaaaa';
             sortPromptSpan.style.fontStyle = 'italic';
             sortPromptSpan.textContent = '[R]整理背包';
-            
+
             headerDiv.appendChild(sortPromptSpan);
         } else {
             // 添加其他库存的标题
@@ -1062,7 +1062,7 @@ class UIInventory {
             }
 
             headerDiv.appendChild(titleSpan);
-            
+
             // 创建ESC提示文本，放在header里
             const escPromptSpan = document.createElement('span');
             escPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
@@ -1070,7 +1070,7 @@ class UIInventory {
             escPromptSpan.style.color = '#aaaaaa';
             escPromptSpan.style.fontStyle = 'italic';
             escPromptSpan.textContent = '[ESC]关闭';
-            
+
             headerDiv.appendChild(escPromptSpan);
         }
 
@@ -2450,6 +2450,35 @@ class UIInventory {
 
         container.appendChild(resizeButton);
     }
+
+    // 在UIInventory类中添加新方法
+    public HideAllInventories(): void {
+      // 隐藏主库存
+      if (this.isMainInventoryVisible) {
+        this.toggleMainInventory();
+      }
+      
+      // 关闭其他库存(如果存在)
+      if (this.closeOtherInventoryFunc) {
+        this.closeOtherInventoryFunc();
+        // 确保引用被清除
+        this.closeOtherInventoryFunc = null;
+      }
+      
+      // 隐藏物品描述面板
+      this.hideItemDescription();
+      
+      // 清理任何拖拽中的物品
+      if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
+        this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+      }
+      
+      // 重置拖拽状态
+      this.draggedItem = null;
+      this.draggedItemGhost = null;
+      this.clickStartPos = null;
+      this.isDragging = false;
+    }
 }
 
 // 导出公共接口
@@ -2535,3 +2564,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 // 导出实例更新回调接口
 export type { InventoryUpdateCallback };
+
+// 在导出部分添加此方法
+export function HideAllInventories(): void {
+  inventoryManager.HideAllInventories();
+}

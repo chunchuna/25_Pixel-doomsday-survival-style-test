@@ -1,6 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
 import type { DialogueSystem } from "../UI/dialogue_ui/UIDialogue.js";
+import { inventoryManager } from "../UI/inventory_ui/UIInventory.js";
 import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UIScreenEffect.js";
 import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
@@ -58,11 +59,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 export class GAMEPLAY_LEVEL {
-    static JumpOtehrLayoutFromLevel(LevelName: string) {
+    static async JumpOtehrLayoutFromLevel(LevelName: string) {
 
-        UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, () => {
-
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
+        UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
             //下雨需要关闭雨粒子 关闭雨声音乐
             if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
                 _Audio.AudioStopAll()
@@ -74,8 +73,18 @@ export class GAMEPLAY_LEVEL {
 
             // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
             //@ts-ignore
+            
             var DialogueWhole: DialogueSystem = DialogueMainController;
             DialogueWhole.DestroyDialogue();
+
+
+            // 关闭 库存面板相关元素
+            inventoryManager.HideAllInventories();
+
+            await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(3)
+
+
+            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
 
         })
     }
