@@ -1,8 +1,8 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
-import { LocalSave, readFromFile } from "../../Group/Save/PIXSave.js";
-import { data } from "../../Group/Save/PIXSave.js"
+import { LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
+import { data } from "../../Group/Save/PIXSave.js"
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
@@ -36,6 +36,7 @@ function initGameMainScene(): void {
     (window as any).HideALLMainMenuUI = (callback?: () => void) => {
         UIMainMenu.getInstance().HideALLMainMenuUI(callback);
     };
+
 }
 
 
@@ -95,6 +96,9 @@ class UIMainMenu {
         setTimeout(() => {
             this.animateMenuButtons();
         }, 500); // 等待500ms后开始按钮动画
+
+        // 初始检查数据状态
+        this.checkDataAndUpdateUI();
     }
 
     private bindEvents(): void {
@@ -134,6 +138,9 @@ class UIMainMenu {
             loadGameBtn.addEventListener('click', () => {
                 loadGameModal.classList.remove('closing');
                 loadGameModal.classList.add('active');
+
+                // 检查是否有存档数据并显示相应按钮
+                this.checkDataAndUpdateUI();
             });
         }
 
@@ -173,7 +180,15 @@ class UIMainMenu {
         const loadLocalBtn = document.getElementById('load-local-btn');
         if (loadLocalBtn) {
             loadLocalBtn.addEventListener('click', () => {
-                LocalSave.DataRead();
+                LocalSave.DataRead()
+            });
+        }
+
+        // 下载存档按钮
+        const saveLocalBtn = document.getElementById('save-local-btn');
+        if (saveLocalBtn) {
+            saveLocalBtn.addEventListener('click', () => {
+                LocalSave.DataDownload();
             });
         }
 
@@ -251,8 +266,13 @@ class UIMainMenu {
         <div id="load-game-modal" class="modal">
           <div class="modal-content">
             <div class="modal-body">
-              <button id="load-local-btn" class="action-btn">从本地读取</button><div class="save-slots">
+              <button id="load-local-btn" class="action-btn">从本地读取</button>
+              <button id="save-local-btn" class="action-btn">下载存档到本地</button>
+              <div class="save-slots">
                 <p>暂无存档</p>
+              </div>
+              <div id="data-load-section" style="display: none;">
+                <button id="use-data-btn" class="action-btn special-btn">使用已有存档数据游戏</button>
               </div>
             </div>
           </div>
@@ -1466,6 +1486,28 @@ class UIMainMenu {
           0% { transform: translateY(-20px); }
           100% { transform: translateY(400px); }
         }
+
+        .special-btn {
+          background-color: rgba(80, 80, 150, 0.6);
+          color: #ddd;
+          margin-top: 15px;
+          padding: 10px 0;
+          border: 1px solid rgba(100, 100, 200, 0.3);
+          transition: all 0.3s ease;
+        }
+        
+        .special-btn:hover {
+          background-color: rgba(90, 90, 180, 0.7);
+          color: #fff;
+          border-color: rgba(120, 120, 255, 0.6);
+          box-shadow: 0 0 10px rgba(100, 100, 255, 0.3);
+        }
+        
+        #data-load-section {
+          margin-top: 15px;
+          padding-top: 10px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
       `;
     }
 
@@ -1982,6 +2024,38 @@ class UIMainMenu {
             aboutModal.addEventListener('transitionend', handleModalClose);
         }
     }
+
+    /**
+     * 检查存档数据并更新UI显示
+     */
+    private checkDataAndUpdateUI(): void {
+        const dataLoadSection = document.getElementById('data-load-section');
+        const useDataBtn = document.getElementById('use-data-btn');
+
+        if (dataLoadSection && useDataBtn) {
+            if (data && data.LevelGameData && data.LevelGameData.length > 0) {
+                // 有存档数据，显示使用按钮
+                dataLoadSection.style.display = 'block';
+
+                // 设置按钮点击事件
+                useDataBtn.onclick = () => {
+                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏")
+                    this.HideALLMainMenuUI(() => {
+                        UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
+                            SaveSetting.isUseDataEnterNewGame = true;
+                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                        })
+
+                    })
+
+                };
+            } else {
+                // 无存档数据，隐藏按钮
+                dataLoadSection.style.display = 'none';
+            }
+        }
+    }
+
 }
 
 export { UIMainMenu as GameMainScene };

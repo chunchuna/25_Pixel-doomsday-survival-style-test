@@ -571,6 +571,20 @@
 									],
 									"subfolders": [],
 									"name": "screeneffect_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIDebug.ts",
+											"type": "application/typescript",
+											"sid": 936583513626583,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "debug_ui"
 								}
 							],
 							"name": "UI"

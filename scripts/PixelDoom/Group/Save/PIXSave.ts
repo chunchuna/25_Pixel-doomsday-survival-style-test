@@ -5,6 +5,27 @@ export let data = {
     RunGameTiems: 0,
     LevelGameData: "",
 }
+export let SaveSetting = {
+    isUseDataEnterNewGame: false,
+}
+
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    // 玩家可以通过使用 数据进入游戏
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+
+    if (SaveSetting.isUseDataEnterNewGame) {
+        if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "Level") {
+            if (data.LevelGameData) {
+                Save.LoadGameFromJson(data.LevelGameData)
+                UISubtitleMain.ShowSubtitles("从data.LevelGameData 加载存档数据", 5)
+            }
+        }
+    }
+
+})
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
     data.RunGameTiems = Number(localStorage.getItem("run_game_times"))
