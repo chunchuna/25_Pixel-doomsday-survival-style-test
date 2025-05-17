@@ -60,29 +60,28 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 export class GAMEPLAY_LEVEL {
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
+        //下雨需要关闭雨粒子 关闭雨声音乐
+        if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
+            _Audio.AudioStopAll()
+        }
+        if (WeatherState.CurrentInterval !== null) {
+            clearInterval(WeatherState.CurrentInterval);
+            WeatherState.CurrentInterval = null;
+        }
 
+        // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
+        //@ts-ignore
+
+        var DialogueWhole: DialogueSystem = DialogueMainController;
+        DialogueWhole.DestroyDialogue();
+
+
+        // 关闭 库存面板相关元素
+        inventoryManager.HideAllInventories();
+        
+        await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1.5)
+        
         UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
-            //下雨需要关闭雨粒子 关闭雨声音乐
-            if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
-                _Audio.AudioStopAll()
-            }
-            if (WeatherState.CurrentInterval !== null) {
-                clearInterval(WeatherState.CurrentInterval);
-                WeatherState.CurrentInterval = null;
-            }
-
-            // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
-            //@ts-ignore
-            
-            var DialogueWhole: DialogueSystem = DialogueMainController;
-            DialogueWhole.DestroyDialogue();
-
-
-            // 关闭 库存面板相关元素
-            inventoryManager.HideAllInventories();
-
-            await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(3)
-
 
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
 
