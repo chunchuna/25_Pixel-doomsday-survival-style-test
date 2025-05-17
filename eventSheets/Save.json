@@ -116,6 +116,14 @@
 			],
 			"actions": [
 				{
+					"type": "script",
+					"language": "typescript",
+					"script": [
+						"//@ts-ignore",
+						"gl$_run_eventhandle_(\"Save:SavetoJson\")"
+					]
+				},
+				{
 					"id": "set-eventvar-value",
 					"objectClass": "System",
 					"sid": 935890281380815,
@@ -123,23 +131,6 @@
 						"variable": "LastestSaveGameJson",
 						"value": "SaveStateJSON"
 					}
-				},
-				{
-					"id": "log",
-					"objectClass": "Web",
-					"sid": 424522204769928,
-					"parameters": {
-						"type": "log",
-						"message": "SaveStateJSON"
-					}
-				},
-				{
-					"type": "script",
-					"language": "typescript",
-					"script": [
-						"//@ts-ignore",
-						"gl$_run_eventhandle_(\"Save:SavetoJson\")"
-					]
 				}
 			],
 			"sid": 256538913300807
