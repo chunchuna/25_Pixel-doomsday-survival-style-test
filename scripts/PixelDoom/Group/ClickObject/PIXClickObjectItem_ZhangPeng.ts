@@ -42,28 +42,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     })
 })
 
-// 帐篷调查
-var DIA_CONTENT_ZHANGPENG_01 = `
-左-> 露营地的帐篷显得格外的显眼
-右->choose:查看外观
-    左-> 一个普通的帐篷，被雨水打湿。帐篷的门是打开的
-右->choose:进入帐篷内查看
-    左-> 里面有一些没有被拿走的东西
-    左-> 看来帐篷的主人走的很匆忙
-    右->choose:继续分析
-        左-> 从帐篷外部的篝火来看，帐篷的主人应该没有离开太久才对
-        左-> 但是由于天气的原因
-        左-> 就算再帐篷里面也感觉比较寒冷
-    右->choose:查看库存
-        左-> 你正在查看帐篷的库存信息[code-(DIA_temp_InventoryFindFunction())]    
-右->choose:整体观察
-    左-> 一个普通的帐篷，被雨水打湿。帐篷的门是打开的
-    右-> 信息:信息被记录
-	`
+export function DIA_temp_ReBackDialogueFunction() {
+    // @ts-ignore
+    DialogueMainController.ShowDialogue(DIA_CONTENT_ZHANGPENG_01)
 
+}
 export function DIA_temp_InventoryFindFunction() {
-    
-    alert("查看库存")
+
     //@ts-ignore
     var InventoryInstance = LastestChooseObject as InstanceType.InventoryData;
 
@@ -82,9 +67,34 @@ export function DIA_temp_InventoryFindFunction() {
     // 传入更新回调参数
     inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName);
 
-
 }
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    (window as any).DIA_temp_InventoryFindFunction=DIA_temp_InventoryFindFunction
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    (window as any).DIA_temp_InventoryFindFunction = DIA_temp_InventoryFindFunction;
+
+    (window as any).DIA_temp_ReBackDialogueFunction = DIA_temp_ReBackDialogueFunction;
 })
+
+
+// 帐篷调查
+var DIA_CONTENT_ZHANGPENG_01 = `
+左-> 露营地的帐篷显得格外的显眼
+右->choose:查看外观
+    左-> 一个普通的帐篷，被雨水打湿。帐篷的门是打开的
+    左->[code-(DIA_temp_ReBackDialogueFunction())] 
+右->choose:进入帐篷内查看
+    左-> 里面有一些没有被拿走的东西
+    左-> 看来帐篷的主人走的很匆忙
+    右->choose:继续分析
+        左-> 从帐篷外部的篝火来看，帐篷的主人应该没有离开太久才对
+        左-> 但是由于天气的原因
+        左-> 就算再帐篷里面也感觉比较寒冷
+        左->[code-(DIA_temp_ReBackDialogueFunction())] 
+    右->choose:查看库存
+        左-> 你正在查看帐篷的库存信息[code-(DIA_temp_InventoryFindFunction())]    
+        左->[code-(DIA_temp_ReBackDialogueFunction())] 
+右->choose:整体观察
+    左-> 一个普通的帐篷，被雨水打湿。帐篷的门是打开的
+    右-> 信息:信息被记录
+    左->[code-(DIA_temp_ReBackDialogueFunction())] 
+	`

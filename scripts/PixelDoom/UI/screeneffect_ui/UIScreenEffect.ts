@@ -970,5 +970,5 @@ export type {
 };
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    UIScreenEffect.FadeIn(800,TransitionEffectType.WIPE_RADIAL,undefined)
+    UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
 })
