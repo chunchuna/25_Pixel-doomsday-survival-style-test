@@ -92,6 +92,14 @@ class UIInventory {
     // 记录库存窗口拖拽后的位置 
     private MainInventoryWindowPosition: number[] = [0, 0]
     private OtherInventoryWindowPosition: number[] = [0, 0]
+    // 添加记录窗口大小的变量
+    private MainInventoryWindowSize: number[] = [0, 0] // [width, height]
+    private OtherInventoryWindowSize: number[] = [0, 0] // [width, height]
+    
+    // 调整大小相关变量
+    private isResizingWindow: boolean = false
+    private resizedWindow: HTMLDivElement | null = null
+    private windowResizeStartPos: { x: number, y: number, windowWidth: number, windowHeight: number } | null = null
 
     private constructor() {
         this.initStyles();
@@ -169,23 +177,62 @@ class UIInventory {
         if (this.OtherInventoryWindowPosition[0] !== 0 || this.OtherInventoryWindowPosition[1] !== 0) {
             this.otherInventoryInstance.style.left = `${this.OtherInventoryWindowPosition[0]}px`;
             this.otherInventoryInstance.style.top = `${this.OtherInventoryWindowPosition[1]}px`;
-            this.otherInventoryContainer.style.right = 'auto';
-            this.otherInventoryContainer.style.transform = "none";
-
-
+            this.otherInventoryInstance.style.right = 'auto';
+            this.otherInventoryInstance.style.transform = "none";
         } else {
             // 设置其他库存的初始位置（右侧）
             this.otherInventoryInstance.style.left = 'auto';
             this.otherInventoryInstance.style.right = '50px';
             this.otherInventoryInstance.style.top = '50%';
             this.otherInventoryInstance.style.transform = 'translateY(-50%)';
-            this.otherInventoryInstance.style.display = 'flex';
+        }
+        
+        this.otherInventoryInstance.style.display = 'flex';
+        
+        // 应用记忆的窗口大小
+        if (this.OtherInventoryWindowSize[0] > 0 && this.OtherInventoryWindowSize[1] > 0) {
+            this.otherInventoryInstance.style.width = `${this.OtherInventoryWindowSize[0]}px`;
+            this.otherInventoryInstance.style.height = `${this.OtherInventoryWindowSize[1]}px`;
         }
 
-
-        // 确保容器初始可见
-        this.otherInventoryInstance.style.opacity = '0';
-
+        // 确保容器完全可见
+        this.otherInventoryInstance.style.opacity = '1';
+        
+        // 立即添加调整大小按钮
+        const resizeButton = document.createElement('button');
+        resizeButton.className = 'inventory-resize-button';
+        resizeButton.innerHTML = `<div class="resize-arrows">
+            <span class="resize-arrow-h">↔</span>
+            <span class="resize-arrow-v">↕</span>
+        </div>`;
+        resizeButton.title = '拖拽调整窗口大小';
+        
+        // 添加鼠标按下事件以开始调整大小
+        resizeButton.addEventListener('mousedown', (e) => {
+            console.log('其他库存角标被点击');
+            
+            // 只响应左键点击
+            if (e.button === 0) {
+                this.isResizingWindow = true;
+                this.resizedWindow = this.otherInventoryInstance;
+                
+                // 获取容器当前大小
+                const rect = this.otherInventoryInstance!.getBoundingClientRect();
+                this.windowResizeStartPos = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    windowWidth: rect.width,
+                    windowHeight: rect.height
+                };
+                
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        
+        this.otherInventoryInstance.appendChild(resizeButton);
+        console.log('直接添加了其他库存的大小调整按钮');
+        
         // 渲染其他库存
         this.renderOtherInventory(rows, columns, InventoryName);
 
@@ -193,8 +240,11 @@ class UIInventory {
         setTimeout(() => {
             if (this.otherInventoryInstance) {
                 this.otherInventoryInstance.classList.add('inventory-open');
+                
+                // 调整网格以适应窗口大小
+                this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
             }
-        }, 10); // 短延迟以确保DOM更新
+        }, 10);
 
         // 添加Escape键关闭库存的监听
         const escapeListener = (e: KeyboardEvent) => {
@@ -262,30 +312,38 @@ class UIInventory {
         this.isMainInventoryVisible = !this.isMainInventoryVisible;
 
         if (this.isMainInventoryVisible) {
-
             // 判断是否已经记录了窗口的位置
             if (this.MainInventoryWindowPosition[0] !== 0 || this.MainInventoryWindowPosition[1] !== 0) {
-
                 this.mainInventoryContainer.style.left = `${this.MainInventoryWindowPosition[0]}px`;
                 this.mainInventoryContainer.style.top = `${this.MainInventoryWindowPosition[1]}px`;
                 this.mainInventoryContainer.style.transform = 'none'
             } else {
-
                 // 根据默认位置设置初始位置（左侧）
                 this.mainInventoryContainer.style.left = '50px';
                 this.mainInventoryContainer.style.top = '50%';
                 this.mainInventoryContainer.style.transform = 'translateY(-50%)';
             }
 
+            // 应用记忆的窗口大小
+            if (this.MainInventoryWindowSize[0] > 0 && this.MainInventoryWindowSize[1] > 0) {
+                this.mainInventoryContainer.style.width = `${this.MainInventoryWindowSize[0]}px`;
+                this.mainInventoryContainer.style.height = `${this.MainInventoryWindowSize[1]}px`;
+            }
 
             this.mainInventoryContainer.style.display = 'flex';
-
-
+            
+            // 确保调整大小按钮存在且可见
+            this.ensureResizeButtonExists(this.mainInventoryContainer);
 
             // 添加动画效果
             this.mainInventoryContainer.classList.remove('inventory-close');
             void this.mainInventoryContainer.offsetWidth; // 强制重绘
             this.mainInventoryContainer.classList.add('inventory-open');
+            
+            // 调整网格以适应窗口大小
+            setTimeout(() => {
+                this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
+            }, 50);
         } else {
             // 添加关闭动画
             this.mainInventoryContainer.classList.remove('inventory-open');
@@ -345,6 +403,79 @@ class UIInventory {
             // 移除默认的居中transform
             this.draggedWindow.style.transform = 'none';
         }
+        
+        // 处理窗口大小调整
+        if (this.isResizingWindow && this.resizedWindow && this.windowResizeStartPos) {
+            // 添加resizing类以应用样式
+            if (!this.resizedWindow.classList.contains('resizing')) {
+                this.resizedWindow.classList.add('resizing');
+                console.log('窗口正在调整大小'); // 添加调试信息
+            }
+            
+            const dx = event.clientX - this.windowResizeStartPos.x;
+            const dy = event.clientY - this.windowResizeStartPos.y;
+            
+            // 计算新的宽度和高度（设置最小值以避免窗口过小）
+            const newWidth = Math.max(225, this.windowResizeStartPos.windowWidth + dx);
+            const newHeight = Math.max(380, this.windowResizeStartPos.windowHeight + dy);
+            
+            // 更新窗口大小
+            this.resizedWindow.style.width = `${newWidth}px`;
+            this.resizedWindow.style.height = `${newHeight}px`;
+            
+            // 保存窗口大小信息
+            if (this.resizedWindow.id === 'main-inventory') {
+                this.MainInventoryWindowSize = [newWidth, newHeight];
+                console.log('主库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
+            } else if (this.resizedWindow.id === 'other-inventory') {
+                this.OtherInventoryWindowSize = [newWidth, newHeight];
+                console.log('其他库存窗口大小已更新:', newWidth, newHeight); // 添加调试信息
+            }
+            
+            // 自动调整网格容器
+            this.adjustGridBasedOnWindowSize(this.resizedWindow);
+        }
+    }
+
+    // 添加方法调整网格布局以适应窗口大小
+    private adjustGridBasedOnWindowSize(container: HTMLDivElement): void {
+        // 找到对应的网格容器
+        const gridContainer = container.querySelector('.inventory-grid') as HTMLDivElement;
+        if (!gridContainer) {
+            console.warn('无法找到网格容器'); // 添加调试信息
+            return;
+        }
+        
+        // 获取当前的列数
+        let columns: number;
+        if (container.id === 'main-inventory') {
+            columns = this.mainInventoryColumns;
+        } else {
+            columns = this.otherInventoryColumns;
+        }
+        
+        // 获取窗口的宽度
+        const containerWidth = container.clientWidth;
+        
+        // 计算可以放置的每个格子的大小
+        // 考虑内边距和边框等因素，减去一些边距值
+        const availableWidth = containerWidth - 40; // 减去左右内边距
+        const slotSize = Math.floor(availableWidth / columns) - 5; // 减去格子之间的间隔
+        
+        console.log('调整格子大小:', slotSize); // 添加调试信息
+        
+        // 更新格子样式，但保持行列数不变
+        const slots = container.querySelectorAll('.inventory-slot');
+        slots.forEach(slot => {
+            (slot as HTMLElement).style.width = `${slotSize}px`;
+            (slot as HTMLElement).style.height = `${slotSize}px`;
+        });
+        
+        // 确保网格仍然保持固定的列数
+        gridContainer.style.gridTemplateColumns = `repeat(${columns}, ${slotSize}px)`;
+        
+        // 设置格子之间的间隔
+        gridContainer.style.gap = '5px';
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
@@ -369,6 +500,19 @@ class UIInventory {
             this.isDraggingWindow = false;
             this.draggedWindow = null;
             this.windowDragStartPos = null;
+            return;
+        }
+        
+        // 处理窗口大小调整结束
+        if (this.isResizingWindow) {
+            // 移除resizing类
+            if (this.resizedWindow && this.resizedWindow.classList.contains('resizing')) {
+                this.resizedWindow.classList.remove('resizing');
+            }
+            
+            this.isResizingWindow = false;
+            this.resizedWindow = null;
+            this.windowResizeStartPos = null;
             return;
         }
 
@@ -791,6 +935,40 @@ class UIInventory {
         });
 
         container.appendChild(dragHandle);
+        
+        // 创建一个明确的尺寸调整按钮（完全重新设计）
+        const resizeButton = document.createElement('button');
+        resizeButton.className = 'inventory-resize-button';
+        resizeButton.textContent = '↘'; // 使用明确的方向箭头
+        resizeButton.title = '拖拽调整窗口大小';
+        
+        console.log('创建拖拽尺寸角标'); // 添加调试信息
+        
+        // 添加鼠标按下事件以开始调整大小
+        resizeButton.addEventListener('mousedown', (e) => {
+            console.log('角标被点击'); // 添加调试信息
+            
+            // 只响应左键点击
+            if (e.button === 0) {
+                this.isResizingWindow = true;
+                this.resizedWindow = container;
+                
+                // 获取容器当前大小
+                const rect = container.getBoundingClientRect();
+                this.windowResizeStartPos = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    windowWidth: rect.width,
+                    windowHeight: rect.height
+                };
+                
+                e.preventDefault(); // 防止选中文本
+                e.stopPropagation(); // 阻止事件冒泡
+            }
+        });
+        
+        container.appendChild(resizeButton);
+        
         return container;
     }
 
@@ -886,7 +1064,8 @@ class UIInventory {
         // 创建库存网格
         const gridContainer = document.createElement('div');
         gridContainer.className = 'inventory-grid';
-        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 45px)`;
+        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        gridContainer.style.gap = '5px'; // 设置格子之间的固定间隔
 
         // 计算需要多少个格子
         const totalSlots = rows * columns;
@@ -1137,14 +1316,16 @@ class UIInventory {
                 flex-direction: column;
                 width: 225px;
                 height: 380px;
-                opacity: 0.1;
+                opacity: 1; /* 改为完全可见 */
                 z-index: 5000;
                 backdrop-filter: blur(5px);
+                resize: none; /* 禁用默认resize */
+                overflow: hidden; /* 防止内容溢出 */
             }
             
             /* 新创建的库存容器初始状态 */
             .inventory-container:not(.inventory-open):not(.inventory-close) {
-                opacity: 0.1;
+                opacity: 1; /* 改为完全可见 */
             }
             
             /* 库存拖拽句柄 */
@@ -1156,6 +1337,129 @@ class UIInventory {
                 height: 40px;
                 cursor: move;
                 z-index: 5002;
+            }
+            
+            /* 移除旧的调整大小角标样式 */
+            .inventory-resize-handle {
+                display: none;
+            }
+            
+            /* 添加新的明确的尺寸调整按钮样式 */
+            .inventory-resize-button {
+                position: absolute;
+                bottom: 5px;
+                right: 5px;
+                width: 30px;
+                height: 30px;
+                background-color: rgba(255, 165, 0, 0.8); /* 橙色背景 */
+                color: white;
+                border: 2px solid rgba(255, 220, 150, 0.8);
+                border-radius: 5px;
+                font-size: 18px;
+                line-height: 18px;
+                cursor: nwse-resize;
+                z-index: 5010;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+                transition: all 0.2s ease;
+                animation: pulse-glow 2s infinite; /* 添加闪烁效果 */
+                user-select: none; /* 防止文本被选中 */
+                pointer-events: auto; /* 确保按钮可点击 */
+            }
+            
+            /* 调整大小指示器的箭头 */
+            .resize-arrows {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .resize-arrow-h, .resize-arrow-v {
+                position: absolute;
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            }
+            
+            .resize-arrow-h {
+                transform: rotate(45deg);
+                bottom: 6px;
+                right: 6px;
+            }
+            
+            .resize-arrow-v {
+                transform: rotate(45deg);
+                top: 6px;
+                left: 6px;
+            }
+            
+            /* 添加闪烁动画 */
+            @keyframes pulse-glow {
+                0% {
+                    box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+                    border-color: rgba(255, 220, 150, 0.8);
+                }
+                50% {
+                    box-shadow: 0 0 15px rgba(255, 165, 0, 0.9);
+                    border-color: rgba(255, 255, 255, 0.9);
+                }
+                100% {
+                    box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+                    border-color: rgba(255, 220, 150, 0.8);
+                }
+            }
+            
+            /* 按钮悬停效果 */
+            .inventory-resize-button:hover {
+                background-color: rgba(255, 140, 0, 0.9);
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.8);
+            }
+            
+            /* 按钮激活效果 */
+            .inventory-resize-button:active,
+            .inventory-container.resizing .inventory-resize-button {
+                background-color: rgba(255, 120, 0, 1);
+                transform: scale(0.95);
+                box-shadow: 0 0 20px rgba(255, 165, 0, 1);
+            }
+            
+            /* 角标内的图标 */
+            .resize-icon {
+                width: 16px;
+                height: 16px;
+                opacity: 0.9;
+            }
+            
+            .resize-icon svg {
+                width: 100%;
+                height: 100%;
+            }
+            
+            /* 角标悬停效果 */
+            .inventory-resize-handle:hover {
+                background-color: rgba(140, 140, 140, 0.9);
+                transform: scale(1.15);
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+            
+            /* 拖拽大小时的视觉反馈 */
+            .inventory-container.resizing .inventory-resize-handle,
+            .inventory-resize-handle:active {
+                background-color: rgba(160, 160, 160, 1);
+                box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+            }
+            
+            /* 拖拽大小时的视觉反馈 */
+            .inventory-container.resizing .inventory-resize-handle {
+                background-color: rgba(255, 255, 255, 0.2);
             }
             
             /* 库存头部样式 */
@@ -1218,14 +1522,14 @@ class UIInventory {
                     opacity: 0;
                 }
                 to {
-                    opacity: 0.1;
+                    opacity: 1; /* 改为完全可见 */
                 }
             }
             
             /* 库存关闭动画 */
             @keyframes fadeOut {
                 from {
-                    opacity: 0.1;
+                    opacity: 1; /* 改为完全可见 */
                 }
                 to {
                     opacity: 0;
@@ -1307,6 +1611,7 @@ class UIInventory {
                 margin-right: -10px; /* 防止滚动条占用空间 */
                 scrollbar-width: thin; /* Firefox */
                 scrollbar-color: #444 #222; /* Firefox: thumb track */
+                width: 100%; /* 确保占满容器宽度 */
             }
             
             /* 自定义滚动条 - 更精致的黑灰风格 */
@@ -1337,9 +1642,9 @@ class UIInventory {
             /* 库存网格 */
             .inventory-grid {
                 display: grid;
-                gap: -10;
+                gap: 5px; /* 设置固定的格子间隔 */
                 width: 100%;
-                grid-auto-rows: 48px;
+                grid-auto-rows: auto;
             }
             
             /* 为主库存和其他库存设置不同的默认位置和视觉样式 */
@@ -2082,6 +2387,63 @@ class UIInventory {
             // 触发回调函数
             this.mainInventoryCallback(items);
         }
+    }
+
+    // 清理角标按钮
+    private cleanupResizeButtons(): void {
+        // 移除所有已存在的调整大小按钮，防止重复添加
+        const allButtons = document.querySelectorAll('.inventory-resize-button');
+        allButtons.forEach(button => {
+            if (button.parentNode) {
+                button.parentNode.removeChild(button);
+            }
+        });
+    }
+    
+    // 确保调整大小按钮存在并可见
+    private ensureResizeButtonExists(container: HTMLDivElement): void {
+        // 先移除容器中已存在的所有调整大小按钮
+        const existingButtons = container.querySelectorAll('.inventory-resize-button');
+        existingButtons.forEach(button => container.removeChild(button));
+        
+        // 创建一个新的调整大小按钮
+        console.log(`为容器 ${container.id} 创建调整大小按钮`);
+        
+        const resizeButton = document.createElement('button');
+        resizeButton.className = 'inventory-resize-button';
+        resizeButton.innerHTML = `<div class="resize-arrows">
+            <span class="resize-arrow-h">↔</span>
+            <span class="resize-arrow-v">↕</span>
+        </div>`;
+        resizeButton.title = '拖拽调整窗口大小';
+        
+        // 设置按钮样式确保可见
+        resizeButton.style.display = 'flex';
+        
+        // 添加鼠标按下事件以开始调整大小
+        resizeButton.addEventListener('mousedown', (e) => {
+            console.log('角标被点击');
+            
+            // 只响应左键点击
+            if (e.button === 0) {
+                this.isResizingWindow = true;
+                this.resizedWindow = container;
+                
+                // 获取容器当前大小
+                const rect = container.getBoundingClientRect();
+                this.windowResizeStartPos = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    windowWidth: rect.width,
+                    windowHeight: rect.height
+                };
+                
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+        
+        container.appendChild(resizeButton);
     }
 }
 
