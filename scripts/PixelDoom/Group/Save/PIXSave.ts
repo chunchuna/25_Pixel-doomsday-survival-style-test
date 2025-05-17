@@ -70,11 +70,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     IsCreatDebugPanel = true
 
     var DebugTest = UIDebug.InitDebugPanel("m")
+
     DebugTest.DebuPanelAddButton("存档-标识符和json同时存档", () => {
         UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
         MixC3Save.SaveGame('cundang-001')
     })
-
     DebugTest.DebuPanelAddButton("读取测试-通过标识符读取", () => {
         UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
         MixC3Save.LoadGame("cundang-001")

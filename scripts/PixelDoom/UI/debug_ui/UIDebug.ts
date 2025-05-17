@@ -127,6 +127,7 @@ export class UIDebug {
         this.panel.style.top = this.posY + 'px';
         this.panel.style.right = this.posX + 'px';
         this.panel.style.width = this.width + 'px';
+        this.panel.style.height = this.height + 'px';
         
         // 创建面板头部
         const panelHeader = document.createElement('div');
@@ -146,6 +147,8 @@ export class UIDebug {
         // 创建按钮容器
         this.buttonsContainer = document.createElement('div');
         this.buttonsContainer.className = 'debug-panel-buttons';
+        // 设置按钮容器高度，使其适应面板高度
+        this.buttonsContainer.style.height = (this.height - 30) + 'px'; // 减去头部高度
         
         // 创建大小调整器
         this.resizer = document.createElement('div');
@@ -238,17 +241,20 @@ export class UIDebug {
         });
         
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isResizing || !this.panel) return;
+            if (!isResizing || !this.panel || !this.buttonsContainer) return;
             
             const newWidth = startW + (e.clientX - startX);
             const newHeight = startH + (e.clientY - startY);
             
             // 设置最小尺寸
             this.width = Math.max(100, newWidth);
-            this.height = Math.max(100, newHeight);
+            this.height = Math.max(120, newHeight);
             
             this.panel.style.width = this.width + 'px';
-            // 高度通过内容自适应，不直接设置
+            this.panel.style.height = this.height + 'px';
+            
+            // 更新按钮容器高度
+            this.buttonsContainer.style.height = (this.height - 30) + 'px'; // 减去头部高度
             
             e.preventDefault();
         };
@@ -314,7 +320,6 @@ export class UIDebug {
                 top: 50px;
                 right: 20px;
                 width: 150px;
-                max-height: 80vh;
                 background-color: rgba(40, 40, 40, 0.9);
                 border-radius: 8px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -324,6 +329,8 @@ export class UIDebug {
                 transition: transform 0.3s, opacity 0.3s;
                 overflow: hidden;
                 scale:1;
+                display: flex;
+                flex-direction: column;
             }
             
             .debug-panel.hidden {
@@ -347,6 +354,8 @@ export class UIDebug {
                 align-items: center;
                 font-size: 10px;
                 user-select: none;
+                flex-shrink: 0;
+                height: 20px;
             }
             
             .debug-panel-close {
@@ -364,13 +373,13 @@ export class UIDebug {
             }
             
             .debug-panel-buttons {
-                max-height: calc(80vh - 40px);
                 overflow-y: auto;
                 padding: 5px;
                 display: flex;
                 flex-direction: column;
                 gap: 4px;
                 font-size:5px;
+                flex-grow: 1;
             }
             
             .debug-panel-buttons::-webkit-scrollbar {
@@ -401,6 +410,8 @@ export class UIDebug {
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+                min-height: 20px;
+                flex-shrink: 0;
             }
             
             .debug-panel-button:hover {
@@ -417,6 +428,7 @@ export class UIDebug {
                 cursor: nwse-resize;
                 background: linear-gradient(135deg, transparent 50%, #888 50%, #aaa 75%, #ccc 100%);
                 border-radius: 0 0 4px 0;
+                z-index: 10001;
             }
         `;
         
