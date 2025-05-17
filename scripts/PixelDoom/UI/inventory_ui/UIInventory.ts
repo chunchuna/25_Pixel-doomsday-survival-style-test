@@ -1465,6 +1465,7 @@ class UIInventory {
                 background-color: rgba(40, 40, 40, 0.3);
                 padding: 10px;
                 border-radius: 3px;
+                height:15px;
             }
             
             /* 为库存类型添加不同的颜色 */
@@ -1477,7 +1478,7 @@ class UIInventory {
             }
             
             .inventory-title {
-                font-size: 18px;
+                font-size: 75%;
                 font-weight: bold;
             }
             
@@ -1486,10 +1487,18 @@ class UIInventory {
                 color: #ccc;
                 border: 1px solid #555;
                 border-radius: 3px;
-                padding: 5px 10px;
+                padding: 5% 10%; 
                 cursor: pointer;
                 transition: all 0.2s ease;
                 z-index: 5001;
+                width: 20%; 
+                height: 15%; 
+                box-sizing: border-box; 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 50%; 
+                white-space: nowrap; 
             }
             
             .sort-button:hover, .close-button:hover {
