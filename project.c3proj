@@ -166,9 +166,7 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [
-			"C3Ctimer"
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -193,7 +191,8 @@
 					"ZhangPeng2",
 					"XueJiDimian",
 					"DaoDiNvHai",
-					"DaoDiNanRen"
+					"DaoDiNanRen",
+					"C3Ctimer"
 				],
 				"subfolders": [],
 				"name": "Sprite"

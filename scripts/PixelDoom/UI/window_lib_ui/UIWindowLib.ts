@@ -245,10 +245,12 @@ export class UIWindowLib {
                 // 展开窗口
                 windowElement.style.height = `${originalHeight}px`;
                 bodyElement.style.display = 'block';
+                resizerElement.style.display = 'block'; // 恢复调整大小角标
             } else {
                 // 收起窗口
                 windowElement.style.height = `${headerElement.offsetHeight}px`;
                 bodyElement.style.display = 'none';
+                resizerElement.style.display = 'none'; // 隐藏调整大小角标
             }
             isMinimized = !isMinimized;
         }, true); // 使用捕获阶段
