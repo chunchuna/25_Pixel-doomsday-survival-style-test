@@ -727,5 +727,5 @@ export class UIWindowLib {
 // 引擎初始化时调用
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     // 启动主窗口
-    UIWindowLib.showExampleWindow();
+    //UIWindowLib.showExampleWindow();
 })

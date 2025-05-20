@@ -4,6 +4,8 @@
 
 import "./engine.js"
 
+import "./PixelDoom/Global/PIXGlobal.js"
+
 import "./PixelDoom/Module/PIXCommandAddon.js"
 import "./PixelDoom/Group/Save/PIXSave.js"
 
