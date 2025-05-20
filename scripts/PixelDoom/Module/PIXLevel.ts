@@ -83,7 +83,7 @@ export class GAMEPLAY_LEVEL {
 
         // 关闭 库存面板相关元素
         inventoryManager.HideAllInventories();
-        PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind();
+        PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); //解绑主库存 
 
         await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
 

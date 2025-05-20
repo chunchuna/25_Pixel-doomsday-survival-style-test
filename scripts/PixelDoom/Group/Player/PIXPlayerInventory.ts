@@ -41,8 +41,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     const updatePlayerInventory = (items: Item[]) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
-    // 绑定主库存，并监听物品变化
-    PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I")
+    
+    // 绑定主库存，获取返回的控制对象
+    const inventoryControl = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
+    
+    // 保存引用，确保解绑功能可用
+    PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryControl;
+    
+    // 切换到单列模式
+    inventoryControl.oneline();
+    
     // 为主库存添加自定义更新回调
     inventoryManager.SetMainInventoryUpdateCallback({
         updateMethod: updatePlayerInventory
@@ -62,8 +70,18 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             setTimeout(() => {
                 // 重置并重新绑定库存
                 //@ts-ignore
-
-                inventoryManager.BindPlayerMainInventory(DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory), 30, 6, "I");
+                const control = inventoryManager.BindPlayerMainInventory(
+                    DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory), 
+                    30, 
+                    6, 
+                    "I"
+                );
+                
+                // 保存引用，确保解绑功能可用
+                PLAYER_MAIN_INVENTORY_LEVEL.MAIN = control;
+                
+                // 应用单列模式
+                control.oneline();
             }, 100);
         }
 

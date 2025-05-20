@@ -64,9 +64,16 @@ export function DIA_temp_InventoryFindFunction() {
         instance: InventoryInstance,
         varName: "InventoryData"
     };
-    // 传入更新回调参数
-    inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName);
 
+    // 传入更新回调参数
+    // 直接设置为单列模式 - 使用链式调用确保oneline被调用
+    inventoryManager.ShowOtherInventory(
+        InventoryData, 
+        10, 
+        6, 
+        updateInfo, 
+        InventoryInstance.instVars.InventoryName
+    ).oneline();
 }
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
