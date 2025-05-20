@@ -45,6 +45,8 @@ async function initGameMainScene(): Promise<void> {
         UIMainMenu.getInstance().HideALLMainMenuUI(callback);
     };
 
+    // 删除这行代码，避免访问私有方法
+    // gameMainScene.simpleUpdateSaveUI();
 }
 
 
@@ -58,6 +60,7 @@ class UIMainMenu {
     private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
     private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
     private titleElement: HTMLElement | null = null; // 存储游戏标题元素
+    private currentDataCheckInterval: number | null = null; // 存储当前的数据检查定时器ID
 
     // 标题效果预设
     private readonly TITLE_EFFECTS = {
@@ -149,7 +152,7 @@ class UIMainMenu {
                 loadGameModal.classList.add('active');
 
                 // 检查是否有存档数据并显示相应按钮
-                this.checkDataAndUpdateUI();
+                this.updateSaveUI();
             });
         }
 
@@ -189,7 +192,40 @@ class UIMainMenu {
         const loadLocalBtn = document.getElementById('load-local-btn');
         if (loadLocalBtn) {
             loadLocalBtn.addEventListener('click', () => {
-                LocalSave.DataRead()
+                // 首先显示加载中文本
+                const noSaveText = document.getElementById('no-save-text');
+                if (noSaveText) {
+                    noSaveText.textContent = "请选择存档文件...";
+                }
+                
+                // 执行读取 - LocalSave.DataRead() 是异步的，会打开文件选择器
+                // 不应该在这里立即更新UI，而是监听数据变化
+                LocalSave.DataRead();
+                
+                // 设置数据检查定时器 - 每秒检查一次是否有数据加载完成
+                const maxWaitTime = 60000; // 最长等待1分钟
+                const startTime = Date.now();
+                let dataCheckInterval = setInterval(() => {
+                    // 检查是否加载了数据
+                    if (data && data.LevelGameData && data.LevelGameData.length > 0) {
+                        // 有数据，清除定时器并更新UI
+                        clearInterval(dataCheckInterval);
+                        this.updateSaveUI();
+                        console.log("数据加载完成，更新UI");
+                    } else {
+                        // 检查是否超时
+                        if (Date.now() - startTime > maxWaitTime) {
+                            clearInterval(dataCheckInterval);
+                            if (noSaveText) {
+                                noSaveText.textContent = "未加载存档或加载超时";
+                            }
+                            console.log("数据加载超时");
+                        }
+                    }
+                }, 1000);
+                
+                // 保存定时器ID，以便在关闭窗口时清除
+                this.currentDataCheckInterval = dataCheckInterval;
             });
         }
 
@@ -207,6 +243,12 @@ class UIMainMenu {
             // 点击背景关闭
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
+                    // 清除可能存在的数据检查定时器
+                    if (this.currentDataCheckInterval) {
+                        clearInterval(this.currentDataCheckInterval);
+                        this.currentDataCheckInterval = null;
+                    }
+                    
                     modal.classList.add('closing');
                     setTimeout(() => {
                         modal.classList.remove('active', 'closing');
@@ -278,7 +320,7 @@ class UIMainMenu {
               <button id="load-local-btn" class="action-btn">从本地读取</button>
               <button id="save-local-btn" class="action-btn">下载存档到本地</button>
               <div class="save-slots">
-                <p>暂无存档</p>
+                <p id="no-save-text">暂无存档</p>
               </div>
               <div id="data-load-section" style="display: none;">
                 <button id="use-data-btn" class="action-btn special-btn">使用已有存档数据游戏</button>
@@ -2035,34 +2077,59 @@ class UIMainMenu {
     }
 
     /**
-     * 检查存档数据并更新UI显示
+     * 更新存档界面UI
      */
-    private checkDataAndUpdateUI(): void {
+    private updateSaveUI(): void {
+        console.log("更新存档UI，检查数据:", data);
+        
+        const noSaveText = document.getElementById('no-save-text');
         const dataLoadSection = document.getElementById('data-load-section');
         const useDataBtn = document.getElementById('use-data-btn');
-
-        if (dataLoadSection && useDataBtn) {
-            if (data && data.LevelGameData && data.LevelGameData.length > 0) {
-                // 有存档数据，显示使用按钮
-                dataLoadSection.style.display = 'block';
-
-                // 设置按钮点击事件
+        
+        if (!noSaveText || !dataLoadSection) {
+            console.error("未找到存档UI元素");
+            return;
+        }
+        
+        // 判断是否有存档数据
+        if (data && data.LevelGameData && data.LevelGameData.length > 0) {
+            console.log("找到存档数据，显示使用按钮");
+            
+            // 隐藏无存档提示
+            noSaveText.style.display = 'none';
+            
+            // 显示存档按钮区域
+            dataLoadSection.style.display = 'block';
+            
+            // 设置按钮点击事件
+            if (useDataBtn) {
                 useDataBtn.onclick = () => {
-                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏", 5)
+                    UISubtitleMain.ShowSubtitles("使用关卡存档进行游戏", 5);
                     this.HideALLMainMenuUI(() => {
                         UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
                             SaveSetting.isUseDataEnterNewGame = true;
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
-                        })
-
-                    })
-
+                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level");
+                        });
+                    });
                 };
-            } else {
-                // 无存档数据，隐藏按钮
-                dataLoadSection.style.display = 'none';
             }
+        } else {
+            console.log("未找到存档数据，显示暂无存档文本");
+            
+            // 显示无存档提示
+            noSaveText.style.display = 'block';
+            noSaveText.textContent = "暂无存档";
+            
+            // 隐藏存档按钮区域
+            dataLoadSection.style.display = 'none';
         }
+    }
+
+    /**
+     * 检查存档数据并更新UI显示
+     */
+    private checkDataAndUpdateUI(): void {
+        this.updateSaveUI();
     }
 
 }
