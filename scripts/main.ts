@@ -27,9 +27,11 @@ import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_ZhangPeng.js"
 
 //UI
+import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"
 import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
+
 
 import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"
 import "./PixelDoom/UI/MainMenu_ui/UIMainMenu.js"

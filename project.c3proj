@@ -166,7 +166,9 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [],
+		"items": [
+			"C3Ctimer"
+		],
 		"subfolders": [
 			{
 				"items": [
@@ -585,6 +587,20 @@
 									],
 									"subfolders": [],
 									"name": "debug_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIWindowLib.ts",
+											"type": "application/typescript",
+											"sid": 609359433462504,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "window_lib_ui"
 								}
 							],
 							"name": "UI"
