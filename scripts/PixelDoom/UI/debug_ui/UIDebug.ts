@@ -340,8 +340,17 @@ export class UIDebug {
         // 创建主面板
         this.panel = document.createElement('div');
         this.panel.className = 'debug-panel hidden';
+        
+        // 默认居中显示窗口
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        
+        // 计算居中位置
+        this.posX = Math.max(0, (viewportWidth - this.width) / 2);
+        this.posY = Math.max(0, (viewportHeight - this.height) / 2);
+        
+        this.panel.style.left = this.posX + 'px';
         this.panel.style.top = this.posY + 'px';
-        this.panel.style.right = this.posX + 'px';
         this.panel.style.width = this.width + 'px';
         this.panel.style.height = this.height + 'px';
 
@@ -404,19 +413,22 @@ export class UIDebug {
 
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDragging || !this.panel) return;
-
-            const newLeft = e.clientX - offsetX;
-            const newTop = e.clientY - offsetY;
-
-            this.panel.style.left = newLeft + 'px';
-            this.panel.style.top = newTop + 'px';
-            // 拖动时使用left而非right属性定位
-            this.panel.style.right = 'auto';
-
-            // 更新位置变量
-            this.posX = window.innerWidth - newLeft - this.width;
-            this.posY = newTop;
-
+            
+            // 计算新位置
+            const newLeft = Math.max(0, e.clientX - offsetX);
+            const newTop = Math.max(0, e.clientY - offsetY);
+            
+            // 限制不超出屏幕边界
+            const maxLeft = window.innerWidth - this.width;
+            const maxTop = window.innerHeight - this.height;
+            
+            // 保存位置并应用
+            this.posX = Math.min(maxLeft, newLeft);
+            this.posY = Math.min(maxTop, newTop);
+            
+            this.panel.style.left = this.posX + 'px';
+            this.panel.style.top = this.posY + 'px';
+            
             e.preventDefault();
         };
 
@@ -533,31 +545,24 @@ export class UIDebug {
         styleElement.textContent = `
             .debug-panel {
                 position: fixed;
-                top: 50px;
-                right: 20px;
-                width: 150px;
                 background-color: rgba(40, 40, 40, 0.9);
                 border-radius: 8px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
                 color: #ffffff;
                 font-family: monospace;
                 z-index: 10000;
-                transition: transform 0.3s, opacity 0.3s;
+                transition: opacity 0.3s;
                 overflow: hidden;
-                scale:1;
                 display: flex;
                 flex-direction: column;
-                scale:1.32;
             }
             
             .debug-panel.hidden {
-                transform: translateX(350px);
                 opacity: 0;
                 pointer-events: none;
             }
             
             .debug-panel.visible {
-                transform: translateX(0);
                 opacity: 1;
             }
             

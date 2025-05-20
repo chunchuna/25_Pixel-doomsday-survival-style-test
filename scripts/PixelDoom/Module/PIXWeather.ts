@@ -14,9 +14,13 @@ export const WeatherState = {
 
 // 声明全局变量
 let visibilityChangeHandler: EventListener;
+// 使用C3内部的计时器
+var WeatherC3Timer: InstanceType.C3Ctimer
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+
+    WeatherC3Timer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Rain", -100, -100)
     handleWeather();
 })
 
@@ -29,11 +33,12 @@ async function handleWeather() {
 }
 
 async function Rain() {
+
+    if (WeatherC3Timer == null) return
     WeatherState.CurrentWeather = WEATHER_TYPE.RAIN;
 
-    if (WeatherState.CurrentInterval != null) {
-        clearInterval(WeatherState.CurrentInterval);
-        WeatherState.CurrentInterval = null;
+    if (WeatherC3Timer.behaviors.Timer.isTimerRunning("rain")) {
+        WeatherC3Timer.behaviors.Timer.stopTimer("rain")
     }
 
     _Audio.AudioPlayCycle("Rain", -10, 1, "Rain");
@@ -42,53 +47,9 @@ async function Rain() {
     var GameLayoutdth = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
     var GameLayoutHeight = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.height;
 
-    // 定义可见性变化事件处理函数
-    visibilityChangeHandler = function (event) {
-        if (document.hidden) {
-            // 页面不可见，清除定时器
-            if (WeatherState.CurrentInterval != null) {
-                clearInterval(WeatherState.CurrentInterval);
-                WeatherState.CurrentInterval = null;
-            }
-        } else {
-            // 页面重新可见，重新启动雨滴生成但避免集中生成
-            if (WeatherState.CurrentInterval == null && WeatherState.CurrentWeather === WEATHER_TYPE.RAIN) {
-                // 重新启动前先随机分散一些雨滴在屏幕上
-                for (let i = 0; i < 20; i++) {
-                    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
-                    RainDropSpriteClass.createInstance(
-                        "Rain",
-                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-5000, GameLayoutdth),
-                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-500, GameLayoutHeight / 2),
-                        false
-                    );
-                }
 
-                // 重新启动定时器
-                WeatherState.CurrentInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
-                    // 一次性创建多个雨滴，但数量减少，增加生成频率
-                    for (let i = 0; i < 15; i++) {
-                        if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
-                        RainDropSpriteClass.createInstance(
-                            "Rain",
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-5000, GameLayoutdth),
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(-500, 20),
-                            false
-                        );
-                    }
-                }, 0.1);
-            }
-        }
-    } as EventListener;
-
-    // 先移除任何已存在的监听器，避免重复
-    document.removeEventListener("visibilitychange", visibilityChangeHandler);
-    // 注册新的监听器
-    document.addEventListener("visibilitychange", visibilityChangeHandler);
-
-    // 初始启动雨滴生成
-    WeatherState.CurrentInterval = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FROM_PROMIS_ERVYSECOND(() => {
-        // 一次性创建多个雨滴，但减少数量并增加频率
+    WeatherC3Timer.behaviors.Timer.startTimer(0.1, "rain", "regular")
+    WeatherC3Timer.behaviors.Timer.addEventListener("timer", () => {
         for (let i = 0; i < 15; i++) {
             if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
             RainDropSpriteClass.createInstance(
@@ -98,22 +59,14 @@ async function Rain() {
                 false
             );
         }
-    }, 0.1);
+    })
 }
 
 async function Normal() {
     WeatherState.CurrentWeather = WEATHER_TYPE.NORMAL;
-
-    // 移除visibilitychange事件监听器
-    if (visibilityChangeHandler) {
-        document.removeEventListener("visibilitychange", visibilityChangeHandler);
+    if (WeatherC3Timer.behaviors.Timer.isTimerRunning("rain")) {
+        WeatherC3Timer.behaviors.Timer.stopTimer("rain")
     }
-
-    if (WeatherState.CurrentInterval != null) {
-        clearInterval(WeatherState.CurrentInterval);
-        WeatherState.CurrentInterval = null;
-    }
-
     _Audio.AudioStop("Rain");
 }
 

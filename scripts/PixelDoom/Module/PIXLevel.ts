@@ -64,25 +64,18 @@ export class GAMEPLAY_LEVEL {
         if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
             _Audio.AudioStopAll()
         }
-        if (WeatherState.CurrentInterval !== null) {
-            clearInterval(WeatherState.CurrentInterval);
-            WeatherState.CurrentInterval = null;
-        }
-
+       
         // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
         //@ts-ignore
-
         var DialogueWhole: DialogueSystem = DialogueMainController;
         DialogueWhole.DestroyDialogue();
-
 
         // 关闭 库存面板相关元素
         inventoryManager.HideAllInventories();
         
-        await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1.5)
+        await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
         
         UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
-
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
 
         })
