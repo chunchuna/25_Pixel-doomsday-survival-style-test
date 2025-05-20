@@ -103,6 +103,10 @@ class UIInventory {
 
     // 首先添加一个新的状态变量，用于标记是否正在处理物品拖拽
     private isHandlingItemDrag: boolean = false;
+    
+    // 添加单列模式标志
+    private isMainInventoryOnelineMode: boolean = false;
+    private isOtherInventoryOnelineMode: boolean = false;
 
     private constructor() {
         this.initStyles();
@@ -133,7 +137,7 @@ class UIInventory {
     }
 
     // 绑定主库存
-    public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void } {
+    public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void } {
         // 重置主库存数据，避免叠加
         this.mainInventoryData = [];
         this.slotPositions = [];
@@ -146,9 +150,10 @@ class UIInventory {
 
         this.renderMainInventory();
 
-        // 返回一个对象，其中包含解绑方法
+        // 返回一个对象，其中包含解绑方法和单列模式切换方法
         return {
-            unbind: () => this.unbindMainInventory()
+            unbind: () => this.unbindMainInventory(),
+            oneline: () => this.toggleMainInventoryOnelineMode()
         };
     }
 
@@ -176,7 +181,7 @@ class UIInventory {
     }
 
     // 显示其他库存（如NPC或箱子库存）
-    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void } {
+    public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void, oneline: () => void } {
         // 如果已有打开的其他库存，先关闭它
         if (this.closeOtherInventoryFunc) {
             this.closeOtherInventoryFunc();
@@ -320,9 +325,10 @@ class UIInventory {
         // 保存关闭函数的引用
         this.closeOtherInventoryFunc = closeOtherInventory;
 
-        // 返回关闭方法和获取当前库存数据的方法
+        // 返回关闭方法、获取当前库存数据的方法和单列模式切换方法
         return {
-            close: closeOtherInventory
+            close: closeOtherInventory,
+            oneline: () => this.toggleOtherInventoryOnelineMode()
         };
     }
 
@@ -476,12 +482,16 @@ class UIInventory {
             return;
         }
 
+        // 判断是否是单列模式
+        const isOnelineMode = (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+                             (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
+        
         // 获取当前的列数
         let columns: number;
         if (container.id === 'main-inventory') {
-            columns = this.mainInventoryColumns;
+            columns = isOnelineMode ? 1 : this.mainInventoryColumns;
         } else {
-            columns = this.otherInventoryColumns;
+            columns = isOnelineMode ? 1 : this.otherInventoryColumns;
         }
 
         // 获取窗口的宽度
@@ -491,22 +501,34 @@ class UIInventory {
         // 减去左右内边距和格子间隔
         const availableWidth = containerWidth - 40; // 内边距
         const gapWidth = 5 * (columns - 1); // 所有格子间隔的总宽度
-        const slotSize = Math.floor((availableWidth - gapWidth) / columns); // 计算每个格子的大小
+        const slotSize = isOnelineMode ? availableWidth : Math.floor((availableWidth - gapWidth) / columns); // 计算每个格子的大小
 
-        console.log(`调整格子大小: ${slotSize}px, 容器宽度: ${containerWidth}px, 列数: ${columns}`);
+        console.log(`调整格子大小: ${slotSize}px, 容器宽度: ${containerWidth}px, 列数: ${columns}, 单列模式: ${isOnelineMode}`);
 
         // 首先更新网格容器的列宽定义，确保固定列数
-        gridContainer.style.gridTemplateColumns = `repeat(${columns}, ${slotSize}px)`;
+        if (isOnelineMode) {
+            gridContainer.style.gridTemplateColumns = `1fr`; // 单列模式下使用1fr
+        } else {
+            gridContainer.style.gridTemplateColumns = `repeat(${columns}, ${slotSize}px)`;
+        }
         gridContainer.style.gap = '5px'; // 确保间隔一致
 
         // 更新每个格子的样式
         const slots = container.querySelectorAll('.inventory-slot');
         slots.forEach(slot => {
-            (slot as HTMLElement).style.width = `${slotSize}px`;
-            (slot as HTMLElement).style.height = `${slotSize}px`;
-            // 不设置格子之间的间距，由网格容器统一控制
+            const slotElement = slot as HTMLElement;
+            if (isOnelineMode) {
+                // 单列模式下，格子是长条形的
+                slotElement.style.width = `${slotSize}px`;
+                slotElement.style.height = `30px`; // 降低高度为固定值
+                slotElement.classList.add('oneline-slot');
+            } else {
+                // 正常模式下，格子是正方形的
+                slotElement.style.width = `${slotSize}px`;
+                slotElement.style.height = `${slotSize}px`;
+                slotElement.classList.remove('oneline-slot');
+            }
         });
-
     }
 
     // 处理鼠标抬起事件（放置拖拽物品）
@@ -1024,6 +1046,9 @@ class UIInventory {
 
     // 渲染主库存
     private renderMainInventory(): void {
+        // 保存是否处于拖拽状态的标志
+        const wasHandlingDrag = this.isHandlingItemDrag;
+        
         this.renderInventory(
             this.mainInventoryContainer,
             this.mainInventoryData,
@@ -1032,10 +1057,16 @@ class UIInventory {
             // 传递一个标识，表示这是主库存
             false
         );
+        
+        // 恢复拖拽状态标志
+        this.isHandlingItemDrag = wasHandlingDrag;
     }
 
     // 渲染其他库存
     private renderOtherInventory(rows: number, columns: number, InventoryName?: string): void {
+        // 保存是否处于拖拽状态的标志
+        const wasHandlingDrag = this.isHandlingItemDrag;
+        
         if (this.otherInventoryInstance) {
             this.renderInventory(
                 this.otherInventoryInstance,
@@ -1047,6 +1078,9 @@ class UIInventory {
                 InventoryName,
             );
         }
+        
+        // 恢复拖拽状态标志
+        this.isHandlingItemDrag = wasHandlingDrag;
     }
 
     // 通用渲染库存方法
@@ -1123,8 +1157,16 @@ class UIInventory {
         const gridContainer = document.createElement('div');
         gridContainer.className = 'inventory-grid';
 
+        // 判断是否是单列模式
+        const isOnelineMode = (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+                            (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
+                            
         // 明确设置固定的列数和间隔
-        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        if (isOnelineMode) {
+            gridContainer.style.gridTemplateColumns = `1fr`; // 单列模式
+        } else {
+            gridContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        }
         gridContainer.style.gap = '5px'; // 设置格子之间的固定间隔
 
         // 计算需要多少个格子
@@ -1242,7 +1284,49 @@ class UIInventory {
             setTimeout(() => {
                 this.adjustGridBasedOnWindowSize(container);
             }, 0);
+        } else {
+            // 即使在拖拽状态下，也要保持单列模式的样式
+            setTimeout(() => {
+                // 保持单列模式的布局
+                if (isOnelineMode) {
+                    this.applyOnelineModeStyles(container);
+                }
+            }, 0);
         }
+    }
+    
+    // 新增方法：为容器应用单列模式样式，即使在拖拽状态
+    private applyOnelineModeStyles(container: HTMLDivElement): void {
+        // 获取窗口的宽度
+        const containerWidth = container.clientWidth;
+        const availableWidth = containerWidth - 40; // 内边距
+        
+        // 获取网格容器并设置为1fr
+        const gridContainer = container.querySelector('.inventory-grid') as HTMLDivElement;
+        if (gridContainer) {
+            gridContainer.style.gridTemplateColumns = `1fr`;
+        }
+        
+        // 应用单列样式到所有格子
+        const slots = container.querySelectorAll('.inventory-slot');
+        slots.forEach(slot => {
+            const slotElement = slot as HTMLElement;
+            slotElement.style.width = `${availableWidth}px`;
+            slotElement.style.height = `30px`;
+            slotElement.classList.add('oneline-slot');
+            
+            // 查找物品元素并添加单列样式
+            const itemElement = slotElement.querySelector('.inventory-item');
+            if (itemElement) {
+                itemElement.classList.add('oneline-item');
+                
+                // 查找数量标签并添加单列样式
+                const countLabel = itemElement.querySelector('.item-count');
+                if (countLabel) {
+                    countLabel.classList.add('oneline-count');
+                }
+            }
+        });
     }
 
     // 物品分组
@@ -1280,12 +1364,23 @@ class UIInventory {
 
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
+        
+        // 检查是否为单列模式，添加相应的类
+        const isOnelineMode = (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
+                             (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
+        if (isOnelineMode) {
+            slot.classList.add('oneline-slot');
+        }
+        
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
 
         // 创建物品元素
         const itemElement = document.createElement('div');
         itemElement.className = 'inventory-item';
+        if (isOnelineMode) {
+            itemElement.classList.add('oneline-item');
+        }
         itemElement.setAttribute('data-item-name', item.itemName);
         itemElement.setAttribute('data-item-level', item.itemLevel);
         itemElement.textContent = item.itemName;
@@ -1294,6 +1389,9 @@ class UIInventory {
         if (count > 1) {
             const countLabel = document.createElement('div');
             countLabel.className = 'item-count';
+            if (isOnelineMode) {
+                countLabel.classList.add('oneline-count');
+            }
             countLabel.textContent = count.toString();
             itemElement.appendChild(countLabel);
         }
@@ -1335,6 +1433,14 @@ class UIInventory {
     private createEmptySlot(slotIndex: number, inventoryType: 'main' | 'other'): HTMLDivElement {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot empty';
+        
+        // 检查是否为单列模式，添加相应的类
+        const isOnelineMode = (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
+                             (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
+        if (isOnelineMode) {
+            slot.classList.add('oneline-slot');
+        }
+        
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
 
@@ -1911,6 +2017,62 @@ class UIInventory {
             
             .level-break, .item-name[data-level="BREAK"] {
                 color: #666666; /* 暗灰色 */
+            }
+            
+            /* 单列模式下的格子样式 */
+            .inventory-slot.oneline-slot {
+                border-radius: 3px;
+                height: 30px !important;
+                width: 100% !important;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 0 10px;
+                box-sizing: border-box;
+                margin-bottom: 2px;
+            }
+            
+            /* 单列模式下的物品样式 */
+            .inventory-item.oneline-item {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                font-size: 12px;
+                text-align: left;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            /* 单列模式下的数量标签样式 */
+            .item-count.oneline-count {
+                position: static;
+                margin-left: auto;
+                margin-right: 5px;
+                padding: 1px 5px;
+                font-size: 10px;
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+            }
+            
+            /* 单列模式下的高亮效果 */
+            .oneline-slot.slot-highlight {
+                background-color: rgba(60, 60, 60, 0.7);
+                border-color: #aaa;
+            }
+            
+            /* 单列模式下的源格子样式 */
+            .oneline-slot.source-slot {
+                background-color: rgba(70, 70, 90, 0.7);
+                border: 1px dashed #999;
+            }
+            
+            /* 单列模式下的目标格子样式 */
+            .oneline-slot.target-slot {
+                background-color: rgba(70, 90, 70, 0.7);
+                border: 1px solid #9c9;
             }
         `;
 
@@ -2536,10 +2698,76 @@ class UIInventory {
       this.clickStartPos = null;
       this.isDragging = false;
     }
+
+    // 添加主库存单列模式切换方法
+    private toggleMainInventoryOnelineMode(): void {
+        this.isMainInventoryOnelineMode = !this.isMainInventoryOnelineMode;
+        
+        if (this.isMainInventoryVisible) {
+            this.renderMainInventory();
+            
+            // 调整窗口大小以适应单列模式
+            if (this.isMainInventoryOnelineMode) {
+                // 在单列模式下调整窗口宽度
+                const newWidth = 300; // 更宽的窗口
+                const newHeight = Math.max(this.MainInventoryWindowSize[1], 500); // 保持高度或增加
+                
+                this.mainInventoryContainer.style.width = `${newWidth}px`;
+                this.mainInventoryContainer.style.height = `${newHeight}px`;
+                this.MainInventoryWindowSize = [newWidth, newHeight];
+            } else {
+                // 恢复原来的窗口尺寸比例
+                const newWidth = Math.max(225, this.MainInventoryWindowSize[0]);
+                const newHeight = Math.max(380, this.MainInventoryWindowSize[1]);
+                
+                this.mainInventoryContainer.style.width = `${newWidth}px`;
+                this.mainInventoryContainer.style.height = `${newHeight}px`;
+            }
+            
+            // 调整网格以适应窗口大小
+            setTimeout(() => {
+                this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
+            }, 50);
+        }
+    }
+    
+    // 添加其他库存单列模式切换方法
+    private toggleOtherInventoryOnelineMode(): void {
+        this.isOtherInventoryOnelineMode = !this.isOtherInventoryOnelineMode;
+        
+        if (this.otherInventoryInstance) {
+            this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+            
+            // 调整窗口大小以适应单列模式
+            if (this.isOtherInventoryOnelineMode) {
+                // 在单列模式下调整窗口宽度
+                const newWidth = 300; // 更宽的窗口
+                const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500); // 保持高度或增加
+                
+                this.otherInventoryInstance.style.width = `${newWidth}px`;
+                this.otherInventoryInstance.style.height = `${newHeight}px`;
+                this.OtherInventoryWindowSize = [newWidth, newHeight];
+            } else {
+                // 恢复原来的窗口尺寸比例
+                const newWidth = Math.max(225, this.OtherInventoryWindowSize[0]);
+                const newHeight = Math.max(380, this.OtherInventoryWindowSize[1]);
+                
+                this.otherInventoryInstance.style.width = `${newWidth}px`;
+                this.otherInventoryInstance.style.height = `${newHeight}px`;
+            }
+            
+            // 调整网格以适应窗口大小
+            setTimeout(() => {
+                if (this.otherInventoryInstance) { // 添加空值检查
+                    this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
+                }
+            }, 50);
+        }
+    }
 }
 
 // 导出公共接口
-export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void } {
+export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void } {
     return inventoryManager.BindPlayerMainInventory(inventoryArray, rows, columns, key);
 }
 
@@ -2547,9 +2775,10 @@ export function ShowOtherInventory(
     inventoryArray: Item[],
     rows: number,
     columns: number,
-    updateInfo?: InventoryUpdateCallback
-): { close: () => void } {
-    return inventoryManager.ShowOtherInventory(inventoryArray, rows, columns, updateInfo);
+    updateInfo?: InventoryUpdateCallback,
+    InventoryName?: string
+): { close: () => void, oneline: () => void } {
+    return inventoryManager.ShowOtherInventory(inventoryArray, rows, columns, updateInfo, InventoryName);
 }
 
 // 添加序列化和反序列化函数到导出接口

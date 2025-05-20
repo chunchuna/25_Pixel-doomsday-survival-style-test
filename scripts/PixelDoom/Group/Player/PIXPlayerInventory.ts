@@ -42,7 +42,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
     // 绑定主库存，并监听物品变化
-    PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
+    PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I")
     // 为主库存添加自定义更新回调
     inventoryManager.SetMainInventoryUpdateCallback({
         updateMethod: updatePlayerInventory

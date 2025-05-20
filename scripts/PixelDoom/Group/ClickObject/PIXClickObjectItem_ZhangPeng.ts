@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 varName: "InventoryData"
             };
             // 传入更新回调参数
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName);
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName).oneline();
         }
         if (ButtonConetent == "调查") {
             if (LastestChooseObject == null) return
