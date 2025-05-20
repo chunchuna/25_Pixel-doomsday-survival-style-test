@@ -130,7 +130,7 @@ class UIInventory {
     }
 
     // 绑定主库存
-    public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): void {
+    public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void } {
         // 重置主库存数据，避免叠加
         this.mainInventoryData = [];
         this.slotPositions = [];
@@ -142,6 +142,34 @@ class UIInventory {
         this.mainInventoryKey = key;
 
         this.renderMainInventory();
+
+        // 返回一个对象，其中包含解绑方法
+        return {
+            unbind: () => this.unbindMainInventory()
+        };
+    }
+
+    // 解绑主库存的方法
+    public unbindMainInventory(): void {
+        // 如果主库存当前显示，先隐藏它
+        if (this.isMainInventoryVisible) {
+            this.toggleMainInventory();
+        }
+
+        // 清空主库存数据
+        this.mainInventoryData = [];
+        this.slotPositions = [];
+        this.mainInventoryRows = 0;
+        this.mainInventoryColumns = 0;
+        this.mainInventoryKey = '';
+
+        // 移除键盘事件监听（如果有特定的处理器引用，可以更精确地移除）
+        // 这里我们保留全局键盘监听器，因为它处理的不仅仅是主库存
+
+        // 清除主库存回调
+        this.mainInventoryCallback = null;
+
+        console.log("主库存已解绑");
     }
 
     // 显示其他库存（如NPC或箱子库存）
@@ -2482,8 +2510,8 @@ class UIInventory {
 }
 
 // 导出公共接口
-export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): void {
-    inventoryManager.BindPlayerMainInventory(inventoryArray, rows, columns, key);
+export function BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void } {
+    return inventoryManager.BindPlayerMainInventory(inventoryArray, rows, columns, key);
 }
 
 export function ShowOtherInventory(

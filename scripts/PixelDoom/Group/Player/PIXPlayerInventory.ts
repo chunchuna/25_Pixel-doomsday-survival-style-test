@@ -3,6 +3,13 @@ import { DeserializeItemsOnly, inventoryManager, ItemLevel, SerializeItemsOnly, 
 
 export var PLAYER_INVENTORY_ITEMS: Item[];
 
+
+// 玩家在LEVEL里面的主库存
+export var PLAYER_MAIN_INVENTORY_LEVEL = {
+    MAIN: null as any,
+}
+
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 玩家的初始库存  写在这里
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly([
@@ -26,7 +33,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
     // 获取初始库存数据
     const initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
@@ -35,7 +42,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
     // 绑定主库存，并监听物品变化
-    inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
+    PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
     // 为主库存添加自定义更新回调
     inventoryManager.SetMainInventoryUpdateCallback({
         updateMethod: updatePlayerInventory
