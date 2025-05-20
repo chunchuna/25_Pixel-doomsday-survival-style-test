@@ -233,6 +233,7 @@ class UIMainMenu {
                     if (this.currentDataCheckInterval) {
                         clearInterval(this.currentDataCheckInterval);
                         this.currentDataCheckInterval = null;
+                        console.log("通过模态背景点击关闭窗口，清除存档计时器");
                     }
                     
                     modal.classList.add('closing');
@@ -2001,10 +2002,23 @@ class UIMainMenu {
         this.updateSaveUI();
         
         // 设置定时器定期检查数据变化
-        setInterval(() => {
-            if (this.loadGameWindow) {
-                this.updateSaveUI();
+        const dataUpdateInterval = setInterval(() => {
+            // 检查存档窗口是否还存在，如果不存在则清除定时器
+            if (!this.loadGameWindow) {
+                console.log("存档窗口已关闭，停止数据更新检查");
+                clearInterval(dataUpdateInterval);
+                
+                // 同时确保数据检查定时器也被清除
+                if (this.currentDataCheckInterval) {
+                    console.log("确保清除存档计时器");
+                    clearInterval(this.currentDataCheckInterval);
+                    this.currentDataCheckInterval = null;
+                }
+                return;
             }
+            
+            // 窗口存在，更新UI
+            this.updateSaveUI();
         }, 2000); // 每2秒检查一次
     }
 
@@ -2227,6 +2241,30 @@ class UIMainMenu {
             originalClose();
         };
         
+        // 监听窗口元素被移除事件，确保在任何移除情况下都能清理定时器
+        const observeWindowRemoval = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+                    for (let i = 0; i < mutation.removedNodes.length; i++) {
+                        if (mutation.removedNodes[i] === windowElement) {
+                            console.log("窗口被移除，确保清理定时器");
+                            if (this.currentDataCheckInterval) {
+                                clearInterval(this.currentDataCheckInterval);
+                                this.currentDataCheckInterval = null;
+                            }
+                            observeWindowRemoval.disconnect();
+                            break;
+                        }
+                    }
+                }
+            });
+        });
+        
+        // 开始观察窗口元素的父节点
+        if (windowElement.parentNode) {
+            observeWindowRemoval.observe(windowElement.parentNode, { childList: true });
+        }
+        
         // 添加唯一ID标识，避免ID冲突
         const uniqueId = Date.now().toString();
         const loadLocalBtnId = `load-local-btn-${uniqueId}`;
@@ -2337,7 +2375,7 @@ class UIMainMenu {
                 <p id="${noSaveTextId}">暂无存档</p>
             </div>
             <div id="${dataLoadSectionId}" style="display: none;">
-                <button id="${useDataBtnId}" class="action-btn special-btn">使用已有存档数据游戏</button>
+                <button id="${useDataBtnId}" class="action-btn special-btn">存档1</button>
             </div>
         `;
         
@@ -2411,6 +2449,15 @@ class UIMainMenu {
                                 
                                 if (noSaveText) {
                                     noSaveText.textContent = "未加载存档或加载超时";
+                                }
+                            }
+                            
+                            // 检查窗口是否仍然存在，如果窗口已关闭则清除定时器
+                            if (!this.loadGameWindow || !windowElement.isConnected) {
+                                console.log("窗口已关闭，清除存档计时器");
+                                if (this.currentDataCheckInterval) {
+                                    clearInterval(this.currentDataCheckInterval);
+                                    this.currentDataCheckInterval = null;
                                 }
                             }
                         }

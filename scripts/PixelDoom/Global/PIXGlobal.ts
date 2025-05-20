@@ -56,6 +56,6 @@ export function showImageWindow(
 }
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    showImageWindow("Resource/Tree.png")
+    //showImageWindow("Resource/Tree.png")
 
 })

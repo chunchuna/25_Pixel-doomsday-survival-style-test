@@ -14,6 +14,7 @@ var isCreatDebugPanel = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!isCreatDebugPanel) {
+        
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
@@ -33,8 +34,8 @@ export class UIDebug {
     private static toggleKey: string = "";
     private static posX: number = 20;
     private static posY: number = 50;
-    private static width: number = 200;
-    private static height: number = 600;
+    private static width: number = 500;
+    private static height: number = 300;
     private static resizer: HTMLDivElement | null = null;
     private static consoleContainer: HTMLDivElement | null = null;
     private static originalConsole: any = {};
@@ -61,7 +62,7 @@ export class UIDebug {
         this.toggleKey = toggleKey;
 
         // 从localStorage加载面板位置和大小
-        this.loadPanelSettings();
+        //this.loadPanelSettings();
 
         // 创建面板样式
         this.createStyles();

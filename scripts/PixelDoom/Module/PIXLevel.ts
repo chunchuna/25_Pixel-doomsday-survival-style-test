@@ -5,6 +5,10 @@ import { inventoryManager } from "../UI/inventory_ui/UIInventory.js";
 import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UIScreenEffect.js";
 import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
+
+
+
+
 var CameraZoomValue: number = 0.5;
 var CameraZoomTarget = 0.5;
 
@@ -60,6 +64,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 export class GAMEPLAY_LEVEL {
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
+       
+        //关闭环境音效
+        _Audio.AudioStop("NiaoJiao")
+       
         //下雨需要关闭雨粒子 关闭雨声音乐
         if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
             _Audio.AudioStopAll()
