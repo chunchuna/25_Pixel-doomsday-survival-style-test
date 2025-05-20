@@ -101,6 +101,9 @@ class UIInventory {
     private resizedWindow: HTMLDivElement | null = null
     private windowResizeStartPos: { x: number, y: number, windowWidth: number, windowHeight: number } | null = null
 
+    // 首先添加一个新的状态变量，用于标记是否正在处理物品拖拽
+    private isHandlingItemDrag: boolean = false;
+
     private constructor() {
         this.initStyles();
         this.mainInventoryContainer = this.createInventoryContainer('main-inventory');
@@ -600,11 +603,17 @@ class UIInventory {
             this.slotPositions[this.draggedItem.sourceSlot].count = 0;
         }
 
+        // 设置标记表示正在处理物品拖拽
+        this.isHandlingItemDrag = true;
+        
         // 重新渲染主库存
         this.renderMainInventory();
 
         // 触发主库存更新回调
         this.triggerMainInventoryCallback();
+        
+        // 处理完毕后清除标记
+        this.isHandlingItemDrag = false;
     }
 
     // 查找鼠标下方的格子
@@ -670,6 +679,8 @@ class UIInventory {
         this.clickStartPos = { x: event.clientX, y: event.clientY };
         this.clickStartTime = Date.now();
         this.isDragging = false;
+        // 设置正在处理物品拖拽的标记
+        this.isHandlingItemDrag = true;
 
         // 标记源格子的样式
         const sourceSlotElement = element.closest('.inventory-slot');
@@ -767,6 +778,8 @@ class UIInventory {
                 this.draggedItemGhost = null;
                 this.clickStartPos = null;
                 this.isDragging = false;
+                // 最后清理拖拽标记
+                this.isHandlingItemDrag = false;
                 return;
             }
 
@@ -847,6 +860,8 @@ class UIInventory {
                 this.draggedItemGhost = null;
                 this.clickStartPos = null;
                 this.isDragging = false;
+                // 最后清理拖拽标记
+                this.isHandlingItemDrag = false;
             }
         };
 
@@ -1222,10 +1237,12 @@ class UIInventory {
 
         container.appendChild(scrollContainer);
 
-        // 在渲染完成后调整格子大小
-        setTimeout(() => {
-            this.adjustGridBasedOnWindowSize(container);
-        }, 0);
+        // 只在非物品拖拽状态下调整格子大小
+        if (!this.isHandlingItemDrag) {
+            setTimeout(() => {
+                this.adjustGridBasedOnWindowSize(container);
+            }, 0);
+        }
     }
 
     // 物品分组
@@ -1913,6 +1930,9 @@ class UIInventory {
             return;
         }
 
+        // 在处理物品传输前设置标记
+        this.isHandlingItemDrag = true;
+
         // 从主库存转移到其他库存
         if (direction === 'main-to-other') {
             // 获取源物品信息
@@ -2114,6 +2134,9 @@ class UIInventory {
                 this.triggerMainInventoryCallback();
             }
         }
+        
+        // 处理完毕后清除标记
+        this.isHandlingItemDrag = false;
     }
 
     // 获取其他库存的格子数据
@@ -2221,8 +2244,14 @@ class UIInventory {
         // 同步更新原始库存数组
         this.syncOriginalInventoryArray();
 
+        // 设置标记表示正在处理物品拖拽
+        this.isHandlingItemDrag = true;
+
         // 重新渲染其他库存，保持行列不变
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+        
+        // 处理完毕后清除标记
+        this.isHandlingItemDrag = false;
     }
 
     // 更新其他库存的数据数组
