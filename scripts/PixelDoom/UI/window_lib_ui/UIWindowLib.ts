@@ -5,6 +5,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
  */
 export class UIWindowLib {
     private static idCounter: number = 0;
+    private static activeWindows: Set<string> = new Set();
     
     /**
      * 创建一个新窗口
@@ -30,18 +31,34 @@ export class UIWindowLib {
         contentElement: HTMLElement,
         close: () => void
     } {
+        // 生成唯一ID
         const windowId = `pd-window-${++this.idCounter}`;
+        this.activeWindows.add(windowId);
         
-        // 创建样式
-        this.createStyles(windowId);
+        // 确保全局样式只添加一次
+        this.ensureGlobalStyles();
         
-        // 创建窗口元素
+        // 创建窗口元素 - 使用完全分离的元素结构
         const windowElement = document.createElement('div');
         windowElement.id = windowId;
         windowElement.className = 'pd-window';
-        windowElement.style.width = `${width}px`;
-        windowElement.style.height = `${height}px`;
-        windowElement.style.opacity = opacity.toString();
+        windowElement.setAttribute('tabindex', '-1'); // 使窗口可聚焦
+        
+        // 设置窗口样式 - 使用fixed定位代替absolute
+        Object.assign(windowElement.style, {
+            width: `${width}px`,
+            height: `${height}px`,
+            opacity: opacity.toString(),
+            position: 'fixed', // 改为fixed定位，解决点击问题
+            backgroundColor: '#282828',
+            border: '1px solid #3c3c3c',
+            borderRadius: '4px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+            overflow: 'hidden',
+            fontFamily: 'Arial, sans-serif',
+            color: '#e0e0e0',
+            zIndex: '9999' // 提高z-index值
+        });
         
         // 设置窗口位置
         if (x !== undefined && y !== undefined) {
@@ -55,66 +72,220 @@ export class UIWindowLib {
             windowElement.style.top = `${(viewportHeight - height) / 2}px`;
         }
         
-        // 窗口内容
-        windowElement.innerHTML = `
-            <div class="pd-window-header">
-                <div class="pd-window-title">${title}</div>
-                <div class="pd-window-controls">
-                    <div class="pd-window-minimize"></div>
-                    <div class="pd-window-close"></div>
-                </div>
-            </div>
-            <div class="pd-window-body">
-                <div class="pd-window-content"></div>
-            </div>
-            <div class="pd-window-resizer"></div>
-        `;
+        // 创建窗口组件 - 每个部分都是独立的DOM元素
+        // 1. 创建窗口头部
+        const headerElement = document.createElement('div');
+        headerElement.className = 'pd-window-header';
+        Object.assign(headerElement.style, {
+            height: '28px',
+            backgroundColor: '#1c1c1c',
+            borderBottom: '1px solid #3c3c3c',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 10px',
+            cursor: 'move',
+            userSelect: 'none',
+            position: 'relative'
+        });
+        
+        // 2. 创建标题
+        const titleElement = document.createElement('div');
+        titleElement.className = 'pd-window-title';
+        titleElement.textContent = title;
+        Object.assign(titleElement.style, {
+            fontSize: '12px',
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+        });
+        
+        // 3. 创建控制按钮容器
+        const controlsElement = document.createElement('div');
+        controlsElement.className = 'pd-window-controls';
+        Object.assign(controlsElement.style, {
+            display: 'flex',
+            gap: '6px'
+        });
+        
+        // 4. 创建最小化按钮
+        const minimizeButton = document.createElement('div');
+        minimizeButton.className = 'pd-window-minimize';
+        Object.assign(minimizeButton.style, {
+            width: '14px',
+            height: '14px',
+            borderRadius: '2px',
+            backgroundColor: '#555',
+            cursor: 'pointer',
+            position: 'relative'
+        });
+        // 添加减号图标
+        const minIconElement = document.createElement('div');
+        Object.assign(minIconElement.style, {
+            width: '8px',
+            height: '2px',
+            backgroundColor: '#222',
+            position: 'absolute',
+            left: '3px',
+            top: '6px'
+        });
+        minimizeButton.appendChild(minIconElement);
+        
+        // 5. 创建关闭按钮
+        const closeButton = document.createElement('div');
+        closeButton.className = 'pd-window-close';
+        Object.assign(closeButton.style, {
+            width: '14px',
+            height: '14px',
+            borderRadius: '2px',
+            backgroundColor: '#913a3a',
+            cursor: 'pointer',
+            position: 'relative'
+        });
+        // 添加叉号图标
+        const closeIcon1 = document.createElement('div');
+        Object.assign(closeIcon1.style, {
+            width: '8px',
+            height: '2px',
+            backgroundColor: '#222',
+            position: 'absolute',
+            left: '3px',
+            top: '6px',
+            transform: 'rotate(45deg)'
+        });
+        const closeIcon2 = document.createElement('div');
+        Object.assign(closeIcon2.style, {
+            width: '8px',
+            height: '2px',
+            backgroundColor: '#222',
+            position: 'absolute',
+            left: '3px',
+            top: '6px',
+            transform: 'rotate(-45deg)'
+        });
+        closeButton.appendChild(closeIcon1);
+        closeButton.appendChild(closeIcon2);
+        
+        // 6. 创建窗口主体
+        const bodyElement = document.createElement('div');
+        bodyElement.className = 'pd-window-body';
+        Object.assign(bodyElement.style, {
+            height: 'calc(100% - 28px)',
+            overflow: 'hidden'
+        });
+        
+        // 7. 创建内容区域
+        const contentElement = document.createElement('div');
+        contentElement.className = 'pd-window-content';
+        Object.assign(contentElement.style, {
+            height: '100%',
+            width: '100%',
+            overflowY: 'auto',
+            padding: '10px',
+            boxSizing: 'border-box'
+        });
+        
+        // 8. 创建调整大小角标
+        const resizerElement = document.createElement('div');
+        resizerElement.className = 'pd-window-resizer';
+        Object.assign(resizerElement.style, {
+            position: 'absolute',
+            width: '24px', // 增大点击区域
+            height: '24px', // 增大点击区域
+            bottom: '0',
+            right: '0',
+            cursor: 'nwse-resize',
+            zIndex: '9999' // 确保总是在最上层
+        });
+        
+        // 调整大小角标图标
+        const resizerIcon = document.createElement('div');
+        Object.assign(resizerIcon.style, {
+            position: 'absolute',
+            bottom: '3px',
+            right: '3px',
+            width: '10px',
+            height: '10px',
+            borderRight: '2px solid #555',
+            borderBottom: '2px solid #555'
+        });
+        resizerElement.appendChild(resizerIcon);
+        
+        // 组装窗口
+        controlsElement.appendChild(minimizeButton);
+        controlsElement.appendChild(closeButton);
+        headerElement.appendChild(titleElement);
+        headerElement.appendChild(controlsElement);
+        bodyElement.appendChild(contentElement);
+        windowElement.appendChild(headerElement);
+        windowElement.appendChild(bodyElement);
+        windowElement.appendChild(resizerElement);
         
         // 添加到父元素
         parent.appendChild(windowElement);
         
-        // 获取元素引用
-        const headerElement = windowElement.querySelector('.pd-window-header') as HTMLElement;
-        const contentElement = windowElement.querySelector('.pd-window-content') as HTMLElement;
-        const minimizeButton = windowElement.querySelector('.pd-window-minimize') as HTMLElement;
-        const closeButton = windowElement.querySelector('.pd-window-close') as HTMLElement;
-        const resizerElement = windowElement.querySelector('.pd-window-resizer') as HTMLElement;
+        // 为内容区域添加额外的事件处理，确保可以点击
+        this.applyExtraClickHandling(contentElement);
         
-        // 添加拖拽功能
-        this.enableDrag(windowElement, headerElement);
+        // 绑定窗口事件 - 确保更可靠的拖拽
+        this.enableWindowDrag(windowElement, headerElement);
         
-        // 添加调整大小功能
-        this.enableResize(windowElement, resizerElement, contentElement);
+        // 绑定窗口大小调整 - 使用更可靠的实现
+        this.enableWindowResize(windowElement, resizerElement);
         
         // 绑定收起按钮点击事件
         let isMinimized = false;
         const originalHeight = height;
         
-        minimizeButton.addEventListener('click', () => {
+        minimizeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             if (isMinimized) {
                 // 展开窗口
                 windowElement.style.height = `${originalHeight}px`;
-                windowElement.classList.remove('pd-window-minimized');
+                bodyElement.style.display = 'block';
             } else {
                 // 收起窗口
-                const headerHeight = headerElement.offsetHeight;
-                windowElement.style.height = `${headerHeight}px`;
-                windowElement.classList.add('pd-window-minimized');
+                windowElement.style.height = `${headerElement.offsetHeight}px`;
+                bodyElement.style.display = 'none';
             }
             isMinimized = !isMinimized;
-        });
+        }, true); // 使用捕获阶段
+        
+        // 确保按钮悬停效果
+        minimizeButton.addEventListener('mouseover', () => {
+            minimizeButton.style.backgroundColor = '#666';
+        }, true);
+        minimizeButton.addEventListener('mouseout', () => {
+            minimizeButton.style.backgroundColor = '#555';
+        }, true);
+        
+        closeButton.addEventListener('mouseover', () => {
+            closeButton.style.backgroundColor = '#c14545';
+        }, true);
+        closeButton.addEventListener('mouseout', () => {
+            closeButton.style.backgroundColor = '#913a3a';
+        }, true);
         
         // 绑定关闭按钮点击事件
         const close = () => {
+            // 从活动窗口集合中移除
+            this.activeWindows.delete(windowId);
+            
+            // 移除元素
             windowElement.remove();
-            // 移除对应的样式
-            const styleElement = document.getElementById(`${windowId}-style`);
-            if (styleElement) {
-                styleElement.remove();
-            }
         };
         
-        closeButton.addEventListener('click', close);
+        closeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            close();
+        }, true); // 使用捕获阶段
+        
+        // 点击窗口时将其置于前台
+        windowElement.addEventListener('mousedown', () => {
+            this.bringToFront(windowElement);
+        }, true);
         
         return { 
             windowElement, 
@@ -124,258 +295,280 @@ export class UIWindowLib {
     }
     
     /**
-     * 创建窗口样式
-     * @param windowId 窗口ID
+     * 确保全局样式只被添加一次
      */
-    private static createStyles(windowId: string): void {
-        const styleElement = document.createElement('style');
-        styleElement.id = `${windowId}-style`;
-        
-        styleElement.textContent = `
-            #${windowId} {
-                position: absolute;
-                background-color: #282828;
-                border: 1px solid #3c3c3c;
-                border-radius: 4px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-                overflow: hidden;
-                transition: height 0.3s ease;
-                font-family: Arial, sans-serif;
-                z-index: 1000;
-                color: #e0e0e0;
-            }
+    private static ensureGlobalStyles() {
+        if (!document.getElementById('pd-window-global-styles')) {
+            const styleElement = document.createElement('style');
+            styleElement.id = 'pd-window-global-styles';
             
-            #${windowId} .pd-window-header {
-                height: 28px;
-                background-color: #1c1c1c;
-                border-bottom: 1px solid #3c3c3c;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0 10px;
-                cursor: move;
-                user-select: none;
-            }
+            styleElement.textContent = `
+                /* 窗口滚动条样式 */
+                .pd-window-content::-webkit-scrollbar {
+                    width: 8px;
+                }
+                
+                .pd-window-content::-webkit-scrollbar-track {
+                    background: #282828;
+                }
+                
+                .pd-window-content::-webkit-scrollbar-thumb {
+                    background-color: #444;
+                    border-radius: 4px;
+                }
+                
+                /* 确保输入元素在窗口内部正常工作 */
+                .pd-window-content input,
+                .pd-window-content textarea,
+                .pd-window-content select,
+                .pd-window-content button {
+                    background-color: #333;
+                    border: 1px solid #555;
+                    color: #e0e0e0;
+                    padding: 5px;
+                    z-index: 9999;
+                }
+                
+                /* 防止窗口被意外遮挡 */
+                .pd-window {
+                    pointer-events: auto !important;
+                }
+                
+                .pd-window * {
+                    pointer-events: auto !important;
+                }
+            `;
             
-            #${windowId} .pd-window-title {
-                font-size: 12px;
-                font-weight: bold;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            #${windowId} .pd-window-controls {
-                display: flex;
-                gap: 6px;
-            }
-            
-            #${windowId} .pd-window-minimize,
-            #${windowId} .pd-window-close {
-                width: 14px;
-                height: 14px;
-                border-radius: 2px;
-                cursor: pointer;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            
-            #${windowId} .pd-window-minimize {
-                background-color: #555;
-                position: relative;
-            }
-            
-            #${windowId} .pd-window-minimize:hover {
-                background-color: #666;
-            }
-            
-            #${windowId} .pd-window-minimize::after {
-                content: '';
-                width: 8px;
-                height: 2px;
-                background-color: #222;
-                position: absolute;
-            }
-            
-            #${windowId} .pd-window-close {
-                background-color: #913a3a;
-                position: relative;
-            }
-            
-            #${windowId} .pd-window-close:hover {
-                background-color: #c14545;
-            }
-            
-            #${windowId} .pd-window-close::before,
-            #${windowId} .pd-window-close::after {
-                content: '';
-                width: 8px;
-                height: 2px;
-                background-color: #222;
-                position: absolute;
-            }
-            
-            #${windowId} .pd-window-close::before {
-                transform: rotate(45deg);
-            }
-            
-            #${windowId} .pd-window-close::after {
-                transform: rotate(-45deg);
-            }
-            
-            #${windowId} .pd-window-body {
-                height: calc(100% - 28px);
-                overflow: hidden;
-            }
-            
-            #${windowId} .pd-window-content {
-                height: 100%;
-                overflow-y: auto;
-                padding: 10px;
-                box-sizing: border-box;
-                scrollbar-width: thin;
-                scrollbar-color: #444 #282828;
-            }
-            
-            #${windowId} .pd-window-content::-webkit-scrollbar {
-                width: 8px;
-            }
-            
-            #${windowId} .pd-window-content::-webkit-scrollbar-track {
-                background: #282828;
-            }
-            
-            #${windowId} .pd-window-content::-webkit-scrollbar-thumb {
-                background-color: #444;
-                border-radius: 4px;
-            }
-            
-            #${windowId}.pd-window-minimized .pd-window-body {
-                display: none;
-            }
-            
-            #${windowId} .pd-window-resizer {
-                position: absolute;
-                width: 14px;
-                height: 14px;
-                bottom: 0;
-                right: 0;
-                cursor: nwse-resize;
-            }
-            
-            #${windowId} .pd-window-resizer::before {
-                content: '';
-                position: absolute;
-                bottom: 3px;
-                right: 3px;
-                width: 6px;
-                height: 6px;
-                border-right: 2px solid #555;
-                border-bottom: 2px solid #555;
-            }
-        `;
-        
-        document.head.appendChild(styleElement);
+            document.head.appendChild(styleElement);
+        }
     }
     
     /**
-     * 启用窗口拖拽功能
-     * @param windowElement 窗口元素
-     * @param dragHandle 拖拽句柄元素
+     * 窗口拖拽功能 - 使用更高优先级的事件处理
      */
-    private static enableDrag(windowElement: HTMLElement, dragHandle: HTMLElement): void {
-        let offsetX: number = 0;
-        let offsetY: number = 0;
+    private static enableWindowDrag(windowElement: HTMLElement, dragHandle: HTMLElement) {
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
         
+        // 使用捕获阶段以确保事件不被阻断
         const startDrag = (e: MouseEvent) => {
-            e.preventDefault();
-            
-            // 获取鼠标相对于窗口的位置
-            offsetX = e.clientX - windowElement.getBoundingClientRect().left;
-            offsetY = e.clientY - windowElement.getBoundingClientRect().top;
-            
-            // 绑定鼠标移动和松开事件
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-            
-            // 确保当前窗口在最上层
-            windowElement.style.zIndex = '1001';
+            // 确保是从头部拖拽
+            if (e.target === dragHandle || dragHandle.contains(e.target as Node)) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isDragging = true;
+                
+                // 获取鼠标相对于窗口的位置
+                const rect = windowElement.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                this.bringToFront(windowElement);
+                
+                // 添加拖动中的样式
+                document.body.style.userSelect = 'none';
+                document.body.style.cursor = 'move';
+                
+                // 使用捕获阶段添加事件监听
+                document.addEventListener('mousemove', drag, true);
+                document.addEventListener('mouseup', stopDrag, true);
+            }
         };
         
         const drag = (e: MouseEvent) => {
-            e.preventDefault();
+            if (!isDragging) return;
             
-            // 计算新位置
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 更新窗口位置
             const newLeft = e.clientX - offsetX;
             const newTop = e.clientY - offsetY;
             
-            // 应用新位置
-            windowElement.style.left = `${newLeft}px`;
-            windowElement.style.top = `${newTop}px`;
-        };
-        
-        const stopDrag = () => {
-            // 移除事件监听
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('mouseup', stopDrag);
+            // 限制拖动不超出可视区域
+            const maxLeft = window.innerWidth - windowElement.offsetWidth;
+            const maxTop = window.innerHeight - dragHandle.offsetHeight;
             
-            // 恢复原来的z-index
-            windowElement.style.zIndex = '1000';
+            windowElement.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+            windowElement.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
         };
         
-        dragHandle.addEventListener('mousedown', startDrag);
+        const stopDrag = (e: MouseEvent) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isDragging = false;
+            
+            // 恢复样式
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            
+            // 移除事件监听
+            document.removeEventListener('mousemove', drag, true);
+            document.removeEventListener('mouseup', stopDrag, true);
+        };
+        
+        // 使用捕获阶段添加事件
+        dragHandle.addEventListener('mousedown', startDrag, true);
     }
     
     /**
-     * 启用窗口大小调整功能
-     * @param windowElement 窗口元素
-     * @param resizeHandle 调整大小的句柄元素
-     * @param contentElement 内容元素，需要自适应大小
+     * 窗口大小调整功能 - 使用更可靠的实现
      */
-    private static enableResize(
-        windowElement: HTMLElement, 
-        resizeHandle: HTMLElement,
-        contentElement: HTMLElement
-    ): void {
-        let startX: number = 0;
-        let startY: number = 0;
-        let startWidth: number = 0;
-        let startHeight: number = 0;
+    private static enableWindowResize(windowElement: HTMLElement, resizeHandle: HTMLElement) {
+        let startX = 0;
+        let startY = 0;
+        let startWidth = 0;
+        let startHeight = 0;
+        let isResizing = false;
         
+        // 使用捕获阶段以确保事件不被阻断
         const startResize = (e: MouseEvent) => {
             e.preventDefault();
+            e.stopPropagation();
             
-            // 记录开始大小和位置
+            isResizing = true;
+            
+            // 记录初始值
             startX = e.clientX;
             startY = e.clientY;
             startWidth = windowElement.offsetWidth;
             startHeight = windowElement.offsetHeight;
             
-            // 绑定鼠标移动和松开事件
-            document.addEventListener('mousemove', resize);
-            document.addEventListener('mouseup', stopResize);
+            this.bringToFront(windowElement);
+            
+            // 设置调整大小时的样式
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'nwse-resize';
+            
+            // 使用捕获阶段添加事件监听
+            document.addEventListener('mousemove', resize, true);
+            document.addEventListener('mouseup', stopResize, true);
         };
         
         const resize = (e: MouseEvent) => {
+            if (!isResizing) return;
+            
             e.preventDefault();
+            e.stopPropagation();
             
-            // 计算新尺寸（确保最小尺寸）
-            const newWidth = Math.max(200, startWidth + (e.clientX - startX));
-            const newHeight = Math.max(100, startHeight + (e.clientY - startY));
+            // 计算新尺寸
+            const width = Math.max(200, startWidth + (e.clientX - startX));
+            const height = Math.max(100, startHeight + (e.clientY - startY));
             
-            // 应用新尺寸
-            windowElement.style.width = `${newWidth}px`;
-            windowElement.style.height = `${newHeight}px`;
+            // 设置新尺寸
+            windowElement.style.width = `${width}px`;
+            windowElement.style.height = `${height}px`;
         };
         
-        const stopResize = () => {
+        const stopResize = (e: MouseEvent) => {
+            if (!isResizing) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isResizing = false;
+            
+            // 恢复样式
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            
             // 移除事件监听
-            document.removeEventListener('mousemove', resize);
-            document.removeEventListener('mouseup', stopResize);
+            document.removeEventListener('mousemove', resize, true);
+            document.removeEventListener('mouseup', stopResize, true);
         };
         
-        resizeHandle.addEventListener('mousedown', startResize);
+        // 直接添加事件监听，使用捕获阶段
+        resizeHandle.addEventListener('mousedown', startResize, true);
+        
+        // 增加调整大小角标的可见性
+        resizeHandle.addEventListener('mouseover', () => {
+            const icon = resizeHandle.firstChild as HTMLElement;
+            if (icon) {
+                icon.style.borderColor = '#888';
+            }
+        }, true);
+        
+        resizeHandle.addEventListener('mouseout', () => {
+            const icon = resizeHandle.firstChild as HTMLElement;
+            if (icon) {
+                icon.style.borderColor = '#555';
+            }
+        }, true);
+    }
+    
+    /**
+     * 应用额外的点击处理，确保窗口内容可点击
+     */
+    private static applyExtraClickHandling(element: HTMLElement): void {
+        // 监听所有鼠标事件
+        const events = ['click', 'mousedown', 'mouseup'];
+        
+        // 确保所有子元素可以接收点击事件
+        function processElement(el: HTMLElement) {
+            // 为按钮和输入框特别添加高优先级事件处理
+            if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || 
+                el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' ||
+                el.classList.contains('example-button')) {
+                
+                events.forEach(eventType => {
+                    el.addEventListener(eventType, (e) => {
+                        e.stopPropagation();
+                    }, true);
+                });
+            }
+            
+            // 递归处理所有子元素
+            Array.from(el.children).forEach(child => {
+                processElement(child as HTMLElement);
+            });
+        }
+        
+        // 开始处理
+        setTimeout(() => {
+            processElement(element);
+        }, 100);
+        
+        // 监控DOM变化，为新添加的元素添加事件监听
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1) { // 元素节点
+                            processElement(node as HTMLElement);
+                        }
+                    });
+                }
+            });
+        });
+        
+        // 配置并启动观察器
+        observer.observe(element, { 
+            childList: true, 
+            subtree: true 
+        });
+    }
+    
+    /**
+     * 将窗口置于前台
+     */
+    private static bringToFront(windowElement: HTMLElement) {
+        // 获取当前最高的z-index
+        let maxZIndex = 9999;
+        this.activeWindows.forEach(id => {
+            const win = document.getElementById(id);
+            if (win && win !== windowElement) {
+                const zIndex = parseInt(getComputedStyle(win).zIndex || '9999');
+                maxZIndex = Math.max(maxZIndex, zIndex);
+            }
+        });
+        
+        // 设置更高的z-index
+        windowElement.style.zIndex = (maxZIndex + 1).toString();
     }
     
     /**
@@ -396,8 +589,8 @@ export class UIWindowLib {
      * @param height 高度
      */
     public static setSize(windowElement: HTMLElement, width: number, height: number): void {
-        windowElement.style.width = `${width}px`;
-        windowElement.style.height = `${height}px`;
+        windowElement.style.width = `${Math.max(200, width)}px`;
+        windowElement.style.height = `${Math.max(100, height)}px`;
     }
     
     /**
@@ -419,28 +612,6 @@ export class UIWindowLib {
      */
     public static setOpacity(windowElement: HTMLElement, opacity: number): void {
         windowElement.style.opacity = opacity.toString();
-    }
-    
-    /**
-     * 将窗口置于前面
-     * @param windowElement 窗口元素
-     */
-    public static bringToFront(windowElement: HTMLElement): void {
-        windowElement.style.zIndex = '1002'; // 比普通窗口更高的z-index
-        setTimeout(() => {
-            windowElement.style.zIndex = '1000'; // 还原z-index
-        }, 10);
-    }
-    
-    /**
-     * 切换窗口最小化状态
-     * @param windowElement 窗口元素
-     */
-    public static toggleMinimize(windowElement: HTMLElement): void {
-        const minimizeButton = windowElement.querySelector('.pd-window-minimize') as HTMLElement;
-        if (minimizeButton) {
-            minimizeButton.click();
-        }
     }
     
     /**
@@ -518,23 +689,41 @@ export class UIWindowLib {
                 
                 <input type="text" class="example-input" placeholder="输入一些文本...">
                 
-                <button class="example-button" id="${windowElement.id}-test-button">测试按钮</button>
+                <button class="example-button" id="example-button">测试按钮</button>
             </div>
         `;
         
-        // 添加按钮交互逻辑
-        const testButton = contentElement.querySelector(`#${windowElement.id}-test-button`) as HTMLElement;
-        if (testButton) {
-            testButton.addEventListener('click', () => {
-                alert('您点击了示例窗口中的按钮！');
-            });
-        }
+        // 为DOM变化添加一个小延迟，确保内容已加载
+        setTimeout(() => {
+            // 添加按钮交互逻辑
+            const testButton = contentElement.querySelector('#example-button') as HTMLElement;
+            if (testButton) {
+                // 使用捕获阶段添加事件
+                testButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    alert('您点击了示例窗口中的按钮！');
+                }, true);
+            }
+            
+            // 为输入框添加事件
+            const inputField = contentElement.querySelector('.example-input') as HTMLInputElement;
+            if (inputField) {
+                inputField.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                }, true);
+                
+                inputField.addEventListener('input', (e) => {
+                    e.stopPropagation();
+                }, true);
+            }
+        }, 100);
         
         return { windowElement, contentElement, close };
     }
 }
 
+// 引擎初始化时调用
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    // 启动主窗口
     UIWindowLib.showExampleWindow();
-
 })

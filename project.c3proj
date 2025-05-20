@@ -758,6 +758,20 @@
 						}
 					],
 					"name": "UI"
+				},
+				{
+					"items": [
+						{
+							"name": "Tree.png",
+							"type": "image/png",
+							"sid": 374567787382291,
+							"file-info": {
+								"purpose": "none"
+							}
+						}
+					],
+					"subfolders": [],
+					"name": "Resource"
 				}
 			],
 			"autoReloadOnPreview": true
