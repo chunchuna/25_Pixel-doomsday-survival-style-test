@@ -21,6 +21,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             if (data.LevelGameData) {
                 MixC3Save.LoadGameFromJson(data.LevelGameData)
                 UISubtitleMain.ShowSubtitles("从data.LevelGameData 加载存档数据", 5)
+                SaveSetting.isUseDataEnterNewGame = false;
             }
         }
     }
@@ -65,7 +66,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 var isBindButtonIntoDebugPanel = false;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (isBindButtonIntoDebugPanel) return
-    isBindButtonIntoDebugPanel=true
+    isBindButtonIntoDebugPanel = true
     //DEBUG 面板绘制 
     if (!DEBUG.DebugMainUI) return
 

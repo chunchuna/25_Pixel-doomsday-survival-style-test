@@ -69,7 +69,7 @@ export class GAMEPLAY_LEVEL {
     
         
         //关闭环境音效
-        _Audio.AudioStop("NiaoJiao")
+        //_Audio.AudioStop("NiaoJiao")
 
         //下雨需要关闭雨粒子 关闭雨声音乐
         if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
