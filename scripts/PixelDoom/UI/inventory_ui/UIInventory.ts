@@ -114,6 +114,9 @@ class UIInventory {
     // 添加一个Map来记忆每种其他库存的单列模式状态
     private otherInventoryTypeOnelineModes: Map<string, boolean> = new Map();
 
+    private mainInventoryScrollPosition: number = 0;
+    private otherInventoryScrollPosition: number = 0;
+
     private constructor() {
         this.initStyles();
         this.mainInventoryContainer = this.createInventoryContainer('main-inventory');
@@ -744,7 +747,7 @@ class UIInventory {
         const gapWidth = 5 * (columns - 1); // 所有格子间隔的总宽度
         const slotSize = isOnelineMode ? availableWidth : Math.floor((availableWidth - gapWidth) / columns); // 计算每个格子的大小
 
-        console.log(`调整格子大小: ${slotSize}px, 容器宽度: ${containerWidth}px, 列数: ${columns}, 单列模式: ${isOnelineMode}`);
+        //console.log(`调整格子大小: ${slotSize}px, 容器宽度: ${containerWidth}px, 列数: ${columns}, 单列模式: ${isOnelineMode}`);
 
         // 首先更新网格容器的列宽定义，确保固定列数
         if (isOnelineMode) {
@@ -903,6 +906,13 @@ class UIInventory {
             // 清空原始格子
             this.slotPositions[this.draggedItem.sourceSlot].item = null;
             this.slotPositions[this.draggedItem.sourceSlot].count = 0;
+        }
+
+        // 保存滚动位置并禁用滚动动画
+        const scrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
+        if (scrollContainer) {
+            this.mainInventoryScrollPosition = scrollContainer.scrollTop;
+            scrollContainer.style.scrollBehavior = 'auto';
         }
 
         // 设置标记表示正在处理物品拖拽
@@ -1329,6 +1339,28 @@ class UIInventory {
         // 保存是否处于拖拽状态的标志
         const wasHandlingDrag = this.isHandlingItemDrag;
         
+        // 保存当前滚动位置
+        let mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
+        if (mainScrollContainer) {
+            this.mainInventoryScrollPosition = mainScrollContainer.scrollTop;
+        }
+        
+        // 创建一个克隆的HTML结构用于渲染，避免直接操作可见DOM
+        let currentGrid = null;
+        let mainGridClone = null;
+        
+        if (wasHandlingDrag && mainScrollContainer) {
+            // 禁用滚动条过渡动画
+            mainScrollContainer.style.scrollBehavior = 'auto';
+            
+            // 仅在拖拽操作时保留滚动容器，只更新网格内容
+            currentGrid = mainScrollContainer.querySelector('.inventory-grid');
+            if (currentGrid) {
+                // 克隆当前网格结构
+                mainGridClone = currentGrid.cloneNode(false);
+            }
+        }
+        
         this.renderInventory(
             this.mainInventoryContainer,
             this.mainInventoryData,
@@ -1340,9 +1372,24 @@ class UIInventory {
         
         // 恢复拖拽状态标志
         this.isHandlingItemDrag = wasHandlingDrag;
+        
+        // 在拖拽操作中，立即恢复滚动位置，不使用延时
+        if (wasHandlingDrag) {
+            mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
+            if (mainScrollContainer && this.mainInventoryScrollPosition > 0) {
+                // 立即恢复滚动位置，不使用动画
+                mainScrollContainer.style.scrollBehavior = 'auto';
+                mainScrollContainer.scrollTop = this.mainInventoryScrollPosition;
+                
+                // 确保网格容器渲染正确，使用requestAnimationFrame
+                requestAnimationFrame(() => {
+                    this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
+                });
+            }
+        }
     }
 
-    // 渲染其他库存
+    // 渲染其他库存 - 移除滚动位置记忆
     private renderOtherInventory(rows: number, columns: number, InventoryName?: string): void {
         // 保存是否处于拖拽状态的标志
         const wasHandlingDrag = this.isHandlingItemDrag;
@@ -1363,8 +1410,17 @@ class UIInventory {
         this.isHandlingItemDrag = wasHandlingDrag;
     }
 
-    // 通用渲染库存方法
+    // 通用渲染库存方法 - 修改滚动容器的创建方式
     private renderInventory(container: HTMLDivElement, items: Item[], rows: number, columns: number, isOtherInventory: boolean = false, InventoryName?: string): void {
+        // 保存原有的滚动容器，以便稍后重用
+        const existingScrollContainer = container.querySelector('.inventory-scroll-container') as HTMLElement;
+        let savedScrollTop = 0;
+        
+        // 如果是主库存且在拖拽状态，保存滚动位置
+        if (!isOtherInventory && this.isHandlingItemDrag && existingScrollContainer) {
+            savedScrollTop = existingScrollContainer.scrollTop;
+        }
+        
         // 清空容器，但保留拖拽句柄
         const dragHandle = container.querySelector('.inventory-drag-handle');
         container.innerHTML = '';
@@ -1552,14 +1608,26 @@ class UIInventory {
             this.otherInventoryData = items;
         }
 
-        // 添加滚动条容器
+        // 添加滚动条容器 - 对主库存特殊处理
         const scrollContainer = document.createElement('div');
         scrollContainer.className = 'inventory-scroll-container';
+        
+        // 如果是主库存且在拖拽操作中，设置滚动行为为自动(避免平滑滚动动画)
+        if (!isOtherInventory && this.isHandlingItemDrag) {
+            scrollContainer.style.scrollBehavior = 'auto';
+        }
+        
         scrollContainer.appendChild(gridContainer);
-
         container.appendChild(scrollContainer);
-
-        // 只在非物品拖拽状态下调整格子大小
+        
+        // 如果是主库存且在拖拽状态，立即恢复滚动位置
+        if (!isOtherInventory && this.isHandlingItemDrag) {
+            if (savedScrollTop > 0 || this.mainInventoryScrollPosition > 0) {
+                scrollContainer.scrollTop = savedScrollTop || this.mainInventoryScrollPosition;
+            }
+        }
+        
+        // 在非拖拽状态下调整格子大小
         if (!this.isHandlingItemDrag) {
             setTimeout(() => {
                 this.adjustGridBasedOnWindowSize(container);
@@ -1568,7 +1636,8 @@ class UIInventory {
             // 即使在拖拽状态下，也要保持单列模式的样式
             setTimeout(() => {
                 // 保持单列模式的布局
-                if (isOnelineMode) {
+                if ((container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+                    (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode)) {
                     this.applyOnelineModeStyles(container);
                 }
             }, 0);
@@ -2377,6 +2446,14 @@ class UIInventory {
             return;
         }
 
+        // 仅保存主库存的滚动位置
+        const mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
+        if (mainScrollContainer) {
+            this.mainInventoryScrollPosition = mainScrollContainer.scrollTop;
+            // 禁用滚动动画
+            mainScrollContainer.style.scrollBehavior = 'auto';
+        }
+
         // 在处理物品传输前设置标记
         this.isHandlingItemDrag = true;
 
@@ -2627,7 +2704,7 @@ class UIInventory {
         return otherInventorySlots;
     }
 
-    // 处理其他库存内部的拖拽
+    // 处理其他库存内部的拖拽 - 移除滚动位置记忆
     private handleOtherInventoryDrop(targetSlot: number): void {
         if (!this.draggedItem) return;
 
