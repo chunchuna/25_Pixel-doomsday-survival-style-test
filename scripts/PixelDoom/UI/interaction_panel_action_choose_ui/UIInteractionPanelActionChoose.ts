@@ -17,6 +17,7 @@ class InteractionUIState {
   static buttonsContainer: HTMLElement | null = null;
   static isInitialized: boolean = false;
   static isWindowDestroyed: boolean = false; // 添加新状态，标记窗口是否被销毁
+  static resizeHandler: (() => void) | null = null; // 添加窗口大小改变处理函数
 }
 
 /** 初始化 */
@@ -72,6 +73,20 @@ function ensureClickHandling() {
   }
 }
 
+// 辅助函数：将窗口定位到右下角
+function positionWindowToBottomRight(windowElement: HTMLElement) {
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const windowWidth = parseInt(windowElement.style.width);
+  const windowHeight = parseInt(windowElement.style.height);
+  
+  // 设置窗口位置在右下角，留出一些边距
+  const rightPosition = viewportWidth - windowWidth - 20; // 20px 的右边距
+  const bottomPosition = viewportHeight - windowHeight - 20; // 20px 的下边距
+  
+  UIWindowLib.setPosition(windowElement, rightPosition, bottomPosition);
+}
+
 export class UIInteractionPanelActionChooseMain {
   // 用于存储打开和关闭事件的回调函数
   private static openCallbacks: Function[] = [];
@@ -96,6 +111,12 @@ export class UIInteractionPanelActionChooseMain {
     // 确保全局点击处理器已设置
     ensureClickHandling();
     
+    // 移除之前的窗口大小改变监听器（如果存在）
+    if (InteractionUIState.resizeHandler) {
+      window.removeEventListener('resize', InteractionUIState.resizeHandler);
+      InteractionUIState.resizeHandler = null;
+    }
+    
     // 完全重建窗口
     if (InteractionUIState.windowElement) {
       try {
@@ -113,7 +134,7 @@ export class UIInteractionPanelActionChooseMain {
       InteractionUIState.buttonsContainer = null;
     }
     
-    // 创建新窗口
+    // 创建新窗口 - 不指定位置，稍后会设置为右下角
     const { windowElement, contentElement, close } = UIWindowLib.createWindow(
       "交互选项", // 标题
       300,        // 宽度
@@ -145,6 +166,20 @@ export class UIInteractionPanelActionChooseMain {
     // 保存按钮容器引用
     InteractionUIState.buttonsContainer = buttonsContainer;
     
+    // 立即将窗口定位到右下角
+    positionWindowToBottomRight(windowElement);
+    
+    // 添加窗口大小改变事件监听器，保持窗口在右下角
+    const resizeHandler = () => {
+      if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
+        positionWindowToBottomRight(InteractionUIState.windowElement);
+      }
+    };
+    
+    // 保存处理函数引用以便稍后可以移除
+    InteractionUIState.resizeHandler = resizeHandler;
+    window.addEventListener('resize', resizeHandler);
+    
     // 触发所有打开事件回调
     this.openCallbacks.forEach(callback => {
       try {
@@ -157,6 +192,12 @@ export class UIInteractionPanelActionChooseMain {
 
   // 关闭UI面板
   static CloseChoosePanle() {
+    // 移除窗口大小改变监听器
+    if (InteractionUIState.resizeHandler) {
+      window.removeEventListener('resize', InteractionUIState.resizeHandler);
+      InteractionUIState.resizeHandler = null;
+    }
+    
     if (InteractionUIState.windowElement) {
       // 触发所有关闭事件回调
       this.closeCallbacks.forEach(callback => {
@@ -264,6 +305,9 @@ export class UIInteractionPanelActionChooseMain {
         300, // 保持宽度不变
         height
       );
+      
+      // 调整大小后重新定位到右下角
+      positionWindowToBottomRight(InteractionUIState.windowElement);
     }
   }
 
