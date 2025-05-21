@@ -31,6 +31,24 @@ function initInteractionUI() {
 }
 
 export class UIInteractionPanelActionChooseMain {
+  // 用于存储打开和关闭事件的回调函数
+  private static openCallbacks: Function[] = [];
+  private static closeCallbacks: Function[] = [];
+
+  // 监听交互面板打开事件
+  static OnInteractionOpen(callback: Function) {
+    if (typeof callback === 'function') {
+      this.openCallbacks.push(callback);
+    }
+  }
+
+  // 监听交互面板关闭事件
+  static OnInteractionClose(callback: Function) {
+    if (typeof callback === 'function') {
+      this.closeCallbacks.push(callback);
+    }
+  }
+
   // 显示UI面板
   static ShowChoosePanle() {
     const panel = document.getElementById('interaction_panel_action_choose_ui');
@@ -42,6 +60,15 @@ export class UIInteractionPanelActionChooseMain {
       // @ts-ignore
       panel.setAttribute('data-initialized', 'true');
     }
+    
+    // 触发所有打开事件回调
+    this.openCallbacks.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('交互面板打开回调执行错误:', error);
+      }
+    });
   }
 
   // 关闭UI面板
@@ -52,6 +79,16 @@ export class UIInteractionPanelActionChooseMain {
     // 重置初始化标记，确保下次打开面板时不会立即关闭
     // @ts-ignore
     panel.removeAttribute('data-initialized');
+    
+    // 触发所有关闭事件回调
+    this.closeCallbacks.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('交互面板关闭回调执行错误:', error);
+      }
+    });
+    
     // @ts-ignore
     panel.addEventListener('animationend', () => {
       // @ts-ignore
