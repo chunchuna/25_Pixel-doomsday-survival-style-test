@@ -50,8 +50,25 @@ interface InventoryUpdateCallback {
     updateMethod?: (instance: any, items: Item[]) => void;
 }
 
+// 添加UIInventory接口声明，用于定义类型
+interface IUIInventory {
+    // 公共属性
+    IsQuickPickUpItem: boolean;
+    closeOtherInventoryFunc: (() => any) | null;
+    
+    // 公共方法
+    BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void };
+    ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void, oneline: () => void };
+    HideAllInventories(): void;
+    SetMainInventoryUpdateCallback(callback: { updateMethod: (items: Item[]) => void }): void;
+    SerializeInventory(inventoryArray: Item[], rows: number, columns: number): string;
+    DeserializeInventory(data: string): { inventory: Item[], rows: number, columns: number };
+    SerializeItemsOnly(inventoryArray: Item[]): string;
+    DeserializeItemsOnly(data: string): Item[];
+}
+
 // 库存UI管理类
-class UIInventory {
+class UIInventory implements IUIInventory {
     private static instance: UIInventory;
     private mainInventoryContainer: HTMLDivElement;
     private otherInventoryContainer: HTMLDivElement;
@@ -72,50 +89,42 @@ class UIInventory {
     private clickStartPos: { x: number, y: number } | null = null;
     private clickStartTime: number = 0;
     private isDragging: boolean = false;
-
     // 窗口拖拽相关变量
     private isDraggingWindow: boolean = false;
     private draggedWindow: HTMLDivElement | null = null;
     private windowDragStartPos: { x: number, y: number, windowX: number, windowY: number } | null = null;
-
     // 添加一个变量来存储原始库存数组的引用
     private originalInventoryArray: Item[] | null = null;
-
     // 添加一个变量来存储关闭其他库存的函数
     public closeOtherInventoryFunc: (() => any) | null = null;
-
     // 添加一个变量来存储更新回调
     private updateCallback: InventoryUpdateCallback | null = null;
-
     private mainInventoryCallback: ((items: Item[]) => void) | null = null;
-
-    // 记录库存窗口拖拽后的位置 
+    // 记录库存窗口拖拽后的位置    
     private MainInventoryWindowPosition: number[] = [0, 0]
     private OtherInventoryWindowPosition: number[] = [0, 0]
     // 添加记录窗口大小的变量
     private MainInventoryWindowSize: number[] = [0, 0] // [width, height]
     private OtherInventoryWindowSize: number[] = [0, 0] // [width, height]
-
     // 调整大小相关变量
     private isResizingWindow: boolean = false
     private resizedWindow: HTMLDivElement | null = null
     private windowResizeStartPos: { x: number, y: number, windowWidth: number, windowHeight: number } | null = null
-
     // 首先添加一个新的状态变量，用于标记是否正在处理物品拖拽
     private isHandlingItemDrag: boolean = false;
     
     // 添加单列模式标志
     private isMainInventoryOnelineMode: boolean = false;
     private isOtherInventoryOnelineMode: boolean = false;
-
     // 添加一个变量来记忆主库存的单列模式状态
     private shouldMainInventoryUseOnelineMode: boolean = false;
-
     // 添加一个Map来记忆每种其他库存的单列模式状态
     private otherInventoryTypeOnelineModes: Map<string, boolean> = new Map();
-
     private mainInventoryScrollPosition: number = 0;
     private otherInventoryScrollPosition: number = 0;
+    
+    // 添加快速拾取功能开关
+    public IsQuickPickUpItem: boolean = true;
 
     private constructor() {
         this.initStyles();
@@ -250,7 +259,7 @@ class UIInventory {
                     this.mainInventoryContainer.style.height = `${newHeight}px`;
                     this.MainInventoryWindowSize = [newWidth, newHeight];
                     
-                    // 调整网格适应窗口
+                    // 调整网格以适应窗口
                     this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
                     
                     // 强制重新渲染一次
@@ -1772,6 +1781,19 @@ class UIInventory {
                 this.startDrag(item, count, slotIndex, itemElement, e, inventoryType);
                 e.preventDefault(); // 防止选中文本
             }
+            // 添加右键点击快速拾取功能（仅对其他库存有效）
+            else if (e.button === 2 && inventoryType === 'other') {
+                // 调用快速拾取方法
+                this.handleQuickPickup(item, count, slotIndex);
+                e.preventDefault(); // 防止默认的右键菜单
+                e.stopPropagation(); // 阻止事件冒泡
+            }
+        });
+
+        // 添加右键菜单阻止功能
+        slot.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // 阻止默认的右键菜单
+            return false;
         });
 
         slot.appendChild(itemElement);
@@ -2427,6 +2449,53 @@ class UIInventory {
             .oneline-slot.target-slot {
                 background-color: rgba(70, 90, 70, 0.7);
                 border: 1px solid #9c9;
+            }
+            
+            /* 飞行物品样式 */
+            .flying-item {
+                position: fixed;
+                pointer-events: none;
+                z-index: 6000;
+                background-color: rgba(60, 60, 100, 0.6);
+                border: 1px solid rgba(100, 150, 255, 0.6);
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 12px;
+                text-align: center;
+                box-shadow: 0 0 15px rgba(100, 200, 255, 0.7);
+                transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            /* 飞行物品数量标签 */
+            .flying-item .item-count {
+                position: absolute;
+                bottom: 2px;
+                right: 2px;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 8px;
+            }
+            
+            /* 飞行物品高亮效果 */
+            @keyframes flyingGlow {
+                0%, 100% {
+                    box-shadow: 0 0 15px rgba(100, 200, 255, 0.7);
+                }
+                50% {
+                    box-shadow: 0 0 20px rgba(150, 220, 255, 0.9);
+                }
+            }
+            
+            .flying-item {
+                animation: flyingGlow 1s infinite;
             }
         `;
 
@@ -3194,6 +3263,189 @@ class UIInventory {
             }, 200);
         }
     }
+
+    // 处理快速拾取物品（右键点击）
+    private handleQuickPickup(item: Item, count: number, sourceSlot: number): void {
+        // 检查是否启用了快速拾取功能且主库存是否打开
+        if (!this.IsQuickPickUpItem || !this.isMainInventoryVisible) {
+            return;
+        }
+        
+        // 获取其他库存中的源物品信息
+        const otherInventorySlots = this.getOtherInventorySlots();
+        const sourceItemInfo = otherInventorySlots[sourceSlot];
+        
+        if (!sourceItemInfo.item) return;
+        
+        // 查找主库存中合适的位置放置物品
+        let targetSlot = -1;
+        
+        // 首先尝试找到相同物品的格子并合并
+        for (let i = 0; i < this.slotPositions.length; i++) {
+            const slotItem = this.slotPositions[i].item;
+            if (slotItem && slotItem.itemName === item.itemName && this.slotPositions[i].count < 64) {
+                // 找到相同物品且数量未满的格子
+                targetSlot = i;
+                break;
+            }
+        }
+        
+        // 如果没有找到相同物品的格子，尝试找一个空格子
+        if (targetSlot === -1) {
+            for (let i = 0; i < this.slotPositions.length; i++) {
+                if (!this.slotPositions[i].item) {
+                    // 找到空格子
+                    targetSlot = i;
+                    break;
+                }
+            }
+        }
+        
+        // 如果找到了合适的格子
+        if (targetSlot !== -1) {
+            // 创建飞行动画效果
+            this.createFlyingItemAnimation(item, sourceItemInfo.item, count, sourceSlot, targetSlot);
+            
+            // 处理物品转移
+            const targetItem = this.slotPositions[targetSlot].item;
+            if (targetItem && targetItem.itemName === item.itemName) {
+                // 合并物品
+                const totalCount = this.slotPositions[targetSlot].count + count;
+                if (totalCount <= 64) {
+                    // 可以完全合并
+                    this.slotPositions[targetSlot].count = totalCount;
+                    
+                    // 清空其他库存中的对应项
+                    sourceItemInfo.item = null;
+                    sourceItemInfo.count = 0;
+                } else {
+                    // 部分合并
+                    this.slotPositions[targetSlot].count = 64;
+                    sourceItemInfo.count = totalCount - 64;
+                }
+            } else {
+                // 放入空格子
+                this.slotPositions[targetSlot].item = { ...item }; // 深拷贝
+                this.slotPositions[targetSlot].count = count;
+                
+                // 清空其他库存中的对应项
+                sourceItemInfo.item = null;
+                sourceItemInfo.count = 0;
+            }
+            
+            // 更新其他库存数组数据
+            this.updateOtherInventoryData(item, count, 'remove');
+            
+            // 同步更新原始库存数组
+            this.syncOriginalInventoryArray();
+            
+            // 重新渲染库存
+            setTimeout(() => {
+                this.renderMainInventory();
+                this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                
+                // 触发主库存更新回调
+                this.triggerMainInventoryCallback();
+            }, 300); // 延迟渲染，等待动画完成
+        } else {
+            // 如果没有找到合适的格子，显示提示信息
+            this.showInventoryFullNotification();
+        }
+    }
+    
+    // 创建物品飞行动画
+    private createFlyingItemAnimation(item: Item, originalItem: Item | null, count: number, sourceSlot: number, targetSlot: number): void {
+        // 如果其他库存实例不存在，则无法创建动画
+        if (!this.otherInventoryInstance) return;
+        
+        // 获取源格子和目标格子的元素
+        const sourceSlotEl = this.otherInventoryInstance.querySelector(`.inventory-slot[data-slot-index="${sourceSlot}"]`) as HTMLElement;
+        const targetSlotEl = this.mainInventoryContainer.querySelector(`.inventory-slot[data-slot-index="${targetSlot}"]`) as HTMLElement;
+        
+        if (!sourceSlotEl || !targetSlotEl) return;
+        
+        // 获取源格子和目标格子的位置
+        const sourceRect = sourceSlotEl.getBoundingClientRect();
+        const targetRect = targetSlotEl.getBoundingClientRect();
+        
+        // 创建飞行物品元素
+        const flyingItem = document.createElement('div');
+        flyingItem.className = 'flying-item';
+        
+        // 应用物品的样式
+        flyingItem.textContent = item.itemName;
+        flyingItem.setAttribute('data-item-level', item.itemLevel);
+        
+        // 如果数量大于1，添加数量标签
+        if (count > 1) {
+            const countLabel = document.createElement('div');
+            countLabel.className = 'item-count';
+            countLabel.textContent = count.toString();
+            flyingItem.appendChild(countLabel);
+        }
+        
+        // 设置初始位置和尺寸
+        flyingItem.style.position = 'fixed';
+        flyingItem.style.left = `${sourceRect.left}px`;
+        flyingItem.style.top = `${sourceRect.top}px`;
+        flyingItem.style.width = `${sourceRect.width}px`;
+        flyingItem.style.height = `${sourceRect.height}px`;
+        flyingItem.style.zIndex = '6000';
+        flyingItem.style.background = 'rgba(60, 60, 100, 0.6)';
+        flyingItem.style.borderRadius = '5px';
+        flyingItem.style.display = 'flex';
+        flyingItem.style.alignItems = 'center';
+        flyingItem.style.justifyContent = 'center';
+        flyingItem.style.color = '#fff';
+        flyingItem.style.fontSize = '12px';
+        flyingItem.style.boxShadow = '0 0 15px rgba(100, 200, 255, 0.7)';
+        flyingItem.style.transition = 'all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
+        
+        // 添加到文档中
+        document.body.appendChild(flyingItem);
+        
+        // 强制回流，准备开始动画
+        void flyingItem.offsetWidth;
+        
+        // 应用动画
+        flyingItem.style.left = `${targetRect.left}px`;
+        flyingItem.style.top = `${targetRect.top}px`;
+        flyingItem.style.width = `${targetRect.width}px`;
+        flyingItem.style.height = `${targetRect.height}px`;
+        flyingItem.style.opacity = '0.8';
+        flyingItem.style.transform = 'scale(0.8)';
+        
+        // 动画结束后移除元素
+        flyingItem.addEventListener('transitionend', () => {
+            if (flyingItem.parentNode) {
+                flyingItem.parentNode.removeChild(flyingItem);
+            }
+            
+            // 在目标格子添加高亮效果
+            targetSlotEl.classList.add('slot-highlight');
+            setTimeout(() => {
+                targetSlotEl.classList.remove('slot-highlight');
+            }, 300);
+        });
+    }
+    
+    // 显示库存已满提示
+    private showInventoryFullNotification(): void {
+        const notification = document.createElement('div');
+        notification.className = 'inventory-notification';
+        notification.textContent = '库存已满';
+        this.mainInventoryContainer.appendChild(notification);
+
+        // 动画结束后移除提示
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
+        }, 1500);
+    }
 }
 
 // 导出公共接口
@@ -3284,4 +3536,19 @@ export type { InventoryUpdateCallback };
 // 在导出部分添加此方法
 export function HideAllInventories(): void {
   inventoryManager.HideAllInventories();
+}
+
+// 添加快速拾取功能开关控制方法
+export function EnableQuickPickup(enable: boolean): void {
+  if (inventoryManager) {
+    inventoryManager.IsQuickPickUpItem = enable;
+  }
+}
+
+// 获取快速拾取功能状态
+export function IsQuickPickupEnabled(): boolean {
+  if (inventoryManager) {
+    return inventoryManager.IsQuickPickUpItem;
+  }
+  return true; // 默认启用
 }
