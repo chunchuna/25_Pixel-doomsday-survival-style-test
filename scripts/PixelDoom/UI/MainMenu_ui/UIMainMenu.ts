@@ -2812,7 +2812,7 @@ class UIMainMenu {
         }
         
         // 创建新窗口
-        this.loadGameWindow = UIWindowLib.createWindow("存档读取", 400, 300);
+        this.loadGameWindow = UIWindowLib.createWindow("存档读取", 400, 300,1);
         const { contentElement, windowElement } = this.loadGameWindow;
         
         // 绑定窗口关闭事件处理
@@ -2862,106 +2862,308 @@ class UIMainMenu {
         // 添加存档读取内容
         contentElement.innerHTML = `
             <style>
-                .action-btn {
-                    padding: 0.6rem 0;
-                    background-color: rgba(50, 50, 50, 0.4);
-                    color: #b0b0b0;
-                    border: none;
-                    border-radius: 2px;
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    margin-bottom: 1rem;
-                    width: 100%;
-                    position: relative;
-                    overflow: hidden;
+                /* 整体样式 */
+                .save-container {
+                    background-color: rgba(25, 25, 25, 0.9);
+                    border-radius: 4px;
+                    padding: 15px;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
                 }
                 
-                .action-btn::before {
-                    content: '';
-                    position: absolute;
-                    left: 0;
-                    bottom: 0;
-                    width: 0;
-                    height: 1px;
-                    background-color: #ffffff;
-                    transition: width 0.3s ease;
+                /* 按钮统一样式 */
+                .action-btn {
+                    padding: 10px 0;
+                    background-color: rgba(40, 40, 40, 0.7);
+                    color: #b0b0b0;
+                    border: 1px solid rgba(60, 60, 60, 0.5);
+                    border-radius: 3px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    position: relative;
+                    overflow: hidden;
+                    margin-bottom: 12px;
+                    text-align: center;
+                    font-weight: 500;
                 }
                 
                 .action-btn:hover {
                     color: #ffffff;
-                    text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-                }
-                
-                .action-btn:hover::before {
-                    width: 100%;
+                    background-color: rgba(50, 50, 50, 0.8);
+                    border-color: rgba(80, 80, 80, 0.7);
+                    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+                    transform: translateY(-1px);
                 }
                 
                 .action-btn:active {
-                    transform: scale(0.98);
+                    transform: translateY(1px);
+                    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
                 }
                 
-                .save-slots {
-                    margin-top: 1rem;
-                    padding: 0.8rem;
-                    background-color: rgba(35, 35, 35, 0.6);
-                    border-radius: 2px;
-                    text-align: center;
-                    color: #aaa;
+                /* 按钮光晕效果 */
+                .action-btn::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    left: -50%;
+                    width: 200%;
+                    height: 200%;
+                    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+                    opacity: 0;
+                    transform: scale(0.5);
+                    transition: opacity 0.5s, transform 0.5s;
+                }
+                
+                .action-btn:hover::after {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                
+                /* 存档插槽区域 */
+                .save-slots-container {
+                    flex: 1;
+                    margin-top: 15px;
+                    background-color: rgba(20, 20, 20, 0.6);
+                    border-radius: 4px;
+                    border: 1px solid rgba(50, 50, 50, 0.5);
+                    padding: 10px;
+                    display: flex;
+                    flex-direction: column;
                     position: relative;
                     overflow: hidden;
-                    border: none;
                 }
                 
-                .save-slots::before {
+                /* 存档插槽标题 */
+                .save-slots-title {
+                    color: #aaa;
+                    font-size: 14px;
+                    margin-bottom: 15px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(80, 80, 80, 0.3);
+                    text-align: center;
+                }
+                
+                /* 无存档提示 */
+                #${noSaveTextId} {
+                    text-align: center;
+                    color: #888;
+                    font-style: italic;
+                    padding: 20px 0;
+                    background-color: rgba(30, 30, 30, 0.4);
+                    border-radius: 3px;
+                    border: 1px dashed rgba(80, 80, 80, 0.3);
+                    margin: auto 0;
+                    font-size: 0.9rem;
+                }
+                
+                /* 存档条目样式 */
+                #${dataLoadSectionId} {
+                    display: none;
+                    height: 100%;
+                    margin-top: 5px;
+                }
+                
+                /* 存档插槽按钮 */
+                .save-slot-btn {
+                    background-color: rgba(30, 30, 30, 0.7);
+                    border: 1px solid rgba(60, 60, 60, 0.6);
+                    border-radius: 4px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    color: #ddd;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .save-slot-btn:hover {
+                    background-color: rgba(40, 40, 40, 0.8);
+                    border-color: rgba(100, 100, 255, 0.4);
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+                    transform: translateY(-2px);
+                }
+                
+                .save-slot-btn:active {
+                    transform: translateY(1px);
+                }
+                
+                /* 存档槽信息 */
+                .slot-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                    border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+                    padding-bottom: 8px;
+                }
+                
+                .slot-title {
+                    font-weight: bold;
+                    color: #fff;
+                    font-size: 16px;
+                }
+                
+                .slot-date {
+                    color: #aaa;
+                    font-size: 12px;
+                }
+                
+                .slot-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+                
+                .slot-stats {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 13px;
+                }
+                
+                .slot-stats-label {
+                    color: #888;
+                }
+                
+                .slot-stats-value {
+                    color: #bbb;
+                }
+                
+                /* 选中存档槽的发光效果 */
+                .save-slot-selected {
+                    border-color: rgba(100, 150, 255, 0.8);
+                    box-shadow: 0 0 10px rgba(70, 130, 255, 0.4);
+                }
+                
+                .save-slot-selected::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 4px;
+                    height: 100%;
+                    background: linear-gradient(to bottom, rgba(100, 150, 255, 0.9), rgba(70, 130, 255, 0.4));
+                }
+                
+                /* 操作按钮区域 */
+                .action-buttons {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 15px;
+                }
+                
+                .action-buttons .action-btn {
+                    flex: 1;
+                    margin-bottom: 0;
+                }
+                
+                /* 加载按钮 */
+                #${loadLocalBtnId} {
+                    background-color: rgba(40, 60, 80, 0.7);
+                    border-color: rgba(60, 80, 100, 0.5);
+                }
+                
+                #${loadLocalBtnId}:hover {
+                    background-color: rgba(50, 70, 90, 0.8);
+                    border-color: rgba(70, 90, 120, 0.7);
+                    box-shadow: 0 0 8px rgba(50, 100, 150, 0.3);
+                }
+                
+                /* 保存按钮 */
+                #${saveLocalBtnId} {
+                    background-color: rgba(50, 70, 50, 0.7);
+                    border-color: rgba(70, 90, 70, 0.5);
+                }
+                
+                #${saveLocalBtnId}:hover {
+                    background-color: rgba(60, 80, 60, 0.8);
+                    border-color: rgba(80, 110, 80, 0.7);
+                    box-shadow: 0 0 8px rgba(70, 130, 70, 0.3);
+                }
+                
+                /* 使用存档按钮 */
+                #${useDataBtnId} {
+                    background-color: rgba(70, 70, 120, 0.7);
+                    color: #e0e0e0;
+                    border-color: rgba(90, 90, 150, 0.6);
+                    font-weight: bold;
+                    padding: 12px;
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                #${useDataBtnId}:hover {
+                    background-color: rgba(80, 80, 140, 0.8);
+                    color: #ffffff;
+                    border-color: rgba(110, 110, 200, 0.7);
+                    box-shadow: 0 0 15px rgba(80, 80, 180, 0.4);
+                }
+                
+                #${useDataBtnId}::after {
                     content: '';
                     position: absolute;
                     top: 0;
-                    left: 10%;
-                    width: 80%;
-                    height: 1px;
-                    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, 
+                        transparent, 
+                        rgba(255, 255, 255, 0.1), 
+                        transparent);
+                    transition: 0.6s;
                 }
                 
-                .save-slots::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 10%;
-                    width: 80%;
-                    height: 1px;
-                    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+                #${useDataBtnId}:hover::after {
+                    left: 100%;
                 }
                 
-                .special-btn {
-                    background-color: rgba(80, 80, 150, 0.6);
-                    color: #ddd;
-                    margin-top: 15px;
-                    padding: 10px 0;
-                    border: 1px solid rgba(100, 100, 200, 0.3);
-                    transition: all 0.3s ease;
+                /* 动画效果 */
+                @keyframes pulse-border {
+                    0% { border-color: rgba(90, 90, 150, 0.6); }
+                    50% { border-color: rgba(120, 120, 200, 0.8); }
+                    100% { border-color: rgba(90, 90, 150, 0.6); }
                 }
                 
-                .special-btn:hover {
-                    background-color: rgba(90, 90, 180, 0.7);
-                    color: #fff;
-                    border-color: rgba(120, 120, 255, 0.6);
-                    box-shadow: 0 0 10px rgba(100, 100, 255, 0.3);
-                }
-                
-                #${dataLoadSectionId} {
-                    margin-top: 15px;
-                    padding-top: 10px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.1);
+                .pulse-animation {
+                    animation: pulse-border 2s infinite;
                 }
             </style>
-            <button id="${loadLocalBtnId}" class="action-btn">从本地读取</button>
-            <button id="${saveLocalBtnId}" class="action-btn">下载存档到本地</button>
-            <div class="save-slots">
-                <p id="${noSaveTextId}">暂无存档</p>
-            </div>
-            <div id="${dataLoadSectionId}" style="display: none;">
-                <button id="${useDataBtnId}" class="action-btn special-btn">存档1</button>
+            <div class="save-container">
+                <div class="action-buttons">
+                    <button id="${loadLocalBtnId}" class="action-btn">从本地读取</button>
+                    <button id="${saveLocalBtnId}" class="action-btn">下载存档</button>
+                </div>
+                
+                <div class="save-slots-container">
+                    <div class="save-slots-title">存档插槽</div>
+                    <div id="${noSaveTextId}">暂无存档</div>
+                    
+                    <div id="${dataLoadSectionId}">
+                        <div class="save-slot-btn save-slot-selected" id="${useDataBtnId}">
+                            <div class="slot-header">
+                                <div class="slot-title">存档 #1</div>
+                                <div class="slot-date">今天 12:34</div>
+                            </div>
+                            <div class="slot-info">
+                                <div class="slot-stats">
+                                    <span class="slot-stats-label">游戏进度:</span>
+                                    <span class="slot-stats-value">未知</span>
+                                </div>
+                                <div class="slot-stats">
+                                    <span class="slot-stats-label">游戏时间:</span>
+                                    <span class="slot-stats-value">未知</span>
+                                </div>
+                                <div class="slot-stats">
+                                    <span class="slot-stats-label">难度:</span>
+                                    <span class="slot-stats-value">未知</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         
@@ -3054,9 +3256,6 @@ class UIMainMenu {
                 loadLocalBtn.removeEventListener('click', handleLoadLocalClick);
                 // 添加新的监听器，确保使用捕获
                 loadLocalBtn.addEventListener('click', handleLoadLocalClick, true);
-                
-                // 为按钮添加特殊样式以便调试
-                loadLocalBtn.style.border = "1px solid #3498db";
                 console.log("成功绑定本地读取按钮");
             } else {
                 console.error(`未找到本地读取按钮: #${loadLocalBtnId}`);
@@ -3078,9 +3277,6 @@ class UIMainMenu {
                 saveLocalBtn.removeEventListener('click', handleSaveLocalClick);
                 // 添加新的监听器，确保使用捕获
                 saveLocalBtn.addEventListener('click', handleSaveLocalClick, true);
-                
-                // 为按钮添加特殊样式以便调试
-                saveLocalBtn.style.border = "1px solid #2ecc71";
                 console.log("成功绑定下载存档按钮");
             } else {
                 console.error(`未找到下载存档按钮: #${saveLocalBtnId}`);
