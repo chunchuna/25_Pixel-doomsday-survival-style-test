@@ -48,7 +48,8 @@ export class UIWindowLib {
         Object.assign(windowElement.style, {
             width: `${width}px`,
             height: `${height}px`,
-            opacity: opacity.toString(),
+            opacity: '0', // 初始设置为透明，用于打开动画
+            transform: 'scale(0.95)', // 初始缩放比例
             position: 'fixed', // 改为fixed定位，解决点击问题
             backgroundColor: '#282828',
             border: '1px solid #3c3c3c',
@@ -57,7 +58,8 @@ export class UIWindowLib {
             overflow: 'hidden',
             fontFamily: 'Arial, sans-serif',
             color: '#e0e0e0',
-            zIndex: '9999' // 提高z-index值
+            zIndex: '9999', // 提高z-index值
+            transition: 'opacity 0.2s ease-out, transform 0.2s ease-out' // 添加过渡效果
         });
         
         // 设置窗口位置
@@ -272,11 +274,18 @@ export class UIWindowLib {
         
         // 绑定关闭按钮点击事件
         const close = () => {
-            // 从活动窗口集合中移除
-            this.activeWindows.delete(windowId);
+            // 添加关闭动画
+            windowElement.style.opacity = '0';
+            windowElement.style.transform = 'scale(0.95)';
             
-            // 移除元素
-            windowElement.remove();
+            // 等待动画完成后移除元素
+            setTimeout(() => {
+                // 从活动窗口集合中移除
+                this.activeWindows.delete(windowId);
+                
+                // 移除元素
+                windowElement.remove();
+            }, 200); // 与CSS过渡时间匹配
         };
         
         closeButton.addEventListener('click', (e) => {
@@ -288,6 +297,15 @@ export class UIWindowLib {
         windowElement.addEventListener('mousedown', () => {
             this.bringToFront(windowElement);
         }, true);
+        
+        // 添加打开动画效果 - 使用requestAnimationFrame确保DOM已更新
+        requestAnimationFrame(() => {
+            // 短暂延迟以确保变换生效
+            setTimeout(() => {
+                windowElement.style.opacity = opacity.toString();
+                windowElement.style.transform = 'scale(1)';
+            }, 30);
+        });
         
         return { 
             windowElement, 
@@ -338,6 +356,11 @@ export class UIWindowLib {
                 
                 .pd-window * {
                     pointer-events: auto !important;
+                }
+                
+                /* 窗口动画效果 */
+                .pd-window {
+                    transform-origin: center;
                 }
             `;
             
