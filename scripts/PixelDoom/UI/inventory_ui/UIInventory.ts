@@ -126,6 +126,12 @@ class UIInventory implements IUIInventory {
     // 添加快速拾取功能开关
     public IsQuickPickUpItem: boolean = true;
 
+    // 添加四个回调函数属性，用于存储事件监听器
+    private onMainInventoryOpenCallback: (() => void) | null = null;
+    private onMainInventoryCloseCallback: (() => void) | null = null;
+    private onOtherInventoryOpenCallback: (() => void) | null = null;
+    private onOtherInventoryCloseCallback: (() => void) | null = null;
+
     private constructor() {
         this.initStyles();
         this.mainInventoryContainer = this.createInventoryContainer('main-inventory');
@@ -472,6 +478,11 @@ class UIInventory implements IUIInventory {
             }
         });
 
+        // 触发其他库存打开事件回调
+        if (this.onOtherInventoryOpenCallback) {
+            this.onOtherInventoryOpenCallback();
+        }
+
         // 添加Escape键关闭库存的监听
         const escapeListener = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && this.otherInventoryInstance) {
@@ -483,6 +494,11 @@ class UIInventory implements IUIInventory {
 
         // 创建关闭函数
         const closeOtherInventory = () => {
+            // 触发其他库存关闭事件回调
+            if (this.onOtherInventoryCloseCallback) {
+                this.onOtherInventoryCloseCallback();
+            }
+
             // 移除Escape键监听
             document.removeEventListener('keydown', escapeListener);
 
@@ -633,7 +649,17 @@ class UIInventory implements IUIInventory {
                     this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
                 }, 50);
             });
+
+            // 触发主库存打开事件回调
+            if (this.onMainInventoryOpenCallback) {
+                this.onMainInventoryOpenCallback();
+            }
         } else {
+            // 触发主库存关闭事件回调
+            if (this.onMainInventoryCloseCallback) {
+                this.onMainInventoryCloseCallback();
+            }
+
             // 添加关闭动画
             this.mainInventoryContainer.classList.remove('inventory-open');
             void this.mainInventoryContainer.offsetWidth; // 强制重绘
@@ -3446,6 +3472,26 @@ class UIInventory implements IUIInventory {
             }, 500);
         }, 1500);
     }
+
+    // 添加主库存打开事件监听方法
+    public OnMainInventoryOpen(callback: () => void): void {
+        this.onMainInventoryOpenCallback = callback;
+    }
+
+    // 添加主库存关闭事件监听方法
+    public OnMainInventoryClose(callback: () => void): void {
+        this.onMainInventoryCloseCallback = callback;
+    }
+
+    // 添加其他库存打开事件监听方法
+    public OnOtherInventoryOpen(callback: () => void): void {
+        this.onOtherInventoryOpenCallback = callback;
+    }
+
+    // 添加其他库存关闭事件监听方法
+    public OnOtherInventoryClose(callback: () => void): void {
+        this.onOtherInventoryCloseCallback = callback;
+    }
 }
 
 // 导出公共接口
@@ -3551,4 +3597,29 @@ export function IsQuickPickupEnabled(): boolean {
     return inventoryManager.IsQuickPickUpItem;
   }
   return true; // 默认启用
+}
+
+// 导出四个事件监听方法
+export function OnMainInventoryOpen(callback: () => void): void {
+  if (inventoryManager) {
+    inventoryManager.OnMainInventoryOpen(callback);
+  }
+}
+
+export function OnMainInventoryClose(callback: () => void): void {
+  if (inventoryManager) {
+    inventoryManager.OnMainInventoryClose(callback);
+  }
+}
+
+export function OnOtherInventoryOpen(callback: () => void): void {
+  if (inventoryManager) {
+    inventoryManager.OnOtherInventoryOpen(callback);
+  }
+}
+
+export function OnOtherInventoryClose(callback: () => void): void {
+  if (inventoryManager) {
+    inventoryManager.OnOtherInventoryClose(callback);
+  }
 }
