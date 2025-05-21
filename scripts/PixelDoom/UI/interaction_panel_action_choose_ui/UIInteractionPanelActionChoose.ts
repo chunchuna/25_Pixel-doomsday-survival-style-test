@@ -1,4 +1,13 @@
 // 在文件顶部添加全局类型声明
+/**
+ * 互动窗口实现
+ * 
+ * 更新说明:
+ * 1. 互动窗口默认显示在右下角
+ * 2. 窗口大小改变时保持在右下角位置
+ * 3. 新增 WindowName 参数，可自定义窗口标题
+ * 4. 修复关闭按钮关闭后无法再次打开的问题
+ */
 declare global {
   interface Window {
     pixelDoomClickHandlerSet?: boolean;
@@ -92,6 +101,9 @@ export class UIInteractionPanelActionChooseMain {
   private static openCallbacks: Function[] = [];
   private static closeCallbacks: Function[] = [];
 
+  // 增加一个静态属性来保存当前窗口标题
+  private static currentWindowName: string = "交互选项";
+
   // 监听交互面板打开事件
   static OnInteractionOpen(callback: Function) {
     if (typeof callback === 'function') {
@@ -107,7 +119,13 @@ export class UIInteractionPanelActionChooseMain {
   }
 
   // 显示UI面板
-  static ShowChoosePanle() {
+  static ShowChoosePanle(windowName: string = "交互选项") {
+    // 保存当前窗口标题
+    this.currentWindowName = windowName;
+    
+    // 确保窗口状态初始化 - 在某些情况下，窗口可能在其他地方被关闭，导致状态不一致
+    InteractionUIState.isWindowDestroyed = false;
+    
     // 确保全局点击处理器已设置
     ensureClickHandling();
     
@@ -136,7 +154,7 @@ export class UIInteractionPanelActionChooseMain {
     
     // 创建新窗口 - 不指定位置，稍后会设置为右下角
     const { windowElement, contentElement, close } = UIWindowLib.createWindow(
-      "交互选项", // 标题
+      windowName, // 使用传入的窗口标题
       300,        // 宽度
       200,        // 高度，初始高度设为200
       1.0         // 不透明度
@@ -145,8 +163,38 @@ export class UIInteractionPanelActionChooseMain {
     // 保存窗口引用
     InteractionUIState.windowElement = windowElement;
     InteractionUIState.contentElement = contentElement;
-    InteractionUIState.closeFunction = close;
     InteractionUIState.isWindowDestroyed = false;
+    
+    // 修改关闭函数，确保正确调用我们的关闭方法
+    const ourCloseFunction = () => {
+      close(); // 先调用原始的关闭函数
+      UIInteractionPanelActionChooseMain.CloseChoosePanle(); // 然后调用我们的关闭方法确保状态重置
+    };
+    
+    // 保存我们修改过的关闭函数
+    InteractionUIState.closeFunction = ourCloseFunction;
+    
+    // 找到并覆盖关闭按钮的点击处理程序
+    const closeButton = windowElement.querySelector('.pd-window-close') as HTMLElement;
+    if (closeButton) {
+      // 移除原有的所有点击监听器（必须先克隆再替换元素）
+      const newCloseButton = closeButton.cloneNode(true) as HTMLElement;
+      closeButton.parentNode?.replaceChild(newCloseButton, closeButton);
+      
+      // 添加我们自己的点击处理程序
+      newCloseButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        ourCloseFunction(); // 使用我们的关闭函数
+      }, true);
+      
+      // 保持鼠标悬停效果
+      newCloseButton.addEventListener('mouseover', () => {
+        newCloseButton.style.backgroundColor = '#c14545';
+      }, true);
+      newCloseButton.addEventListener('mouseout', () => {
+        newCloseButton.style.backgroundColor = '#913a3a';
+      }, true);
+    }
     
     // 设置内容区样式
     contentElement.style.padding = '10px';
@@ -198,40 +246,37 @@ export class UIInteractionPanelActionChooseMain {
       InteractionUIState.resizeHandler = null;
     }
     
-    if (InteractionUIState.windowElement) {
-      // 触发所有关闭事件回调
-      this.closeCallbacks.forEach(callback => {
-        try {
-          callback();
-        } catch (error) {
-          console.error('交互面板关闭回调执行错误:', error);
-        }
-      });
-      
+    // 触发所有关闭事件回调
+    this.closeCallbacks.forEach(callback => {
       try {
-        // 完全移除窗口
-        if (InteractionUIState.windowElement.parentNode) {
-          InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
-        }
-        
-        // 彻底重置所有状态
-        InteractionUIState.windowElement = null;
-        InteractionUIState.contentElement = null;
-        InteractionUIState.buttonsContainer = null;
-        InteractionUIState.closeFunction = null;
-        InteractionUIState.isWindowDestroyed = true;
+        callback();
       } catch (error) {
-        console.error('关闭窗口时发生错误:', error);
-        InteractionUIState.isWindowDestroyed = true;
+        console.error('交互面板关闭回调执行错误:', error);
       }
+    });
+    
+    // 尝试移除窗口
+    try {
+      if (InteractionUIState.windowElement && InteractionUIState.windowElement.parentNode) {
+        InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
+      }
+    } catch (error) {
+      console.error('关闭窗口时发生错误:', error);
     }
+    
+    // 彻底重置所有状态 - 无论成功与否都重置
+    InteractionUIState.windowElement = null;
+    InteractionUIState.contentElement = null;
+    InteractionUIState.buttonsContainer = null;
+    InteractionUIState.closeFunction = null;
+    InteractionUIState.isWindowDestroyed = true;
   }
 
   // 增加按钮进入面板
   static AddChooseButtonIntoPanel(ButtonContent: string, ButtonIndex: any) {
     // 确保窗口存在
     if (!InteractionUIState.contentElement || InteractionUIState.isWindowDestroyed) {
-      this.ShowChoosePanle();
+      this.ShowChoosePanle(this.currentWindowName);
     }
     
     // 使用保存的按钮容器引用
@@ -312,10 +357,10 @@ export class UIInteractionPanelActionChooseMain {
   }
 
   // 根据解析生成按钮
-  static ExplainConetntToButton(Conteng: string) {
+  static ExplainConetntToButton(Conteng: string, WindowName: string = "交互选项") {
     // 确保窗口存在
     if (!InteractionUIState.contentElement || InteractionUIState.isWindowDestroyed) {
-      this.ShowChoosePanle();
+      this.ShowChoosePanle(WindowName);
     }
     
     const ButtonList = Conteng.split(',');
@@ -331,6 +376,11 @@ export class UIInteractionPanelActionChooseMain {
     ButtonList.forEach((ButtonContent: string, Index: any) => {
       UIInteractionPanelActionChooseMain.AddChooseButtonIntoPanel(ButtonContent.trim(), Index);
     });
+    
+    // 如果窗口元素存在，设置窗口标题
+    if (InteractionUIState.windowElement) {
+      UIWindowLib.setTitle(InteractionUIState.windowElement, WindowName);
+    }
   }
 }
 

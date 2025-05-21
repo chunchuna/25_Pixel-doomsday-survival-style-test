@@ -2,6 +2,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
 import type { DialogueSystem } from "../UI/dialogue_ui/UIDialogue.js";
+import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { inventoryManager } from "../UI/inventory_ui/UIInventory.js";
 import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UIScreenEffect.js";
 import { _Audio } from "./PIXAudio.js";
@@ -86,6 +87,9 @@ export class GAMEPLAY_LEVEL {
         PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); //解绑主库存 
 
         await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
+
+        // 关闭互动面板 
+        UIInteractionPanelActionChooseMain.CloseChoosePanle();
 
         UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)

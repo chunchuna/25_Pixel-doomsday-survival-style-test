@@ -99,7 +99,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             }
 
 
-            ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions)
+            ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions,"正在交互:"+GetChooseObject.instVars.ObjectName)
 
 
       })
@@ -186,8 +186,8 @@ export class ClickObject {
       }
 
       /** 通过 UI 生成按钮列表 */
-      static GenerateInstructionsBy_interactionpanelactionchoose(Content: string) {
-            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content)
+      static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
+            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content,WindowName)
       }
 }
 
