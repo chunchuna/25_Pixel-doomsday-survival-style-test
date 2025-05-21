@@ -7,6 +7,7 @@ class InteractionUIState {
   static windowElement: HTMLElement | null = null;
   static contentElement: HTMLElement | null = null;
   static closeFunction: (() => void) | null = null;
+  static buttonsContainer: HTMLElement | null = null;
   static isInitialized: boolean = false;
 }
 
@@ -47,7 +48,7 @@ export class UIInteractionPanelActionChooseMain {
   // 显示UI面板
   static ShowChoosePanle() {
     // 如果窗口已经存在，直接显示
-    if (InteractionUIState.windowElement) {
+    if (InteractionUIState.windowElement && InteractionUIState.windowElement.parentNode) {
       InteractionUIState.windowElement.style.display = 'block';
     } else {
       // 创建新窗口
@@ -74,6 +75,9 @@ export class UIInteractionPanelActionChooseMain {
       buttonsContainer.style.gap = '6px';
       
       contentElement.appendChild(buttonsContainer);
+      
+      // 保存按钮容器引用
+      InteractionUIState.buttonsContainer = buttonsContainer;
     }
     
     // 触发所有打开事件回调
@@ -98,13 +102,26 @@ export class UIInteractionPanelActionChooseMain {
         }
       });
       
-      // 关闭窗口
-      InteractionUIState.closeFunction();
-      
-      // 清除窗口引用
-      InteractionUIState.windowElement = null;
-      InteractionUIState.contentElement = null;
-      InteractionUIState.closeFunction = null;
+      try {
+        // 隐藏窗口而不是销毁它，这样窗口引用可以保持
+        if (InteractionUIState.windowElement) {
+          InteractionUIState.windowElement.style.display = 'none';
+        }
+        
+        // 注释掉以下代码，以便保留窗口引用
+        // InteractionUIState.closeFunction();
+        // InteractionUIState.windowElement = null;
+        // InteractionUIState.contentElement = null;
+        // InteractionUIState.buttonsContainer = null;
+        // InteractionUIState.closeFunction = null;
+      } catch (error) {
+        console.error('关闭窗口时发生错误:', error);
+        // 发生错误时才重置引用
+        InteractionUIState.windowElement = null;
+        InteractionUIState.contentElement = null;
+        InteractionUIState.buttonsContainer = null;
+        InteractionUIState.closeFunction = null;
+      }
     }
   }
 
@@ -115,7 +132,8 @@ export class UIInteractionPanelActionChooseMain {
       this.ShowChoosePanle();
     }
     
-    const container = document.getElementById('interaction_buttons_container_action_choose_ui');
+    // 使用保存的按钮容器引用
+    const container = InteractionUIState.buttonsContainer;
     if (!container) return;
     
     const button = document.createElement('button');
@@ -141,8 +159,10 @@ export class UIInteractionPanelActionChooseMain {
     button.addEventListener('click', function () {
       // 这里可以添加按钮点击后的逻辑
       console.log('点击了按钮:', ButtonContent);
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: ButtonContent })
-      //CloseChoosePanle();
+      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: ButtonContent });
+      
+      // 点击后关闭面板
+      UIInteractionPanelActionChooseMain.CloseChoosePanle();
     });
 
     // 添加按钮到指定位置或默认添加到第一个
@@ -180,7 +200,9 @@ export class UIInteractionPanelActionChooseMain {
     }
     
     const ButtonList = Conteng.split(',');
-    const container = document.getElementById('interaction_buttons_container_action_choose_ui');
+    
+    // 使用保存的按钮容器引用
+    const container = InteractionUIState.buttonsContainer;
     if (!container) return;
 
     // 清空现有按钮
