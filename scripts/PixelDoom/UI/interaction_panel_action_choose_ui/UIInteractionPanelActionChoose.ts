@@ -1,11 +1,18 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
+import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 
-
+// 存储窗口引用和状态
+class InteractionUIState {
+  static windowElement: HTMLElement | null = null;
+  static contentElement: HTMLElement | null = null;
+  static closeFunction: (() => void) | null = null;
+  static isInitialized: boolean = false;
+}
 
 /** 初始化 */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-  initInteractionUI()
+  initInteractionUI();
   //UIInteractionPanelActionChooseMain.ShowChoosePanle()
   // AddChooseButtonIntoPanel("a", 1)
   // AddChooseButtonIntoPanel("a", 1)
@@ -14,20 +21,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 function initInteractionUI() {
-  const panel = document.getElementById('interaction_panel_action_choose_ui');
-  // @ts-ignore
-  if (!panel) {
-    const panelHTML = `
-      <div id="interaction_panel_action_choose_ui" class="interaction-panel" style="display: none;">
-        <div id="interaction_buttons_container_action_choose_ui" class="buttons-container"></div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', panelHTML);
-  } else {
-    // 确保已存在的面板也具有正确的初始状态
-    // @ts-ignore
-    panel.style.display = 'none';
-  }
+  // 使用窗口库不需要额外创建DOM元素
+  InteractionUIState.isInitialized = true;
 }
 
 export class UIInteractionPanelActionChooseMain {
@@ -51,14 +46,34 @@ export class UIInteractionPanelActionChooseMain {
 
   // 显示UI面板
   static ShowChoosePanle() {
-    const panel = document.getElementById('interaction_panel_action_choose_ui');
-    // @ts-ignore
-    panel.style.display = 'block';
-    // 确保面板在显示时设置初始状态标记
-    // @ts-ignore
-    if (!panel.hasAttribute('data-initialized')) {
-      // @ts-ignore
-      panel.setAttribute('data-initialized', 'true');
+    // 如果窗口已经存在，直接显示
+    if (InteractionUIState.windowElement) {
+      InteractionUIState.windowElement.style.display = 'block';
+    } else {
+      // 创建新窗口
+      const { windowElement, contentElement, close } = UIWindowLib.createWindow(
+        "交互选项", // 标题
+        300,        // 宽度
+        200,        // 高度，初始高度设为200
+        1.0         // 不透明度
+      );
+      
+      // 保存窗口引用
+      InteractionUIState.windowElement = windowElement;
+      InteractionUIState.contentElement = contentElement;
+      InteractionUIState.closeFunction = close;
+      
+      // 设置内容区样式
+      contentElement.style.padding = '10px';
+      
+      // 创建按钮容器
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.id = 'interaction_buttons_container_action_choose_ui';
+      buttonsContainer.style.display = 'flex';
+      buttonsContainer.style.flexDirection = 'column';
+      buttonsContainer.style.gap = '6px';
+      
+      contentElement.appendChild(buttonsContainer);
     }
     
     // 触发所有打开事件回调
@@ -73,37 +88,54 @@ export class UIInteractionPanelActionChooseMain {
 
   // 关闭UI面板
   static CloseChoosePanle() {
-    const panel = document.getElementById('interaction_panel_action_choose_ui');
-    // @ts-ignore
-    panel.classList.add('closing');
-    // 重置初始化标记，确保下次打开面板时不会立即关闭
-    // @ts-ignore
-    panel.removeAttribute('data-initialized');
-    
-    // 触发所有关闭事件回调
-    this.closeCallbacks.forEach(callback => {
-      try {
-        callback();
-      } catch (error) {
-        console.error('交互面板关闭回调执行错误:', error);
-      }
-    });
-    
-    // @ts-ignore
-    panel.addEventListener('animationend', () => {
-      // @ts-ignore
-      panel.style.display = 'none';
-      // @ts-ignore
-      panel.classList.remove('closing');
-    }, { once: true });
+    if (InteractionUIState.closeFunction) {
+      // 触发所有关闭事件回调
+      this.closeCallbacks.forEach(callback => {
+        try {
+          callback();
+        } catch (error) {
+          console.error('交互面板关闭回调执行错误:', error);
+        }
+      });
+      
+      // 关闭窗口
+      InteractionUIState.closeFunction();
+      
+      // 清除窗口引用
+      InteractionUIState.windowElement = null;
+      InteractionUIState.contentElement = null;
+      InteractionUIState.closeFunction = null;
+    }
   }
 
   // 增加按钮进入面板
   static AddChooseButtonIntoPanel(ButtonContent: string, ButtonIndex: any) {
+    // 确保窗口存在
+    if (!InteractionUIState.contentElement) {
+      this.ShowChoosePanle();
+    }
+    
     const container = document.getElementById('interaction_buttons_container_action_choose_ui');
+    if (!container) return;
+    
     const button = document.createElement('button');
     button.className = 'interaction-btn';
     button.textContent = ButtonContent;
+    button.style.backgroundColor = '#333';
+    button.style.border = '1px solid #555';
+    button.style.color = '#e0e0e0';
+    button.style.padding = '8px 16px';
+    button.style.borderRadius = '4px';
+    button.style.cursor = 'pointer';
+    button.style.transition = 'background-color 0.2s';
+    
+    // 鼠标悬停效果
+    button.addEventListener('mouseover', () => {
+      button.style.backgroundColor = '#444';
+    });
+    button.addEventListener('mouseout', () => {
+      button.style.backgroundColor = '#333';
+    });
 
     // 设置按钮点击事件
     button.addEventListener('click', function () {
@@ -114,43 +146,50 @@ export class UIInteractionPanelActionChooseMain {
     });
 
     // 添加按钮到指定位置或默认添加到第一个
-    // @ts-ignore
     if (ButtonIndex !== undefined && ButtonIndex >= 0 && ButtonIndex < container.children.length) {
-      // @ts-ignore
       container.insertBefore(button, container.children[ButtonIndex]);
     } else {
-      // @ts-ignore
       container.appendChild(button);
     }
 
-    // 触发按钮出现动画
+    // 动画效果
+    button.style.opacity = '0';
+    button.style.transform = 'translateY(10px)';
+    
     setTimeout(() => {
       button.style.opacity = '1';
       button.style.transform = 'translateY(0)';
-      // @ts-ignore
     }, 100 * (ButtonIndex !== undefined ? ButtonIndex : container.children.length - 1));
+    
+    // 调整窗口高度以适应内容
+    if (InteractionUIState.windowElement) {
+      const height = Math.min(400, container.children.length * 45 + 40); // 限制最大高度
+      UIWindowLib.setSize(
+        InteractionUIState.windowElement, 
+        300, // 保持宽度不变
+        height
+      );
+    }
   }
 
   // 根据解析生成按钮
   static ExplainConetntToButton(Conteng: string) {
-    // @ts-ignore
+    // 确保窗口存在
+    if (!InteractionUIState.contentElement) {
+      this.ShowChoosePanle();
+    }
+    
     const ButtonList = Conteng.split(',');
     const container = document.getElementById('interaction_buttons_container_action_choose_ui');
+    if (!container) return;
 
     // 清空现有按钮
-    // @ts-ignore
     container.innerHTML = '';
 
     // 添加新按钮
     ButtonList.forEach((ButtonContent: string, Index: any) => {
       UIInteractionPanelActionChooseMain.AddChooseButtonIntoPanel(ButtonContent.trim(), Index);
     });
-
-    // 显示面板
-    UIInteractionPanelActionChooseMain.ShowChoosePanle();
   }
-
-  // 初始化UI
-  // document.addEventListener('DOMContentLoaded', initInteractionUI);
 }
 
