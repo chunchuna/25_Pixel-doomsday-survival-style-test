@@ -351,6 +351,10 @@ class UIInventory {
 
         // 创建新的其他库存
         this.otherInventoryInstance = this.createInventoryContainer('other-inventory');
+        
+        // 修改：先设置为不可见，防止闪烁
+        this.otherInventoryInstance.style.opacity = '0';
+        
         document.body.appendChild(this.otherInventoryInstance);
         
         // 将库存名称保存到实例元素属性中(关键步骤)
@@ -377,9 +381,6 @@ class UIInventory {
             this.otherInventoryInstance.style.width = `${this.OtherInventoryWindowSize[0]}px`;
             this.otherInventoryInstance.style.height = `${this.OtherInventoryWindowSize[1]}px`;
         }
-
-        // 确保容器完全可见
-        this.otherInventoryInstance.style.opacity = '1';
 
         // 立即添加调整大小按钮
         const resizeButton = document.createElement('button');
@@ -428,11 +429,14 @@ class UIInventory {
         // 渲染其他库存
         this.renderOtherInventory(rows, columns, InventoryName);
 
-        // 添加动画效果
-        setTimeout(() => {
+        // 避免闪烁：直接渲染完成后显示容器并添加动画
+        // 使用requestAnimationFrame来确保DOM已更新
+        requestAnimationFrame(() => {
             if (this.otherInventoryInstance) {
+                // 添加开启动画类，同时设置为可见
                 this.otherInventoryInstance.classList.add('inventory-open');
-
+                this.otherInventoryInstance.style.opacity = '1';
+                
                 // 调整网格以适应窗口大小
                 this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
                 
@@ -454,7 +458,7 @@ class UIInventory {
                     }, 100);
                 }
             }
-        }, 10);
+        });
 
         // 添加Escape键关闭库存的监听
         const escapeListener = (e: KeyboardEvent) => {
@@ -596,20 +600,27 @@ class UIInventory {
                 this.mainInventoryContainer.style.height = `${this.MainInventoryWindowSize[1]}px`;
             }
 
+            // 先设置为不可见，防止闪烁
+            this.mainInventoryContainer.style.opacity = '0';
             this.mainInventoryContainer.style.display = 'flex';
 
             // 确保调整大小按钮存在且可见
             this.ensureResizeButtonExists(this.mainInventoryContainer);
 
-            // 添加动画效果
-            this.mainInventoryContainer.classList.remove('inventory-close');
-            void this.mainInventoryContainer.offsetWidth; // 强制重绘
-            this.mainInventoryContainer.classList.add('inventory-open');
-
-            // 调整网格以适应窗口大小
-            setTimeout(() => {
-                this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
-            }, 50);
+            // 使用requestAnimationFrame确保DOM更新后再应用动画
+            requestAnimationFrame(() => {
+                // 移除关闭动画类
+                this.mainInventoryContainer.classList.remove('inventory-close');
+                
+                // 添加打开动画类并设置为可见
+                this.mainInventoryContainer.classList.add('inventory-open');
+                this.mainInventoryContainer.style.opacity = '1';
+                
+                // 调整网格以适应窗口大小
+                setTimeout(() => {
+                    this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
+                }, 50);
+            });
         } else {
             // 添加关闭动画
             this.mainInventoryContainer.classList.remove('inventory-open');
@@ -1758,16 +1769,17 @@ class UIInventory {
                 flex-direction: column;
                 width: 225px;
                 height: 380px;
-                opacity: 1; /* 改为完全可见 */
+                opacity: 0; /* 修改：默认不可见，防止闪烁 */
                 z-index: 5000;
                 backdrop-filter: blur(5px);
                 resize: none; /* 禁用默认resize */
                 overflow: hidden; /* 防止内容溢出 */
+                transition: opacity 0.1s ease; /* 添加过渡效果 */
             }
             
             /* 新创建的库存容器初始状态 */
             .inventory-container:not(.inventory-open):not(.inventory-close) {
-                opacity: 1; /* 改为完全可见 */
+                opacity: 0; /* 修改：默认不可见 */
             }
             
             /* 库存拖拽句柄 */
@@ -1945,19 +1957,23 @@ class UIInventory {
             @keyframes fadeIn {
                 from {
                     opacity: 0;
+                    transform: scale(0.95);
                 }
                 to {
-                    opacity: 1; /* 改为完全可见 */
+                    opacity: 1;
+                    transform: scale(1);
                 }
             }
             
             /* 库存关闭动画 */
             @keyframes fadeOut {
                 from {
-                    opacity: 1; /* 改为完全可见 */
+                    opacity: 1;
+                    transform: scale(1);
                 }
                 to {
                     opacity: 0;
+                    transform: scale(0.95);
                 }
             }
             
