@@ -1,4 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { data, LocalSave } from "../../Group/Save/PIXSave.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 
 /**
@@ -10,6 +11,8 @@ export class UIMainSaveWindow {
     private contentElement: HTMLElement | null = null;
     private closeFunction: (() => void) | null = null;
     private saveSlots: { id: number, name: string, date: string }[] = [];
+
+    public Data:any;
     
     /**
      * 获取单例实例
@@ -267,125 +270,92 @@ export class UIMainSaveWindow {
         // 清空容器
         slotsContainer.innerHTML = '';
         
-        // 如果没有存档，显示空插槽
-        if (this.saveSlots.length === 0) {
-            // 创建6个空存档插槽
-            for (let i = 0; i < 6; i++) {
-                const emptySlot = document.createElement('div');
-                emptySlot.className = 'save-slot empty';
-                emptySlot.setAttribute('data-slot-id', i.toString());
-                emptySlot.textContent = '空存档槽';
-                
-                emptySlot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.selectSlot(i);
-                }, true);
-                
-                slotsContainer.appendChild(emptySlot);
-            }
-        } else {
-            // 显示现有存档
-            this.saveSlots.forEach(slot => {
-                const slotElement = document.createElement('div');
-                slotElement.className = 'save-slot';
-                slotElement.setAttribute('data-slot-id', slot.id.toString());
-                
-                slotElement.innerHTML = `
-                    <div class="save-slot-header">
-                        <div class="save-slot-name">${slot.name}</div>
-                        <div class="save-slot-date">${slot.date}</div>
-                    </div>
-                    <div class="save-slot-preview">存档预览</div>
-                `;
-                
-                slotElement.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.selectSlot(slot.id);
-                }, true);
-                
-                slotsContainer.appendChild(slotElement);
-            });
+        // 检查Data是否为空
+        if (!this.Data || Object.keys(this.Data).length === 0) {
+            // Data为空，不显示任何插槽
+            slotsContainer.innerHTML = '<div class="no-save-message">没有可用的存档数据</div>';
             
-            // 添加额外的空存档槽，确保总数为6
-            const remainingSlots = 6 - this.saveSlots.length;
-            for (let i = 0; i < remainingSlots; i++) {
-                const emptySlot = document.createElement('div');
-                emptySlot.className = 'save-slot empty';
-                emptySlot.setAttribute('data-slot-id', (this.saveSlots.length + i).toString());
-                emptySlot.textContent = '空存档槽';
-                
-                emptySlot.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.selectSlot(this.saveSlots.length + i);
-                }, true);
-                
-                slotsContainer.appendChild(emptySlot);
-            }
+            // 添加空状态的样式
+            const style = document.createElement('style');
+            style.textContent = `
+                .no-save-message {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    height: 100%;
+                    color: #666;
+                    font-style: italic;
+                    font-size: 16px;
+                }
+            `;
+            slotsContainer.appendChild(style);
+            return;
+        }
+        
+        // Data不为空，生成一个可用插槽
+        const slotElement = document.createElement('div');
+        slotElement.className = 'save-slot';
+        slotElement.setAttribute('data-slot-id', '0');
+        
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        slotElement.innerHTML = `
+            <div class="save-slot-header">
+                <div class="save-slot-name">当前游戏存档</div>
+                <div class="save-slot-date">${dateStr}</div>
+            </div>
+            <div class="save-slot-preview">游戏存档数据可用</div>
+        `;
+        
+        // 为存档插槽添加点击事件，但内部保持为空
+        slotElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // 点击存档插槽后的处理逻辑 - 保持为空供用户自行填写
+        }, true);
+        
+        slotsContainer.appendChild(slotElement);
+        
+        // 添加选中样式
+        slotElement.classList.add('selected');
+        
+        // 启用读取按钮
+        const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
+        if (loadBtn) {
+            loadBtn.disabled = false;
         }
     }
     
     /**
      * 选择存档插槽
+     * @param slotId 插槽ID
      */
     private selectSlot(slotId: number): void {
-        // 移除所有已选择的样式
-        const allSlots = this.contentElement?.querySelectorAll('.save-slot');
-        allSlots?.forEach(slot => {
-            slot.classList.remove('selected');
-        });
-        
-        // 添加选中样式
-        const selectedSlot = this.contentElement?.querySelector(`[data-slot-id="${slotId}"]`);
-        if (selectedSlot) {
-            selectedSlot.classList.add('selected');
-        }
-        
-        // 启用/禁用按钮
-        const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
-        if (loadBtn) {
-            // 检查是否为有效存档
-            const isValidSave = this.saveSlots.some(slot => slot.id === slotId);
-            loadBtn.disabled = !isValidSave;
-        }
+        // 点击存档插槽的处理逻辑 - 保持为空供用户自行填写
     }
     
     /**
      * 处理下载存档
      */
     private handleDownloadSave(): void {
-        // 获取选中的插槽
-        const selectedSlot = this.contentElement?.querySelector('.save-slot.selected');
-        if (!selectedSlot) {
-            console.log('请先选择一个存档槽!');
-            return;
-        }
-        
-        const slotId = parseInt(selectedSlot.getAttribute('data-slot-id') || '-1');
-        if (slotId < 0) return;
-        
-        // 只输出控制台提示
-        console.log(`[存档窗口] 下载存档到槽位 ${slotId}`);
+        // 直接使用PIXSave中的下载方法
+        LocalSave.DataDownload();
+        console.log('[存档窗口] 已调用下载存档功能');
     }
     
     /**
      * 处理读取存档
      */
     private handleLoadSave(): void {
-        // 获取选中的插槽
-        const selectedSlot = this.contentElement?.querySelector('.save-slot.selected');
-        if (!selectedSlot) {
-            console.log('请先选择一个存档!');
-            return;
-        }
+        // 直接使用PIXSave中的读取方法
+        LocalSave.DataRead();
+        console.log('[存档窗口] 已调用读取存档功能');
         
-        const slotId = parseInt(selectedSlot.getAttribute('data-slot-id') || '-1');
-        if (slotId < 0) return;
-        
-        // 只输出控制台提示
-        console.log(`[存档窗口] 从槽位 ${slotId} 读取存档`);
-        
-        // 读取成功后关闭窗口
-        this.close();
+        // 读取完成后关闭窗口
+        setTimeout(() => {
+            this.close();
+        }, 500);
     }
 }
 
@@ -393,4 +363,6 @@ export class UIMainSaveWindow {
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 可以在这里添加窗口启动逻辑
     // 例如：UIMainSaveWindow.getInstance().show();
+    UIMainSaveWindow.getInstance().Data=data;
+   
 });
