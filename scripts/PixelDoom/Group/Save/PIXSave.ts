@@ -47,6 +47,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         data.LevelGameData = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.LastestSaveGameJson;
         localStorage.setItem("level_data", data.LevelGameData)
         localStorage.setItem("run_game_times", String(data.RunGameTiems))
+        console.log(data)
 
         UISubtitleMain.ShowSubtitles("json数据被存下来了", 5)
     })

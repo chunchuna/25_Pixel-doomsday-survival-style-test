@@ -1,6 +1,8 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
-import { data, LocalSave } from "../../Group/Save/PIXSave.js";
+import { data, LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
+import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
+import { GameMainScene } from "./UIMainMenu.js";
 
 /**
  * 主存档窗口类
@@ -12,8 +14,8 @@ export class UIMainSaveWindow {
     private closeFunction: (() => void) | null = null;
     private saveSlots: { id: number, name: string, date: string }[] = [];
 
-    public Data:any;
-    
+    public Data: any;
+
     /**
      * 获取单例实例
      */
@@ -23,21 +25,21 @@ export class UIMainSaveWindow {
         }
         return this.instance;
     }
-    
+
     /**
      * 私有构造函数，防止直接实例化
      */
-    private constructor() {}
-    
+    private constructor() { }
+
     /**
      * 显示存档窗口
      */
     public show(): void {
         // 如果窗口已经存在，则直接返回
-        if (this.windowElement) {
+        if (this.windowElement && document.body.contains(this.windowElement)) {
             return;
         }
-        
+
         // 创建窗口
         const result = UIWindowLib.createWindow(
             "存档管理",
@@ -45,15 +47,15 @@ export class UIMainSaveWindow {
             500,
             1.0
         );
-        
+
         this.windowElement = result.windowElement;
         this.contentElement = result.contentElement;
         this.closeFunction = result.close;
-        
+
         // 初始化窗口内容
         this.initContent();
     }
-    
+
     /**
      * 关闭窗口
      */
@@ -63,29 +65,31 @@ export class UIMainSaveWindow {
             this.windowElement = null;
             this.contentElement = null;
             this.closeFunction = null;
+
+            UIMainSaveWindow.instance = null;
         }
     }
-    
+
     /**
      * 显示窗口（兼容性方法）
      */
     public showWindow(): void {
         this.show();
     }
-    
+
     /**
      * 关闭窗口（兼容性方法）
      */
     public closeWindow(): void {
         this.close();
     }
-    
+
     /**
      * 初始化窗口内容
      */
     private initContent(): void {
         if (!this.contentElement) return;
-        
+
         // 添加样式和HTML内容
         this.contentElement.innerHTML = `
             <style>
@@ -232,49 +236,51 @@ export class UIMainSaveWindow {
                 </div>
             </div>
         `;
-        
+
         // 添加空存档插槽
         this.renderSaveSlots();
-        
+
         // 添加按钮事件监听
         setTimeout(() => {
             const downloadBtn = this.contentElement?.querySelector('#download-save-btn') as HTMLButtonElement;
             const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
-            
+
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.handleDownloadSave();
                 }, true);
             }
-            
+
             if (loadBtn) {
                 loadBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.handleLoadSave();
                 }, true);
-                
+
                 // 初始状态禁用读取按钮
-                loadBtn.disabled = true;
+                loadBtn.disabled = false;
             }
         }, 100);
     }
-    
+
     /**
      * 渲染存档插槽
      */
     private renderSaveSlots(): void {
+        console.warn(this.Data)
         const slotsContainer = this.contentElement?.querySelector('#save-slots-container');
         if (!slotsContainer) return;
-        
+
         // 清空容器
         slotsContainer.innerHTML = '';
-        
+
         // 检查Data是否为空
-        if (!this.Data || Object.keys(this.Data).length === 0) {
+        if (data.LevelGameData==="") {
+            //console.log(this.Data)
             // Data为空，不显示任何插槽
             slotsContainer.innerHTML = '<div class="no-save-message">没有可用的存档数据</div>';
-            
+
             // 添加空状态的样式
             const style = document.createElement('style');
             style.textContent = `
@@ -292,15 +298,15 @@ export class UIMainSaveWindow {
             slotsContainer.appendChild(style);
             return;
         }
-        
+
         // Data不为空，生成一个可用插槽
         const slotElement = document.createElement('div');
         slotElement.className = 'save-slot';
         slotElement.setAttribute('data-slot-id', '0');
-        
+
         const now = new Date();
         const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        
+
         slotElement.innerHTML = `
             <div class="save-slot-header">
                 <div class="save-slot-name">当前游戏存档</div>
@@ -308,25 +314,30 @@ export class UIMainSaveWindow {
             </div>
             <div class="save-slot-preview">游戏存档数据可用</div>
         `;
-        
+
         // 为存档插槽添加点击事件，但内部保持为空
         slotElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            // 点击存档插槽后的处理逻辑 - 保持为空供用户自行填写
+            UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, () => {
+                SaveSetting.isUseDataEnterNewGame = true;
+                GameMainScene.getInstance().HideALLMainMenuUI();
+                pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+
+            })
         }, true);
-        
+
         slotsContainer.appendChild(slotElement);
-        
+
         // 添加选中样式
         slotElement.classList.add('selected');
-        
+
         // 启用读取按钮
         const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
         if (loadBtn) {
             loadBtn.disabled = false;
         }
     }
-    
+
     /**
      * 选择存档插槽
      * @param slotId 插槽ID
@@ -334,7 +345,7 @@ export class UIMainSaveWindow {
     private selectSlot(slotId: number): void {
         // 点击存档插槽的处理逻辑 - 保持为空供用户自行填写
     }
-    
+
     /**
      * 处理下载存档
      */
@@ -343,7 +354,7 @@ export class UIMainSaveWindow {
         LocalSave.DataDownload();
         console.log('[存档窗口] 已调用下载存档功能');
     }
-    
+
     /**
      * 处理读取存档
      */
@@ -351,7 +362,7 @@ export class UIMainSaveWindow {
         // 直接使用PIXSave中的读取方法
         LocalSave.DataRead();
         console.log('[存档窗口] 已调用读取存档功能');
-        
+
         // 读取完成后关闭窗口
         setTimeout(() => {
             this.close();
@@ -363,6 +374,6 @@ export class UIMainSaveWindow {
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 可以在这里添加窗口启动逻辑
     // 例如：UIMainSaveWindow.getInstance().show();
-    UIMainSaveWindow.getInstance().Data=data;
-   
+    //UIMainSaveWindow.getInstance().Data = data;
+
 });
