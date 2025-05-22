@@ -168,13 +168,22 @@ export class UIMainSaveWindow {
                 .save-slot-preview {
                     width: 100%;
                     height: 80px;
-                    background-color: #1a1a1a;
+                    background-color: #1a3e5c;
                     border-radius: 3px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    color: #666;
+                    color: #aed4ff;
                     font-size: 12px;
+                    box-shadow: 0 0 15px rgba(41, 121, 255, 0.4);
+                    border: 1px solid #3a6d9a;
+                    text-shadow: 0 0 5px rgba(173, 216, 255, 0.8);
+                    transition: all 0.3s ease;
+                }
+                
+                .save-slot-preview:hover {
+                    box-shadow: 0 0 20px rgba(41, 121, 255, 0.6);
+                    background-color: #204a6e;
                 }
                 
                 .save-actions {
@@ -220,6 +229,25 @@ export class UIMainSaveWindow {
                     background-color: #333;
                     color: #666;
                     cursor: not-allowed;
+                }
+                
+                /* 滚动条样式 */
+                .save-slots-container::-webkit-scrollbar {
+                    width: 8px;
+                }
+                
+                .save-slots-container::-webkit-scrollbar-track {
+                    background-color: #1a1a1a;
+                    border-radius: 4px;
+                }
+                
+                .save-slots-container::-webkit-scrollbar-thumb {
+                    background-color: #444;
+                    border-radius: 4px;
+                }
+                
+                .save-slots-container::-webkit-scrollbar-thumb:hover {
+                    background-color: #555;
                 }
             </style>
             
