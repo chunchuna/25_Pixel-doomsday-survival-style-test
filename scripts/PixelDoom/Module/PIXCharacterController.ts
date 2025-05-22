@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { GAME_TYPE } from "../Global/PIXGlobal.js";
+import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 
 
 // new eventhandler test
@@ -79,6 +80,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     }
 })
 
+// 互动的时候禁止玩家移动
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
+        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
+    })
 
+    UIInteractionPanelActionChooseMain.OnInteractionClose(() => {
+        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = true;
+    })
+
+})
 
 
