@@ -72,7 +72,7 @@ export class UIDebug {
 
         // 添加键盘事件监听
         document.addEventListener('keydown', (event) => {
-            if (event.key === this.toggleKey) {
+            if (event.key.toLocaleLowerCase() === this.toggleKey.toLocaleLowerCase()) {
                 this.togglePanel();
             }
         });
@@ -556,6 +556,7 @@ export class UIDebug {
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
+                scale:1.2;
             }
             
             .debug-panel.hidden {

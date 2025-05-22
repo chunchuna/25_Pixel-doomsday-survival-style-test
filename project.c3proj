@@ -632,6 +632,11 @@
 						}
 					],
 					"name": "PixelDoom"
+				},
+				{
+					"items": [],
+					"subfolders": [],
+					"name": "resource"
 				}
 			],
 			"autoReloadOnPreview": true
