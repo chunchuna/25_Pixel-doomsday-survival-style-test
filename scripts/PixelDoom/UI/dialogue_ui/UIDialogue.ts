@@ -3,7 +3,8 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 
 var DialogueMainController:DialogueSystem;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
+    // 任何初始化的时候 都注册一下
+    // if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     (window as any).DialogueMainController = new DialogueSystem();
 })
 

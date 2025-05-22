@@ -67,8 +67,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 export class GAMEPLAY_LEVEL {
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
 
-    
-        
+
         //关闭环境音效
         //_Audio.AudioStop("NiaoJiao")
 
@@ -79,8 +78,8 @@ export class GAMEPLAY_LEVEL {
 
         // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
         //@ts-ignore
-        var DialogueWhole: DialogueSystem = DialogueMainController;
-        DialogueWhole.DestroyDialogue();
+        // var DialogueWhole: DialogueSystem = DialogueMainController;
+        // DialogueWhole.DestroyDialogue();
 
         // 关闭 库存面板相关元素
         inventoryManager.HideAllInventories();

@@ -166,7 +166,9 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [],
+		"items": [
+			"MainMenuHTML"
+		],
 		"subfolders": [
 			{
 				"items": [
@@ -540,6 +542,30 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "UIMainSettingWindow.ts",
+											"type": "application/typescript",
+											"sid": 870788357312409,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "UIMainSaveWindow.ts",
+											"type": "application/typescript",
+											"sid": 923030079292541,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "UIMainAboutWindow.ts",
+											"type": "application/typescript",
+											"sid": 332866442148668,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],
@@ -606,11 +632,6 @@
 						}
 					],
 					"name": "PixelDoom"
-				},
-				{
-					"items": [],
-					"subfolders": [],
-					"name": "resource"
 				}
 			],
 			"autoReloadOnPreview": true

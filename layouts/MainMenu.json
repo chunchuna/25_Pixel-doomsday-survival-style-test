@@ -40,6 +40,100 @@
 					"global": false
 				},
 				{
+					"name": "html",
+					"overriden": 0,
+					"subLayers": [],
+					"instances": [
+						{
+							"type": "MainMenuHTML",
+							"properties": {
+								"tag": "div",
+								"content": "<!DOCTYPE html>\n<html lang=\"zh\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>网格风格3D地球</title>\n    <style>\n        body {\n            margin: 0;\n            overflow: hidden;\n            background-color: #000;\n        }\n        canvas {\n            display: block;\n        }\n    </style>\n</head>\n<body>\n    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js\"></script>\n    <script>\n        // 初始化场景、相机和渲染器\n        const scene = new THREE.Scene();\n        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);\n        const renderer = new THREE.WebGLRenderer({ antialias: true });\n        renderer.setSize(window.innerWidth, window.innerHeight);\n        document.body.appendChild(renderer.domElement);\n\n        // 创建网格风格的地球\n        const earthGeometry = new THREE.SphereGeometry(1, 24, 16);\n        const earthTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');\n        \n        // 创建网格材质\n        const earthMaterial = new THREE.MeshBasicMaterial({ \n            map: earthTexture,\n            wireframe: true,\n            wireframeLinewidth: 1,\n            color: 0x3399ff\n        });\n        \n        // 创建地球网格模型\n        const earth = new THREE.Mesh(earthGeometry, earthMaterial);\n        scene.add(earth);\n        \n        // 添加额外的球体，显示为实体但半透明，增强视觉效果\n        const earthCore = new THREE.Mesh(\n            new THREE.SphereGeometry(0.98, 24, 16),\n            new THREE.MeshBasicMaterial({\n                map: earthTexture,\n                transparent: true,\n                opacity: 0.3\n            })\n        );\n        earth.add(earthCore);\n\n        // 创建在地球周围漂浮的几何体\n        const floatingObjects = new THREE.Group();\n        scene.add(floatingObjects);\n\n        // 创建不同的几何体形状\n        const geometries = [\n            new THREE.TetrahedronGeometry(0.2, 0),\n            new THREE.BoxGeometry(0.2, 0.2, 0.2),\n            new THREE.OctahedronGeometry(0.2, 0),\n            new THREE.DodecahedronGeometry(0.2, 0),\n            new THREE.ConeGeometry(0.1, 0.3, 8),\n            new THREE.TorusGeometry(0.15, 0.05, 8, 12)\n        ];\n\n        // 创建漂浮物体\n        const floatingObjectsCount = 15;\n        const floatingObjectsData = [];\n        \n        for (let i = 0; i < floatingObjectsCount; i++) {\n            // 随机选择一个几何体\n            const geometry = geometries[Math.floor(Math.random() * geometries.length)];\n            \n            // 创建网格材质\n            const material = new THREE.MeshBasicMaterial({\n                wireframe: true,\n                color: 0xffffff * Math.random(),\n                transparent: true,\n                opacity: 0.7\n            });\n            \n            // 创建几何体网格\n            const object = new THREE.Mesh(geometry, material);\n            \n            // 设置随机位置（距离地球1.5-4单位）\n            const distance = 1.5 + Math.random() * 2.5;\n            const phi = Math.random() * Math.PI * 2;\n            const theta = Math.random() * Math.PI;\n            \n            object.position.x = distance * Math.sin(theta) * Math.cos(phi);\n            object.position.y = distance * Math.sin(theta) * Math.sin(phi);\n            object.position.z = distance * Math.cos(theta);\n            \n            // 设置随机旋转\n            object.rotation.x = Math.random() * Math.PI;\n            object.rotation.y = Math.random() * Math.PI;\n            object.rotation.z = Math.random() * Math.PI;\n            \n            // 添加到集合中\n            floatingObjects.add(object);\n            \n            // 保存每个对象的移动数据\n            floatingObjectsData.push({\n                rotationSpeed: {\n                    x: (Math.random() - 0.5) * 0.01,\n                    y: (Math.random() - 0.5) * 0.01,\n                    z: (Math.random() - 0.5) * 0.01\n                },\n                orbitSpeed: (Math.random() - 0.5) * 0.005,\n                orbitRadius: distance,\n                orbitAngle: Math.random() * Math.PI * 2,\n                orbitAxis: new THREE.Vector3(\n                    Math.random() - 0.5,\n                    Math.random() - 0.5,\n                    Math.random() - 0.5\n                ).normalize()\n            });\n        }\n\n        // 创建星星\n        const starsGeometry = new THREE.BufferGeometry();\n        const starsMaterial = new THREE.PointsMaterial({\n            color: 0xffffff,\n            size: 0.05,\n            transparent: true\n        });\n\n        const starsVertices = [];\n        for (let i = 0; i < 10000; i++) {\n            const x = (Math.random() - 0.5) * 2000;\n            const y = (Math.random() - 0.5) * 2000;\n            const z = (Math.random() - 0.5) * 2000;\n            if (Math.abs(x) > 5 || Math.abs(y) > 5 || Math.abs(z) > 5) {\n                starsVertices.push(x, y, z);\n            }\n        }\n\n        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));\n        const stars = new THREE.Points(starsGeometry, starsMaterial);\n        scene.add(stars);\n\n        // 设置相机初始位置\n        camera.position.z = 5;\n\n        // 闪烁的星星效果\n        const originalStarSizes = [];\n        for (let i = 0; i < 10000; i++) {\n            originalStarSizes.push(Math.random() * 0.1 + 0.01);\n        }\n\n        // 相机动画状态\n        const cameraAnimation = {\n            time: 0,\n            moveSpeed: 0.000002,\n            rotateSpeed: 0.0010,\n            zoomSpeed: 0.001,\n            zoomDirection: 1,\n            minDistance: 2.5,\n            maxDistance: 20,\n            currentDistance: 5,\n            orbitRadius: 1.5,\n            orbitAngle: 0,\n            orbitHeight: 0,\n            heightDirection: 1\n        };\n\n        // 动画循环\n        function animate() {\n            requestAnimationFrame(animate);\n\n            // 旋转地球\n            earth.rotation.y += 0.005;\n            earth.rotation.x += 0.001;\n\n            // 更新漂浮物体的位置和旋转\n            for (let i = 0; i < floatingObjects.children.length; i++) {\n                const object = floatingObjects.children[i];\n                const data = floatingObjectsData[i];\n                \n                // 更新自身旋转\n                object.rotation.x += data.rotationSpeed.x;\n                object.rotation.y += data.rotationSpeed.y;\n                object.rotation.z += data.rotationSpeed.z;\n                \n                // 更新轨道位置\n                data.orbitAngle += data.orbitSpeed;\n                \n                // 计算新位置\n                const orbitQuat = new THREE.Quaternion().setFromAxisAngle(\n                    data.orbitAxis, \n                    data.orbitAngle\n                );\n                \n                const basePosition = new THREE.Vector3(data.orbitRadius, 0, 0);\n                basePosition.applyQuaternion(orbitQuat);\n                \n                object.position.copy(basePosition);\n            }\n\n            // 更新相机动画\n            cameraAnimation.time += cameraAnimation.moveSpeed;\n            \n            // 缩放相机（推进和拉远）\n            cameraAnimation.currentDistance += cameraAnimation.zoomSpeed * cameraAnimation.zoomDirection;\n            \n            // 改变缩放方向\n            if (cameraAnimation.currentDistance > cameraAnimation.maxDistance || \n                cameraAnimation.currentDistance < cameraAnimation.minDistance) {\n                cameraAnimation.zoomDirection *= -1;\n            }\n            \n            // 更新相机轨道位置\n            cameraAnimation.orbitAngle += cameraAnimation.rotateSpeed;\n            \n            // 更新相机高度\n            cameraAnimation.orbitHeight += 0.005 * cameraAnimation.heightDirection;\n            if (Math.abs(cameraAnimation.orbitHeight) > 1) {\n                cameraAnimation.heightDirection *= -1;\n            }\n            \n            // 计算并设置相机位置\n            camera.position.x = Math.sin(cameraAnimation.orbitAngle) * cameraAnimation.orbitRadius * cameraAnimation.currentDistance;\n            camera.position.y = cameraAnimation.orbitHeight * cameraAnimation.currentDistance * 0.5;\n            camera.position.z = Math.cos(cameraAnimation.orbitAngle) * cameraAnimation.orbitRadius * cameraAnimation.currentDistance;\n            \n            // 让相机始终看向地球\n            camera.lookAt(scene.position);\n\n            // 闪烁星星\n            if (Math.random() > 0.95) {\n                const sizes = starsMaterial.size;\n                starsMaterial.size = sizes * (Math.random() * 0.2 + 0.9);\n            }\n\n            renderer.render(scene, camera);\n        }\n\n        // 响应窗口大小变化\n        window.addEventListener('resize', () => {\n            camera.aspect = window.innerWidth / window.innerHeight;\n            camera.updateProjectionMatrix();\n            renderer.setSize(window.innerWidth, window.innerHeight);\n        });\n\n        animate();\n    </script>\n</body>\n</html>\n",
+								"content-type": "html",
+								"initially-visible": true,
+								"id": "",
+								"class": "",
+								"allow-context-menu": false,
+								"stop-input-events": "no",
+								"origin": "top-left",
+								"set-color": true,
+								"default-color": [
+									0,
+									0,
+									0,
+									0
+								],
+								"set-background-color": false,
+								"default-background-color": [
+									1,
+									1,
+									1,
+									0
+								],
+								"auto-font-size": true,
+								"allow-text-selection": false,
+								"style-attribute": ""
+							},
+							"uid": 119,
+							"sid": 780887382801654,
+							"tags": "",
+							"instanceVariables": {},
+							"behaviors": {},
+							"instanceFolderItem": {
+								"sid": 780887382801654,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 4,
+								"y": 3,
+								"width": 633.2582411623239,
+								"height": 473.62912058116194,
+								"originX": 0,
+								"originY": 0,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								]
+							}
+						}
+					],
+					"sid": 765512333623815,
+					"effectTypes": [],
+					"isInitiallyVisible": true,
+					"isInitiallyInteractive": true,
+					"isHTMLElementsLayer": false,
+					"color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"backgroundColor": [
+						0.3686274509803922,
+						0.3686274509803922,
+						0.3686274509803922,
+						1
+					],
+					"isTransparent": true,
+					"parallaxX": 1,
+					"parallaxY": 1,
+					"scaleRate": 1,
+					"forceOwnTexture": false,
+					"renderingMode": "3d",
+					"drawOrder": "z-order",
+					"useRenderCells": false,
+					"blendMode": "normal",
+					"zElevation": 0,
+					"global": false
+				},
+				{
 					"name": "front",
 					"overriden": 0,
 					"subLayers": [],
