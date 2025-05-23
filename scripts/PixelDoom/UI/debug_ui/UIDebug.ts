@@ -326,6 +326,14 @@ export class UIDebug {
             console.log('===================');
         });
 
+        // 添加测试控制台来源显示按钮
+        this.DebuPanelAddButton('测试控制台来源', () => {
+            console.log('这是一个来自UIDebug的测试日志消息');
+            console.info('这是一个测试信息消息');
+            console.warn('这是一个测试警告消息');
+            console.error('这是一个测试错误消息');
+        });
+
         // 添加测试子菜单
         const testMenu = this.DebuPanelAddFatherButton('🔧 测试子菜单');
         testMenu.AddChildButton('子按钮1', () => {
@@ -1147,6 +1155,10 @@ export class UIDebug {
     private static addConsoleMessage(type: string, args: any[]): void {
         if (!this.consoleContainer || !this.isConsoleEnabled) return;
 
+        // 获取调用来源信息
+        const stack = (new Error()).stack;
+        const scriptName = this.extractScriptName(stack);
+
         // 创建消息包装容器
         const messageWrapper = document.createElement('div');
         messageWrapper.className = 'console-message-wrapper';
@@ -1154,6 +1166,17 @@ export class UIDebug {
         // 创建消息元素
         const messageElement = document.createElement('div');
         messageElement.className = `console-message console-${type}`;
+
+        // 创建来源信息元素
+        const sourceElement = document.createElement('span');
+        sourceElement.className = 'console-source';
+        sourceElement.textContent = `[${scriptName}]`;
+
+        // 添加时间戳
+        const timestamp = document.createElement('span');
+        timestamp.className = 'console-timestamp';
+        const now = new Date();
+        timestamp.textContent = `[${now.toLocaleTimeString()}] `;
 
         // 处理不同类型的参数
         let messageContent = '';
@@ -1174,19 +1197,20 @@ export class UIDebug {
             }
         });
 
-        messageElement.textContent = messageContent;
+        // 创建消息内容元素
+        const contentElement = document.createElement('span');
+        contentElement.className = 'console-content';
+        contentElement.textContent = messageContent;
 
-        // 添加时间戳
-        const timestamp = document.createElement('span');
-        timestamp.className = 'console-timestamp';
-        const now = new Date();
-        timestamp.textContent = `[${now.toLocaleTimeString()}] `;
-        messageElement.prepend(timestamp);
+        // 按顺序添加元素：来源 -> 时间戳 -> 内容
+        messageElement.appendChild(sourceElement);
+        messageElement.appendChild(timestamp);
+        messageElement.appendChild(contentElement);
 
         // 应用随机颜色（如果启用）
         if (this.consoleRandomColor) {
             const color = this.getCurrentConsoleColor();
-            messageElement.style.color = color;
+            contentElement.style.color = color; // 只对内容应用随机颜色
         }
 
         // 将消息元素添加到包装容器
@@ -1395,6 +1419,26 @@ export class UIDebug {
                 color: rgba(136, 136, 136, 0.9);
                 font-size: 0.85em;
                 margin-right: 4px;
+            }
+            
+            /* 控制台来源信息样式 */
+            .console-source {
+                color: #ff4757 !important; /* 红色字体 */
+                background-color: rgba(255, 71, 87, 0.15); /* 红色底板 */
+                border: 1px solid rgba(255, 71, 87, 0.3);
+                border-radius: 3px;
+                padding: 1px 6px;
+                font-size: 0.8em;
+                font-weight: bold;
+                margin-right: 6px;
+                display: inline-block;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(2px);
+            }
+            
+            /* 控制台内容样式 */
+            .console-content {
+                flex: 1;
             }
             
             /* 普通日志 */
