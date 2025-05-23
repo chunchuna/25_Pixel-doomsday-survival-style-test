@@ -42,7 +42,7 @@ export class UIDebug {
     private static consoleContainer: HTMLDivElement | null = null;
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
-    private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
+    private static alwaysShowConsole: boolean = false; // 控制台始终显示的标志
     private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
     private static consoleFontSize: number = 10; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
@@ -341,6 +341,42 @@ export class UIDebug {
         });
         subFolder.AddChildButton('嵌套按钮2', () => {
             console.log('点击了嵌套按钮2');
+        });
+
+        // 添加更深层级的测试菜单来测试位置避免重合
+        const deepFolder = subFolder.AddChildFatherButton('🗂️ 深层文件夹');
+        deepFolder.AddChildButton('深层按钮1', () => {
+            console.log('点击了深层按钮1');
+        });
+        
+        const veryDeepFolder = deepFolder.AddChildFatherButton('📂 很深的文件夹');
+        veryDeepFolder.AddChildButton('很深的按钮1', () => {
+            console.log('点击了很深的按钮1');
+        });
+        veryDeepFolder.AddChildButton('很深的按钮2', () => {
+            console.log('点击了很深的按钮2');
+        });
+
+        // 添加另一个顶级测试菜单
+        const testMenu2 = this.DebuPanelAddFatherButton('⚙️ 测试菜单2');
+        testMenu2.AddChildButton('功能A', () => {
+            console.log('执行功能A');
+        });
+        
+        const settingsFolder = testMenu2.AddChildFatherButton('🔧 设置');
+        settingsFolder.AddChildButton('设置项1', () => {
+            console.log('修改设置项1');
+        });
+        settingsFolder.AddChildButton('设置项2', () => {
+            console.log('修改设置项2');
+        });
+        
+        const advancedSettings = settingsFolder.AddChildFatherButton('🔬 高级设置');
+        advancedSettings.AddChildButton('高级选项1', () => {
+            console.log('修改高级选项1');
+        });
+        advancedSettings.AddChildButton('高级选项2', () => {
+            console.log('修改高级选项2');
         });
 
         return {
@@ -1224,6 +1260,10 @@ export class UIDebug {
         if (!this.menuPanel) return;
         this.menuPanel.style.display = 'none';
         this.isMenuVisible = false;
+        
+        // 隐藏所有子菜单并重置箭头状态
+        this.hideAllSubmenus();
+        this.resetAllArrows();
     }
 
     /**
@@ -1674,6 +1714,11 @@ export class UIDebug {
                 position: relative;
             }
             
+            .debug-menu-folder.active {
+                background-color: rgba(80, 120, 200, 0.3) !important;
+                color: #fff !important;
+            }
+            
             .debug-menu-arrow {
                 position: absolute;
                 right: 10px;
@@ -1682,11 +1727,17 @@ export class UIDebug {
                 font-size: 8px;
                 color: rgba(255, 255, 255, 0.6);
                 transition: transform 0.2s;
+                pointer-events: none;
             }
             
             .debug-menu-folder:hover .debug-menu-arrow {
                 color: #fff;
                 transform: translateY(-50%) scale(1.2);
+            }
+            
+            .debug-menu-folder.active .debug-menu-arrow {
+                color: #fff;
+                transform: translateY(-50%) rotate(90deg);
             }
             
             .debug-submenu {
@@ -2092,13 +2143,10 @@ export class UIDebug {
             arrow.textContent = '▶';
             button.appendChild(arrow);
             
-            // 添加鼠标悬停事件
-            button.addEventListener('mouseenter', () => {
-                this.showSubmenu(itemData.id);
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                this.hideSubmenuDelayed(itemData.id);
+            // 改为点击切换子菜单，而不是鼠标悬停
+            button.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                this.toggleSubmenu(itemData.id);
             });
         } else {
             // 按钮类型，添加点击事件
@@ -2111,6 +2159,36 @@ export class UIDebug {
         }
         
         this.buttonsContainer!.appendChild(button);
+    }
+
+    /**
+     * 切换子菜单显示状态
+     */
+    private static toggleSubmenu(itemId: string): void {
+        const isCurrentlyOpen = this.currentOpenSubmenus.has(itemId);
+        const submenuContainer = this.submenuContainers.get(itemId);
+        const button = document.getElementById(itemId);
+        const arrow = button?.querySelector('.debug-menu-arrow');
+        
+        if (isCurrentlyOpen && submenuContainer) {
+            // 隐藏子菜单
+            submenuContainer.style.display = 'none';
+            this.currentOpenSubmenus.delete(itemId);
+            
+            // 更新按钮状态
+            if (button) button.classList.remove('active');
+            if (arrow) arrow.textContent = '▶';
+            
+            // 递归隐藏所有子级菜单
+            this.hideChildSubmenus(itemId);
+        } else {
+            // 显示子菜单
+            this.showSubmenu(itemId);
+            
+            // 更新按钮状态
+            if (button) button.classList.add('active');
+            if (arrow) arrow.textContent = '▼';
+        }
     }
 
     /**
@@ -2177,13 +2255,10 @@ export class UIDebug {
                     arrow.textContent = '▶';
                     button.appendChild(arrow);
                     
-                    // 添加鼠标悬停事件（支持多级菜单）
-                    button.addEventListener('mouseenter', () => {
-                        this.showSubmenu(childItem.id);
-                    });
-                    
-                    button.addEventListener('mouseleave', () => {
-                        this.hideSubmenuDelayed(childItem.id);
+                    // 改为点击切换子菜单
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        this.toggleSubmenu(childItem.id);
                     });
                 } else {
                     // 按钮类型，添加点击事件
@@ -2202,17 +2277,9 @@ export class UIDebug {
         
         submenu.appendChild(buttonsContainer);
         
-        // 添加鼠标事件，防止子菜单消失
-        submenu.addEventListener('mouseenter', () => {
-            const timeout = this.submenuTimeouts.get(parentId);
-            if (timeout) {
-                clearTimeout(timeout);
-                this.submenuTimeouts.delete(parentId);
-            }
-        });
-        
-        submenu.addEventListener('mouseleave', () => {
-            this.hideSubmenuDelayed(parentId);
+        // 阻止子菜单内部点击冒泡到document
+        submenu.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
         
         return submenu;
@@ -2232,27 +2299,104 @@ export class UIDebug {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         
-        // 计算位置
-        let left = parentRect.right + 5; // 在父菜单右侧5px
-        let top = parentRect.top;
+        // 判断父按钮是在主菜单还是在子菜单中
+        const isInMainMenu = parentButton.closest('.debug-menu') !== null;
+        const isInSubmenu = parentButton.closest('.debug-submenu') !== null;
         
-        // 检查是否超出右边界
-        if (left + submenuWidth > viewportWidth) {
-            left = parentRect.left - submenuWidth - 5; // 显示在左侧
+        let left: number;
+        let top: number;
+        
+        if (isInMainMenu) {
+            // 主菜单的子菜单：显示在右侧
+            left = parentRect.right + 5;
+            top = parentRect.top;
+            
+            // 检查是否超出右边界
+            if (left + submenuWidth > viewportWidth) {
+                left = parentRect.left - submenuWidth - 5; // 显示在左侧
+            }
+        } else if (isInSubmenu) {
+            // 子菜单的子菜单：尝试多个位置避免重合
+            const positions = [
+                // 右侧
+                { left: parentRect.right + 5, top: parentRect.top },
+                // 左侧
+                { left: parentRect.left - submenuWidth - 5, top: parentRect.top },
+                // 右侧偏下
+                { left: parentRect.right + 5, top: parentRect.bottom - 10 },
+                // 左侧偏下
+                { left: parentRect.left - submenuWidth - 5, top: parentRect.bottom - 10 },
+                // 右侧偏上
+                { left: parentRect.right + 5, top: parentRect.top - 30 },
+                // 左侧偏上
+                { left: parentRect.left - submenuWidth - 5, top: parentRect.top - 30 }
+            ];
+            
+            // 选择最佳位置（不超出边界且不与现有子菜单重合）
+            let bestPosition = positions[0];
+            for (const pos of positions) {
+                if (pos.left >= 10 && 
+                    pos.left + submenuWidth <= viewportWidth - 10 &&
+                    pos.top >= 10 && 
+                    pos.top + submenuHeight <= viewportHeight - 10) {
+                    
+                    // 检查是否与现有子菜单重合
+                    if (!this.checkSubmenuOverlap(pos.left, pos.top, submenuWidth, submenuHeight)) {
+                        bestPosition = pos;
+                        break;
+                    }
+                }
+            }
+            
+            left = bestPosition.left;
+            top = bestPosition.top;
+        } else {
+            // 默认位置
+            left = parentRect.right + 5;
+            top = parentRect.top;
         }
         
-        // 检查是否超出下边界
-        if (top + submenuHeight > viewportHeight) {
+        // 最后的边界检查和调整
+        if (left < 10) left = 10;
+        if (left + submenuWidth > viewportWidth - 10) {
+            left = viewportWidth - submenuWidth - 10;
+        }
+        
+        if (top < 10) top = 10;
+        if (top + submenuHeight > viewportHeight - 10) {
             top = viewportHeight - submenuHeight - 10;
-        }
-        
-        // 确保不会超出上边界
-        if (top < 10) {
-            top = 10;
         }
         
         submenuContainer.style.left = left + 'px';
         submenuContainer.style.top = top + 'px';
+    }
+
+    /**
+     * 检查子菜单是否与现有子菜单重合
+     */
+    private static checkSubmenuOverlap(left: number, top: number, width: number, height: number): boolean {
+        for (const [_, submenu] of this.submenuContainers) {
+            if (submenu.style.display === 'none') continue;
+            
+            const submenuRect = submenu.getBoundingClientRect();
+            const submenuLeft = submenuRect.left;
+            const submenuTop = submenuRect.top;
+            const submenuRight = submenuLeft + submenuRect.width;
+            const submenuBottom = submenuTop + submenuRect.height;
+            
+            const newRight = left + width;
+            const newBottom = top + height;
+            
+            // 检查是否重合（带一些边距）
+            const margin = 20;
+            if (!(newRight + margin < submenuLeft || 
+                  left - margin > submenuRight || 
+                  newBottom + margin < submenuTop || 
+                  top - margin > submenuBottom)) {
+                return true; // 有重合
+            }
+        }
+        return false; // 无重合
     }
 
     /**
@@ -2315,6 +2459,22 @@ export class UIDebug {
             submenu.style.display = 'none';
         });
         this.currentOpenSubmenus.clear();
+    }
+
+    /**
+     * 重置所有箭头方向
+     */
+    private static resetAllArrows(): void {
+        const allArrows = document.querySelectorAll('.debug-menu-arrow');
+        allArrows.forEach(arrow => {
+            arrow.textContent = '▶';
+        });
+        
+        // 重置所有文件夹按钮的active状态
+        const allFolderButtons = document.querySelectorAll('.debug-menu-folder');
+        allFolderButtons.forEach(button => {
+            button.classList.remove('active');
+        });
     }
 }
 
