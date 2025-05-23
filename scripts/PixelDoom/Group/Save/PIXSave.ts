@@ -122,7 +122,9 @@ export class LocalSave {
     static DataRead() {
         LocalSave.readFromFile().then(_data => {
             if (_data) {
-                data = _data
+                data.RunGameTiems = _data.RunGameTiems || 0;
+                data.LevelGameData = _data.LevelGameData || "";
+            
                 UISubtitleMain.ShowSubtitles("读取上传的游戏数据成功", 5)
             }
         });
