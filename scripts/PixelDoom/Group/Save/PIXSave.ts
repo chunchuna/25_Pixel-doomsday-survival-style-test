@@ -70,6 +70,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     isBindButtonIntoDebugPanel = true
     //DEBUG 面板绘制 
     if (!DEBUG.DebugMainUI) return
+    DEBUG.DebugMainUI.AddValue(data);
 
     DEBUG.DebugMainUI.DebuPanelAddButton("存档-标识符和json同时存档", () => {
         UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)

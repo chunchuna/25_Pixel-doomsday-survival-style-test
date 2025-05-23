@@ -63,6 +63,8 @@ export class UIDebug {
     private static isVariableWindowVisible: boolean = false;
     private static isDragging: boolean = false;
     private static dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+    private static expandedItems: Set<string> = new Set(); // 展开的项目ID集合
+    private static maxDisplayLength: number = 50; // 变量值最大显示长度（降低到50字符）
 
     /**
      * 初始化调试面板
@@ -226,6 +228,39 @@ export class UIDebug {
 
         this.DebuPanelAddButton('颜色组大小-', () => {
             this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize - 1);
+        });
+
+        // 添加变量显示长度控制按钮
+        this.DebuPanelAddButton('变量显示长度+', () => {
+            this.SetVariableDisplayMaxLength(this.maxDisplayLength + 10);
+            console.log('当前变量显示长度: ' + this.maxDisplayLength);
+        });
+
+        this.DebuPanelAddButton('变量显示长度-', () => {
+            this.SetVariableDisplayMaxLength(this.maxDisplayLength - 10);
+            console.log('当前变量显示长度: ' + this.maxDisplayLength);
+        });
+
+        // 添加测试长文本按钮
+        this.DebuPanelAddButton('测试长文本', () => {
+            const testLongText = {
+                shortText: "短文本",
+                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
+                jsonData: {
+                    name: "测试数据",
+                    description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
+                    properties: {
+                        prop1: "属性1",
+                        prop2: "属性2",
+                        prop3: {
+                            nestedProp: "嵌套属性",
+                            anotherNested: "另一个嵌套属性"
+                        }
+                    },
+                    array: ["元素1", "元素2", "元素3", "元素4", "元素5"]
+                }
+            };
+            this.AddValue(testLongText);
         });
 
         return {
@@ -399,6 +434,12 @@ export class UIDebug {
         this.variableList = document.createElement('div');
         this.variableList.className = 'variable-monitor-list';
         
+        // 创建空状态提示
+        const emptyState = document.createElement('div');
+        emptyState.className = 'variable-monitor-empty';
+        emptyState.textContent = '未添加任何变量';
+        this.variableList.appendChild(emptyState);
+        
         // 组装窗口
         this.variableMonitorWindow.appendChild(header);
         this.variableMonitorWindow.appendChild(this.variableList);
@@ -523,6 +564,13 @@ export class UIDebug {
     }
 
     /**
+     * 设置变量显示最大长度
+     */
+    public static SetVariableDisplayMaxLength(length: number): void {
+        this.maxDisplayLength = Math.max(20, Math.min(200, length));
+    }
+
+    /**
      * 添加要监控的变量
      */
     public static AddValue(variable: any): DebugPanelInstance {
@@ -626,46 +674,126 @@ export class UIDebug {
     /**
      * 创建变量列表项
      */
-    private static createVariableListItem(variableId: string, variableInfo: any): void {
+    private static createVariableListItem(variableId: string, variableInfo: any, level: number = 0, parentPath: string = ''): void {
+        // 隐藏空状态提示（如果有变量被添加）
+        const emptyState = this.variableList?.querySelector('.variable-monitor-empty') as HTMLElement;
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+
         const listItem = document.createElement('div');
         listItem.className = 'variable-list-item';
         listItem.id = variableId;
+        listItem.style.paddingLeft = (level * 20 + 8) + 'px'; // 层级缩进
+        
+        // 创建主要内容容器
+        const mainContent = document.createElement('div');
+        mainContent.className = 'variable-main-content';
+        
+        // 展开/折叠按钮（只对对象类型显示）
+        const expandButton = document.createElement('button');
+        expandButton.className = 'variable-expand-button';
+        const canExpand = this.canVariableExpand(variableInfo.value);
+        
+        if (canExpand) {
+            const isExpanded = this.expandedItems.has(variableId);
+            expandButton.textContent = isExpanded ? '▼' : '▶';
+            expandButton.addEventListener('click', () => {
+                this.toggleVariableExpansion(variableId, variableInfo.value, level, parentPath);
+            });
+        } else {
+            expandButton.textContent = '';
+            expandButton.style.visibility = 'hidden';
+        }
         
         // 变量名
         const nameSpan = document.createElement('span');
         nameSpan.className = 'variable-name';
-        nameSpan.textContent = variableInfo.name;
+        nameSpan.textContent = level === 0 ? variableInfo.name : this.getPropertyDisplayName(variableInfo.name, parentPath);
         
-        // 变量值
+        // 变量值容器
+        const valueContainer = document.createElement('div');
+        valueContainer.className = 'variable-value-container';
+        
         const valueSpan = document.createElement('span');
         valueSpan.className = 'variable-value';
-        valueSpan.textContent = this.formatVariableValue(variableInfo.value);
         
-        // 变量类
-        const classSpan = document.createElement('span');
-        classSpan.className = 'variable-class';
-        classSpan.textContent = variableInfo.className;
+        // 处理值显示
+        const formattedValue = this.formatVariableValue(variableInfo.value);
+        const needsTruncation = formattedValue.length > this.maxDisplayLength;
         
-        // 脚本名
-        const scriptSpan = document.createElement('span');
-        scriptSpan.className = 'variable-script';
-        scriptSpan.textContent = variableInfo.scriptName;
+        if (needsTruncation) {
+            // 创建截断显示
+            const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
+            valueSpan.textContent = truncatedValue;
+            
+            // 添加展开角标
+            const expandIndicator = document.createElement('span');
+            expandIndicator.className = 'variable-expand-indicator';
+            expandIndicator.textContent = '📄';
+            expandIndicator.title = '点击查看完整内容';
+            
+            const isTextExpanded = this.expandedItems.has(variableId + '_text');
+            
+            expandIndicator.addEventListener('click', () => {
+                this.toggleTextExpansion(variableId, formattedValue, valueSpan);
+            });
+            
+            valueContainer.appendChild(valueSpan);
+            valueContainer.appendChild(expandIndicator);
+        } else {
+            valueSpan.textContent = formattedValue;
+            valueContainer.appendChild(valueSpan);
+        }
         
-        // 删除按钮
+        // 变量类型和脚本信息（只在顶级显示）
+        const metaInfo = document.createElement('div');
+        metaInfo.className = 'variable-meta-info';
+        
+        if (level === 0) {
+            const classSpan = document.createElement('span');
+            classSpan.className = 'variable-class';
+            classSpan.textContent = variableInfo.className;
+            
+            const scriptSpan = document.createElement('span');
+            scriptSpan.className = 'variable-script';
+            scriptSpan.textContent = variableInfo.scriptName;
+            
+            metaInfo.appendChild(classSpan);
+            metaInfo.appendChild(scriptSpan);
+        }
+        
+        // 删除按钮（只在顶级显示）
         const deleteButton = document.createElement('button');
         deleteButton.className = 'variable-delete';
         deleteButton.textContent = '×';
+        deleteButton.style.display = level === 0 ? 'flex' : 'none';
         deleteButton.addEventListener('click', () => {
             this.removeVariable(variableId);
         });
         
-        listItem.appendChild(nameSpan);
-        listItem.appendChild(valueSpan);
-        listItem.appendChild(classSpan);
-        listItem.appendChild(scriptSpan);
-        listItem.appendChild(deleteButton);
+        // 组装主要内容
+        mainContent.appendChild(expandButton);
+        mainContent.appendChild(nameSpan);
+        mainContent.appendChild(valueContainer);
+        mainContent.appendChild(metaInfo);
+        mainContent.appendChild(deleteButton);
+        
+        listItem.appendChild(mainContent);
+        
+        // 为子项创建容器
+        const childrenContainer = document.createElement('div');
+        childrenContainer.className = 'variable-children-container';
+        childrenContainer.id = variableId + '_children';
+        childrenContainer.style.display = 'none';
+        listItem.appendChild(childrenContainer);
         
         this.variableList!.appendChild(listItem);
+        
+        // 如果已展开，显示子项
+        if (this.expandedItems.has(variableId) && canExpand) {
+            this.expandVariable(variableId, variableInfo.value, level, parentPath);
+        }
     }
 
     /**
@@ -674,10 +802,22 @@ export class UIDebug {
     private static formatVariableValue(value: any): string {
         if (value === null) return 'null';
         if (value === undefined) return 'undefined';
-        if (typeof value === 'string') return `"${value}"`;
+        if (typeof value === 'string') {
+            // 对于长字符串不加引号，短字符串加引号便于识别
+            if (value.length > 30) {
+                return value;
+            } else {
+                return `"${value}"`;
+            }
+        }
         if (typeof value === 'object') {
             try {
-                return JSON.stringify(value);
+                const jsonString = JSON.stringify(value);
+                // 如果JSON字符串很长，进行格式化
+                if (jsonString.length > this.maxDisplayLength) {
+                    return JSON.stringify(value, null, 2);
+                }
+                return jsonString;
             } catch {
                 return '[Object]';
             }
@@ -693,6 +833,21 @@ export class UIDebug {
         const element = document.getElementById(variableId);
         if (element) {
             element.remove();
+        }
+        
+        // 清理相关的展开状态
+        this.expandedItems.forEach(itemId => {
+            if (itemId.startsWith(variableId)) {
+                this.expandedItems.delete(itemId);
+            }
+        });
+        
+        // 如果没有变量了，显示空状态提示
+        if (this.monitoredVariables.size === 0) {
+            const emptyState = this.variableList?.querySelector('.variable-monitor-empty') as HTMLElement;
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
         }
     }
 
@@ -715,17 +870,44 @@ export class UIDebug {
         this.monitoredVariables.forEach((data, variableId) => {
             const element = document.getElementById(variableId);
             if (element) {
-                const valueSpan = element.querySelector('.variable-value');
-                if (valueSpan) {
+                const valueContainer = element.querySelector('.variable-value-container');
+                if (valueContainer) {
                     const newValue = this.formatVariableValue(data.reference);
-                    if (valueSpan.textContent !== newValue) {
+                    const needsTruncation = newValue.length > this.maxDisplayLength;
+                    
+                    // 清空现有内容
+                    valueContainer.innerHTML = '';
+                    
+                    // 创建值显示元素
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'variable-value';
+                    
+                    if (needsTruncation) {
+                        const truncatedValue = newValue.substring(0, this.maxDisplayLength) + '...';
+                        valueSpan.textContent = truncatedValue;
+                        
+                        // 创建角标
+                        const expandIndicator = document.createElement('span');
+                        expandIndicator.className = 'variable-expand-indicator';
+                        expandIndicator.textContent = '📄';
+                        expandIndicator.title = '点击查看完整内容';
+                        
+                        expandIndicator.addEventListener('click', () => {
+                            this.toggleTextExpansion(variableId, newValue, valueSpan);
+                        });
+                        
+                        valueContainer.appendChild(valueSpan);
+                        valueContainer.appendChild(expandIndicator);
+                    } else {
                         valueSpan.textContent = newValue;
-                        // 添加更新动画效果
-                        valueSpan.classList.add('variable-updated');
-                        setTimeout(() => {
-                            valueSpan.classList.remove('variable-updated');
-                        }, 300);
+                        valueContainer.appendChild(valueSpan);
                     }
+                    
+                    // 添加更新动画效果
+                    valueSpan.classList.add('variable-updated');
+                    setTimeout(() => {
+                        valueSpan.classList.remove('variable-updated');
+                    }, 300);
                 }
             }
         });
@@ -1117,44 +1299,105 @@ export class UIDebug {
             }
             
             .variable-list-item {
-                display: grid;
-                grid-template-columns: 1fr 2fr 1fr 1fr auto;
-                gap: 10px;
-                padding: 8px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                align-items: center;
+                display: block !important; /* 覆盖原有grid布局 */
+                padding: 4px 8px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
                 transition: background-color 0.2s;
+                margin: 1px 0;
             }
             
-            .variable-list-item:hover {
-                background-color: rgba(255, 255, 255, 0.05);
+            .variable-main-content {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                min-height: 24px;
+            }
+            
+            .variable-expand-button {
+                background: none;
+                border: none;
+                color: #ffffff;
+                cursor: pointer;
+                font-size: 10px;
+                width: 16px;
+                height: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 2px;
+                transition: all 0.2s;
+                flex-shrink: 0;
+            }
+            
+            .variable-expand-button:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: scale(1.1);
             }
             
             .variable-name {
                 color: #4ecdc4;
                 font-weight: bold;
-                word-break: break-all;
+                font-size: 11px;
+                min-width: 80px;
+                flex-shrink: 0;
+            }
+            
+            .variable-child-name {
+                color: #96ceb4;
+                font-weight: normal;
+            }
+            
+            .variable-value-container {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                flex: 1;
+                min-width: 0;
             }
             
             .variable-value {
                 color: #ffeaa7;
+                font-size: 10px;
                 word-break: break-all;
                 transition: all 0.3s;
+                flex: 1;
+                min-width: 0;
             }
             
-            .variable-value.variable-updated {
-                background-color: rgba(255, 234, 167, 0.3);
-                transform: scale(1.02);
+            .variable-expand-indicator {
+                background: none;
+                border: none;
+                color: #fd79a8;
+                cursor: pointer;
+                font-size: 12px;
+                padding: 2px 4px;
+                border-radius: 3px;
+                transition: all 0.2s;
+                flex-shrink: 0;
+                background-color: rgba(253, 121, 168, 0.1);
+            }
+            
+            .variable-expand-indicator:hover {
+                background-color: rgba(253, 121, 168, 0.3);
+                transform: scale(1.1);
+            }
+            
+            .variable-meta-info {
+                display: flex;
+                gap: 8px;
+                flex-shrink: 0;
             }
             
             .variable-class {
                 color: #74b9ff;
-                word-break: break-all;
+                font-size: 9px;
+                opacity: 0.8;
             }
             
             .variable-script {
                 color: #fd79a8;
-                word-break: break-all;
+                font-size: 9px;
+                opacity: 0.8;
             }
             
             .variable-delete {
@@ -1170,13 +1413,234 @@ export class UIDebug {
                 justify-content: center;
                 border-radius: 2px;
                 transition: background-color 0.2s;
+                flex-shrink: 0;
             }
             
             .variable-delete:hover {
                 background-color: rgba(255, 107, 107, 0.2);
             }
+            
+            .variable-children-container {
+                margin-left: 16px;
+                border-left: 1px solid rgba(255, 255, 255, 0.1);
+                padding-left: 4px;
+            }
+            
+            .variable-child-item {
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+            
+            .variable-child-item:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+            
+            .variable-monitor-empty {
+                text-align: center;
+                color: #666;
+                font-style: italic;
+                padding: 40px 20px;
+                font-size: 12px;
+            }
+            
+            .variable-value.variable-updated {
+                background-color: rgba(255, 234, 167, 0.3);
+                transform: scale(1.02);
+                border-radius: 3px;
+                padding: 2px 4px;
+                margin: -2px -4px;
+            }
         `;
 
         document.head.appendChild(styleElement);
+    }
+
+    /**
+     * 判断变量是否可以展开
+     */
+    private static canVariableExpand(value: any): boolean {
+        if (value === null || value === undefined) return false;
+        if (typeof value === 'object') {
+            if (Array.isArray(value)) return value.length > 0;
+            return Object.keys(value).length > 0;
+        }
+        return false;
+    }
+
+    /**
+     * 切换变量展开状态
+     */
+    private static toggleVariableExpansion(variableId: string, value: any, level: number, parentPath: string): void {
+        const isExpanded = this.expandedItems.has(variableId);
+        const expandButton = document.getElementById(variableId)?.querySelector('.variable-expand-button') as HTMLButtonElement;
+        const childrenContainer = document.getElementById(variableId + '_children');
+        
+        if (isExpanded) {
+            // 折叠
+            this.expandedItems.delete(variableId);
+            if (expandButton) expandButton.textContent = '▶';
+            if (childrenContainer) {
+                childrenContainer.style.display = 'none';
+                childrenContainer.innerHTML = ''; // 清空子项
+            }
+        } else {
+            // 展开
+            this.expandedItems.add(variableId);
+            if (expandButton) expandButton.textContent = '▼';
+            this.expandVariable(variableId, value, level, parentPath);
+        }
+    }
+
+    /**
+     * 展开变量显示子项
+     */
+    private static expandVariable(variableId: string, value: any, level: number, parentPath: string): void {
+        const childrenContainer = document.getElementById(variableId + '_children');
+        if (!childrenContainer) return;
+        
+        childrenContainer.style.display = 'block';
+        childrenContainer.innerHTML = ''; // 清空现有内容
+        
+        if (Array.isArray(value)) {
+            // 处理数组
+            value.forEach((item, index) => {
+                const childId = variableId + '_child_' + index;
+                const childInfo = {
+                    name: `[${index}]`,
+                    value: item,
+                    className: typeof item,
+                    scriptName: ''
+                };
+                
+                // 创建子项元素
+                this.createChildVariableItem(childId, childInfo, level + 1, parentPath + `[${index}]`, childrenContainer);
+            });
+        } else if (typeof value === 'object' && value !== null) {
+            // 处理对象
+            Object.keys(value).forEach(key => {
+                const childId = variableId + '_child_' + key;
+                const childInfo = {
+                    name: key,
+                    value: value[key],
+                    className: typeof value[key],
+                    scriptName: ''
+                };
+                
+                // 创建子项元素
+                this.createChildVariableItem(childId, childInfo, level + 1, parentPath + '.' + key, childrenContainer);
+            });
+        }
+    }
+
+    /**
+     * 创建子变量项
+     */
+    private static createChildVariableItem(childId: string, childInfo: any, level: number, parentPath: string, container: HTMLElement): void {
+        const listItem = document.createElement('div');
+        listItem.className = 'variable-list-item variable-child-item';
+        listItem.id = childId;
+        listItem.style.paddingLeft = (level * 20 + 8) + 'px';
+        
+        // 创建主要内容容器
+        const mainContent = document.createElement('div');
+        mainContent.className = 'variable-main-content';
+        
+        // 展开/折叠按钮
+        const expandButton = document.createElement('button');
+        expandButton.className = 'variable-expand-button';
+        const canExpand = this.canVariableExpand(childInfo.value);
+        
+        if (canExpand) {
+            const isExpanded = this.expandedItems.has(childId);
+            expandButton.textContent = isExpanded ? '▼' : '▶';
+            expandButton.addEventListener('click', () => {
+                this.toggleVariableExpansion(childId, childInfo.value, level, parentPath);
+            });
+        } else {
+            expandButton.textContent = '';
+            expandButton.style.visibility = 'hidden';
+        }
+        
+        // 变量名
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'variable-name variable-child-name';
+        nameSpan.textContent = childInfo.name;
+        
+        // 变量值容器
+        const valueContainer = document.createElement('div');
+        valueContainer.className = 'variable-value-container';
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'variable-value';
+        
+        // 处理值显示
+        const formattedValue = this.formatVariableValue(childInfo.value);
+        const needsTruncation = formattedValue.length > this.maxDisplayLength;
+        
+        if (needsTruncation) {
+            const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
+            valueSpan.textContent = truncatedValue;
+            
+            const expandIndicator = document.createElement('span');
+            expandIndicator.className = 'variable-expand-indicator';
+            expandIndicator.textContent = '📄';
+            expandIndicator.title = '点击查看完整内容';
+            
+            expandIndicator.addEventListener('click', () => {
+                this.toggleTextExpansion(childId, formattedValue, valueSpan);
+            });
+            
+            valueContainer.appendChild(valueSpan);
+            valueContainer.appendChild(expandIndicator);
+        } else {
+            valueSpan.textContent = formattedValue;
+            valueContainer.appendChild(valueSpan);
+        }
+        
+        // 组装主要内容
+        mainContent.appendChild(expandButton);
+        mainContent.appendChild(nameSpan);
+        mainContent.appendChild(valueContainer);
+        
+        listItem.appendChild(mainContent);
+        
+        // 为子项创建容器
+        const childrenContainer = document.createElement('div');
+        childrenContainer.className = 'variable-children-container';
+        childrenContainer.id = childId + '_children';
+        childrenContainer.style.display = 'none';
+        listItem.appendChild(childrenContainer);
+        
+        container.appendChild(listItem);
+        
+        // 如果已展开，显示子项
+        if (this.expandedItems.has(childId) && canExpand) {
+            this.expandVariable(childId, childInfo.value, level, parentPath);
+        }
+    }
+
+    /**
+     * 获取属性显示名
+     */
+    private static getPropertyDisplayName(name: string, parentPath: string): string {
+        return name;
+    }
+
+    /**
+     * 切换文本展开状态
+     */
+    private static toggleTextExpansion(variableId: string, fullText: string, valueSpan: HTMLElement): void {
+        const textExpandId = variableId + '_text';
+        const isExpanded = this.expandedItems.has(textExpandId);
+        
+        if (isExpanded) {
+            // 收起文本
+            this.expandedItems.delete(textExpandId);
+            const truncatedValue = fullText.substring(0, this.maxDisplayLength) + '...';
+            valueSpan.textContent = truncatedValue;
+        } else {
+            // 展开文本
+            this.expandedItems.add(textExpandId);
+            valueSpan.textContent = fullText;
+        }
     }
 }
