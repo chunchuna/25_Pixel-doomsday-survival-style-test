@@ -2,7 +2,7 @@
 	"name": "MainMenu",
 	"layers": [
 		{
-			"name": "html",
+			"name": "html_layer",
 			"overriden": 0,
 			"subLayers": [],
 			"instances": [
@@ -69,7 +69,7 @@
 			"sid": 765512333623815,
 			"effectTypes": [],
 			"isInitiallyVisible": true,
-			"isInitiallyInteractive": true,
+			"isInitiallyInteractive": false,
 			"isHTMLElementsLayer": true,
 			"color": [
 				1,
@@ -107,7 +107,7 @@
 					"sid": 265083285741202,
 					"effectTypes": [],
 					"isInitiallyVisible": true,
-					"isInitiallyInteractive": true,
+					"isInitiallyInteractive": false,
 					"isHTMLElementsLayer": false,
 					"color": [
 						1,

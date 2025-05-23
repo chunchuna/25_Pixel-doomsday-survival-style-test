@@ -13,7 +13,11 @@ import { UIMainAboutWindow } from "./UIMainAboutWindow.js";
 var IsInitGameMainMenu = false
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
+
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
+    // 强行修改图层是否透明
+    //@ts-ignore
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer("background").isTransparent=true
     UIMainMenu.getInstance().ShowMainMenu()
     if (IsInitGameMainMenu) return;
     IsInitGameMainMenu = true;
