@@ -25,6 +25,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 interface DebugPanelInstance {
     DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance;
     InitConsoleCapture(): DebugPanelInstance;
+    AddValue(variable: any): DebugPanelInstance;
 }
 
 export class UIDebug {
@@ -37,12 +38,31 @@ export class UIDebug {
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
     private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
-    private static consoleFontSize: number = 15; // 控制台字体大小
+    private static consoleFontSize: number = 10; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '20, 30, 60'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0.5; // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
     private static mouseY: number = 0; // 记录鼠标Y位置
+    
+    // 新增：随机控制台字体颜色相关变量
+    private static consoleRandomColor: boolean = false; // 随机控制台字体颜色开关
+    private static consoleColorRandomGroupSize: number = 3; // 字体颜色行数控制随机（1-5）
+    private static currentColorGroup: string = '#ffffff'; // 当前颜色组使用的颜色
+    private static colorGroupCounter: number = 0; // 当前颜色组计数器
+    private static availableColors: string[] = [
+        '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7',
+        '#fd79a8', '#fdcb6e', '#6c5ce7', '#74b9ff', '#00b894',
+        '#e17055', '#a29bfe', '#fd79a8', '#fdcb6e', '#55a3ff'
+    ]; // 可用颜色列表
+    
+    // 新增：变量监控窗口相关变量
+    private static variableMonitorWindow: HTMLDivElement | null = null;
+    private static variableList: HTMLDivElement | null = null;
+    private static monitoredVariables: Map<string, any> = new Map(); // 监控的变量列表
+    private static isVariableWindowVisible: boolean = false;
+    private static isDragging: boolean = false;
+    private static dragOffset: { x: number; y: number } = { x: 0, y: 0 };
 
     /**
      * 初始化调试面板
@@ -58,6 +78,9 @@ export class UIDebug {
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
+                },
+                AddValue: (variable: any) => {
+                    return UIDebug.AddValue(variable);
                 }
             };
         }
@@ -72,6 +95,9 @@ export class UIDebug {
 
         // 创建控制台元素
         this.createConsoleElement();
+
+        // 创建变量监控窗口
+        this.createVariableMonitorWindow();
 
         // 添加鼠标移动事件监听，记录鼠标位置
         document.addEventListener('mousemove', (event) => {
@@ -99,6 +125,9 @@ export class UIDebug {
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
+            },
+            AddValue: (variable: any) => {
+                return UIDebug.AddValue(variable);
             }
         };
     }
@@ -118,6 +147,9 @@ export class UIDebug {
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
+                },
+                AddValue: (variable: any) => {
+                    return UIDebug.AddValue(variable);
                 }
             };
         }
@@ -138,6 +170,9 @@ export class UIDebug {
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
+            },
+            AddValue: (variable: any) => {
+                return UIDebug.AddValue(variable);
             }
         };
     }
@@ -155,6 +190,9 @@ export class UIDebug {
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
+                },
+                AddValue: (variable: any) => {
+                    return UIDebug.AddValue(variable);
                 }
             };
         }
@@ -171,12 +209,34 @@ export class UIDebug {
             }
         });
 
+        // 添加变量监控窗口控制按钮
+        this.DebuPanelAddButton('显示变量监控', () => {
+            this.toggleVariableMonitorWindow();
+        });
+
+        // 添加随机颜色控制按钮
+        this.DebuPanelAddButton('切换随机颜色', () => {
+            this.SetConsoleRandomColor(!this.consoleRandomColor);
+        });
+
+        // 添加设置颜色组大小按钮
+        this.DebuPanelAddButton('颜色组大小+', () => {
+            this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize + 1);
+        });
+
+        this.DebuPanelAddButton('颜色组大小-', () => {
+            this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize - 1);
+        });
+
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
+            },
+            AddValue: (variable: any) => {
+                return UIDebug.AddValue(variable);
             }
         };
     }
@@ -313,6 +373,365 @@ export class UIDebug {
     }
 
     /**
+     * 创建变量监控窗口
+     */
+    private static createVariableMonitorWindow(): void {
+        // 创建变量监控窗口容器
+        this.variableMonitorWindow = document.createElement('div');
+        this.variableMonitorWindow.className = 'variable-monitor-window';
+        this.variableMonitorWindow.style.display = 'none';
+        
+        // 创建窗口头部（用于拖拽）
+        const header = document.createElement('div');
+        header.className = 'variable-monitor-header';
+        header.textContent = '变量监控';
+        
+        // 创建关闭按钮
+        const closeButton = document.createElement('button');
+        closeButton.className = 'variable-monitor-close';
+        closeButton.textContent = '×';
+        closeButton.addEventListener('click', () => {
+            this.hideVariableMonitorWindow();
+        });
+        header.appendChild(closeButton);
+        
+        // 创建变量列表容器
+        this.variableList = document.createElement('div');
+        this.variableList.className = 'variable-monitor-list';
+        
+        // 组装窗口
+        this.variableMonitorWindow.appendChild(header);
+        this.variableMonitorWindow.appendChild(this.variableList);
+        
+        // 添加拖拽功能
+        this.setupWindowDragAndDrop(header);
+        
+        // 添加到文档
+        document.body.appendChild(this.variableMonitorWindow);
+    }
+
+    /**
+     * 设置窗口拖拽功能
+     */
+    private static setupWindowDragAndDrop(header: HTMLElement): void {
+        header.addEventListener('mousedown', (e) => {
+            if (e.target === header || header.contains(e.target as Node)) {
+                this.isDragging = true;
+                const rect = this.variableMonitorWindow!.getBoundingClientRect();
+                this.dragOffset.x = e.clientX - rect.left;
+                this.dragOffset.y = e.clientY - rect.top;
+                
+                document.addEventListener('mousemove', this.handleWindowDrag);
+                document.addEventListener('mouseup', this.handleWindowDragEnd);
+                e.preventDefault();
+            }
+        });
+    }
+
+    /**
+     * 处理窗口拖拽
+     */
+    private static handleWindowDrag = (e: MouseEvent): void => {
+        if (!this.isDragging || !this.variableMonitorWindow) return;
+        
+        const newX = e.clientX - this.dragOffset.x;
+        const newY = e.clientY - this.dragOffset.y;
+        
+        this.variableMonitorWindow.style.left = newX + 'px';
+        this.variableMonitorWindow.style.top = newY + 'px';
+    }
+
+    /**
+     * 处理窗口拖拽结束
+     */
+    private static handleWindowDragEnd = (): void => {
+        this.isDragging = false;
+        document.removeEventListener('mousemove', this.handleWindowDrag);
+        document.removeEventListener('mouseup', this.handleWindowDragEnd);
+    }
+
+    /**
+     * 显示变量监控窗口
+     */
+    private static showVariableMonitorWindow(): void {
+        if (!this.variableMonitorWindow) return;
+        this.variableMonitorWindow.style.display = 'block';
+        this.isVariableWindowVisible = true;
+    }
+
+    /**
+     * 隐藏变量监控窗口
+     */
+    private static hideVariableMonitorWindow(): void {
+        if (!this.variableMonitorWindow) return;
+        this.variableMonitorWindow.style.display = 'none';
+        this.isVariableWindowVisible = false;
+    }
+
+    /**
+     * 切换变量监控窗口显示状态
+     */
+    private static toggleVariableMonitorWindow(): void {
+        if (this.isVariableWindowVisible) {
+            this.hideVariableMonitorWindow();
+        } else {
+            this.showVariableMonitorWindow();
+        }
+    }
+
+    /**
+     * 获取随机颜色（用于控制台消息）
+     */
+    private static getRandomColor(): string {
+        return this.availableColors[Math.floor(Math.random() * this.availableColors.length)];
+    }
+
+    /**
+     * 获取当前控制台消息应该使用的颜色
+     */
+    private static getCurrentConsoleColor(): string {
+        if (!this.consoleRandomColor) {
+            return '#ffffff'; // 默认白色
+        }
+        
+        // 如果计数器达到组大小，则重新选择颜色
+        if (this.colorGroupCounter >= this.consoleColorRandomGroupSize) {
+            this.currentColorGroup = this.getRandomColor();
+            this.colorGroupCounter = 0;
+        }
+        
+        this.colorGroupCounter++;
+        return this.currentColorGroup;
+    }
+
+    /**
+     * 设置控制台随机颜色
+     */
+    public static SetConsoleRandomColor(enable: boolean): void {
+        this.consoleRandomColor = enable;
+        if (enable) {
+            this.currentColorGroup = this.getRandomColor();
+            this.colorGroupCounter = 0;
+        }
+    }
+
+    /**
+     * 设置控制台颜色组大小
+     */
+    public static SetConsoleColorGroupSize(size: number): void {
+        this.consoleColorRandomGroupSize = Math.max(1, Math.min(5, size));
+    }
+
+    /**
+     * 添加要监控的变量
+     */
+    public static AddValue(variable: any): DebugPanelInstance {
+        if (!this.variableList) {
+            console.error('Variable monitor window not initialized.');
+            return {
+                DebuPanelAddButton: (name: string, callback: () => void) => {
+                    return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                InitConsoleCapture: () => {
+                    return UIDebug.InitConsoleCapture();
+                },
+                AddValue: (variable: any) => {
+                    return UIDebug.AddValue(variable);
+                }
+            };
+        }
+
+        // 生成唯一ID
+        const variableId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 获取变量信息
+        const variableInfo = this.getVariableInfo(variable);
+        
+        // 存储变量引用
+        this.monitoredVariables.set(variableId, {
+            reference: variable,
+            info: variableInfo
+        });
+        
+        // 创建变量显示元素
+        this.createVariableListItem(variableId, variableInfo);
+        
+        // 启动监控更新
+        this.startVariableMonitoring();
+        
+        return {
+            DebuPanelAddButton: (name: string, callback: () => void) => {
+                return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            InitConsoleCapture: () => {
+                return UIDebug.InitConsoleCapture();
+            },
+            AddValue: (variable: any) => {
+                return UIDebug.AddValue(variable);
+            }
+        };
+    }
+
+    /**
+     * 获取变量信息
+     */
+    private static getVariableInfo(variable: any): any {
+        const stack = (new Error()).stack;
+        const scriptName = this.extractScriptName(stack);
+        
+        return {
+            name: this.getVariableName(variable),
+            value: variable,
+            className: this.getClassName(variable),
+            scriptName: scriptName
+        };
+    }
+
+    /**
+     * 获取变量名（尽力而为）
+     */
+    private static getVariableName(variable: any): string {
+        if (variable && variable.constructor && variable.constructor.name) {
+            return variable.constructor.name;
+        }
+        return typeof variable;
+    }
+
+    /**
+     * 获取类名
+     */
+    private static getClassName(variable: any): string {
+        if (variable && variable.constructor) {
+            return variable.constructor.name;
+        }
+        return typeof variable;
+    }
+
+    /**
+     * 从堆栈中提取脚本名
+     */
+    private static extractScriptName(stack: string | undefined): string {
+        if (!stack) return 'unknown';
+        
+        const lines = stack.split('\n');
+        for (let i = 2; i < lines.length; i++) { // 跳过前两行
+            const match = lines[i].match(/\/([^\/]+\.(?:js|ts))/);
+            if (match) {
+                return match[1];
+            }
+        }
+        return 'unknown';
+    }
+
+    /**
+     * 创建变量列表项
+     */
+    private static createVariableListItem(variableId: string, variableInfo: any): void {
+        const listItem = document.createElement('div');
+        listItem.className = 'variable-list-item';
+        listItem.id = variableId;
+        
+        // 变量名
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'variable-name';
+        nameSpan.textContent = variableInfo.name;
+        
+        // 变量值
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'variable-value';
+        valueSpan.textContent = this.formatVariableValue(variableInfo.value);
+        
+        // 变量类
+        const classSpan = document.createElement('span');
+        classSpan.className = 'variable-class';
+        classSpan.textContent = variableInfo.className;
+        
+        // 脚本名
+        const scriptSpan = document.createElement('span');
+        scriptSpan.className = 'variable-script';
+        scriptSpan.textContent = variableInfo.scriptName;
+        
+        // 删除按钮
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'variable-delete';
+        deleteButton.textContent = '×';
+        deleteButton.addEventListener('click', () => {
+            this.removeVariable(variableId);
+        });
+        
+        listItem.appendChild(nameSpan);
+        listItem.appendChild(valueSpan);
+        listItem.appendChild(classSpan);
+        listItem.appendChild(scriptSpan);
+        listItem.appendChild(deleteButton);
+        
+        this.variableList!.appendChild(listItem);
+    }
+
+    /**
+     * 格式化变量值显示
+     */
+    private static formatVariableValue(value: any): string {
+        if (value === null) return 'null';
+        if (value === undefined) return 'undefined';
+        if (typeof value === 'string') return `"${value}"`;
+        if (typeof value === 'object') {
+            try {
+                return JSON.stringify(value);
+            } catch {
+                return '[Object]';
+            }
+        }
+        return String(value);
+    }
+
+    /**
+     * 移除变量监控
+     */
+    private static removeVariable(variableId: string): void {
+        this.monitoredVariables.delete(variableId);
+        const element = document.getElementById(variableId);
+        if (element) {
+            element.remove();
+        }
+    }
+
+    /**
+     * 启动变量监控更新
+     */
+    private static startVariableMonitoring(): void {
+        // 避免重复启动
+        if ((this as any).monitoringInterval) return;
+        
+        (this as any).monitoringInterval = setInterval(() => {
+            this.updateVariableDisplay();
+        }, 100); // 每100ms更新一次
+    }
+
+    /**
+     * 更新变量显示
+     */
+    private static updateVariableDisplay(): void {
+        this.monitoredVariables.forEach((data, variableId) => {
+            const element = document.getElementById(variableId);
+            if (element) {
+                const valueSpan = element.querySelector('.variable-value');
+                if (valueSpan) {
+                    const newValue = this.formatVariableValue(data.reference);
+                    if (valueSpan.textContent !== newValue) {
+                        valueSpan.textContent = newValue;
+                        // 添加更新动画效果
+                        valueSpan.classList.add('variable-updated');
+                        setTimeout(() => {
+                            valueSpan.classList.remove('variable-updated');
+                        }, 300);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
      * 替换原始console方法以捕获输出
      */
     private static overrideConsoleMethods(): void {
@@ -397,6 +816,12 @@ export class UIDebug {
         const now = new Date();
         timestamp.textContent = `[${now.toLocaleTimeString()}] `;
         messageElement.prepend(timestamp);
+
+        // 应用随机颜色（如果启用）
+        if (this.consoleRandomColor) {
+            const color = this.getCurrentConsoleColor();
+            messageElement.style.color = color;
+        }
 
         // 将消息元素添加到包装容器
         messageWrapper.appendChild(messageElement);
@@ -503,7 +928,7 @@ export class UIDebug {
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                max-height: 60vh;
+                max-height: 36vh;
                 overflow-y: auto;
                 color: #ffffff;
                 font-family: monospace;
@@ -629,6 +1054,126 @@ export class UIDebug {
             .console-debug {
                 color: rgba(119, 255, 177, 0.95);
                 background-color: rgba(0, 80, 40, 0.4) !important;
+            }
+            
+            /* 变量监控窗口样式 */
+            .variable-monitor-window {
+                position: fixed;
+                top: 20%;
+                left: 20%;
+                width: 600px;
+                height: 400px;
+                background-color: rgba(30, 30, 30, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(10px);
+                z-index: 10001;
+                font-family: monospace;
+                color: #ffffff;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .variable-monitor-header {
+                background-color: rgba(50, 50, 50, 0.8);
+                padding: 10px 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                cursor: move;
+                user-select: none;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            
+            .variable-monitor-close {
+                background: none;
+                border: none;
+                color: #ff6b6b;
+                font-size: 16px;
+                cursor: pointer;
+                padding: 0;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 2px;
+                transition: background-color 0.2s;
+            }
+            
+            .variable-monitor-close:hover {
+                background-color: rgba(255, 107, 107, 0.2);
+            }
+            
+            .variable-monitor-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 10px;
+                font-size: 11px;
+            }
+            
+            .variable-list-item {
+                display: grid;
+                grid-template-columns: 1fr 2fr 1fr 1fr auto;
+                gap: 10px;
+                padding: 8px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                align-items: center;
+                transition: background-color 0.2s;
+            }
+            
+            .variable-list-item:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+            
+            .variable-name {
+                color: #4ecdc4;
+                font-weight: bold;
+                word-break: break-all;
+            }
+            
+            .variable-value {
+                color: #ffeaa7;
+                word-break: break-all;
+                transition: all 0.3s;
+            }
+            
+            .variable-value.variable-updated {
+                background-color: rgba(255, 234, 167, 0.3);
+                transform: scale(1.02);
+            }
+            
+            .variable-class {
+                color: #74b9ff;
+                word-break: break-all;
+            }
+            
+            .variable-script {
+                color: #fd79a8;
+                word-break: break-all;
+            }
+            
+            .variable-delete {
+                background: none;
+                border: none;
+                color: #ff6b6b;
+                cursor: pointer;
+                font-size: 14px;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 2px;
+                transition: background-color 0.2s;
+            }
+            
+            .variable-delete:hover {
+                background-color: rgba(255, 107, 107, 0.2);
             }
         `;
 
