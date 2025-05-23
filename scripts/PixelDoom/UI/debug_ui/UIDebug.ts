@@ -275,6 +275,17 @@ export class UIDebug {
             console.log('变量显示长度限制:', this.maxDisplayLength);
         });
 
+        // 添加堆栈跟踪调试按钮
+        this.DebuPanelAddButton('测试脚本来源', () => {
+            const stack = (new Error()).stack;
+            const scriptName = this.extractScriptName(stack);
+            console.log('=== 脚本来源调试 ===');
+            console.log('检测到的脚本名:', scriptName);
+            console.log('完整堆栈信息:');
+            console.log(stack);
+            console.log('===================');
+        });
+
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
@@ -694,12 +705,47 @@ export class UIDebug {
         if (!stack) return 'unknown';
         
         const lines = stack.split('\n');
-        for (let i = 2; i < lines.length; i++) { // 跳过前两行
-            const match = lines[i].match(/\/([^\/]+\.(?:js|ts))/);
+        
+        // 跳过UIDebug内部的调用，找到真正的外部调用者
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            
+            // 匹配脚本路径
+            const match = line.match(/\/([^\/]+\.(?:js|ts))/);
             if (match) {
-                return match[1];
+                const scriptName = match[1];
+                
+                // 跳过UIDebug.js相关的调用，找到外部调用者
+                if (scriptName.toLowerCase() !== 'uidebug.js' && 
+                    scriptName.toLowerCase() !== 'uidebug.ts') {
+                    return scriptName;
+                }
             }
         }
+        
+        // 如果没有找到外部脚本，尝试更宽松的匹配
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            
+            // 尝试匹配更多格式的路径
+            const patterns = [
+                /([^\/\\]+\.(?:js|ts)):\d+:\d+/,  // filename.js:line:col
+                /at\s+[^(]*\(([^)]+\.(?:js|ts))/,  // at function (filename.js)
+                /([^\/\\]+\.(?:js|ts))/            // 简单匹配
+            ];
+            
+            for (const pattern of patterns) {
+                const match = line.match(pattern);
+                if (match) {
+                    const scriptName = match[1];
+                    if (scriptName.toLowerCase() !== 'uidebug.js' && 
+                        scriptName.toLowerCase() !== 'uidebug.ts') {
+                        return scriptName;
+                    }
+                }
+            }
+        }
+        
         return 'unknown';
     }
 
