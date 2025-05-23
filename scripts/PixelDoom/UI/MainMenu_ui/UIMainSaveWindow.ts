@@ -304,7 +304,7 @@ export class UIMainSaveWindow {
         slotsContainer.innerHTML = '';
 
         // 检查Data是否为空
-        if (data.LevelGameData==="") {
+        if (data.LevelGameData === "") {
             //console.log(this.Data)
             // Data为空，不显示任何插槽
             slotsContainer.innerHTML = '<div class="no-save-message">没有可用的存档数据</div>';
@@ -346,12 +346,16 @@ export class UIMainSaveWindow {
         // 为存档插槽添加点击事件，但内部保持为空
         slotElement.addEventListener('click', (e) => {
             e.stopPropagation();
-            UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, () => {
-                SaveSetting.isUseDataEnterNewGame = true;
-                GameMainScene.getInstance().HideALLMainMenuUI();
-                pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+            GameMainScene.getInstance().HideALLMainMenuUI(() => {
+                UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, () => {
+                    SaveSetting.isUseDataEnterNewGame = true;
 
-            })
+                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+
+                })
+
+            });
+
         }, true);
 
         slotsContainer.appendChild(slotElement);
