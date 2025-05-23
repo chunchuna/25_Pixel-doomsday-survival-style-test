@@ -1,6 +1,25 @@
 /**
  * Debug UI System
  * 提供游戏内调试面板功能
+ * 
+ * 使用示例：
+ * 
+ * // 基本用法
+ * DEBUG.DebugMainUI.AddValue(someVariable);
+ * 
+ * // 实时变量监控（推荐用于会变化的变量）
+ * let gameScore = 0;
+ * DEBUG.DebugMainUI.AddValueByReference(() => gameScore, '游戏分数');
+ * 
+ * // 监控对象属性
+ * const player = { x: 0, y: 0, health: 100 };
+ * DEBUG.DebugMainUI.AddValueByReference(() => player, '玩家对象');
+ * DEBUG.DebugMainUI.AddValueByReference(() => player.x, '玩家X坐标');
+ * DEBUG.DebugMainUI.AddValueByReference(() => player.health, '玩家血量');
+ * 
+ * // 监控计算值
+ * DEBUG.DebugMainUI.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
+ * DEBUG.DebugMainUI.AddValueByReference(() => Math.floor(Math.random() * 100), '随机数');
  */
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
@@ -27,6 +46,7 @@ interface DebugPanelInstance {
     DebuPanelAddFatherButton(name: string): FatherButtonInstance;
     InitConsoleCapture(): DebugPanelInstance;
     AddValue(variable: any): DebugPanelInstance;
+    AddValueByReference(variableGetter: () => any, variableName: string): DebugPanelInstance;
 }
 
 interface FatherButtonInstance {
@@ -100,6 +120,9 @@ export class UIDebug {
                 },
                 AddValue: (variable: any) => {
                     return UIDebug.AddValue(variable);
+                },
+                AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                    return UIDebug.AddValueByReference(variableGetter, variableName);
                 }
             };
         }
@@ -166,6 +189,9 @@ export class UIDebug {
             },
             AddValue: (variable: any) => {
                 return UIDebug.AddValue(variable);
+            },
+            AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                return UIDebug.AddValueByReference(variableGetter, variableName);
             }
         };
     }
@@ -191,6 +217,9 @@ export class UIDebug {
                 },
                 AddValue: (variable: any) => {
                     return UIDebug.AddValue(variable);
+                },
+                AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                    return UIDebug.AddValueByReference(variableGetter, variableName);
                 }
             };
         }
@@ -217,6 +246,9 @@ export class UIDebug {
             },
             AddValue: (variable: any) => {
                 return UIDebug.AddValue(variable);
+            },
+            AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                return UIDebug.AddValueByReference(variableGetter, variableName);
             }
         };
     }
@@ -240,6 +272,9 @@ export class UIDebug {
                 },
                 AddValue: (variable: any) => {
                     return UIDebug.AddValue(variable);
+                },
+                AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                    return UIDebug.AddValueByReference(variableGetter, variableName);
                 }
             };
         }
@@ -262,130 +297,34 @@ export class UIDebug {
             this.toggleVariableMonitorWindow();
         });
 
-        // // 添加随机颜色控制按钮
-        // this.DebuPanelAddButton('切换随机颜色', () => {
-        //     this.SetConsoleRandomColor(!this.consoleRandomColor);
-        // });
-
-        // // 添加设置颜色组大小按钮
-        // this.DebuPanelAddButton('颜色组大小+', () => {
-        //     this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize + 1);
-        // });
-
-        // this.DebuPanelAddButton('颜色组大小-', () => {
-        //     this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize - 1);
-        // });
-
-        // // 添加变量显示长度控制按钮
-        // this.DebuPanelAddButton('变量显示长度+', () => {
-        //     this.SetVariableDisplayMaxLength(this.maxDisplayLength + 10);
-        //     console.log('当前变量显示长度: ' + this.maxDisplayLength);
-        // });
-
-        // this.DebuPanelAddButton('变量显示长度-', () => {
-        //     this.SetVariableDisplayMaxLength(this.maxDisplayLength - 10);
-        //     console.log('当前变量显示长度: ' + this.maxDisplayLength);
-        // });
-
-        // // 添加测试长文本按钮
-        // this.DebuPanelAddButton('测试长文本', () => {
-        //     const testLongText = {
-        //         shortText: "短文本",
-        //         longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
-        //         jsonData: {
-        //             name: "测试数据",
-        //             description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
-        //             properties: {
-        //                 prop1: "属性1",
-        //                 prop2: "属性2",
-        //                 prop3: {
-        //                     nestedProp: "嵌套属性",
-        //                     anotherNested: "另一个嵌套属性"
-        //                 }
-        //             },
-        //             array: ["元素1", "元素2", "元素3", "元素4", "元素5"]
-        //         }
+        // // 添加测试实时变量监控的按钮
+        // DebugFather.AddChildButton('测试实时变量监控', () => {
+        //     // 创建一个会实时变化的测试对象
+        //     const testObject = {
+        //         counter: 0,
+        //         timestamp: Date.now(),
+        //         randomValue: Math.random()
         //     };
-        //     this.AddValue(testLongText);
-        // });
 
-        // // 添加调试状态检查按钮
-        // this.DebuPanelAddButton('检查展开状态', () => {
-        //     console.log('当前展开项目:', Array.from(this.expandedItems));
-        //     console.log('当前监控变量数量:', this.monitoredVariables.size);
-        //     console.log('变量显示长度限制:', this.maxDisplayLength);
-        // });
+        //     // 启动一个定时器让值持续变化
+        //     const interval = setInterval(() => {
+        //         testObject.counter++;
+        //         testObject.timestamp = Date.now();
+        //         testObject.randomValue = Math.random();
+        //     }, 500);
 
-        // // 添加堆栈跟踪调试按钮
-        // this.DebuPanelAddButton('测试脚本来源', () => {
-        //     const stack = (new Error()).stack;
-        //     const scriptName = this.extractScriptName(stack);
-        //     console.log('=== 脚本来源调试 ===');
-        //     console.log('检测到的脚本名:', scriptName);
-        //     console.log('完整堆栈信息:');
-        //     console.log(stack);
-        //     console.log('===================');
-        // });
-
-        // // 添加测试控制台来源显示按钮
-        // this.DebuPanelAddButton('测试控制台来源', () => {
-        //     console.log('这是一个来自UIDebug的测试日志消息');
-        //     console.info('这是一个测试信息消息');
-        //     console.warn('这是一个测试警告消息');
-        //     console.error('这是一个测试错误消息');
-        // });
-
-        // // 添加测试子菜单
-        // const testMenu = this.DebuPanelAddFatherButton('测试子菜单');
-        // testMenu.AddChildButton('子按钮1', () => {
-        //     console.log('点击了子按钮1');
-        // });
-        // testMenu.AddChildButton('子按钮2', () => {
-        //     console.log('点击了子按钮2');
-        // });
-
-        // const subFolder = testMenu.AddChildFatherButton('子文件夹');
-        // subFolder.AddChildButton('嵌套按钮1', () => {
-        //     console.log('点击了嵌套按钮1');
-        // });
-        // subFolder.AddChildButton('嵌套按钮2', () => {
-        //     console.log('点击了嵌套按钮2');
-        // });
-
-        // // 添加更深层级的测试菜单来测试位置避免重合
-        // const deepFolder = subFolder.AddChildFatherButton('深层文件夹');
-        // deepFolder.AddChildButton('深层按钮1', () => {
-        //     console.log('点击了深层按钮1');
-        // });
-
-        // const veryDeepFolder = deepFolder.AddChildFatherButton('很深的文件夹');
-        // veryDeepFolder.AddChildButton('很深的按钮1', () => {
-        //     console.log('点击了很深的按钮1');
-        // });
-        // veryDeepFolder.AddChildButton('很深的按钮2', () => {
-        //     console.log('点击了很深的按钮2');
-        // });
-
-        // // 添加另一个顶级测试菜单
-        // const testMenu2 = this.DebuPanelAddFatherButton('测试菜单2');
-        // testMenu2.AddChildButton('功能A', () => {
-        //     console.log('执行功能A');
-        // });
-
-        // const settingsFolder = testMenu2.AddChildFatherButton('设置');
-        // settingsFolder.AddChildButton('设置项1', () => {
-        //     console.log('修改设置项1');
-        // });
-        // settingsFolder.AddChildButton('设置项2', () => {
-        //     console.log('修改设置项2');
-        // });
-
-        // const advancedSettings = settingsFolder.AddChildFatherButton('级设置');
-        // advancedSettings.AddChildButton('高级选项1', () => {
-        //     console.log('修改高级选项1');
-        // });
-        // advancedSettings.AddChildButton('高级选项2', () => {
-        //     console.log('修改高级选项2');
+        //     // 使用新的引用方式监控
+        //     this.AddValueByReference(() => testObject, '实时测试对象');
+        //     this.AddValueByReference(() => testObject.counter, '计数器');
+        //     this.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
+            
+        //     console.log('已添加实时变量监控测试，对象值每500ms更新一次');
+            
+        //     // 10秒后停止测试
+        //     setTimeout(() => {
+        //         clearInterval(interval);
+        //         console.log('实时变量监控测试已停止');
+        //     }, 10000);
         // });
 
         return {
@@ -400,6 +339,9 @@ export class UIDebug {
             },
             AddValue: (variable: any) => {
                 return UIDebug.AddValue(variable);
+            },
+            AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                return UIDebug.AddValueByReference(variableGetter, variableName);
             }
         };
     }
@@ -721,7 +663,9 @@ export class UIDebug {
     /**
      * 添加要监控的变量
      */
-    public static AddValue(variable: any): DebugPanelInstance {
+    public static AddValue(variable: any): DebugPanelInstance;
+    public static AddValue(variableGetter: () => any, variableName?: string): DebugPanelInstance;
+    public static AddValue(variableOrGetter: any | (() => any), variableName?: string): DebugPanelInstance {
         if (!this.variableList) {
             console.error('Variable monitor window not initialized.');
             return {
@@ -736,20 +680,45 @@ export class UIDebug {
                 },
                 AddValue: (variable: any) => {
                     return UIDebug.AddValue(variable);
+                },
+                AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                    return UIDebug.AddValueByReference(variableGetter, variableName);
                 }
             };
         }
 
         // 生成唯一ID
         const variableId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 判断是否为函数引用
+        const isFunction = typeof variableOrGetter === 'function';
+        let currentValue: any;
+        let getter: (() => any) | null = null;
+        
+        if (isFunction) {
+            // 函数引用方式
+            getter = variableOrGetter as () => any;
+            try {
+                currentValue = getter();
+            } catch (error) {
+                currentValue = `[Error: ${error}]`;
+            }
+        } else {
+            // 直接值方式
+            currentValue = variableOrGetter;
+        }
 
         // 获取变量信息
-        const variableInfo = this.getVariableInfo(variable);
+        const variableInfo = this.getVariableInfo(currentValue, variableName);
 
         // 存储变量引用
         this.monitoredVariables.set(variableId, {
-            reference: variable,
-            info: variableInfo
+            reference: isFunction ? null : variableOrGetter, // 直接值时存储引用
+            getter: getter, // 函数引用时存储getter
+            info: variableInfo,
+            isFunction: isFunction,
+            lastValue: this.deepClone(currentValue), // 存储上次的值用于比较
+            lastFormattedValue: this.formatVariableValue(currentValue) // 存储上次格式化的值
         });
 
         // 创建变量显示元素
@@ -770,19 +739,32 @@ export class UIDebug {
             },
             AddValue: (variable: any) => {
                 return UIDebug.AddValue(variable);
+            },
+            AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                return UIDebug.AddValueByReference(variableGetter, variableName);
             }
         };
     }
 
     /**
+     * 通过函数引用添加要监控的变量（推荐用于实时变化的变量）
+     * @param variableGetter 获取变量值的函数
+     * @param variableName 变量显示名称
+     * @returns 调试面板实例
+     */
+    public static AddValueByReference(variableGetter: () => any, variableName: string): DebugPanelInstance {
+        return this.AddValue(variableGetter, variableName);
+    }
+
+    /**
      * 获取变量信息
      */
-    private static getVariableInfo(variable: any): any {
+    private static getVariableInfo(variable: any, variableName?: string): any {
         const stack = (new Error()).stack;
         const scriptName = this.extractScriptName(stack);
 
         return {
-            name: this.getVariableName(variable),
+            name: variableName || this.getVariableName(variable),
             value: variable,
             className: this.getClassName(variable),
             scriptName: scriptName
@@ -1058,14 +1040,38 @@ export class UIDebug {
     private static updateVariableDisplay(): void {
         this.monitoredVariables.forEach((data, variableId) => {
             const element = document.getElementById(variableId);
-            if (element) {
+            if (!element) return;
+            
+            // 获取当前值
+            let currentValue: any;
+            if (data.isFunction && data.getter) {
+                try {
+                    currentValue = data.getter();
+                } catch (error) {
+                    currentValue = `[Error: ${error}]`;
+                }
+            } else {
+                currentValue = data.reference;
+            }
+            
+            // 检查值是否发生变化
+            const hasChanged = !this.deepEqual(currentValue, data.lastValue);
+            
+            if (hasChanged) {
+                // 更新存储的值
+                data.lastValue = this.deepClone(currentValue);
+                
+                // 格式化新值
+                const newFormattedValue = this.formatVariableValue(currentValue);
+                data.lastFormattedValue = newFormattedValue;
+                
+                // 更新显示
                 const valueContainer = element.querySelector('.variable-value-container');
                 if (valueContainer) {
-                    const newValue = this.formatVariableValue(data.reference);
-                    const needsTruncation = newValue.length > this.maxDisplayLength;
+                    const needsTruncation = newFormattedValue.length > this.maxDisplayLength;
 
                     // 检查是否可以展开对象结构
-                    const canExpand = this.canVariableExpand(data.reference);
+                    const canExpand = this.canVariableExpand(currentValue);
                     const shouldShowTextExpansion = needsTruncation && !canExpand;
 
                     // 清空现有内容
@@ -1076,7 +1082,7 @@ export class UIDebug {
                     valueSpan.className = 'variable-value';
 
                     if (shouldShowTextExpansion) {
-                        const truncatedValue = newValue.substring(0, this.maxDisplayLength) + '...';
+                        const truncatedValue = newFormattedValue.substring(0, this.maxDisplayLength) + '...';
                         valueSpan.textContent = truncatedValue;
 
                         // 创建角标
@@ -1086,13 +1092,13 @@ export class UIDebug {
                         expandIndicator.title = '点击查看完整内容';
 
                         expandIndicator.addEventListener('click', () => {
-                            this.toggleTextExpansion(variableId, newValue, valueSpan);
+                            this.toggleTextExpansion(variableId, newFormattedValue, valueSpan);
                         });
 
                         valueContainer.appendChild(valueSpan);
                         valueContainer.appendChild(expandIndicator);
                     } else {
-                        valueSpan.textContent = newValue;
+                        valueSpan.textContent = newFormattedValue;
                         valueContainer.appendChild(valueSpan);
                     }
 
@@ -1101,6 +1107,25 @@ export class UIDebug {
                     setTimeout(() => {
                         valueSpan.classList.remove('variable-updated');
                     }, 300);
+                    
+                    // 更新展开按钮状态（如果对象结构发生变化）
+                    const expandButton = element.querySelector('.variable-expand-button') as HTMLButtonElement;
+                    if (expandButton) {
+                        const canExpandNow = this.canVariableExpand(currentValue);
+                        if (canExpandNow) {
+                            const isExpanded = this.expandedItems.has(variableId);
+                            expandButton.textContent = isExpanded ? '▼' : '▶';
+                            expandButton.style.visibility = 'visible';
+                            
+                            // 如果当前是展开状态，需要重新展开以显示新的内容
+                            if (isExpanded) {
+                                this.expandVariable(variableId, currentValue, 0, '');
+                            }
+                        } else {
+                            expandButton.textContent = '';
+                            expandButton.style.visibility = 'hidden';
+                        }
+                    }
                 }
             }
         });
@@ -2566,6 +2591,69 @@ export class UIDebug {
         allFolderButtons.forEach(button => {
             button.classList.remove('active');
         });
+    }
+
+    /**
+     * 深度克隆对象
+     */
+    private static deepClone(obj: any): any {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        
+        if (obj instanceof Date) {
+            return new Date(obj.getTime());
+        }
+        
+        if (obj instanceof Array) {
+            return obj.map(item => this.deepClone(item));
+        }
+        
+        if (typeof obj === 'object') {
+            const cloned: any = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    cloned[key] = this.deepClone(obj[key]);
+                }
+            }
+            return cloned;
+        }
+        
+        return obj;
+    }
+
+    /**
+     * 深度比较两个值是否相等
+     */
+    private static deepEqual(a: any, b: any): boolean {
+        if (a === b) return true;
+        
+        if (a === null || b === null) return a === b;
+        if (typeof a !== typeof b) return false;
+        
+        if (typeof a !== 'object') return a === b;
+        
+        if (Array.isArray(a) !== Array.isArray(b)) return false;
+        
+        if (Array.isArray(a)) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (!this.deepEqual(a[i], b[i])) return false;
+            }
+            return true;
+        }
+        
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+        
+        if (keysA.length !== keysB.length) return false;
+        
+        for (const key of keysA) {
+            if (!keysB.includes(key)) return false;
+            if (!this.deepEqual(a[key], b[key])) return false;
+        }
+        
+        return true;
     }
 }
 

@@ -13,41 +13,35 @@ import { UIMainAboutWindow } from "./UIMainAboutWindow.js";
 var IsInitGameMainMenu = false
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
     // 强行修改图层是否透明
     //@ts-ignore
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer("background").isTransparent=true
-    UIMainMenu.getInstance().ShowMainMenu()
-    if (IsInitGameMainMenu) return;
-    IsInitGameMainMenu = true;
-
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer("background").isTransparent = true
+    
     initGameMainScene();
 
 });
 
 async function initGameMainScene(): Promise<void> {
+    console.log('initGameMainScene 开始执行');
     const gameMainScene = UIMainMenu.getInstance();
     gameMainScene.initialize();
     UIMainMenu.getInstance().MenuAddButton("语言", () => {
     })
 
+    UIMainMenu.getInstance().ShowMainMenu()
+
     setTimeout(() => {
-
-        UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800);
-        // const aboutModal = document.getElementById('about-modal');
-        // //@ts-ignore
-        // aboutModal.classList.remove('closing');
-        // //@ts-ignore
-        // aboutModal.classList.add('active');
-
+        UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800)
         //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
     }, 1000); // 延迟1秒，确保按钮已经完全显示
 
-    UIMainMenu.getInstance().HideALLMainMenuUI(() => {
-        // 在初始化完成后执行一些操作
-        UIMainMenu.getInstance().ShowMainMenu();
-    });
+    
+    
+    // UIMainMenu.getInstance().HideALLMainMenuUI(() => {
+    //     // 在初始化完成后执行一些操作
+    //     UIMainMenu.getInstance().ShowMainMenu();
+    // });
 
     (window as any).HideALLMainMenuUI = (callback?: () => void) => {
         UIMainMenu.getInstance().HideALLMainMenuUI(callback);
@@ -55,6 +49,7 @@ async function initGameMainScene(): Promise<void> {
 
     // 删除这行代码，避免访问私有方法
     // gameMainScene.simpleUpdateSaveUI();
+    console.log('initGameMainScene 执行完成');
 }
 
 class UIMainMenu {
@@ -67,7 +62,7 @@ class UIMainMenu {
     private menuButtons: Map<string, () => void> = new Map(); // 存储按钮和对应的回调函数
     private buttonShakeEffects: Map<string, number> = new Map(); // 存储按钮晃动效果的间隔ID
     private titleElement: HTMLElement | null = null; // 存储游戏标题元素
-    
+
     // 存储窗口引用和实例
     private settingsWindowInstance: UIMainSettingWindow = new UIMainSettingWindow();
     private loadGameWindowInstance: UIMainSaveWindow = UIMainSaveWindow.getInstance();
@@ -100,6 +95,22 @@ class UIMainMenu {
     }
 
     public initialize(): void {
+        console.log('UIMainMenu.initialize 开始执行');
+        // 如果已经初始化过，先清理旧的DOM元素
+        if (this.mainContainer && this.mainContainer.parentNode) {
+            console.log('清理旧的DOM元素');
+            this.mainContainer.parentNode.removeChild(this.mainContainer);
+            this.mainContainer = null;
+        }
+
+        // 清理可能存在的重复样式元素
+        const existingStyles = document.querySelectorAll('style');
+        existingStyles.forEach(style => {
+            if (style.textContent && style.textContent.includes('.game-main-panel')) {
+                style.remove();
+            }
+        });
+
         // 创建样式元素
         const styleElement = document.createElement('style');
         styleElement.textContent = this.cssStyles;
@@ -118,44 +129,75 @@ class UIMainMenu {
         setTimeout(() => {
             this.animateMenuButtons();
         }, 500); // 等待500ms后开始按钮动画
+        console.log('UIMainMenu.initialize 执行完成');
     }
 
     private bindEvents(): void {
+        console.log('bindEvents 开始执行');
         // 新游戏按钮
         const newGameBtn = document.getElementById('new-game-btn');
+        console.log('新游戏按钮元素:', newGameBtn);
         if (newGameBtn) {
-            newGameBtn.addEventListener('click', () => {
-                console.log('新游戏按钮点击 - 等待实现');
-                this.HideALLMainMenuUI(() => {
-                    UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
-                        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+            // 移除可能存在的旧事件监听器
+            newGameBtn.replaceWith(newGameBtn.cloneNode(true));
+            const freshNewGameBtn = document.getElementById('new-game-btn');
+            console.log('刷新后的新游戏按钮元素:', freshNewGameBtn);
+            if (freshNewGameBtn) {
+                freshNewGameBtn.addEventListener('click', () => {
+                    console.log('新游戏按钮点击 - 等待实现');
+                    this.HideALLMainMenuUI(() => {
+                        UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
+                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                        })
                     })
-                })
-            });
+                });
+                console.log('新游戏按钮事件绑定完成');
+            }
         }
 
         // 设置按钮
         const settingsBtn = document.getElementById('settings-btn');
+        console.log('设置按钮元素:', settingsBtn);
         if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                this.showSettingsWindow();
-            });
+            settingsBtn.replaceWith(settingsBtn.cloneNode(true));
+            const freshSettingsBtn = document.getElementById('settings-btn');
+            if (freshSettingsBtn) {
+                freshSettingsBtn.addEventListener('click', () => {
+                    console.log('设置按钮被点击');
+                    this.showSettingsWindow();
+                });
+                console.log('设置按钮事件绑定完成');
+            }
         }
 
         // 存档读取按钮
         const loadGameBtn = document.getElementById('load-game-btn');
+        console.log('存档读取按钮元素:', loadGameBtn);
         if (loadGameBtn) {
-            loadGameBtn.addEventListener('click', () => {
-                this.showLoadGameWindow();
-            });
+            loadGameBtn.replaceWith(loadGameBtn.cloneNode(true));
+            const freshLoadGameBtn = document.getElementById('load-game-btn');
+            if (freshLoadGameBtn) {
+                freshLoadGameBtn.addEventListener('click', () => {
+                    console.log('存档读取按钮被点击');
+                    this.showLoadGameWindow();
+                });
+                console.log('存档读取按钮事件绑定完成');
+            }
         }
 
         // 关于按钮
         const aboutBtn = document.getElementById('about-btn');
+        console.log('关于按钮元素:', aboutBtn);
         if (aboutBtn) {
-            aboutBtn.addEventListener('click', () => {
-                this.showAboutWindow();
-            });
+            aboutBtn.replaceWith(aboutBtn.cloneNode(true));
+            const freshAboutBtn = document.getElementById('about-btn');
+            if (freshAboutBtn) {
+                freshAboutBtn.addEventListener('click', () => {
+                    console.log('关于按钮被点击');
+                    this.showAboutWindow();
+                });
+                console.log('关于按钮事件绑定完成');
+            }
         }
 
         // 静音切换
@@ -197,6 +239,7 @@ class UIMainMenu {
                 });
             }
         });
+        console.log('bindEvents 执行完成');
     }
 
     private toggleFullscreen(): void {
@@ -406,17 +449,24 @@ class UIMainMenu {
 
     // 新增显示/隐藏菜单方法
     public ShowMainMenu(): void {
+        console.log('UIMainMenu.ShowMainMenu 开始执行');
         if (this.mainContainer) {
             this.mainContainer.style.display = 'block';
             const panel = this.mainContainer.querySelector('.game-main-panel');
             if (panel) {
                 (panel as HTMLElement).style.animation = 'panelSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards, panelGlow 3s ease-in-out infinite';
             }
+            
+            // 重新绑定事件，确保按钮可点击
+            console.log('重新绑定事件');
+            this.bindEvents();
+            
             // 重新触发按钮动画
             setTimeout(() => {
                 this.animateMenuButtons();
             }, 500);
         }
+        console.log('UIMainMenu.ShowMainMenu 执行完成');
     }
 
     public HideMainMenu(): void {
