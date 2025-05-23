@@ -268,6 +268,13 @@ export class UIDebug {
             this.AddValue(testLongText);
         });
 
+        // 添加调试状态检查按钮
+        this.DebuPanelAddButton('检查展开状态', () => {
+            console.log('当前展开项目:', Array.from(this.expandedItems));
+            console.log('当前监控变量数量:', this.monitoredVariables.size);
+            console.log('变量显示长度限制:', this.maxDisplayLength);
+        });
+
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
@@ -747,18 +754,17 @@ export class UIDebug {
         const formattedValue = this.formatVariableValue(variableInfo.value);
         const needsTruncation = formattedValue.length > this.maxDisplayLength;
         
-        if (needsTruncation) {
-            // 创建截断显示
+        // 应用同样的优化逻辑：可展开对象时不显示📄角标
+        const shouldShowTextExpansion = needsTruncation && !canExpand;
+        
+        if (shouldShowTextExpansion) {
             const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
             valueSpan.textContent = truncatedValue;
             
-            // 添加展开角标
             const expandIndicator = document.createElement('span');
             expandIndicator.className = 'variable-expand-indicator';
             expandIndicator.textContent = '📄';
             expandIndicator.title = '点击查看完整内容';
-            
-            const isTextExpanded = this.expandedItems.has(variableId + '_text');
             
             expandIndicator.addEventListener('click', () => {
                 this.toggleTextExpansion(variableId, formattedValue, valueSpan);
@@ -837,12 +843,13 @@ export class UIDebug {
         }
         if (typeof value === 'object') {
             try {
-                const jsonString = JSON.stringify(value);
-                // 如果JSON字符串很长，进行格式化
-                if (jsonString.length > this.maxDisplayLength) {
-                    return JSON.stringify(value, null, 2);
+                // 对于对象类型，始终显示简短的表示，不显示完整内容
+                if (Array.isArray(value)) {
+                    return `Array(${value.length})`;
+                } else {
+                    const keys = Object.keys(value);
+                    return `Object{${keys.length} keys}`;
                 }
-                return jsonString;
             } catch {
                 return '[Object]';
             }
@@ -900,6 +907,10 @@ export class UIDebug {
                     const newValue = this.formatVariableValue(data.reference);
                     const needsTruncation = newValue.length > this.maxDisplayLength;
                     
+                    // 检查是否可以展开对象结构
+                    const canExpand = this.canVariableExpand(data.reference);
+                    const shouldShowTextExpansion = needsTruncation && !canExpand;
+                    
                     // 清空现有内容
                     valueContainer.innerHTML = '';
                     
@@ -907,7 +918,7 @@ export class UIDebug {
                     const valueSpan = document.createElement('span');
                     valueSpan.className = 'variable-value';
                     
-                    if (needsTruncation) {
+                    if (shouldShowTextExpansion) {
                         const truncatedValue = newValue.substring(0, this.maxDisplayLength) + '...';
                         valueSpan.textContent = truncatedValue;
                         
@@ -1671,7 +1682,10 @@ export class UIDebug {
         const formattedValue = this.formatVariableValue(childInfo.value);
         const needsTruncation = formattedValue.length > this.maxDisplayLength;
         
-        if (needsTruncation) {
+        // 应用同样的优化逻辑：可展开对象时不显示📄角标
+        const shouldShowTextExpansion = needsTruncation && !canExpand;
+        
+        if (shouldShowTextExpansion) {
             const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
             valueSpan.textContent = truncatedValue;
             
