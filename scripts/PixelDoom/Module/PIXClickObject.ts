@@ -6,6 +6,9 @@ import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
 export var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后选择的物体
 
+
+
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       console.log("[ClickObject] init")
 })
@@ -51,6 +54,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
       //点击对象 
       pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
+            if(ClickObject.is_OEPN_interaction_UI) return
 
             //console.log("点击了交互物")
 
@@ -99,7 +103,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             }
 
 
-            ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions,"正在交互:"+GetChooseObject.instVars.ObjectName)
+            ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions, "正在交互:" + GetChooseObject.instVars.ObjectName)
 
 
       })
@@ -158,11 +162,26 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
       }
 })
 
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+      // 玩家在交互的时候 就不用继续处理点击事件了
+      UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
+            ClickObject.is_OEPN_interaction_UI = true;
+
+      })
+      UIInteractionPanelActionChooseMain.OnInteractionClose(() => {
+            ClickObject.is_OEPN_interaction_UI = false;
+      })
+
+
+})
 
 export class ClickObject {
 
       /** 最大的交互距离 */
       static ClickObjectClickMaxDistance = 200;
+      // 是否已经正在交互
+      static is_OEPN_interaction_UI = false;
+
 
 
       static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
@@ -187,7 +206,7 @@ export class ClickObject {
 
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
-            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content,WindowName)
+            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
       }
 }
 

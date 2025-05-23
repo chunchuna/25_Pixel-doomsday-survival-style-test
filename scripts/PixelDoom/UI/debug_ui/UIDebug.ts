@@ -63,8 +63,8 @@ export class UIDebug {
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
-    private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
-    private static consoleFontSize: number = 15; // 控制台字体大小
+    private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
+    private static consoleFontSize: number = 10; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '20, 30, 60'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0.5; // 底板透明度
@@ -108,23 +108,7 @@ export class UIDebug {
     public static InitDebugPanel(toggleKey: string = '`'): DebugPanelInstance {
         if (this.menuPanel) {
             console.warn('Debug panel already initialized');
-            return {
-                DebuPanelAddButton: (name: string, callback: () => void) => {
-                    return UIDebug.DebuPanelAddButton(name, callback);
-                },
-                DebuPanelAddFatherButton: (name: string) => {
-                    return UIDebug.DebuPanelAddFatherButton(name);
-                },
-                InitConsoleCapture: () => {
-                    return UIDebug.InitConsoleCapture();
-                },
-                AddValue: (variable: any) => {
-                    return UIDebug.AddValue(variable);
-                },
-                AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                    return UIDebug.AddValueByReference(variableGetter, variableName);
-                }
-            };
+            return this.createDebugPanelInstance();
         }
 
         this.toggleKey = toggleKey;
@@ -177,23 +161,7 @@ export class UIDebug {
             }
         });
 
-        return {
-            DebuPanelAddButton: (name: string, callback: () => void) => {
-                return UIDebug.DebuPanelAddButton(name, callback);
-            },
-            DebuPanelAddFatherButton: (name: string) => {
-                return UIDebug.DebuPanelAddFatherButton(name);
-            },
-            InitConsoleCapture: () => {
-                return UIDebug.InitConsoleCapture();
-            },
-            AddValue: (variable: any) => {
-                return UIDebug.AddValue(variable);
-            },
-            AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                return UIDebug.AddValueByReference(variableGetter, variableName);
-            }
-        };
+        return this.createDebugPanelInstance();
     }
 
     /**
@@ -205,23 +173,7 @@ export class UIDebug {
     public static DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance {
         if (!this.buttonsContainer) {
             console.error('Debug panel not initialized. Call InitDebugPanel first.');
-            return {
-                DebuPanelAddButton: (name: string, callback: () => void) => {
-                    return UIDebug.DebuPanelAddButton(name, callback);
-                },
-                DebuPanelAddFatherButton: (name: string) => {
-                    return UIDebug.DebuPanelAddFatherButton(name);
-                },
-                InitConsoleCapture: () => {
-                    return UIDebug.InitConsoleCapture();
-                },
-                AddValue: (variable: any) => {
-                    return UIDebug.AddValue(variable);
-                },
-                AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                    return UIDebug.AddValueByReference(variableGetter, variableName);
-                }
-            };
+            return this.createDebugPanelInstance();
         }
 
         const button = document.createElement('button');
@@ -234,23 +186,7 @@ export class UIDebug {
 
         this.buttonsContainer.appendChild(button);
 
-        return {
-            DebuPanelAddButton: (name: string, callback: () => void) => {
-                return UIDebug.DebuPanelAddButton(name, callback);
-            },
-            DebuPanelAddFatherButton: (name: string) => {
-                return UIDebug.DebuPanelAddFatherButton(name);
-            },
-            InitConsoleCapture: () => {
-                return UIDebug.InitConsoleCapture();
-            },
-            AddValue: (variable: any) => {
-                return UIDebug.AddValue(variable);
-            },
-            AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                return UIDebug.AddValueByReference(variableGetter, variableName);
-            }
-        };
+        return this.createDebugPanelInstance();
     }
 
     /**
@@ -260,23 +196,7 @@ export class UIDebug {
     public static InitConsoleCapture(): DebugPanelInstance {
         if (this.isConsoleEnabled) {
             console.warn('Console capture already initialized');
-            return {
-                DebuPanelAddButton: (name: string, callback: () => void) => {
-                    return UIDebug.DebuPanelAddButton(name, callback);
-                },
-                DebuPanelAddFatherButton: (name: string) => {
-                    return UIDebug.DebuPanelAddFatherButton(name);
-                },
-                InitConsoleCapture: () => {
-                    return UIDebug.InitConsoleCapture();
-                },
-                AddValue: (variable: any) => {
-                    return UIDebug.AddValue(variable);
-                },
-                AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                    return UIDebug.AddValueByReference(variableGetter, variableName);
-                }
-            };
+            return this.createDebugPanelInstance();
         }
 
         this.isConsoleEnabled = true;
@@ -297,61 +217,15 @@ export class UIDebug {
             this.toggleVariableMonitorWindow();
         });
 
-        DebugFather.AddChildButton("打开控制台",()=>{
+        DebugFather.AddChildButton("打开控制台", () => {
             UIDebug.SetConsoleAlwaysShow(true)
         })
 
-        DebugFather.AddChildButton("关闭控制台",()=>{
+        DebugFather.AddChildButton("关闭控制台", () => {
             UIDebug.SetConsoleAlwaysShow(false)
         })
 
-        // // 添加测试实时变量监控的按钮
-        // DebugFather.AddChildButton('测试实时变量监控', () => {
-        //     // 创建一个会实时变化的测试对象
-        //     const testObject = {
-        //         counter: 0,
-        //         timestamp: Date.now(),
-        //         randomValue: Math.random()
-        //     };
-
-        //     // 启动一个定时器让值持续变化
-        //     const interval = setInterval(() => {
-        //         testObject.counter++;
-        //         testObject.timestamp = Date.now();
-        //         testObject.randomValue = Math.random();
-        //     }, 500);
-
-        //     // 使用新的引用方式监控
-        //     this.AddValueByReference(() => testObject, '实时测试对象');
-        //     this.AddValueByReference(() => testObject.counter, '计数器');
-        //     this.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
-            
-        //     console.log('已添加实时变量监控测试，对象值每500ms更新一次');
-            
-        //     // 10秒后停止测试
-        //     setTimeout(() => {
-        //         clearInterval(interval);
-        //         console.log('实时变量监控测试已停止');
-        //     }, 10000);
-        // });
-
-        return {
-            DebuPanelAddButton: (name: string, callback: () => void) => {
-                return UIDebug.DebuPanelAddButton(name, callback);
-            },
-            DebuPanelAddFatherButton: (name: string) => {
-                return UIDebug.DebuPanelAddFatherButton(name);
-            },
-            InitConsoleCapture: () => {
-                return UIDebug.InitConsoleCapture();
-            },
-            AddValue: (variable: any) => {
-                return UIDebug.AddValue(variable);
-            },
-            AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                return UIDebug.AddValueByReference(variableGetter, variableName);
-            }
-        };
+        return this.createDebugPanelInstance();
     }
 
     /**
@@ -676,33 +550,17 @@ export class UIDebug {
     public static AddValue(variableOrGetter: any | (() => any), variableName?: string): DebugPanelInstance {
         if (!this.variableList) {
             console.error('Variable monitor window not initialized.');
-            return {
-                DebuPanelAddButton: (name: string, callback: () => void) => {
-                    return UIDebug.DebuPanelAddButton(name, callback);
-                },
-                DebuPanelAddFatherButton: (name: string) => {
-                    return UIDebug.DebuPanelAddFatherButton(name);
-                },
-                InitConsoleCapture: () => {
-                    return UIDebug.InitConsoleCapture();
-                },
-                AddValue: (variable: any) => {
-                    return UIDebug.AddValue(variable);
-                },
-                AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                    return UIDebug.AddValueByReference(variableGetter, variableName);
-                }
-            };
+            return this.createDebugPanelInstance();
         }
 
         // 生成唯一ID
         const variableId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         // 判断是否为函数引用
         const isFunction = typeof variableOrGetter === 'function';
         let currentValue: any;
         let getter: (() => any) | null = null;
-        
+
         if (isFunction) {
             // 函数引用方式
             getter = variableOrGetter as () => any;
@@ -735,23 +593,7 @@ export class UIDebug {
         // 启动监控更新
         this.startVariableMonitoring();
 
-        return {
-            DebuPanelAddButton: (name: string, callback: () => void) => {
-                return UIDebug.DebuPanelAddButton(name, callback);
-            },
-            DebuPanelAddFatherButton: (name: string) => {
-                return UIDebug.DebuPanelAddFatherButton(name);
-            },
-            InitConsoleCapture: () => {
-                return UIDebug.InitConsoleCapture();
-            },
-            AddValue: (variable: any) => {
-                return UIDebug.AddValue(variable);
-            },
-            AddValueByReference: (variableGetter: () => any, variableName: string) => {
-                return UIDebug.AddValueByReference(variableGetter, variableName);
-            }
-        };
+        return this.createDebugPanelInstance();
     }
 
     /**
@@ -1049,7 +891,7 @@ export class UIDebug {
         this.monitoredVariables.forEach((data, variableId) => {
             const element = document.getElementById(variableId);
             if (!element) return;
-            
+
             // 获取当前值
             let currentValue: any;
             if (data.isFunction && data.getter) {
@@ -1061,18 +903,18 @@ export class UIDebug {
             } else {
                 currentValue = data.reference;
             }
-            
+
             // 检查值是否发生变化
             const hasChanged = !this.deepEqual(currentValue, data.lastValue);
-            
+
             if (hasChanged) {
                 // 更新存储的值
                 data.lastValue = this.deepClone(currentValue);
-                
+
                 // 格式化新值
                 const newFormattedValue = this.formatVariableValue(currentValue);
                 data.lastFormattedValue = newFormattedValue;
-                
+
                 // 更新显示
                 const valueContainer = element.querySelector('.variable-value-container');
                 if (valueContainer) {
@@ -1115,7 +957,7 @@ export class UIDebug {
                     setTimeout(() => {
                         valueSpan.classList.remove('variable-updated');
                     }, 300);
-                    
+
                     // 更新展开按钮状态（如果对象结构发生变化）
                     const expandButton = element.querySelector('.variable-expand-button') as HTMLButtonElement;
                     if (expandButton) {
@@ -1124,7 +966,7 @@ export class UIDebug {
                             const isExpanded = this.expandedItems.has(variableId);
                             expandButton.textContent = isExpanded ? '▼' : '▶';
                             expandButton.style.visibility = 'visible';
-                            
+
                             // 如果当前是展开状态，需要重新展开以显示新的内容
                             if (isExpanded) {
                                 this.expandVariable(variableId, currentValue, 0, '');
@@ -2564,14 +2406,14 @@ export class UIDebug {
         const timeout = setTimeout(() => {
             const submenuContainer = this.submenuContainers.get(itemId);
             const button = document.getElementById(itemId);
-            
+
             if (submenuContainer) {
                 submenuContainer.style.display = 'none';
             }
-            
+
             this.currentOpenSubmenus.delete(itemId);
             this.submenuTimeouts.delete(itemId);
-            
+
             // 重置按钮状态
             if (button) {
                 button.classList.remove('active');
@@ -2645,15 +2487,15 @@ export class UIDebug {
         if (obj === null || typeof obj !== 'object') {
             return obj;
         }
-        
+
         if (obj instanceof Date) {
             return new Date(obj.getTime());
         }
-        
+
         if (obj instanceof Array) {
             return obj.map(item => this.deepClone(item));
         }
-        
+
         if (typeof obj === 'object') {
             const cloned: any = {};
             for (const key in obj) {
@@ -2663,7 +2505,7 @@ export class UIDebug {
             }
             return cloned;
         }
-        
+
         return obj;
     }
 
@@ -2672,14 +2514,14 @@ export class UIDebug {
      */
     private static deepEqual(a: any, b: any): boolean {
         if (a === b) return true;
-        
+
         if (a === null || b === null) return a === b;
         if (typeof a !== typeof b) return false;
-        
+
         if (typeof a !== 'object') return a === b;
-        
+
         if (Array.isArray(a) !== Array.isArray(b)) return false;
-        
+
         if (Array.isArray(a)) {
             if (a.length !== b.length) return false;
             for (let i = 0; i < a.length; i++) {
@@ -2687,17 +2529,17 @@ export class UIDebug {
             }
             return true;
         }
-        
+
         const keysA = Object.keys(a);
         const keysB = Object.keys(b);
-        
+
         if (keysA.length !== keysB.length) return false;
-        
+
         for (const key of keysA) {
             if (!keysB.includes(key)) return false;
             if (!this.deepEqual(a[key], b[key])) return false;
         }
-        
+
         return true;
     }
 
@@ -2709,10 +2551,10 @@ export class UIDebug {
         if (!currentItem) return;
 
         const parentId = currentItem.parent;
-        
+
         // 获取父菜单的所有子项
         let siblings: Map<string, MenuItemData> | undefined;
-        
+
         if (!parentId) {
             // 主菜单级别
             siblings = new Map();
@@ -2739,22 +2581,22 @@ export class UIDebug {
             siblings.forEach((_, siblingId) => {
                 const submenuContainer = this.submenuContainers.get(siblingId);
                 const button = document.getElementById(siblingId);
-                
+
                 if (submenuContainer && submenuContainer.style.display !== 'none') {
                     submenuContainer.style.display = 'none';
                     this.currentOpenSubmenus.delete(siblingId);
-                    
+
                     // 重置按钮状态
                     if (button) {
                         button.classList.remove('active');
                         const arrow = button.querySelector('.debug-menu-arrow');
                         if (arrow) arrow.textContent = '▶';
                     }
-                    
+
                     // 递归隐藏其子菜单
                     this.hideChildSubmenus(siblingId);
                 }
-                
+
                 // 清除隐藏定时器
                 const timeout = this.submenuTimeouts.get(siblingId);
                 if (timeout) {
@@ -2763,6 +2605,27 @@ export class UIDebug {
                 }
             });
         }
+    }
+
+    // 在 UIDebug 类中添加这个私有方法
+    private static createDebugPanelInstance(): DebugPanelInstance {
+        return {
+            DebuPanelAddButton: (name: string, callback: () => void) => {
+                return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            DebuPanelAddFatherButton: (name: string) => {
+                return UIDebug.DebuPanelAddFatherButton(name);
+            },
+            InitConsoleCapture: () => {
+                return UIDebug.InitConsoleCapture();
+            },
+            AddValue: (variable: any) => {
+                return UIDebug.AddValue(variable);
+            },
+            AddValueByReference: (variableGetter: () => any, variableName: string) => {
+                return UIDebug.AddValueByReference(variableGetter, variableName);
+            }
+        };
     }
 }
 
