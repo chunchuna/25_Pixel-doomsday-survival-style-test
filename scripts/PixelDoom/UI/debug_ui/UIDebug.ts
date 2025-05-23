@@ -112,6 +112,11 @@ export class UIDebug {
             if (event.key.toLocaleLowerCase() === this.toggleKey.toLocaleLowerCase()) {
                 this.toggleMenu();
             }
+            // 添加Escape键快速收起所有展开的变量
+            if (event.key === 'Escape' && this.isVariableWindowVisible) {
+                this.collapseAllVariables();
+                event.preventDefault();
+            }
         });
 
         // 点击空白处隐藏菜单
@@ -245,7 +250,7 @@ export class UIDebug {
         this.DebuPanelAddButton('测试长文本', () => {
             const testLongText = {
                 shortText: "短文本",
-                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
+                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
                 jsonData: {
                     name: "测试数据",
                     description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
@@ -419,7 +424,23 @@ export class UIDebug {
         // 创建窗口头部（用于拖拽）
         const header = document.createElement('div');
         header.className = 'variable-monitor-header';
-        header.textContent = '变量监控';
+        
+        // 创建标题
+        const title = document.createElement('span');
+        title.textContent = '变量监控';
+        
+        // 创建控制按钮容器
+        const controls = document.createElement('div');
+        controls.className = 'variable-monitor-controls';
+        
+        // 创建全部收起按钮
+        const collapseAllButton = document.createElement('button');
+        collapseAllButton.className = 'variable-monitor-collapse-all';
+        collapseAllButton.textContent = '收起全部';
+        collapseAllButton.title = '收起所有展开的项目';
+        collapseAllButton.addEventListener('click', () => {
+            this.collapseAllVariables();
+        });
         
         // 创建关闭按钮
         const closeButton = document.createElement('button');
@@ -428,7 +449,11 @@ export class UIDebug {
         closeButton.addEventListener('click', () => {
             this.hideVariableMonitorWindow();
         });
-        header.appendChild(closeButton);
+        
+        controls.appendChild(collapseAllButton);
+        controls.appendChild(closeButton);
+        header.appendChild(title);
+        header.appendChild(controls);
         
         // 创建变量列表容器
         this.variableList = document.createElement('div');
@@ -1271,6 +1296,29 @@ export class UIDebug {
                 font-size: 12px;
             }
             
+            .variable-monitor-controls {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .variable-monitor-collapse-all {
+                background: rgba(76, 175, 80, 0.2);
+                border: 1px solid rgba(76, 175, 80, 0.4);
+                color: #4caf50;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                transition: all 0.2s;
+                font-family: monospace;
+            }
+            
+            .variable-monitor-collapse-all:hover {
+                background: rgba(76, 175, 80, 0.4);
+                color: #ffffff;
+            }
+            
             .variable-monitor-close {
                 background: none;
                 border: none;
@@ -1296,6 +1344,28 @@ export class UIDebug {
                 overflow-y: auto;
                 padding: 10px;
                 font-size: 11px;
+                scrollbar-width: thin; /* Firefox - 显示细滚动条 */
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1); /* Firefox滚动条颜色 */
+            }
+            
+            /* Webkit浏览器（Chrome, Safari）滚动条样式 */
+            .variable-monitor-list::-webkit-scrollbar {
+                width: 8px;
+                display: block !important; /* 强制显示滚动条 */
+            }
+            
+            .variable-monitor-list::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+            
+            .variable-monitor-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+            }
+            
+            .variable-monitor-list::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
             }
             
             .variable-list-item {
@@ -1448,6 +1518,31 @@ export class UIDebug {
                 border-radius: 3px;
                 padding: 2px 4px;
                 margin: -2px -4px;
+            }
+            
+            .variable-text-expanded {
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 4px !important;
+                padding: 8px !important;
+                margin: 4px 0 !important;
+                white-space: pre-wrap !important;
+                font-family: monospace !important;
+                scrollbar-width: thin !important;
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;
+            }
+            
+            .variable-text-expanded::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .variable-text-expanded::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .variable-text-expanded::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
             }
         `;
 
@@ -1637,10 +1732,43 @@ export class UIDebug {
             this.expandedItems.delete(textExpandId);
             const truncatedValue = fullText.substring(0, this.maxDisplayLength) + '...';
             valueSpan.textContent = truncatedValue;
+            valueSpan.style.maxHeight = '';
+            valueSpan.style.overflow = '';
+            valueSpan.style.cursor = '';
+            valueSpan.classList.remove('variable-text-expanded');
         } else {
             // 展开文本
             this.expandedItems.add(textExpandId);
             valueSpan.textContent = fullText;
+            valueSpan.style.maxHeight = '200px'; // 限制最大高度
+            valueSpan.style.overflow = 'auto'; // 添加滚动条
+            valueSpan.style.cursor = 'pointer';
+            valueSpan.classList.add('variable-text-expanded');
+            
+            // 添加点击收起的提示
+            valueSpan.title = '点击收起';
+            valueSpan.addEventListener('click', () => {
+                this.toggleTextExpansion(variableId, fullText, valueSpan);
+            }, { once: true }); // 只执行一次，避免重复绑定
         }
+    }
+
+    /**
+     * 折叠所有展开的项目
+     */
+    private static collapseAllVariables(): void {
+        this.expandedItems.clear();
+        const allItems = document.querySelectorAll('.variable-list-item');
+        allItems.forEach(item => {
+            const expandButton = item.querySelector('.variable-expand-button') as HTMLButtonElement;
+            if (expandButton) {
+                expandButton.textContent = '▶';
+            }
+            const childrenContainer = item.querySelector('.variable-children-container') as HTMLElement;
+            if (childrenContainer) {
+                childrenContainer.style.display = 'none';
+                childrenContainer.innerHTML = '';
+            }
+        });
     }
 }
