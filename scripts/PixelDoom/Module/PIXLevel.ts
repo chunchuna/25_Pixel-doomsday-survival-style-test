@@ -56,8 +56,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     isBindButtonIntoDebugPanel = true
     //DEBUG 面板绘制 
     if (!DEBUG.DebugMainUI) return
+    var LevelFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("LEVEL")
+    LevelFather.AddChildButton
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("跳转到mainmenu场景", () => {
+    LevelFather.AddChildButton("跳转到mainmenu场景", () => {
         if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
         GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
 

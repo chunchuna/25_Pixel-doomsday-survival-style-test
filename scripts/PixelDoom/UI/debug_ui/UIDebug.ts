@@ -14,7 +14,7 @@ var isCreatDebugPanel = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!isCreatDebugPanel) {
-        
+
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
@@ -42,15 +42,15 @@ export class UIDebug {
     private static consoleContainer: HTMLDivElement | null = null;
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
-    private static alwaysShowConsole: boolean = false; // 控制台始终显示的标志
+    private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
     private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
-    private static consoleFontSize: number = 10; // 控制台字体大小
+    private static consoleFontSize: number = 15; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '20, 30, 60'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0.5; // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
     private static mouseY: number = 0; // 记录鼠标Y位置
-    
+
     // 新增：随机控制台字体颜色相关变量
     private static consoleRandomColor: boolean = false; // 随机控制台字体颜色开关
     private static consoleColorRandomGroupSize: number = 3; // 字体颜色行数控制随机（1-5）
@@ -61,7 +61,7 @@ export class UIDebug {
         '#fd79a8', '#fdcb6e', '#6c5ce7', '#74b9ff', '#00b894',
         '#e17055', '#a29bfe', '#fd79a8', '#fdcb6e', '#55a3ff'
     ]; // 可用颜色列表
-    
+
     // 新增：变量监控窗口相关变量
     private static variableMonitorWindow: HTMLDivElement | null = null;
     private static variableList: HTMLDivElement | null = null;
@@ -71,7 +71,7 @@ export class UIDebug {
     private static dragOffset: { x: number; y: number } = { x: 0, y: 0 };
     private static expandedItems: Set<string> = new Set(); // 展开的项目ID集合
     private static maxDisplayLength: number = 50; // 变量值最大显示长度（降低到50字符）
-    
+
     // 新增：子菜单系统相关变量
     private static menuItems: Map<string, MenuItemData> = new Map(); // 菜单项数据
     private static currentOpenSubmenus: Set<string> = new Set(); // 当前打开的子菜单
@@ -146,7 +146,7 @@ export class UIDebug {
                         clickedInSubmenu = true;
                     }
                 });
-                
+
                 // 如果没有点击在子菜单上，则隐藏所有菜单
                 if (!clickedInSubmenu) {
                     this.hideMenu();
@@ -249,143 +249,144 @@ export class UIDebug {
         // 替换原始console方法
         this.overrideConsoleMethods();
 
-        // 添加清除控制台按钮
-        this.DebuPanelAddButton('清除控制台', () => {
+        var DebugFather = this.DebuPanelAddFatherButton("DEBUG")
+        DebugFather.AddChildButton('清除控制台', () => {
             if (this.consoleContainer) {
                 this.consoleContainer.innerHTML = '';
             }
-        });
+
+        })
 
         // 添加变量监控窗口控制按钮
-        this.DebuPanelAddButton('显示变量监控', () => {
+        DebugFather.AddChildButton('显示变量监控', () => {
             this.toggleVariableMonitorWindow();
         });
 
-        // 添加随机颜色控制按钮
-        this.DebuPanelAddButton('切换随机颜色', () => {
-            this.SetConsoleRandomColor(!this.consoleRandomColor);
-        });
+        // // 添加随机颜色控制按钮
+        // this.DebuPanelAddButton('切换随机颜色', () => {
+        //     this.SetConsoleRandomColor(!this.consoleRandomColor);
+        // });
 
-        // 添加设置颜色组大小按钮
-        this.DebuPanelAddButton('颜色组大小+', () => {
-            this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize + 1);
-        });
+        // // 添加设置颜色组大小按钮
+        // this.DebuPanelAddButton('颜色组大小+', () => {
+        //     this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize + 1);
+        // });
 
-        this.DebuPanelAddButton('颜色组大小-', () => {
-            this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize - 1);
-        });
+        // this.DebuPanelAddButton('颜色组大小-', () => {
+        //     this.SetConsoleColorGroupSize(this.consoleColorRandomGroupSize - 1);
+        // });
 
-        // 添加变量显示长度控制按钮
-        this.DebuPanelAddButton('变量显示长度+', () => {
-            this.SetVariableDisplayMaxLength(this.maxDisplayLength + 10);
-            console.log('当前变量显示长度: ' + this.maxDisplayLength);
-        });
+        // // 添加变量显示长度控制按钮
+        // this.DebuPanelAddButton('变量显示长度+', () => {
+        //     this.SetVariableDisplayMaxLength(this.maxDisplayLength + 10);
+        //     console.log('当前变量显示长度: ' + this.maxDisplayLength);
+        // });
 
-        this.DebuPanelAddButton('变量显示长度-', () => {
-            this.SetVariableDisplayMaxLength(this.maxDisplayLength - 10);
-            console.log('当前变量显示长度: ' + this.maxDisplayLength);
-        });
+        // this.DebuPanelAddButton('变量显示长度-', () => {
+        //     this.SetVariableDisplayMaxLength(this.maxDisplayLength - 10);
+        //     console.log('当前变量显示长度: ' + this.maxDisplayLength);
+        // });
 
-        // 添加测试长文本按钮
-        this.DebuPanelAddButton('测试长文本', () => {
-            const testLongText = {
-                shortText: "短文本",
-                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
-                jsonData: {
-                    name: "测试数据",
-                    description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
-                    properties: {
-                        prop1: "属性1",
-                        prop2: "属性2",
-                        prop3: {
-                            nestedProp: "嵌套属性",
-                            anotherNested: "另一个嵌套属性"
-                        }
-                    },
-                    array: ["元素1", "元素2", "元素3", "元素4", "元素5"]
-                }
-            };
-            this.AddValue(testLongText);
-        });
+        // // 添加测试长文本按钮
+        // this.DebuPanelAddButton('测试长文本', () => {
+        //     const testLongText = {
+        //         shortText: "短文本",
+        //         longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
+        //         jsonData: {
+        //             name: "测试数据",
+        //             description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
+        //             properties: {
+        //                 prop1: "属性1",
+        //                 prop2: "属性2",
+        //                 prop3: {
+        //                     nestedProp: "嵌套属性",
+        //                     anotherNested: "另一个嵌套属性"
+        //                 }
+        //             },
+        //             array: ["元素1", "元素2", "元素3", "元素4", "元素5"]
+        //         }
+        //     };
+        //     this.AddValue(testLongText);
+        // });
 
-        // 添加调试状态检查按钮
-        this.DebuPanelAddButton('检查展开状态', () => {
-            console.log('当前展开项目:', Array.from(this.expandedItems));
-            console.log('当前监控变量数量:', this.monitoredVariables.size);
-            console.log('变量显示长度限制:', this.maxDisplayLength);
-        });
+        // // 添加调试状态检查按钮
+        // this.DebuPanelAddButton('检查展开状态', () => {
+        //     console.log('当前展开项目:', Array.from(this.expandedItems));
+        //     console.log('当前监控变量数量:', this.monitoredVariables.size);
+        //     console.log('变量显示长度限制:', this.maxDisplayLength);
+        // });
 
-        // 添加堆栈跟踪调试按钮
-        this.DebuPanelAddButton('测试脚本来源', () => {
-            const stack = (new Error()).stack;
-            const scriptName = this.extractScriptName(stack);
-            console.log('=== 脚本来源调试 ===');
-            console.log('检测到的脚本名:', scriptName);
-            console.log('完整堆栈信息:');
-            console.log(stack);
-            console.log('===================');
-        });
+        // // 添加堆栈跟踪调试按钮
+        // this.DebuPanelAddButton('测试脚本来源', () => {
+        //     const stack = (new Error()).stack;
+        //     const scriptName = this.extractScriptName(stack);
+        //     console.log('=== 脚本来源调试 ===');
+        //     console.log('检测到的脚本名:', scriptName);
+        //     console.log('完整堆栈信息:');
+        //     console.log(stack);
+        //     console.log('===================');
+        // });
 
-        // 添加测试控制台来源显示按钮
-        this.DebuPanelAddButton('测试控制台来源', () => {
-            console.log('这是一个来自UIDebug的测试日志消息');
-            console.info('这是一个测试信息消息');
-            console.warn('这是一个测试警告消息');
-            console.error('这是一个测试错误消息');
-        });
+        // // 添加测试控制台来源显示按钮
+        // this.DebuPanelAddButton('测试控制台来源', () => {
+        //     console.log('这是一个来自UIDebug的测试日志消息');
+        //     console.info('这是一个测试信息消息');
+        //     console.warn('这是一个测试警告消息');
+        //     console.error('这是一个测试错误消息');
+        // });
 
-        // 添加测试子菜单
-        const testMenu = this.DebuPanelAddFatherButton('🔧 测试子菜单');
-        testMenu.AddChildButton('子按钮1', () => {
-            console.log('点击了子按钮1');
-        });
-        testMenu.AddChildButton('子按钮2', () => {
-            console.log('点击了子按钮2');
-        });
-        
-        const subFolder = testMenu.AddChildFatherButton('📁 子文件夹');
-        subFolder.AddChildButton('嵌套按钮1', () => {
-            console.log('点击了嵌套按钮1');
-        });
-        subFolder.AddChildButton('嵌套按钮2', () => {
-            console.log('点击了嵌套按钮2');
-        });
+        // // 添加测试子菜单
+        // const testMenu = this.DebuPanelAddFatherButton('测试子菜单');
+        // testMenu.AddChildButton('子按钮1', () => {
+        //     console.log('点击了子按钮1');
+        // });
+        // testMenu.AddChildButton('子按钮2', () => {
+        //     console.log('点击了子按钮2');
+        // });
 
-        // 添加更深层级的测试菜单来测试位置避免重合
-        const deepFolder = subFolder.AddChildFatherButton('🗂️ 深层文件夹');
-        deepFolder.AddChildButton('深层按钮1', () => {
-            console.log('点击了深层按钮1');
-        });
-        
-        const veryDeepFolder = deepFolder.AddChildFatherButton('📂 很深的文件夹');
-        veryDeepFolder.AddChildButton('很深的按钮1', () => {
-            console.log('点击了很深的按钮1');
-        });
-        veryDeepFolder.AddChildButton('很深的按钮2', () => {
-            console.log('点击了很深的按钮2');
-        });
+        // const subFolder = testMenu.AddChildFatherButton('子文件夹');
+        // subFolder.AddChildButton('嵌套按钮1', () => {
+        //     console.log('点击了嵌套按钮1');
+        // });
+        // subFolder.AddChildButton('嵌套按钮2', () => {
+        //     console.log('点击了嵌套按钮2');
+        // });
 
-        // 添加另一个顶级测试菜单
-        const testMenu2 = this.DebuPanelAddFatherButton('⚙️ 测试菜单2');
-        testMenu2.AddChildButton('功能A', () => {
-            console.log('执行功能A');
-        });
-        
-        const settingsFolder = testMenu2.AddChildFatherButton('🔧 设置');
-        settingsFolder.AddChildButton('设置项1', () => {
-            console.log('修改设置项1');
-        });
-        settingsFolder.AddChildButton('设置项2', () => {
-            console.log('修改设置项2');
-        });
-        
-        const advancedSettings = settingsFolder.AddChildFatherButton('🔬 高级设置');
-        advancedSettings.AddChildButton('高级选项1', () => {
-            console.log('修改高级选项1');
-        });
-        advancedSettings.AddChildButton('高级选项2', () => {
-            console.log('修改高级选项2');
-        });
+        // // 添加更深层级的测试菜单来测试位置避免重合
+        // const deepFolder = subFolder.AddChildFatherButton('深层文件夹');
+        // deepFolder.AddChildButton('深层按钮1', () => {
+        //     console.log('点击了深层按钮1');
+        // });
+
+        // const veryDeepFolder = deepFolder.AddChildFatherButton('很深的文件夹');
+        // veryDeepFolder.AddChildButton('很深的按钮1', () => {
+        //     console.log('点击了很深的按钮1');
+        // });
+        // veryDeepFolder.AddChildButton('很深的按钮2', () => {
+        //     console.log('点击了很深的按钮2');
+        // });
+
+        // // 添加另一个顶级测试菜单
+        // const testMenu2 = this.DebuPanelAddFatherButton('测试菜单2');
+        // testMenu2.AddChildButton('功能A', () => {
+        //     console.log('执行功能A');
+        // });
+
+        // const settingsFolder = testMenu2.AddChildFatherButton('设置');
+        // settingsFolder.AddChildButton('设置项1', () => {
+        //     console.log('修改设置项1');
+        // });
+        // settingsFolder.AddChildButton('设置项2', () => {
+        //     console.log('修改设置项2');
+        // });
+
+        // const advancedSettings = settingsFolder.AddChildFatherButton('级设置');
+        // advancedSettings.AddChildButton('高级选项1', () => {
+        //     console.log('修改高级选项1');
+        // });
+        // advancedSettings.AddChildButton('高级选项2', () => {
+        //     console.log('修改高级选项2');
+        // });
 
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
@@ -464,7 +465,7 @@ export class UIDebug {
      */
     private static updateConsoleStyles(): void {
         if (!this.consoleContainer) return;
-        
+
         // 更新位置
         if (this.consolePosition === 'top') {
             this.consoleContainer.style.bottom = 'auto';
@@ -476,14 +477,14 @@ export class UIDebug {
 
         // 更新字体大小
         this.consoleContainer.style.fontSize = this.consoleFontSize + 'px';
-        
+
         // 更新底板样式类
         if (this.consoleUseBackplate) {
             this.consoleContainer.classList.add('use-backplate');
         } else {
             this.consoleContainer.classList.remove('use-backplate');
         }
-        
+
         // 更新CSS变量
         this.consoleContainer.style.setProperty('--backplate-color', this.consoleBackplateColor);
         this.consoleContainer.style.setProperty('--backplate-opacity', this.consoleBackplateOpacity.toString());
@@ -497,19 +498,19 @@ export class UIDebug {
         this.consoleContainer = document.createElement('div');
         this.consoleContainer.className = 'debug-console';
         this.consoleContainer.style.display = this.alwaysShowConsole ? 'block' : 'none';
-        
+
         // 应用初始样式设置
         this.updateConsoleStyles();
-        
+
         // 添加鼠标滚轮事件监听
         document.addEventListener('wheel', (event) => {
             if (!this.consoleContainer || !this.alwaysShowConsole) return;
-            
+
             // 根据控制台位置判断滚动区域
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
             const mouseY = event.clientY;
             const threshold = viewportHeight * 0.3; // 30%的区域
-            
+
             let shouldScroll = false;
             if (this.consolePosition === 'bottom') {
                 // 底部时，鼠标在屏幕底部30%区域时响应
@@ -518,18 +519,18 @@ export class UIDebug {
                 // 顶部时，鼠标在屏幕顶部30%区域时响应
                 shouldScroll = mouseY < threshold;
             }
-            
+
             if (shouldScroll) {
                 const delta = event.deltaY;
                 this.consoleContainer.scrollTop += delta;
-                
+
                 // 防止页面滚动
                 if (this.consoleContainer.scrollHeight > this.consoleContainer.clientHeight) {
                     event.preventDefault();
                 }
             }
         }, { passive: false });
-        
+
         // 添加到文档
         document.body.appendChild(this.consoleContainer);
     }
@@ -542,19 +543,19 @@ export class UIDebug {
         this.variableMonitorWindow = document.createElement('div');
         this.variableMonitorWindow.className = 'variable-monitor-window';
         this.variableMonitorWindow.style.display = 'none';
-        
+
         // 创建窗口头部（用于拖拽）
         const header = document.createElement('div');
         header.className = 'variable-monitor-header';
-        
+
         // 创建标题
         const title = document.createElement('span');
         title.textContent = '变量监控';
-        
+
         // 创建控制按钮容器
         const controls = document.createElement('div');
         controls.className = 'variable-monitor-controls';
-        
+
         // 创建全部收起按钮
         const collapseAllButton = document.createElement('button');
         collapseAllButton.className = 'variable-monitor-collapse-all';
@@ -563,7 +564,7 @@ export class UIDebug {
         collapseAllButton.addEventListener('click', () => {
             this.collapseAllVariables();
         });
-        
+
         // 创建关闭按钮
         const closeButton = document.createElement('button');
         closeButton.className = 'variable-monitor-close';
@@ -571,29 +572,29 @@ export class UIDebug {
         closeButton.addEventListener('click', () => {
             this.hideVariableMonitorWindow();
         });
-        
+
         controls.appendChild(collapseAllButton);
         controls.appendChild(closeButton);
         header.appendChild(title);
         header.appendChild(controls);
-        
+
         // 创建变量列表容器
         this.variableList = document.createElement('div');
         this.variableList.className = 'variable-monitor-list';
-        
+
         // 创建空状态提示
         const emptyState = document.createElement('div');
         emptyState.className = 'variable-monitor-empty';
         emptyState.textContent = '未添加任何变量';
         this.variableList.appendChild(emptyState);
-        
+
         // 组装窗口
         this.variableMonitorWindow.appendChild(header);
         this.variableMonitorWindow.appendChild(this.variableList);
-        
+
         // 添加拖拽功能
         this.setupWindowDragAndDrop(header);
-        
+
         // 添加到文档
         document.body.appendChild(this.variableMonitorWindow);
     }
@@ -608,7 +609,7 @@ export class UIDebug {
                 const rect = this.variableMonitorWindow!.getBoundingClientRect();
                 this.dragOffset.x = e.clientX - rect.left;
                 this.dragOffset.y = e.clientY - rect.top;
-                
+
                 document.addEventListener('mousemove', this.handleWindowDrag);
                 document.addEventListener('mouseup', this.handleWindowDragEnd);
                 e.preventDefault();
@@ -621,10 +622,10 @@ export class UIDebug {
      */
     private static handleWindowDrag = (e: MouseEvent): void => {
         if (!this.isDragging || !this.variableMonitorWindow) return;
-        
+
         const newX = e.clientX - this.dragOffset.x;
         const newY = e.clientY - this.dragOffset.y;
-        
+
         this.variableMonitorWindow.style.left = newX + 'px';
         this.variableMonitorWindow.style.top = newY + 'px';
     }
@@ -681,13 +682,13 @@ export class UIDebug {
         if (!this.consoleRandomColor) {
             return '#ffffff'; // 默认白色
         }
-        
+
         // 如果计数器达到组大小，则重新选择颜色
         if (this.colorGroupCounter >= this.consoleColorRandomGroupSize) {
             this.currentColorGroup = this.getRandomColor();
             this.colorGroupCounter = 0;
         }
-        
+
         this.colorGroupCounter++;
         return this.currentColorGroup;
     }
@@ -741,22 +742,22 @@ export class UIDebug {
 
         // 生成唯一ID
         const variableId = 'var_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         // 获取变量信息
         const variableInfo = this.getVariableInfo(variable);
-        
+
         // 存储变量引用
         this.monitoredVariables.set(variableId, {
             reference: variable,
             info: variableInfo
         });
-        
+
         // 创建变量显示元素
         this.createVariableListItem(variableId, variableInfo);
-        
+
         // 启动监控更新
         this.startVariableMonitoring();
-        
+
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
@@ -779,7 +780,7 @@ export class UIDebug {
     private static getVariableInfo(variable: any): any {
         const stack = (new Error()).stack;
         const scriptName = this.extractScriptName(stack);
-        
+
         return {
             name: this.getVariableName(variable),
             value: variable,
@@ -813,49 +814,49 @@ export class UIDebug {
      */
     private static extractScriptName(stack: string | undefined): string {
         if (!stack) return 'unknown';
-        
+
         const lines = stack.split('\n');
-        
+
         // 跳过UIDebug内部的调用，找到真正的外部调用者
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
-            
+
             // 匹配脚本路径
             const match = line.match(/\/([^\/]+\.(?:js|ts))/);
             if (match) {
                 const scriptName = match[1];
-                
+
                 // 跳过UIDebug.js相关的调用，找到外部调用者
-                if (scriptName.toLowerCase() !== 'uidebug.js' && 
+                if (scriptName.toLowerCase() !== 'uidebug.js' &&
                     scriptName.toLowerCase() !== 'uidebug.ts') {
                     return scriptName;
                 }
             }
         }
-        
+
         // 如果没有找到外部脚本，尝试更宽松的匹配
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
-            
+
             // 尝试匹配更多格式的路径
             const patterns = [
                 /([^\/\\]+\.(?:js|ts)):\d+:\d+/,  // filename.js:line:col
                 /at\s+[^(]*\(([^)]+\.(?:js|ts))/,  // at function (filename.js)
                 /([^\/\\]+\.(?:js|ts))/            // 简单匹配
             ];
-            
+
             for (const pattern of patterns) {
                 const match = line.match(pattern);
                 if (match) {
                     const scriptName = match[1];
-                    if (scriptName.toLowerCase() !== 'uidebug.js' && 
+                    if (scriptName.toLowerCase() !== 'uidebug.js' &&
                         scriptName.toLowerCase() !== 'uidebug.ts') {
                         return scriptName;
                     }
                 }
             }
         }
-        
+
         return 'unknown';
     }
 
@@ -873,16 +874,16 @@ export class UIDebug {
         listItem.className = 'variable-list-item';
         listItem.id = variableId;
         listItem.style.paddingLeft = (level * 20 + 8) + 'px'; // 层级缩进
-        
+
         // 创建主要内容容器
         const mainContent = document.createElement('div');
         mainContent.className = 'variable-main-content';
-        
+
         // 展开/折叠按钮（只对对象类型显示）
         const expandButton = document.createElement('button');
         expandButton.className = 'variable-expand-button';
         const canExpand = this.canVariableExpand(variableInfo.value);
-        
+
         if (canExpand) {
             const isExpanded = this.expandedItems.has(variableId);
             expandButton.textContent = isExpanded ? '▼' : '▶';
@@ -893,63 +894,63 @@ export class UIDebug {
             expandButton.textContent = '';
             expandButton.style.visibility = 'hidden';
         }
-        
+
         // 变量名
         const nameSpan = document.createElement('span');
         nameSpan.className = 'variable-name';
         nameSpan.textContent = level === 0 ? variableInfo.name : this.getPropertyDisplayName(variableInfo.name, parentPath);
-        
+
         // 变量值容器
         const valueContainer = document.createElement('div');
         valueContainer.className = 'variable-value-container';
-        
+
         const valueSpan = document.createElement('span');
         valueSpan.className = 'variable-value';
-        
+
         // 处理值显示
         const formattedValue = this.formatVariableValue(variableInfo.value);
         const needsTruncation = formattedValue.length > this.maxDisplayLength;
-        
+
         // 应用同样的优化逻辑：可展开对象时不显示📄角标
         const shouldShowTextExpansion = needsTruncation && !canExpand;
-        
+
         if (shouldShowTextExpansion) {
             const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
             valueSpan.textContent = truncatedValue;
-            
+
             const expandIndicator = document.createElement('span');
             expandIndicator.className = 'variable-expand-indicator';
             expandIndicator.textContent = '📄';
             expandIndicator.title = '点击查看完整内容';
-            
+
             expandIndicator.addEventListener('click', () => {
                 this.toggleTextExpansion(variableId, formattedValue, valueSpan);
             });
-            
+
             valueContainer.appendChild(valueSpan);
             valueContainer.appendChild(expandIndicator);
         } else {
             valueSpan.textContent = formattedValue;
             valueContainer.appendChild(valueSpan);
         }
-        
+
         // 变量类型和脚本信息（只在顶级显示）
         const metaInfo = document.createElement('div');
         metaInfo.className = 'variable-meta-info';
-        
+
         if (level === 0) {
             const classSpan = document.createElement('span');
             classSpan.className = 'variable-class';
             classSpan.textContent = variableInfo.className;
-            
+
             const scriptSpan = document.createElement('span');
             scriptSpan.className = 'variable-script';
             scriptSpan.textContent = variableInfo.scriptName;
-            
+
             metaInfo.appendChild(classSpan);
             metaInfo.appendChild(scriptSpan);
         }
-        
+
         // 删除按钮（只在顶级显示）
         const deleteButton = document.createElement('button');
         deleteButton.className = 'variable-delete';
@@ -958,25 +959,25 @@ export class UIDebug {
         deleteButton.addEventListener('click', () => {
             this.removeVariable(variableId);
         });
-        
+
         // 组装主要内容
         mainContent.appendChild(expandButton);
         mainContent.appendChild(nameSpan);
         mainContent.appendChild(valueContainer);
         mainContent.appendChild(metaInfo);
         mainContent.appendChild(deleteButton);
-        
+
         listItem.appendChild(mainContent);
-        
+
         // 为子项创建容器
         const childrenContainer = document.createElement('div');
         childrenContainer.className = 'variable-children-container';
         childrenContainer.id = variableId + '_children';
         childrenContainer.style.display = 'none';
         listItem.appendChild(childrenContainer);
-        
+
         this.variableList!.appendChild(listItem);
-        
+
         // 如果已展开，显示子项
         if (this.expandedItems.has(variableId) && canExpand) {
             this.expandVariable(variableId, variableInfo.value, level, parentPath);
@@ -1022,14 +1023,14 @@ export class UIDebug {
         if (element) {
             element.remove();
         }
-        
+
         // 清理相关的展开状态
         this.expandedItems.forEach(itemId => {
             if (itemId.startsWith(variableId)) {
                 this.expandedItems.delete(itemId);
             }
         });
-        
+
         // 如果没有变量了，显示空状态提示
         if (this.monitoredVariables.size === 0) {
             const emptyState = this.variableList?.querySelector('.variable-monitor-empty') as HTMLElement;
@@ -1045,7 +1046,7 @@ export class UIDebug {
     private static startVariableMonitoring(): void {
         // 避免重复启动
         if ((this as any).monitoringInterval) return;
-        
+
         (this as any).monitoringInterval = setInterval(() => {
             this.updateVariableDisplay();
         }, 100); // 每100ms更新一次
@@ -1062,39 +1063,39 @@ export class UIDebug {
                 if (valueContainer) {
                     const newValue = this.formatVariableValue(data.reference);
                     const needsTruncation = newValue.length > this.maxDisplayLength;
-                    
+
                     // 检查是否可以展开对象结构
                     const canExpand = this.canVariableExpand(data.reference);
                     const shouldShowTextExpansion = needsTruncation && !canExpand;
-                    
+
                     // 清空现有内容
                     valueContainer.innerHTML = '';
-                    
+
                     // 创建值显示元素
                     const valueSpan = document.createElement('span');
                     valueSpan.className = 'variable-value';
-                    
+
                     if (shouldShowTextExpansion) {
                         const truncatedValue = newValue.substring(0, this.maxDisplayLength) + '...';
                         valueSpan.textContent = truncatedValue;
-                        
+
                         // 创建角标
                         const expandIndicator = document.createElement('span');
                         expandIndicator.className = 'variable-expand-indicator';
                         expandIndicator.textContent = '📄';
                         expandIndicator.title = '点击查看完整内容';
-                        
+
                         expandIndicator.addEventListener('click', () => {
                             this.toggleTextExpansion(variableId, newValue, valueSpan);
                         });
-                        
+
                         valueContainer.appendChild(valueSpan);
                         valueContainer.appendChild(expandIndicator);
                     } else {
                         valueSpan.textContent = newValue;
                         valueContainer.appendChild(valueSpan);
                     }
-                    
+
                     // 添加更新动画效果
                     valueSpan.classList.add('variable-updated');
                     setTimeout(() => {
@@ -1250,27 +1251,27 @@ export class UIDebug {
      */
     private static showMenu(): void {
         if (!this.menuPanel) return;
-        
+
         // 设置菜单位置为鼠标位置
         const menuWidth = 180; // 菜单宽度
         const menuHeight = 400; // 菜单最大高度
         const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
         const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-        
+
         // 计算菜单位置，确保不超出屏幕边界
         let left = this.mouseX;
         let top = this.mouseY;
-        
+
         // 如果菜单会超出右边界，则向左显示
         if (left + menuWidth > viewportWidth) {
             left = viewportWidth - menuWidth - 10;
         }
-        
+
         // 如果菜单会超出下边界，则向上显示
         if (top + menuHeight > viewportHeight) {
             top = viewportHeight - menuHeight - 10;
         }
-        
+
         this.menuPanel.style.left = left + 'px';
         this.menuPanel.style.top = top + 'px';
         this.menuPanel.style.display = 'block';
@@ -1284,7 +1285,7 @@ export class UIDebug {
         if (!this.menuPanel) return;
         this.menuPanel.style.display = 'none';
         this.isMenuVisible = false;
-        
+
         // 隐藏所有子菜单并重置箭头状态
         this.hideAllSubmenus();
         this.resetAllArrows();
@@ -1361,6 +1362,29 @@ export class UIDebug {
                 display: flex;
                 flex-direction: column;
                 max-height: 400px;
+                scrollbar-width: thin; /* Firefox - 显示细滚动条 */
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(60, 60, 60, 0.8); /* Firefox滚动条颜色 */
+            }
+            
+            /* Webkit浏览器（Chrome, Safari）主菜单滚动条样式 */
+            .debug-menu-buttons::-webkit-scrollbar {
+                width: 8px;
+                display: block !important; /* 强制显示滚动条 */
+            }
+            
+            .debug-menu-buttons::-webkit-scrollbar-track {
+                background: rgba(60, 60, 60, 0.8);
+                border-radius: 4px;
+            }
+            
+            .debug-menu-buttons::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+                border: 1px solid rgba(45, 45, 45, 0.5);
+            }
+            
+            .debug-menu-buttons::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
             }
             
             .debug-menu-button {
@@ -1423,9 +1447,9 @@ export class UIDebug {
             
             /* 控制台来源信息样式 */
             .console-source {
-                color: #ff4757 !important; /* 红色字体 */
-                background-color: rgba(255, 71, 87, 0.15); /* 红色底板 */
-                border: 1px solid rgba(255, 71, 87, 0.3);
+                color:hsl(0, 84.30%, 50.00%) !important; /* 红色字体 */
+                background-color: rgba(217, 235, 23, 0.78); /* 红色底板 */
+                border: 1px solid rgba(3, 26, 80, 0.3);
                 border-radius: 3px;
                 padding: 1px 6px;
                 font-size: 0.8em;
@@ -1804,6 +1828,29 @@ export class UIDebug {
                 display: flex;
                 flex-direction: column;
                 max-height: 400px;
+                scrollbar-width: thin; /* Firefox - 显示细滚动条 */
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(60, 60, 60, 0.8); /* Firefox滚动条颜色 */
+            }
+            
+            /* Webkit浏览器（Chrome, Safari）子菜单滚动条样式 */
+            .debug-submenu-buttons::-webkit-scrollbar {
+                width: 8px;
+                display: block !important; /* 强制显示滚动条 */
+            }
+            
+            .debug-submenu-buttons::-webkit-scrollbar-track {
+                background: rgba(60, 60, 60, 0.8);
+                border-radius: 4px;
+            }
+            
+            .debug-submenu-buttons::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+                border: 1px solid rgba(45, 45, 45, 0.5);
+            }
+            
+            .debug-submenu-buttons::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
             }
             
             .debug-menu-scroll-arrow {
@@ -1853,7 +1900,7 @@ export class UIDebug {
         const isExpanded = this.expandedItems.has(variableId);
         const expandButton = document.getElementById(variableId)?.querySelector('.variable-expand-button') as HTMLButtonElement;
         const childrenContainer = document.getElementById(variableId + '_children');
-        
+
         if (isExpanded) {
             // 折叠
             this.expandedItems.delete(variableId);
@@ -1876,10 +1923,10 @@ export class UIDebug {
     private static expandVariable(variableId: string, value: any, level: number, parentPath: string): void {
         const childrenContainer = document.getElementById(variableId + '_children');
         if (!childrenContainer) return;
-        
+
         childrenContainer.style.display = 'block';
         childrenContainer.innerHTML = ''; // 清空现有内容
-        
+
         if (Array.isArray(value)) {
             // 处理数组
             value.forEach((item, index) => {
@@ -1890,7 +1937,7 @@ export class UIDebug {
                     className: typeof item,
                     scriptName: ''
                 };
-                
+
                 // 创建子项元素
                 this.createChildVariableItem(childId, childInfo, level + 1, parentPath + `[${index}]`, childrenContainer);
             });
@@ -1904,7 +1951,7 @@ export class UIDebug {
                     className: typeof value[key],
                     scriptName: ''
                 };
-                
+
                 // 创建子项元素
                 this.createChildVariableItem(childId, childInfo, level + 1, parentPath + '.' + key, childrenContainer);
             });
@@ -1919,16 +1966,16 @@ export class UIDebug {
         listItem.className = 'variable-list-item variable-child-item';
         listItem.id = childId;
         listItem.style.paddingLeft = (level * 20 + 8) + 'px';
-        
+
         // 创建主要内容容器
         const mainContent = document.createElement('div');
         mainContent.className = 'variable-main-content';
-        
+
         // 展开/折叠按钮
         const expandButton = document.createElement('button');
         expandButton.className = 'variable-expand-button';
         const canExpand = this.canVariableExpand(childInfo.value);
-        
+
         if (canExpand) {
             const isExpanded = this.expandedItems.has(childId);
             expandButton.textContent = isExpanded ? '▼' : '▶';
@@ -1939,62 +1986,62 @@ export class UIDebug {
             expandButton.textContent = '';
             expandButton.style.visibility = 'hidden';
         }
-        
+
         // 变量名
         const nameSpan = document.createElement('span');
         nameSpan.className = 'variable-name variable-child-name';
         nameSpan.textContent = childInfo.name;
-        
+
         // 变量值容器
         const valueContainer = document.createElement('div');
         valueContainer.className = 'variable-value-container';
-        
+
         const valueSpan = document.createElement('span');
         valueSpan.className = 'variable-value';
-        
+
         // 处理值显示
         const formattedValue = this.formatVariableValue(childInfo.value);
         const needsTruncation = formattedValue.length > this.maxDisplayLength;
-        
+
         // 应用同样的优化逻辑：可展开对象时不显示📄角标
         const shouldShowTextExpansion = needsTruncation && !canExpand;
-        
+
         if (shouldShowTextExpansion) {
             const truncatedValue = formattedValue.substring(0, this.maxDisplayLength) + '...';
             valueSpan.textContent = truncatedValue;
-            
+
             const expandIndicator = document.createElement('span');
             expandIndicator.className = 'variable-expand-indicator';
             expandIndicator.textContent = '📄';
             expandIndicator.title = '点击查看完整内容';
-            
+
             expandIndicator.addEventListener('click', () => {
                 this.toggleTextExpansion(childId, formattedValue, valueSpan);
             });
-            
+
             valueContainer.appendChild(valueSpan);
             valueContainer.appendChild(expandIndicator);
         } else {
             valueSpan.textContent = formattedValue;
             valueContainer.appendChild(valueSpan);
         }
-        
+
         // 组装主要内容
         mainContent.appendChild(expandButton);
         mainContent.appendChild(nameSpan);
         mainContent.appendChild(valueContainer);
-        
+
         listItem.appendChild(mainContent);
-        
+
         // 为子项创建容器
         const childrenContainer = document.createElement('div');
         childrenContainer.className = 'variable-children-container';
         childrenContainer.id = childId + '_children';
         childrenContainer.style.display = 'none';
         listItem.appendChild(childrenContainer);
-        
+
         container.appendChild(listItem);
-        
+
         // 如果已展开，显示子项
         if (this.expandedItems.has(childId) && canExpand) {
             this.expandVariable(childId, childInfo.value, level, parentPath);
@@ -2014,7 +2061,7 @@ export class UIDebug {
     private static toggleTextExpansion(variableId: string, fullText: string, valueSpan: HTMLElement): void {
         const textExpandId = variableId + '_text';
         const isExpanded = this.expandedItems.has(textExpandId);
-        
+
         if (isExpanded) {
             // 收起文本
             this.expandedItems.delete(textExpandId);
@@ -2032,7 +2079,7 @@ export class UIDebug {
             valueSpan.style.overflow = 'auto'; // 添加滚动条
             valueSpan.style.cursor = 'pointer';
             valueSpan.classList.add('variable-text-expanded');
-            
+
             // 添加点击收起的提示
             valueSpan.title = '点击收起';
             valueSpan.addEventListener('click', () => {
@@ -2072,7 +2119,7 @@ export class UIDebug {
         }
 
         const itemId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         // 创建菜单项数据
         const menuItemData: MenuItemData = {
             id: itemId,
@@ -2080,12 +2127,12 @@ export class UIDebug {
             type: 'folder',
             children: new Map()
         };
-        
+
         this.menuItems.set(itemId, menuItemData);
-        
+
         // 创建菜单项DOM元素
         this.createMenuItemElement(menuItemData);
-        
+
         return this.createFatherButtonInstance(itemId);
     }
 
@@ -2130,7 +2177,7 @@ export class UIDebug {
         }
 
         const childId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         const childItemData: MenuItemData = {
             id: childId,
             name: name,
@@ -2138,10 +2185,10 @@ export class UIDebug {
             callback: callback,
             parent: parentId
         };
-        
+
         parentItem.children.set(childId, childItemData);
         this.menuItems.set(childId, childItemData);
-        
+
         return this.createFatherButtonInstance(parentId);
     }
 
@@ -2156,7 +2203,7 @@ export class UIDebug {
         }
 
         const childId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
+
         const childItemData: MenuItemData = {
             id: childId,
             name: name,
@@ -2164,10 +2211,10 @@ export class UIDebug {
             children: new Map(),
             parent: parentId
         };
-        
+
         parentItem.children.set(childId, childItemData);
         this.menuItems.set(childId, childItemData);
-        
+
         return this.createFatherButtonInstance(childId);
     }
 
@@ -2179,14 +2226,14 @@ export class UIDebug {
         button.textContent = itemData.name;
         button.className = itemData.type === 'folder' ? 'debug-menu-button debug-menu-folder' : 'debug-menu-button';
         button.id = itemData.id;
-        
+
         if (itemData.type === 'folder') {
             // 文件夹类型，添加箭头指示器
             const arrow = document.createElement('span');
             arrow.className = 'debug-menu-arrow';
             arrow.textContent = '▶';
             button.appendChild(arrow);
-            
+
             // 改为点击切换子菜单，而不是鼠标悬停
             button.addEventListener('click', (e) => {
                 e.stopPropagation(); // 阻止事件冒泡
@@ -2201,7 +2248,7 @@ export class UIDebug {
                 this.hideMenu();
             });
         }
-        
+
         this.buttonsContainer!.appendChild(button);
     }
 
@@ -2213,22 +2260,22 @@ export class UIDebug {
         const submenuContainer = this.submenuContainers.get(itemId);
         const button = document.getElementById(itemId);
         const arrow = button?.querySelector('.debug-menu-arrow');
-        
+
         if (isCurrentlyOpen && submenuContainer) {
             // 隐藏子菜单
             submenuContainer.style.display = 'none';
             this.currentOpenSubmenus.delete(itemId);
-            
+
             // 更新按钮状态
             if (button) button.classList.remove('active');
             if (arrow) arrow.textContent = '▶';
-            
+
             // 递归隐藏所有子级菜单
             this.hideChildSubmenus(itemId);
         } else {
             // 显示子菜单
             this.showSubmenu(itemId);
-            
+
             // 更新按钮状态
             if (button) button.classList.add('active');
             if (arrow) arrow.textContent = '▼';
@@ -2260,14 +2307,14 @@ export class UIDebug {
         // 创建新的子菜单容器
         submenuContainer = this.createSubmenuContainer(itemId, menuItem);
         this.submenuContainers.set(itemId, submenuContainer);
-        
+
         // 定位子菜单
         this.positionSubmenu(itemId, submenuContainer);
-        
+
         // 显示子菜单
         submenuContainer.style.display = 'block';
         this.currentOpenSubmenus.add(itemId);
-        
+
         // 添加到文档
         document.body.appendChild(submenuContainer);
     }
@@ -2279,11 +2326,11 @@ export class UIDebug {
         const submenu = document.createElement('div');
         submenu.className = 'debug-submenu';
         submenu.id = 'submenu_' + parentId;
-        
+
         // 创建按钮容器
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'debug-submenu-buttons';
-        
+
         // 添加子菜单项
         if (parentItem.children) {
             parentItem.children.forEach((childItem) => {
@@ -2291,14 +2338,14 @@ export class UIDebug {
                 button.textContent = childItem.name;
                 button.className = childItem.type === 'folder' ? 'debug-menu-button debug-menu-folder' : 'debug-menu-button';
                 button.id = childItem.id;
-                
+
                 if (childItem.type === 'folder') {
                     // 文件夹类型，添加箭头指示器
                     const arrow = document.createElement('span');
                     arrow.className = 'debug-menu-arrow';
                     arrow.textContent = '▶';
                     button.appendChild(arrow);
-                    
+
                     // 改为点击切换子菜单
                     button.addEventListener('click', (e) => {
                         e.stopPropagation(); // 阻止事件冒泡
@@ -2314,18 +2361,18 @@ export class UIDebug {
                         this.hideMenu();
                     });
                 }
-                
+
                 buttonsContainer.appendChild(button);
             });
         }
-        
+
         submenu.appendChild(buttonsContainer);
-        
+
         // 阻止子菜单内部点击冒泡到document
         submenu.addEventListener('click', (e) => {
             e.stopPropagation();
         });
-        
+
         return submenu;
     }
 
@@ -2335,26 +2382,26 @@ export class UIDebug {
     private static positionSubmenu(parentId: string, submenuContainer: HTMLElement): void {
         const parentButton = document.getElementById(parentId);
         if (!parentButton) return;
-        
+
         const parentRect = parentButton.getBoundingClientRect();
         const submenuWidth = 150; // 子菜单宽度
         const submenuHeight = submenuContainer.offsetHeight || 200; // 预估高度
-        
+
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         // 判断父按钮是在主菜单还是在子菜单中
         const isInMainMenu = parentButton.closest('.debug-menu') !== null;
         const isInSubmenu = parentButton.closest('.debug-submenu') !== null;
-        
+
         let left: number;
         let top: number;
-        
+
         if (isInMainMenu) {
             // 主菜单的子菜单：显示在右侧
             left = parentRect.right + 5;
             top = parentRect.top;
-            
+
             // 检查是否超出右边界
             if (left + submenuWidth > viewportWidth) {
                 left = parentRect.left - submenuWidth - 5; // 显示在左侧
@@ -2375,15 +2422,15 @@ export class UIDebug {
                 // 左侧偏上
                 { left: parentRect.left - submenuWidth - 5, top: parentRect.top - 30 }
             ];
-            
+
             // 选择最佳位置（不超出边界且不与现有子菜单重合）
             let bestPosition = positions[0];
             for (const pos of positions) {
-                if (pos.left >= 10 && 
+                if (pos.left >= 10 &&
                     pos.left + submenuWidth <= viewportWidth - 10 &&
-                    pos.top >= 10 && 
+                    pos.top >= 10 &&
                     pos.top + submenuHeight <= viewportHeight - 10) {
-                    
+
                     // 检查是否与现有子菜单重合
                     if (!this.checkSubmenuOverlap(pos.left, pos.top, submenuWidth, submenuHeight)) {
                         bestPosition = pos;
@@ -2391,7 +2438,7 @@ export class UIDebug {
                     }
                 }
             }
-            
+
             left = bestPosition.left;
             top = bestPosition.top;
         } else {
@@ -2399,18 +2446,18 @@ export class UIDebug {
             left = parentRect.right + 5;
             top = parentRect.top;
         }
-        
+
         // 最后的边界检查和调整
         if (left < 10) left = 10;
         if (left + submenuWidth > viewportWidth - 10) {
             left = viewportWidth - submenuWidth - 10;
         }
-        
+
         if (top < 10) top = 10;
         if (top + submenuHeight > viewportHeight - 10) {
             top = viewportHeight - submenuHeight - 10;
         }
-        
+
         submenuContainer.style.left = left + 'px';
         submenuContainer.style.top = top + 'px';
     }
@@ -2421,22 +2468,22 @@ export class UIDebug {
     private static checkSubmenuOverlap(left: number, top: number, width: number, height: number): boolean {
         for (const [_, submenu] of this.submenuContainers) {
             if (submenu.style.display === 'none') continue;
-            
+
             const submenuRect = submenu.getBoundingClientRect();
             const submenuLeft = submenuRect.left;
             const submenuTop = submenuRect.top;
             const submenuRight = submenuLeft + submenuRect.width;
             const submenuBottom = submenuTop + submenuRect.height;
-            
+
             const newRight = left + width;
             const newBottom = top + height;
-            
+
             // 检查是否重合（带一些边距）
             const margin = 20;
-            if (!(newRight + margin < submenuLeft || 
-                  left - margin > submenuRight || 
-                  newBottom + margin < submenuTop || 
-                  top - margin > submenuBottom)) {
+            if (!(newRight + margin < submenuLeft ||
+                left - margin > submenuRight ||
+                newBottom + margin < submenuTop ||
+                top - margin > submenuBottom)) {
                 return true; // 有重合
             }
         }
@@ -2452,7 +2499,7 @@ export class UIDebug {
         if (existingTimeout) {
             clearTimeout(existingTimeout);
         }
-        
+
         // 设置新的延迟隐藏定时器
         const timeout = setTimeout(() => {
             const submenuContainer = this.submenuContainers.get(itemId);
@@ -2461,11 +2508,11 @@ export class UIDebug {
             }
             this.currentOpenSubmenus.delete(itemId);
             this.submenuTimeouts.delete(itemId);
-            
+
             // 同时隐藏所有子级菜单
             this.hideChildSubmenus(itemId);
         }, 300); // 300ms延迟
-        
+
         this.submenuTimeouts.set(itemId, timeout);
     }
 
@@ -2475,20 +2522,20 @@ export class UIDebug {
     private static hideChildSubmenus(parentId: string): void {
         const parentItem = this.menuItems.get(parentId);
         if (!parentItem || !parentItem.children) return;
-        
+
         parentItem.children.forEach((childItem) => {
             const childSubmenu = this.submenuContainers.get(childItem.id);
             if (childSubmenu) {
                 childSubmenu.style.display = 'none';
                 this.currentOpenSubmenus.delete(childItem.id);
-                
+
                 // 清除定时器
                 const timeout = this.submenuTimeouts.get(childItem.id);
                 if (timeout) {
                     clearTimeout(timeout);
                     this.submenuTimeouts.delete(childItem.id);
                 }
-                
+
                 // 递归隐藏更深层的子菜单
                 this.hideChildSubmenus(childItem.id);
             }
@@ -2513,7 +2560,7 @@ export class UIDebug {
         allArrows.forEach(arrow => {
             arrow.textContent = '▶';
         });
-        
+
         // 重置所有文件夹按钮的active状态
         const allFolderButtons = document.querySelectorAll('.debug-menu-folder');
         allFolderButtons.forEach(button => {

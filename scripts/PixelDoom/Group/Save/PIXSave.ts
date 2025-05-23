@@ -72,16 +72,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!DEBUG.DebugMainUI) return
     DEBUG.DebugMainUI.AddValue(data);
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("存档-标识符和json同时存档", () => {
+    var SaveFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("存档系统相关");
+    SaveFather.AddChildButton
+
+
+    SaveFather.AddChildButton("存档-标识符和json同时存档", () => {
         UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
         MixC3Save.SaveGame('cundang-001')
     })
-    DEBUG.DebugMainUI.DebuPanelAddButton("读取测试-通过标识符读取", () => {
+    SaveFather.AddChildButton("读取测试-通过标识符读取", () => {
         UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
         MixC3Save.LoadGame("cundang-001")
     })
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("读取测试-通过json", () => {
+    SaveFather.AddChildButton("读取测试-通过json", () => {
         UISubtitleMain.ShowSubtitles("读取测试-通过json", 5)
         // 通过 data.LevelGameData 来加载关卡存档
         if (!data.LevelGameData) {
@@ -91,17 +95,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         MixC3Save.LoadGameFromJson(data.LevelGameData)
     })
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("下载数据", () => {
+    SaveFather.AddChildButton("下载数据", () => {
         UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
         LocalSave.DataDownload()
     })
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("读取本地数据", () => {
+    SaveFather.AddChildButton("读取本地数据", () => {
         UISubtitleMain.ShowSubtitles("读取本地数据", 5)
         LocalSave.DataRead();
     })
 
-    DEBUG.DebugMainUI.DebuPanelAddButton("清空data 并把数据存到localstoreg", () => {
+    SaveFather.AddChildButton("清空data 并把数据存到localstoreg", () => {
         UISubtitleMain.ShowSubtitles("清空data", 5)
         data.LevelGameData = ""
         data.RunGameTiems = 0;
