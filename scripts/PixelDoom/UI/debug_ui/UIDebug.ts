@@ -297,6 +297,14 @@ export class UIDebug {
             this.toggleVariableMonitorWindow();
         });
 
+        DebugFather.AddChildButton("打开控制台",()=>{
+            UIDebug.SetConsoleAlwaysShow(true)
+        })
+
+        DebugFather.AddChildButton("关闭控制台",()=>{
+            UIDebug.SetConsoleAlwaysShow(false)
+        })
+
         // // 添加测试实时变量监控的按钮
         // DebugFather.AddChildButton('测试实时变量监控', () => {
         //     // 创建一个会实时变化的测试对象
@@ -2259,10 +2267,19 @@ export class UIDebug {
             arrow.textContent = '▶';
             button.appendChild(arrow);
 
-            // 改为点击切换子菜单，而不是鼠标悬停
-            button.addEventListener('click', (e) => {
-                e.stopPropagation(); // 阻止事件冒泡
-                this.toggleSubmenu(itemData.id);
+            // 使用鼠标悬停展开子菜单（类似Windows右键菜单）
+            button.addEventListener('mouseenter', () => {
+                // 先关闭同级的其他子菜单
+                this.closeSiblingSubmenus(itemData.id);
+                // 显示当前子菜单
+                this.showSubmenu(itemData.id);
+                button.classList.add('active');
+                arrow.textContent = '▼';
+            });
+
+            // 鼠标离开时设置延迟隐藏
+            button.addEventListener('mouseleave', () => {
+                this.hideSubmenuDelayed(itemData.id);
             });
         } else {
             // 按钮类型，添加点击事件
@@ -2321,27 +2338,22 @@ export class UIDebug {
             this.submenuTimeouts.delete(itemId);
         }
 
-        // 如果子菜单已经存在，直接显示
+        // 获取或创建子菜单容器
         let submenuContainer = this.submenuContainers.get(itemId);
-        if (submenuContainer) {
-            submenuContainer.style.display = 'block';
-            this.currentOpenSubmenus.add(itemId);
-            return;
+        if (!submenuContainer) {
+            // 创建新的子菜单容器
+            submenuContainer = this.createSubmenuContainer(itemId, menuItem);
+            this.submenuContainers.set(itemId, submenuContainer);
+            // 添加到文档
+            document.body.appendChild(submenuContainer);
         }
 
-        // 创建新的子菜单容器
-        submenuContainer = this.createSubmenuContainer(itemId, menuItem);
-        this.submenuContainers.set(itemId, submenuContainer);
-
-        // 定位子菜单
+        // 每次显示时都重新定位（确保位置正确）
         this.positionSubmenu(itemId, submenuContainer);
 
         // 显示子菜单
         submenuContainer.style.display = 'block';
         this.currentOpenSubmenus.add(itemId);
-
-        // 添加到文档
-        document.body.appendChild(submenuContainer);
     }
 
     /**
@@ -2351,6 +2363,20 @@ export class UIDebug {
         const submenu = document.createElement('div');
         submenu.className = 'debug-submenu';
         submenu.id = 'submenu_' + parentId;
+
+        // 鼠标进入子菜单时，取消隐藏定时器
+        submenu.addEventListener('mouseenter', () => {
+            const timeout = this.submenuTimeouts.get(parentId);
+            if (timeout) {
+                clearTimeout(timeout);
+                this.submenuTimeouts.delete(parentId);
+            }
+        });
+
+        // 鼠标离开子菜单时，设置延迟隐藏
+        submenu.addEventListener('mouseleave', () => {
+            this.hideSubmenuDelayed(parentId);
+        });
 
         // 创建按钮容器
         const buttonsContainer = document.createElement('div');
@@ -2371,10 +2397,19 @@ export class UIDebug {
                     arrow.textContent = '▶';
                     button.appendChild(arrow);
 
-                    // 改为点击切换子菜单
-                    button.addEventListener('click', (e) => {
-                        e.stopPropagation(); // 阻止事件冒泡
-                        this.toggleSubmenu(childItem.id);
+                    // 使用鼠标悬停展开子菜单
+                    button.addEventListener('mouseenter', () => {
+                        // 先关闭同级的其他子菜单
+                        this.closeSiblingSubmenus(childItem.id);
+                        // 显示当前子菜单
+                        this.showSubmenu(childItem.id);
+                        button.classList.add('active');
+                        arrow.textContent = '▼';
+                    });
+
+                    // 鼠标离开时设置延迟隐藏
+                    button.addEventListener('mouseleave', () => {
+                        this.hideSubmenuDelayed(childItem.id);
                     });
                 } else {
                     // 按钮类型，添加点击事件
@@ -2528,15 +2563,25 @@ export class UIDebug {
         // 设置新的延迟隐藏定时器
         const timeout = setTimeout(() => {
             const submenuContainer = this.submenuContainers.get(itemId);
+            const button = document.getElementById(itemId);
+            
             if (submenuContainer) {
                 submenuContainer.style.display = 'none';
             }
+            
             this.currentOpenSubmenus.delete(itemId);
             this.submenuTimeouts.delete(itemId);
+            
+            // 重置按钮状态
+            if (button) {
+                button.classList.remove('active');
+                const arrow = button.querySelector('.debug-menu-arrow');
+                if (arrow) arrow.textContent = '▶';
+            }
 
             // 同时隐藏所有子级菜单
             this.hideChildSubmenus(itemId);
-        }, 300); // 300ms延迟
+        }, 200); // 200ms延迟，更快的响应
 
         this.submenuTimeouts.set(itemId, timeout);
     }
@@ -2654,6 +2699,70 @@ export class UIDebug {
         }
         
         return true;
+    }
+
+    /**
+     * 关闭同级的其他子菜单
+     */
+    private static closeSiblingSubmenus(currentItemId: string): void {
+        const currentItem = this.menuItems.get(currentItemId);
+        if (!currentItem) return;
+
+        const parentId = currentItem.parent;
+        
+        // 获取父菜单的所有子项
+        let siblings: Map<string, MenuItemData> | undefined;
+        
+        if (!parentId) {
+            // 主菜单级别
+            siblings = new Map();
+            this.menuItems.forEach((item, id) => {
+                if (!item.parent && item.type === 'folder' && id !== currentItemId) {
+                    siblings!.set(id, item);
+                }
+            });
+        } else {
+            // 子菜单级别
+            const parentItem = this.menuItems.get(parentId);
+            if (parentItem && parentItem.children) {
+                siblings = new Map();
+                parentItem.children.forEach((item, id) => {
+                    if (item.type === 'folder' && id !== currentItemId) {
+                        siblings!.set(id, item);
+                    }
+                });
+            }
+        }
+
+        // 关闭所有同级子菜单
+        if (siblings) {
+            siblings.forEach((_, siblingId) => {
+                const submenuContainer = this.submenuContainers.get(siblingId);
+                const button = document.getElementById(siblingId);
+                
+                if (submenuContainer && submenuContainer.style.display !== 'none') {
+                    submenuContainer.style.display = 'none';
+                    this.currentOpenSubmenus.delete(siblingId);
+                    
+                    // 重置按钮状态
+                    if (button) {
+                        button.classList.remove('active');
+                        const arrow = button.querySelector('.debug-menu-arrow');
+                        if (arrow) arrow.textContent = '▶';
+                    }
+                    
+                    // 递归隐藏其子菜单
+                    this.hideChildSubmenus(siblingId);
+                }
+                
+                // 清除隐藏定时器
+                const timeout = this.submenuTimeouts.get(siblingId);
+                if (timeout) {
+                    clearTimeout(timeout);
+                    this.submenuTimeouts.delete(siblingId);
+                }
+            });
+        }
     }
 }
 
