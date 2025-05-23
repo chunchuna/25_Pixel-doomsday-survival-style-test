@@ -24,8 +24,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 interface DebugPanelInstance {
     DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance;
+    DebuPanelAddFatherButton(name: string): FatherButtonInstance;
     InitConsoleCapture(): DebugPanelInstance;
     AddValue(variable: any): DebugPanelInstance;
+}
+
+interface FatherButtonInstance {
+    AddChildButton(name: string, callback: () => void): FatherButtonInstance;
+    AddChildFatherButton(name: string): FatherButtonInstance;
 }
 
 export class UIDebug {
@@ -65,6 +71,14 @@ export class UIDebug {
     private static dragOffset: { x: number; y: number } = { x: 0, y: 0 };
     private static expandedItems: Set<string> = new Set(); // 展开的项目ID集合
     private static maxDisplayLength: number = 50; // 变量值最大显示长度（降低到50字符）
+    
+    // 新增：子菜单系统相关变量
+    private static menuItems: Map<string, MenuItemData> = new Map(); // 菜单项数据
+    private static currentOpenSubmenus: Set<string> = new Set(); // 当前打开的子菜单
+    private static menuScrollTop: number = 0; // 菜单滚动位置
+    private static menuMaxVisibleItems: number = 10; // 菜单最大可见项数
+    private static submenuContainers: Map<string, HTMLElement> = new Map(); // 子菜单DOM容器
+    private static submenuTimeouts: Map<string, number> = new Map(); // 子菜单延迟隐藏定时器
 
     /**
      * 初始化调试面板
@@ -77,6 +91,9 @@ export class UIDebug {
             return {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                DebuPanelAddFatherButton: (name: string) => {
+                    return UIDebug.DebuPanelAddFatherButton(name);
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
@@ -122,13 +139,27 @@ export class UIDebug {
         // 点击空白处隐藏菜单
         document.addEventListener('click', (event) => {
             if (this.isMenuVisible && this.menuPanel && !this.menuPanel.contains(event.target as Node)) {
-                this.hideMenu();
+                // 检查是否点击在任何子菜单上
+                let clickedInSubmenu = false;
+                this.submenuContainers.forEach((submenu) => {
+                    if (submenu.contains(event.target as Node)) {
+                        clickedInSubmenu = true;
+                    }
+                });
+                
+                // 如果没有点击在子菜单上，则隐藏所有菜单
+                if (!clickedInSubmenu) {
+                    this.hideMenu();
+                }
             }
         });
 
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            DebuPanelAddFatherButton: (name: string) => {
+                return UIDebug.DebuPanelAddFatherButton(name);
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
@@ -151,6 +182,9 @@ export class UIDebug {
             return {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                DebuPanelAddFatherButton: (name: string) => {
+                    return UIDebug.DebuPanelAddFatherButton(name);
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
@@ -175,6 +209,9 @@ export class UIDebug {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
             },
+            DebuPanelAddFatherButton: (name: string) => {
+                return UIDebug.DebuPanelAddFatherButton(name);
+            },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
             },
@@ -194,6 +231,9 @@ export class UIDebug {
             return {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
+                },
+                DebuPanelAddFatherButton: (name: string) => {
+                    return UIDebug.DebuPanelAddFatherButton(name);
                 },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
@@ -250,7 +290,7 @@ export class UIDebug {
         this.DebuPanelAddButton('测试长文本', () => {
             const testLongText = {
                 shortText: "短文本",
-                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
+                longText: "这是一个很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长很长的测试文本",
                 jsonData: {
                     name: "测试数据",
                     description: "这是一个包含很多属性的复杂对象，用来测试JSON序列化后的长文本显示功能",
@@ -286,9 +326,29 @@ export class UIDebug {
             console.log('===================');
         });
 
+        // 添加测试子菜单
+        const testMenu = this.DebuPanelAddFatherButton('🔧 测试子菜单');
+        testMenu.AddChildButton('子按钮1', () => {
+            console.log('点击了子按钮1');
+        });
+        testMenu.AddChildButton('子按钮2', () => {
+            console.log('点击了子按钮2');
+        });
+        
+        const subFolder = testMenu.AddChildFatherButton('📁 子文件夹');
+        subFolder.AddChildButton('嵌套按钮1', () => {
+            console.log('点击了嵌套按钮1');
+        });
+        subFolder.AddChildButton('嵌套按钮2', () => {
+            console.log('点击了嵌套按钮2');
+        });
+
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            DebuPanelAddFatherButton: (name: string) => {
+                return UIDebug.DebuPanelAddFatherButton(name);
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
@@ -623,6 +683,9 @@ export class UIDebug {
                 DebuPanelAddButton: (name: string, callback: () => void) => {
                     return UIDebug.DebuPanelAddButton(name, callback);
                 },
+                DebuPanelAddFatherButton: (name: string) => {
+                    return UIDebug.DebuPanelAddFatherButton(name);
+                },
                 InitConsoleCapture: () => {
                     return UIDebug.InitConsoleCapture();
                 },
@@ -653,6 +716,9 @@ export class UIDebug {
         return {
             DebuPanelAddButton: (name: string, callback: () => void) => {
                 return UIDebug.DebuPanelAddButton(name, callback);
+            },
+            DebuPanelAddFatherButton: (name: string) => {
+                return UIDebug.DebuPanelAddFatherButton(name);
             },
             InitConsoleCapture: () => {
                 return UIDebug.InitConsoleCapture();
@@ -1398,11 +1464,12 @@ export class UIDebug {
             
             .variable-monitor-list {
                 flex: 1;
-                overflow-y: auto;
+                overflow-y: auto !important;
                 padding: 10px;
                 font-size: 11px;
                 scrollbar-width: thin; /* Firefox - 显示细滚动条 */
                 scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1); /* Firefox滚动条颜色 */
+                max-height: 100%; /* 确保有明确的高度限制 */
             }
             
             /* Webkit浏览器（Chrome, Safari）滚动条样式 */
@@ -1600,6 +1667,72 @@ export class UIDebug {
             .variable-text-expanded::-webkit-scrollbar-thumb {
                 background: rgba(255, 255, 255, 0.3);
                 border-radius: 3px;
+            }
+            
+            /* 子菜单系统样式 */
+            .debug-menu-folder {
+                position: relative;
+            }
+            
+            .debug-menu-arrow {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 8px;
+                color: rgba(255, 255, 255, 0.6);
+                transition: transform 0.2s;
+            }
+            
+            .debug-menu-folder:hover .debug-menu-arrow {
+                color: #fff;
+                transform: translateY(-50%) scale(1.2);
+            }
+            
+            .debug-submenu {
+                position: fixed;
+                min-width: 150px;
+                border-radius: 6px;
+                color: #ffffff;
+                font-family: monospace;
+                z-index: 10001;
+                overflow: hidden;
+                box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+                background-color: rgba(45, 45, 45, 0.95);
+                backdrop-filter: blur(5px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                display: none;
+            }
+            
+            .debug-submenu-buttons {
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                max-height: 400px;
+            }
+            
+            .debug-menu-scroll-arrow {
+                background: rgba(80, 120, 200, 0.8);
+                border: none;
+                color: #fff;
+                cursor: pointer;
+                font-family: monospace;
+                padding: 5px 15px;
+                text-align: center;
+                font-size: 10px;
+                transition: background-color 0.2s;
+            }
+            
+            .debug-menu-scroll-arrow:hover {
+                background: rgba(80, 120, 200, 1);
+            }
+            
+            .debug-menu-scroll-up::before {
+                content: "▲ 向上";
+            }
+            
+            .debug-menu-scroll-down::before {
+                content: "▼ 向下";
             }
         `;
 
@@ -1831,4 +1964,366 @@ export class UIDebug {
             }
         });
     }
+
+    /**
+     * 添加父级按钮到面板（支持子菜单）
+     * @param name 按钮名称
+     * @returns 父按钮实例
+     */
+    public static DebuPanelAddFatherButton(name: string): FatherButtonInstance {
+        if (!this.buttonsContainer) {
+            console.error('Debug panel not initialized. Call InitDebugPanel first.');
+            return this.createEmptyFatherButtonInstance();
+        }
+
+        const itemId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 创建菜单项数据
+        const menuItemData: MenuItemData = {
+            id: itemId,
+            name: name,
+            type: 'folder',
+            children: new Map()
+        };
+        
+        this.menuItems.set(itemId, menuItemData);
+        
+        // 创建菜单项DOM元素
+        this.createMenuItemElement(menuItemData);
+        
+        return this.createFatherButtonInstance(itemId);
+    }
+
+    /**
+     * 创建父按钮实例
+     */
+    private static createFatherButtonInstance(itemId: string): FatherButtonInstance {
+        return {
+            AddChildButton: (name: string, callback: () => void) => {
+                return this.addChildButton(itemId, name, callback);
+            },
+            AddChildFatherButton: (name: string) => {
+                return this.addChildFatherButton(itemId, name);
+            }
+        };
+    }
+
+    /**
+     * 创建空的父按钮实例（用于错误情况）
+     */
+    private static createEmptyFatherButtonInstance(): FatherButtonInstance {
+        return {
+            AddChildButton: (name: string, callback: () => void) => {
+                console.error('Cannot add child button: parent not initialized');
+                return this.createEmptyFatherButtonInstance();
+            },
+            AddChildFatherButton: (name: string) => {
+                console.error('Cannot add child folder: parent not initialized');
+                return this.createEmptyFatherButtonInstance();
+            }
+        };
+    }
+
+    /**
+     * 添加子按钮
+     */
+    private static addChildButton(parentId: string, name: string, callback: () => void): FatherButtonInstance {
+        const parentItem = this.menuItems.get(parentId);
+        if (!parentItem || !parentItem.children) {
+            console.error('Parent menu item not found');
+            return this.createEmptyFatherButtonInstance();
+        }
+
+        const childId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        const childItemData: MenuItemData = {
+            id: childId,
+            name: name,
+            type: 'button',
+            callback: callback,
+            parent: parentId
+        };
+        
+        parentItem.children.set(childId, childItemData);
+        this.menuItems.set(childId, childItemData);
+        
+        return this.createFatherButtonInstance(parentId);
+    }
+
+    /**
+     * 添加子文件夹
+     */
+    private static addChildFatherButton(parentId: string, name: string): FatherButtonInstance {
+        const parentItem = this.menuItems.get(parentId);
+        if (!parentItem || !parentItem.children) {
+            console.error('Parent menu item not found');
+            return this.createEmptyFatherButtonInstance();
+        }
+
+        const childId = 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        const childItemData: MenuItemData = {
+            id: childId,
+            name: name,
+            type: 'folder',
+            children: new Map(),
+            parent: parentId
+        };
+        
+        parentItem.children.set(childId, childItemData);
+        this.menuItems.set(childId, childItemData);
+        
+        return this.createFatherButtonInstance(childId);
+    }
+
+    /**
+     * 创建菜单项DOM元素
+     */
+    private static createMenuItemElement(itemData: MenuItemData): void {
+        const button = document.createElement('button');
+        button.textContent = itemData.name;
+        button.className = itemData.type === 'folder' ? 'debug-menu-button debug-menu-folder' : 'debug-menu-button';
+        button.id = itemData.id;
+        
+        if (itemData.type === 'folder') {
+            // 文件夹类型，添加箭头指示器
+            const arrow = document.createElement('span');
+            arrow.className = 'debug-menu-arrow';
+            arrow.textContent = '▶';
+            button.appendChild(arrow);
+            
+            // 添加鼠标悬停事件
+            button.addEventListener('mouseenter', () => {
+                this.showSubmenu(itemData.id);
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                this.hideSubmenuDelayed(itemData.id);
+            });
+        } else {
+            // 按钮类型，添加点击事件
+            button.addEventListener('click', () => {
+                if (itemData.callback) {
+                    itemData.callback();
+                }
+                this.hideMenu();
+            });
+        }
+        
+        this.buttonsContainer!.appendChild(button);
+    }
+
+    /**
+     * 显示子菜单
+     */
+    private static showSubmenu(itemId: string): void {
+        const menuItem = this.menuItems.get(itemId);
+        if (!menuItem || !menuItem.children || menuItem.children.size === 0) return;
+
+        // 清除隐藏定时器
+        const timeout = this.submenuTimeouts.get(itemId);
+        if (timeout) {
+            clearTimeout(timeout);
+            this.submenuTimeouts.delete(itemId);
+        }
+
+        // 如果子菜单已经存在，直接显示
+        let submenuContainer = this.submenuContainers.get(itemId);
+        if (submenuContainer) {
+            submenuContainer.style.display = 'block';
+            this.currentOpenSubmenus.add(itemId);
+            return;
+        }
+
+        // 创建新的子菜单容器
+        submenuContainer = this.createSubmenuContainer(itemId, menuItem);
+        this.submenuContainers.set(itemId, submenuContainer);
+        
+        // 定位子菜单
+        this.positionSubmenu(itemId, submenuContainer);
+        
+        // 显示子菜单
+        submenuContainer.style.display = 'block';
+        this.currentOpenSubmenus.add(itemId);
+        
+        // 添加到文档
+        document.body.appendChild(submenuContainer);
+    }
+
+    /**
+     * 创建子菜单容器
+     */
+    private static createSubmenuContainer(parentId: string, parentItem: MenuItemData): HTMLElement {
+        const submenu = document.createElement('div');
+        submenu.className = 'debug-submenu';
+        submenu.id = 'submenu_' + parentId;
+        
+        // 创建按钮容器
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'debug-submenu-buttons';
+        
+        // 添加子菜单项
+        if (parentItem.children) {
+            parentItem.children.forEach((childItem) => {
+                const button = document.createElement('button');
+                button.textContent = childItem.name;
+                button.className = childItem.type === 'folder' ? 'debug-menu-button debug-menu-folder' : 'debug-menu-button';
+                button.id = childItem.id;
+                
+                if (childItem.type === 'folder') {
+                    // 文件夹类型，添加箭头指示器
+                    const arrow = document.createElement('span');
+                    arrow.className = 'debug-menu-arrow';
+                    arrow.textContent = '▶';
+                    button.appendChild(arrow);
+                    
+                    // 添加鼠标悬停事件（支持多级菜单）
+                    button.addEventListener('mouseenter', () => {
+                        this.showSubmenu(childItem.id);
+                    });
+                    
+                    button.addEventListener('mouseleave', () => {
+                        this.hideSubmenuDelayed(childItem.id);
+                    });
+                } else {
+                    // 按钮类型，添加点击事件
+                    button.addEventListener('click', () => {
+                        if (childItem.callback) {
+                            childItem.callback();
+                        }
+                        this.hideAllSubmenus();
+                        this.hideMenu();
+                    });
+                }
+                
+                buttonsContainer.appendChild(button);
+            });
+        }
+        
+        submenu.appendChild(buttonsContainer);
+        
+        // 添加鼠标事件，防止子菜单消失
+        submenu.addEventListener('mouseenter', () => {
+            const timeout = this.submenuTimeouts.get(parentId);
+            if (timeout) {
+                clearTimeout(timeout);
+                this.submenuTimeouts.delete(parentId);
+            }
+        });
+        
+        submenu.addEventListener('mouseleave', () => {
+            this.hideSubmenuDelayed(parentId);
+        });
+        
+        return submenu;
+    }
+
+    /**
+     * 定位子菜单
+     */
+    private static positionSubmenu(parentId: string, submenuContainer: HTMLElement): void {
+        const parentButton = document.getElementById(parentId);
+        if (!parentButton) return;
+        
+        const parentRect = parentButton.getBoundingClientRect();
+        const submenuWidth = 150; // 子菜单宽度
+        const submenuHeight = submenuContainer.offsetHeight || 200; // 预估高度
+        
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // 计算位置
+        let left = parentRect.right + 5; // 在父菜单右侧5px
+        let top = parentRect.top;
+        
+        // 检查是否超出右边界
+        if (left + submenuWidth > viewportWidth) {
+            left = parentRect.left - submenuWidth - 5; // 显示在左侧
+        }
+        
+        // 检查是否超出下边界
+        if (top + submenuHeight > viewportHeight) {
+            top = viewportHeight - submenuHeight - 10;
+        }
+        
+        // 确保不会超出上边界
+        if (top < 10) {
+            top = 10;
+        }
+        
+        submenuContainer.style.left = left + 'px';
+        submenuContainer.style.top = top + 'px';
+    }
+
+    /**
+     * 延迟隐藏子菜单
+     */
+    private static hideSubmenuDelayed(itemId: string): void {
+        // 清除之前的定时器
+        const existingTimeout = this.submenuTimeouts.get(itemId);
+        if (existingTimeout) {
+            clearTimeout(existingTimeout);
+        }
+        
+        // 设置新的延迟隐藏定时器
+        const timeout = setTimeout(() => {
+            const submenuContainer = this.submenuContainers.get(itemId);
+            if (submenuContainer) {
+                submenuContainer.style.display = 'none';
+            }
+            this.currentOpenSubmenus.delete(itemId);
+            this.submenuTimeouts.delete(itemId);
+            
+            // 同时隐藏所有子级菜单
+            this.hideChildSubmenus(itemId);
+        }, 300); // 300ms延迟
+        
+        this.submenuTimeouts.set(itemId, timeout);
+    }
+
+    /**
+     * 隐藏指定项目的所有子级子菜单
+     */
+    private static hideChildSubmenus(parentId: string): void {
+        const parentItem = this.menuItems.get(parentId);
+        if (!parentItem || !parentItem.children) return;
+        
+        parentItem.children.forEach((childItem) => {
+            const childSubmenu = this.submenuContainers.get(childItem.id);
+            if (childSubmenu) {
+                childSubmenu.style.display = 'none';
+                this.currentOpenSubmenus.delete(childItem.id);
+                
+                // 清除定时器
+                const timeout = this.submenuTimeouts.get(childItem.id);
+                if (timeout) {
+                    clearTimeout(timeout);
+                    this.submenuTimeouts.delete(childItem.id);
+                }
+                
+                // 递归隐藏更深层的子菜单
+                this.hideChildSubmenus(childItem.id);
+            }
+        });
+    }
+
+    /**
+     * 隐藏所有子菜单
+     */
+    private static hideAllSubmenus(): void {
+        this.submenuContainers.forEach((submenu) => {
+            submenu.style.display = 'none';
+        });
+        this.currentOpenSubmenus.clear();
+    }
+}
+
+// 菜单项数据结构
+interface MenuItemData {
+    id: string;
+    name: string;
+    type: 'button' | 'folder';
+    callback?: () => void;
+    children?: Map<string, MenuItemData>;
+    parent?: string;
 }
