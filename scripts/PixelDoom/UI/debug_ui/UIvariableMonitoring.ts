@@ -4,18 +4,6 @@ import { IMGUIDebugButton } from "./UIDbugButton.js";
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-
-    var debug_category = IMGUIDebugButton.AddCategory("debug")
-    if (debug_category) {
-        IMGUIDebugButton.AddButtonToCategory(debug_category,"varibale_monitoring",()=>{
-            VariableMonitoring.Toggle();
-        })
-    }
-
-})
-
-
 
 /**
  * 变量监控器类 - 用于实时监控变量值
@@ -380,6 +368,24 @@ export class VariableMonitoring {
         return Imgui_chunchun.IsWindowOpen(this.windowId);
     }
 }
+
+
+var isBindButtonIntoDebugPanel = false;
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
+
+    var debug_category = IMGUIDebugButton.AddCategory("debug")
+    if (debug_category) {
+        IMGUIDebugButton.AddButtonToCategory(debug_category, "varibale_monitoring", () => {
+            VariableMonitoring.Toggle();
+        })
+    }
+
+})
+
 
 // 导出一个更简洁的别名，方便使用
 export const monitoring = VariableMonitoring;

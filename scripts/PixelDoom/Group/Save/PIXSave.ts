@@ -1,4 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { DEBUG, UIDebug } from "../../UI/debug_ui/UIDebug.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
@@ -70,10 +71,67 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
     //DEBUG 面板绘制 
+
+    // USE NEW IMGUI DEBUG PANEL
+    VariableMonitoring.AddValue("game_data", data)
+    var save_cat = IMGUIDebugButton.AddCategory("save")
+    if (save_cat) {
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "save[c3tag && json]", () => {
+            UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
+            MixC3Save.SaveGame('cundang-001')
+
+        })
+
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "load game from c3 tag", () => {
+            UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
+            MixC3Save.LoadGame("cundang-001")
+
+        })
+
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "laod game from data", () => {
+            UISubtitleMain.ShowSubtitles("读取测试-通过data", 5)
+            // 通过 data.LevelGameData 来加载关卡存档
+            if (!data.LevelGameData) {
+                console.log("data 不存在data.LevelGameData里")
+                UISubtitleMain.ShowSubtitles("data 不存在data.LevelGameData里", 5)
+            }
+            MixC3Save.LoadGameFromJson(data.LevelGameData)
+
+        })
+
+
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "download game data to local", () => {
+            UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
+            LocalSave.DataDownload()
+
+
+        })
+
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "import game data to local", () => {
+            UISubtitleMain.ShowSubtitles("读取本地数据", 5)
+            LocalSave.DataRead();
+
+
+        })
+
+        IMGUIDebugButton.AddButtonToCategory(save_cat, "clear data and save to localstorege", () => {
+            UISubtitleMain.ShowSubtitles("清空data", 5)
+            data.LevelGameData = ""
+            data.RunGameTiems = 0;
+            localStorage.setItem("level_data", data.LevelGameData)
+            localStorage.setItem("run_game_times", String(data.RunGameTiems))
+
+        })
+
+
+    }
+
+
+
+    // USE DEBUG  PANEL NORMAL
+
     if (!DEBUG.DebugMainUI) return
     DEBUG.DebugMainUI.AddValue(data);
-
-    VariableMonitoring.AddValue("game_data", data)
 
     var SaveFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("存档系统相关");
     SaveFather.AddChildButton

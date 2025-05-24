@@ -33,34 +33,34 @@ import { VariableMonitoring } from "./UIvariableMonitoring.js";
 export class IMGUIDebugButton {
     // Window ID
     private static readonly WINDOW_ID: string = "imgui_debug_button_window";
-    
+
     // Toggle key (default: B key)
-    private static toggleKey: string = "b";
-    
+    private static toggleKey: string = "M";
+
     // Is initialized
     private static isInitialized: boolean = false;
-    
+
     // Button list
     private static buttons: Array<DebugButton> = [];
-    
+
     // Category list
     private static categories: Map<string, Category> = new Map();
-    
+
     // Is window visible
     private static isVisible: boolean = false;
-    
+
     // Window position
     private static windowPosition: { x: number, y: number } = { x: 20, y: 50 };
-    
+
     // Window size
     private static windowSize: { width: number, height: number } = { width: 300, height: 400 };
-    
+
     // Folded categories
     private static foldedCategories: Set<string> = new Set();
-    
+
     // 在类定义中添加一个静态变量来标记按钮是否已添加
     private static _buttonsAdded: boolean = false;
-    
+
     /**
      * Check if buttons have been added already
      * @returns True if buttons have been added
@@ -68,32 +68,32 @@ export class IMGUIDebugButton {
     public static AreButtonsAdded(): boolean {
         return IMGUIDebugButton._buttonsAdded;
     }
-    
+
     /**
      * Mark buttons as added
      */
     public static MarkButtonsAdded(): void {
         IMGUIDebugButton._buttonsAdded = true;
     }
-    
+
     /**
      * Initialize Debug Button Panel
      * @private
      */
     private static initialize(): void {
         if (this.isInitialized) return;
-        
+
         // Set initialized flag first to prevent recursive calls
         this.isInitialized = true;
-        
+
         // Create IMGUI window
         Imgui_chunchun.CreateTextWindow(
             this.WINDOW_ID,
-            "Debug Button Panel",
+            "debug_panel",
             "",
             this.windowPosition
         );
-        
+
         // Configure window
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
@@ -106,13 +106,13 @@ export class IMGUIDebugButton {
                 };
             }
         }
-        
+
         // Add keyboard event listener
         this.setupKeyboardEvents();
-        
+
         console.log("IMGUIDebugButton initialized");
     }
-    
+
     /**
      * Setup keyboard events
      * @private
@@ -123,7 +123,7 @@ export class IMGUIDebugButton {
             if (event.key.toLowerCase() === this.toggleKey.toLowerCase()) {
                 this.Toggle();
                 console.log(`Debug button panel toggled by pressing '${this.toggleKey}' key`);
-                
+
                 // Show notification using subtitle
                 if (this.isVisible) {
                     UISubtitleMain.ShowSubtitles("Debug Button Panel: ON");
@@ -133,7 +133,7 @@ export class IMGUIDebugButton {
             }
         });
     }
-    
+
     /**
      * Set toggle key
      * @param key Key to toggle the debug panel
@@ -144,27 +144,27 @@ export class IMGUIDebugButton {
             console.log(`Debug button panel toggle key set to '${this.toggleKey}'`);
         }
     }
-    
+
     /**
      * Render Debug Button Window
      * @private
      */
     private static renderDebugButtonWindow(): void {
         const ImGui = globalThis.ImGui;
-        
+
         // Set window content area
         const contentAvail = ImGui.GetContentRegionAvail();
-        
+
         // Root buttons (not belonging to any category)
         this.renderUncategorizedButtons();
-        
+
         ImGui.Separator();
-        
+
         // Render categories and buttons under them
         this.categories.forEach((category, categoryId) => {
             this.renderCategory(category, categoryId);
         });
-        
+
         // If no buttons, show hint
         if (this.buttons.length === 0 && this.categories.size === 0) {
             ImGui.TextColored(
@@ -173,23 +173,23 @@ export class IMGUIDebugButton {
             );
         }
     }
-    
+
     /**
      * Render uncategorized buttons
      * @private
      */
     private static renderUncategorizedButtons(): void {
         const ImGui = globalThis.ImGui;
-        
+
         // Get uncategorized buttons
         const uncategorizedButtons = this.buttons.filter(btn => !btn.categoryId);
-        
+
         // Render uncategorized buttons
         uncategorizedButtons.forEach(button => {
             this.renderButton(button);
         });
     }
-    
+
     /**
      * Render category
      * @param category Category
@@ -198,29 +198,29 @@ export class IMGUIDebugButton {
      */
     private static renderCategory(category: Category, categoryId: string): void {
         const ImGui = globalThis.ImGui;
-        
+
         // Get buttons under category
         const categoryButtons = this.buttons.filter(btn => btn.categoryId === categoryId);
-        
+
         // If no buttons under category, don't show
         if (categoryButtons.length === 0) return;
-        
+
         // Check if category is folded
         const isFolded = this.foldedCategories.has(categoryId);
-        
+
         // Category title (can be clicked to fold/unfold)
         if (ImGui.CollapsingHeader(category.name, !isFolded ? ImGui.TreeNodeFlags.DefaultOpen : 0)) {
             // Expanded state, remove fold mark
             this.foldedCategories.delete(categoryId);
-            
+
             // Add indent
             ImGui.Indent(10);
-            
+
             // Render buttons under category
             categoryButtons.forEach(button => {
                 this.renderButton(button);
             });
-            
+
             // Restore indent
             ImGui.Unindent(10);
         } else {
@@ -228,7 +228,7 @@ export class IMGUIDebugButton {
             this.foldedCategories.add(categoryId);
         }
     }
-    
+
     /**
      * Render button
      * @param button Button config
@@ -236,38 +236,38 @@ export class IMGUIDebugButton {
      */
     private static renderButton(button: DebugButton): void {
         const ImGui = globalThis.ImGui;
-        
+
         // If has custom color
         if (button.color) {
             ImGui.PushStyleColor(
-                ImGui.Col.Button, 
+                ImGui.Col.Button,
                 new ImGui.ImVec4(...button.color)
             );
-            
+
             // Set hover color (slightly brighter)
-            const hoverColor = button.color.map((v, i) => 
+            const hoverColor = button.color.map((v, i) =>
                 i === 3 ? v : Math.min(v * 1.2, 1.0)
             ) as [number, number, number, number];
-            
+
             ImGui.PushStyleColor(
-                ImGui.Col.ButtonHovered, 
+                ImGui.Col.ButtonHovered,
                 new ImGui.ImVec4(...hoverColor)
             );
-            
+
             // Set active color (slightly darker)
-            const activeColor = button.color.map((v, i) => 
+            const activeColor = button.color.map((v, i) =>
                 i === 3 ? v : v * 0.8
             ) as [number, number, number, number];
-            
+
             ImGui.PushStyleColor(
-                ImGui.Col.ButtonActive, 
+                ImGui.Col.ButtonActive,
                 new ImGui.ImVec4(...activeColor)
             );
         }
-        
+
         // Button width set to window width minus margin
         const buttonWidth = ImGui.GetContentRegionAvail().x;
-        
+
         // Render button
         if (ImGui.Button(button.name, new ImGui.ImVec2(buttonWidth, 0))) {
             if (button.callback) {
@@ -278,20 +278,20 @@ export class IMGUIDebugButton {
                 }
             }
         }
-        
+
         // If has hover tooltip
         if (button.tooltip && ImGui.IsItemHovered()) {
             ImGui.BeginTooltip();
             ImGui.Text(button.tooltip);
             ImGui.EndTooltip();
         }
-        
+
         // If has custom color, restore style
         if (button.color) {
             ImGui.PopStyleColor(3);
         }
     }
-    
+
     /**
      * Add debug button
      * @param name Button name
@@ -301,19 +301,19 @@ export class IMGUIDebugButton {
      */
     public static AddButton(name: string, callback: () => void, tooltip?: string): string {
         this.ensureInitialized();
-        
+
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.buttons.push({
             id: buttonId,
             name,
             callback,
             tooltip
         });
-        
+
         return buttonId;
     }
-    
+
     /**
      * Add color button
      * @param name Button name
@@ -323,15 +323,15 @@ export class IMGUIDebugButton {
      * @returns Button ID
      */
     public static AddColorButton(
-        name: string, 
-        color: [number, number, number, number], 
-        callback: () => void, 
+        name: string,
+        color: [number, number, number, number],
+        callback: () => void,
         tooltip?: string
     ): string {
         this.ensureInitialized();
-        
+
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.buttons.push({
             id: buttonId,
             name,
@@ -339,10 +339,10 @@ export class IMGUIDebugButton {
             callback,
             tooltip
         });
-        
+
         return buttonId;
     }
-    
+
     /**
      * Add category
      * @param name Category name
@@ -350,21 +350,21 @@ export class IMGUIDebugButton {
      */
     public static AddCategory(name: string): string {
         this.ensureInitialized();
-        
+
         // Check if category with same name already exists
         const existingId = this.findCategoryIdByName(name);
         if (existingId) return existingId;
-        
+
         const categoryId = `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.categories.set(categoryId, {
             id: categoryId,
             name
         });
-        
+
         return categoryId;
     }
-    
+
     /**
      * Find category ID by name
      * @param name Category name
@@ -379,7 +379,7 @@ export class IMGUIDebugButton {
         }
         return undefined;
     }
-    
+
     /**
      * Add button to category
      * @param categoryId Category ID
@@ -389,21 +389,21 @@ export class IMGUIDebugButton {
      * @returns Button ID
      */
     public static AddButtonToCategory(
-        categoryId: string, 
-        name: string, 
-        callback: () => void, 
+        categoryId: string,
+        name: string,
+        callback: () => void,
         tooltip?: string
     ): string {
         this.ensureInitialized();
-        
+
         // Check if category exists
         if (!this.categories.has(categoryId)) {
             console.warn(`Category ${categoryId} does not exist, will create uncategorized button`);
             return this.AddButton(name, callback, tooltip);
         }
-        
+
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.buttons.push({
             id: buttonId,
             name,
@@ -411,10 +411,10 @@ export class IMGUIDebugButton {
             tooltip,
             categoryId
         });
-        
+
         return buttonId;
     }
-    
+
     /**
      * Add color button to category
      * @param categoryId Category ID
@@ -432,15 +432,15 @@ export class IMGUIDebugButton {
         tooltip?: string
     ): string {
         this.ensureInitialized();
-        
+
         // Check if category exists
         if (!this.categories.has(categoryId)) {
             console.warn(`Category ${categoryId} does not exist, will create uncategorized button`);
             return this.AddColorButton(name, color, callback, tooltip);
         }
-        
+
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.buttons.push({
             id: buttonId,
             name,
@@ -449,10 +449,10 @@ export class IMGUIDebugButton {
             tooltip,
             categoryId
         });
-        
+
         return buttonId;
     }
-    
+
     /**
      * Remove button
      * @param buttonId Button ID
@@ -463,7 +463,7 @@ export class IMGUIDebugButton {
             this.buttons.splice(index, 1);
         }
     }
-    
+
     /**
      * Remove category and all buttons under it
      * @param categoryId Category ID
@@ -471,11 +471,11 @@ export class IMGUIDebugButton {
     public static RemoveCategory(categoryId: string): void {
         // Remove category
         this.categories.delete(categoryId);
-        
+
         // Remove all buttons under category
         this.buttons = this.buttons.filter(btn => btn.categoryId !== categoryId);
     }
-    
+
     /**
      * Clear all buttons and categories
      */
@@ -483,14 +483,14 @@ export class IMGUIDebugButton {
         this.buttons = [];
         this.categories.clear();
     }
-    
+
     /**
      * Show button panel
      */
     public static Show(): void {
         this.ensureInitialized();
         this.isVisible = true;
-        
+
         // Update window state
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
@@ -500,14 +500,14 @@ export class IMGUIDebugButton {
             }
         }
     }
-    
+
     /**
      * Hide button panel
      */
     public static Hide(): void {
         if (!this.isInitialized) return;
         this.isVisible = false;
-        
+
         // Update window state
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
@@ -517,7 +517,7 @@ export class IMGUIDebugButton {
             }
         }
     }
-    
+
     /**
      * Toggle button panel visibility
      */
@@ -528,7 +528,7 @@ export class IMGUIDebugButton {
             this.Show();
         }
     }
-    
+
     /**
      * Set window position
      * @param x X coordinate
@@ -536,7 +536,7 @@ export class IMGUIDebugButton {
      */
     public static SetPosition(x: number, y: number): void {
         this.windowPosition = { x, y };
-        
+
         // If initialized, update window position
         if (this.isInitialized) {
             const imgui = Imgui_chunchun as any;
@@ -549,7 +549,7 @@ export class IMGUIDebugButton {
             }
         }
     }
-    
+
     /**
      * Set window size
      * @param width Width
@@ -557,7 +557,7 @@ export class IMGUIDebugButton {
      */
     public static SetSize(width: number, height: number): void {
         this.windowSize = { width, height };
-        
+
         // If initialized, update window size
         if (this.isInitialized) {
             const imgui = Imgui_chunchun as any;
@@ -570,7 +570,7 @@ export class IMGUIDebugButton {
             }
         }
     }
-    
+
     /**
      * Check if button panel is visible
      * @returns Is visible
@@ -578,7 +578,7 @@ export class IMGUIDebugButton {
     public static IsVisible(): boolean {
         return this.isVisible;
     }
-    
+
     /**
      * Ensure initialized
      * @private
@@ -588,7 +588,7 @@ export class IMGUIDebugButton {
             this.initialize();
         }
     }
-    
+
     /**
      * Create a category directly (internal use)
      * @param name Category name
@@ -602,18 +602,18 @@ export class IMGUIDebugButton {
                 return id;
             }
         }
-        
+
         // Create new category
         const categoryId = `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.categories.set(categoryId, {
             id: categoryId,
             name
         });
-        
+
         return categoryId;
     }
-    
+
     /**
      * Create a button in a category directly (internal use)
      * @param categoryId Category ID
@@ -630,7 +630,7 @@ export class IMGUIDebugButton {
         tooltip?: string
     ): string {
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         this.buttons.push({
             id: buttonId,
             name,
@@ -638,7 +638,7 @@ export class IMGUIDebugButton {
             tooltip,
             categoryId
         });
-        
+
         return buttonId;
     }
 }
@@ -661,9 +661,9 @@ interface Category {
 
 // Initialize IMGUI Debug Button Panel
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    
-    UISubtitleMain.ShowSubtitles("IMGUI button list - Press 'B' to toggle",5)
-    
+
+    UISubtitleMain.ShowSubtitles("IMGUI button list - Press 'B' to toggle", 5)
+
     // 使用延时添加按钮，确保初始化完成后再添加
     setTimeout(() => {
         // 如果按钮已经添加过，则不再重复添加
@@ -671,17 +671,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             console.log("Debug buttons already added, skipping...");
             return;
         }
-        
+
         // 标记按钮已添加
         IMGUIDebugButton.MarkButtonsAdded();
-        
+
         // Add system buttons
         // const systemCategoryId = IMGUIDebugButton.AddCategory("System");
         // if (systemCategoryId) {
         //     IMGUIDebugButton.AddButtonToCategory(systemCategoryId, "Clear Console", () => {
         //         console.clear();
         //     });
-            
+
         //     // Add warning button example
         //     IMGUIDebugButton.AddColorButtonToCategory(
         //         systemCategoryId,
@@ -693,7 +693,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         //         "Click to show warning message"
         //     );
         // }
-        
+
     }, 100); // 短暂延迟确保初始化完成
 });
 
