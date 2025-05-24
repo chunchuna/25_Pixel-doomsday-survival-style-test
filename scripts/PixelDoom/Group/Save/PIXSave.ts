@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { DEBUG, UIDebug } from "../../UI/debug_ui/UIDebug.js";
+import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js";
 
 export let data = {
@@ -72,6 +73,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!DEBUG.DebugMainUI) return
     DEBUG.DebugMainUI.AddValue(data);
 
+    VariableMonitoring.AddValue("game_data", data)
+
     var SaveFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("存档系统相关");
     SaveFather.AddChildButton
 
@@ -124,7 +127,7 @@ export class LocalSave {
             if (_data) {
                 data.RunGameTiems = _data.RunGameTiems || 0;
                 data.LevelGameData = _data.LevelGameData || "";
-            
+
                 UISubtitleMain.ShowSubtitles("读取上传的游戏数据成功", 5)
             }
         });

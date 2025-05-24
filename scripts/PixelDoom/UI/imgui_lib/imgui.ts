@@ -366,6 +366,7 @@ export class Imgui_chunchun {
     
         // 创建示例窗口
     static CreateExampleWindow(): void {
+        
         const windowId = "example_window";
         
         this.windows.set(windowId, {
@@ -555,7 +556,8 @@ export class Imgui_chunchun {
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () => {
     try {
         await Imgui_chunchun.Initialize();
-        Imgui_chunchun.CreateExampleWindow();
+        //Imgui_chunchun.CreateExampleWindow();
+        
     } catch (error) {
         console.error("ImGui 初始化失败:", error);
     }

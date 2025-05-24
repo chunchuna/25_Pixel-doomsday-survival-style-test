@@ -616,6 +616,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "UIvariableMonitoring.ts",
+											"type": "application/typescript",
+											"sid": 720824141818797,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

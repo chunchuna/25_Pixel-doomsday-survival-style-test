@@ -31,6 +31,7 @@
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
+import { VariableMonitoring } from "./UIvariableMonitoring.js";
 export var DEBUG = {
     DebugMainUI: null as DebugPanelInstance | null,
 }
@@ -126,7 +127,7 @@ export class UIDebug {
         if (savedFontPath) {
             this.customFontPath = savedFontPath;
         }
-        
+
         if (this.menuPanel) {
             console.warn('Debug panel already initialized');
             return this.createDebugPanelInstance();
@@ -224,6 +225,13 @@ export class UIDebug {
 
         // 替换原始console方法
         this.overrideConsoleMethods();
+
+        var IMGUI_DEBUG_FATHER = this.DebuPanelAddFatherButton("IAMGUI")
+
+        IMGUI_DEBUG_FATHER.AddChildButton("Uvariable_Monitoring", () => {
+            VariableMonitoring.Toggle();
+
+        })
 
         var DebugFather = this.DebuPanelAddFatherButton("DEBUG")
         DebugFather.AddChildButton('清除控制台', () => {
@@ -571,14 +579,14 @@ export class UIDebug {
     public static SetCustomFontPath(fontPath: string): void {
         this.customFontPath = fontPath;
         this.isFontLoaded = false;
-        
+
         // 保存字体路径到localStorage，以便场景切换后恢复
         try {
             localStorage.setItem('debug-ui-font-path', fontPath);
         } catch (e) {
             console.warn('Failed to save font path to localStorage:', e);
         }
-        
+
         // 如果样式已经创建，重新创建以应用新字体
         const existingStyle = document.getElementById('debug-ui-styles');
         if (existingStyle) {
@@ -595,7 +603,7 @@ export class UIDebug {
         if (!existingStyle) {
             // 样式元素不存在，重新创建
             this.createStyles();
-            
+
             // 同时重新应用控制台样式
             this.updateConsoleStyles();
         } else {
@@ -604,7 +612,7 @@ export class UIDebug {
             existingStyle.remove();
             document.head.appendChild(existingStyle);
         }
-        
+
         // 检查并恢复控制台元素
         if (this.isConsoleEnabled && !document.body.contains(this.consoleContainer)) {
             // 控制台元素不在DOM中，重新添加
@@ -612,17 +620,17 @@ export class UIDebug {
                 document.body.appendChild(this.consoleContainer);
             }
         }
-        
+
         // 检查并恢复变量监控窗口
         if (this.isVariableWindowVisible && this.variableMonitorWindow && !document.body.contains(this.variableMonitorWindow)) {
             document.body.appendChild(this.variableMonitorWindow);
         }
-        
+
         // 检查并恢复菜单面板
         if (this.menuPanel && !document.body.contains(this.menuPanel)) {
             document.body.appendChild(this.menuPanel);
         }
-        
+
         // 恢复所有子菜单容器
         this.submenuContainers.forEach((submenu, id) => {
             if (!document.body.contains(submenu)) {
@@ -641,13 +649,13 @@ export class UIDebug {
         if (existingStyle) {
             existingStyle.remove();
         }
-        
+
         // 重新创建样式
         this.createStyles();
-        
+
         // 重新应用控制台样式
         this.updateConsoleStyles();
-        
+
         console.log(`DEBUG UI字体已刷新: ${this.customFontPath}`);
     }
 
