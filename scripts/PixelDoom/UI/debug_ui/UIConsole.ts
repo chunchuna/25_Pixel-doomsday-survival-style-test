@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
+import { IMGUIDebugButton } from "./UIDbugButton.js";
 
 /**
  * IMGUI Console System
@@ -26,11 +27,12 @@ export class UIConsole {
      */
     public static Initialize(): void {
         if (this.isInitialized) {
-            console.warn("IMGUI Console already initialized");
+            // 避免使用console.warn
+            this.addSystemMessage("IMGUI Console already initialized", "warn");
             return;
         }
 
-        console.log("Starting to initialize IMGUI console...");
+        this.addSystemMessage("Starting to initialize IMGUI console...", "info");
 
         // Preload font first - this needs to be done before creating the console window
         this.preloadFont();
@@ -56,10 +58,10 @@ export class UIConsole {
                 const oldListener = (this as any)._keydownListener;
                 if (oldListener) {
                     document.removeEventListener('keydown', oldListener, true);
-                    console.log("Removed old keyboard event listener");
+                    this.addSystemMessage("Removed old keyboard event listener", "info");
                 }
             } catch (e) {
-                console.warn("Error trying to remove old listener", e);
+                this.addSystemMessage("Error trying to remove old listener: " + e, "warn");
             }
 
             // Define keyboard event handler - ensure it runs in capture phase
@@ -67,7 +69,7 @@ export class UIConsole {
 
                 // Add hardcoded handling for 'n'
                 if (event.key === 'n' || event.key === 'N' || event.key === this.toggleKey) {
-                    console.log("Console toggle triggered");
+                    this.addSystemMessage("Console toggle triggered", "info");
                     this.Toggle();
                     event.preventDefault();
                     event.stopPropagation();
@@ -79,13 +81,13 @@ export class UIConsole {
 
             // Add keyboard event listener - use capture phase to ensure priority
             document.addEventListener('keydown', keydownHandler, true);
-            console.log(`Keyboard event listener added, current hotkey: ${this.toggleKey}`);
+            this.addSystemMessage(`Keyboard event listener added, current hotkey: ${this.toggleKey}`, "info");
 
             // Remove global keyboard test to avoid duplicates
             this.setupGlobalKeyTest();
 
             this.isInitialized = true;
-            console.log("IMGUI Console initialized");
+            this.addSystemMessage("IMGUI Console initialized", "info");
 
             // Add welcome message
             this.consoleMessages.push({
@@ -96,8 +98,33 @@ export class UIConsole {
             });
 
             // Add Chinese test message
-            console.log("Chinese display test - This text should display correctly");
+            this.addSystemMessage("Chinese display test - This text should display correctly", "info");
         }, 200);
+    }
+
+    /**
+     * 直接添加系统消息，绕过console方法以避免递归
+     */
+    private static addSystemMessage(message: string, type: string = "info"): void {
+        // 直接添加消息而不调用console方法
+        this.consoleMessages.push({
+            type: type,
+            content: message,
+            timestamp: new Date().toLocaleTimeString(),
+            source: 'System'
+        });
+
+        // 同时使用原始console输出到浏览器控制台
+        if (this.originalConsole && this.originalConsole[type]) {
+            this.originalConsole[type](message);
+        } else {
+            // 如果原始console未保存，使用内置console
+            // 修复类型错误，使用类型断言
+            const consoleMethod = console[type as keyof Console];
+            if (typeof consoleMethod === 'function') {
+                (consoleMethod as Function).call(console, message);
+            }
+        }
     }
 
     /**
@@ -446,35 +473,71 @@ export class UIConsole {
             debug: console.debug
         };
 
+        // 设置标志以防止递归
+        this.isOverridingConsole = true;
+
         // Override log method
         console.log = (...args: any[]) => {
-            this.addConsoleMessage('log', args);
-            this.originalConsole.log(...args);
+            this.safeConsoleCapture('log', args);
         };
 
         // Override info method
         console.info = (...args: any[]) => {
-            this.addConsoleMessage('info', args);
-            this.originalConsole.info(...args);
+            this.safeConsoleCapture('info', args);
         };
 
         // Override warn method
         console.warn = (...args: any[]) => {
-            this.addConsoleMessage('warn', args);
-            this.originalConsole.warn(...args);
+            this.safeConsoleCapture('warn', args);
         };
 
         // Override error method
         console.error = (...args: any[]) => {
-            this.addConsoleMessage('error', args);
-            this.originalConsole.error(...args);
+            this.safeConsoleCapture('error', args);
         };
 
         // Override debug method
         console.debug = (...args: any[]) => {
-            this.addConsoleMessage('debug', args);
-            this.originalConsole.debug(...args);
+            this.safeConsoleCapture('debug', args);
         };
+    }
+
+    // 标志，指示是否正在处理控制台消息，用于防止递归
+    private static isProcessingConsoleMessage: boolean = false;
+    private static isOverridingConsole: boolean = false;
+
+    /**
+     * 安全地捕获控制台消息，防止递归
+     */
+    private static safeConsoleCapture(type: string, args: any[]): void {
+        // 防止递归 - 如果已经在处理消息，或者控制台未初始化，使用原始控制台直接输出
+        if (this.isProcessingConsoleMessage || !this.isInitialized || !this.isOverridingConsole) {
+            if (this.originalConsole && this.originalConsole[type]) {
+                this.originalConsole[type](...args);
+            }
+            return;
+        }
+
+        try {
+            // 设置标志指示正在处理消息
+            this.isProcessingConsoleMessage = true;
+            
+            // 添加到控制台消息
+            this.addConsoleMessage(type, args);
+            
+            // 使用原始控制台方法输出到浏览器控制台
+            if (this.originalConsole && this.originalConsole[type]) {
+                this.originalConsole[type](...args);
+            }
+        } catch (e) {
+            // 出错时使用原始控制台直接输出错误
+            if (this.originalConsole && this.originalConsole.error && !this.isProcessingConsoleMessage) {
+                this.originalConsole.error("Error in console capture:", e);
+            }
+        } finally {
+            // 重置处理标志
+            this.isProcessingConsoleMessage = false;
+        }
     }
 
     /**
@@ -515,146 +578,85 @@ export class UIConsole {
     private static addConsoleMessage(type: string, args: any[]): void {
         if (!this.isInitialized) return;
 
-        // Get calling source information
-        const stack = (new Error()).stack;
-        let scriptName = this.extractScriptName(stack);
-
-        // 如果仍然找不到来源，尝试从args中推断
-        if (scriptName === 'script' || scriptName === 'unknown') {
-            // 查看args中是否有常见的标识符
-            const fullArgs = args.join(' ');
-            if (fullArgs.includes('PIX')) {
-                const match = fullArgs.match(/PIX[A-Z][a-zA-Z]+/);
-                if (match) {
-                    scriptName = match[0];
-                }
-            }
-        }
-
-        // Process args into a single content value
-        let content: string;
-        try {
-            if (args.length === 1) {
-                content = this.formatValue(args[0]);
-            } else {
-                content = args.map(arg => this.formatValue(arg)).join(' ');
-            }
-
-            // 确保内容是有效的字符串
-            if (typeof content !== 'string') {
-                content = String(content);
-            }
-        } catch (e) {
-            content = `[Error formatting message: ${e}]`;
-        }
-
-        // Create the message
-        const message = {
-            type,
-            content,
-            timestamp: new Date().toLocaleTimeString(),
-            source: scriptName
-        };
-
-        // Add to messages
-        this.consoleMessages.push(message);
-
-        // Limit console history size
-        if (this.consoleMessages.length > this.maxMessages) {
-            this.consoleMessages.shift();
-        }
-    }
-
-    /**
-     * Extract script name from stack trace
-     */
-    private static extractScriptName(stack: string | undefined): string {
-        if (!stack) return 'unknown';
+        // 如果已经在处理消息，跳过以防止递归
+        if (this.isProcessingConsoleMessage) return;
 
         try {
-            // 分析整个调用堆栈
-            const lines = stack.split('\n');
+            // 设置标志指示正在处理消息
+            this.isProcessingConsoleMessage = true;
 
-            // 构建忽略文件列表 - 这些文件不应作为来源
-            const ignoreFiles = [
-                'uiconsole.js', 'uiconsole.ts',
-                'console.js', 'console.ts',
-                'imgui.js', 'imgui.ts',
-                'uidebug.js', 'uidebug.ts',
-                'engine.js', 'engine.ts'
-            ];
+            // 检查是否来自控制台系统的错误消息
+            const isConsoleSystemMessage = args.length > 0 && 
+                typeof args[0] === 'string' && 
+                (args[0].includes('UIConsole') || 
+                args[0].includes('console initialization') ||
+                args[0].includes('IMGUI Console') ||
+                args[0].includes('Error extracting script name') ||
+                args[0].includes('提取脚本名称时出错'));
 
-            // 跳过UIConsole内部的调用，找到真正的外部调用者
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-
-                // 跳过空行
-                if (!line) continue;
-
-                // 尝试匹配脚本路径
-                const match = line.match(/\/([^\/]+\.(?:js|ts))/);
-                if (match) {
-                    const scriptName = match[1];
-
-                    // 跳过内部文件，找到外部调用者
-                    if (!ignoreFiles.some(ignoreFile =>
-                        scriptName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
-                        return scriptName;
-                    }
+            // 如果是控制台系统消息，简化来源提取
+            let scriptName = 'System';
+            if (!isConsoleSystemMessage) {
+                const stack = (new Error()).stack;
+                try {
+                    scriptName = this.extractScriptName(stack);
+                } catch (e) {
+                    scriptName = 'unknown';
                 }
-            }
 
-            // 如果没有找到外部脚本，尝试更宽松的匹配
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-
-                // 尝试匹配更多格式的路径
-                const patterns = [
-                    /([^\/\\]+\.(?:js|ts)):\d+:\d+/,  // filename.js:line:col
-                    /at\s+(?:\w+\s+)?\(([^)]+\.(?:js|ts))/,  // at function (filename.js)
-                    /at\s+([^\/\\]+\.(?:js|ts))/,      // at filename.js
-                    /([^\/\\]+\.(?:js|ts))/            // 简单匹配
-                ];
-
-                for (const pattern of patterns) {
-                    const match = line.match(pattern);
-                    if (match) {
-                        const fileName = match[1];
-
-                        // 检查是否在忽略列表中
-                        if (!ignoreFiles.some(ignoreFile =>
-                            fileName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
-                            return fileName;
+                // 如果仍然找不到来源，尝试从args中推断
+                if (scriptName === 'script' || scriptName === 'unknown') {
+                    // 查看args中是否有常见的标识符
+                    const fullArgs = args.join(' ');
+                    if (fullArgs.includes('PIX')) {
+                        const match = fullArgs.match(/PIX[A-Z][a-zA-Z]+/);
+                        if (match) {
+                            scriptName = match[0];
                         }
                     }
                 }
             }
 
-            // 模块名称匹配 - 尝试提取PIX前缀的模块
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-
-                // 匹配PIX开头的模块名
-                const moduleMatch = line.match(/PIX[A-Za-z0-9_]+/);
-                if (moduleMatch) {
-                    return moduleMatch[0];
+            // Process args into a single content value
+            let content: string;
+            try {
+                if (args.length === 1) {
+                    content = this.formatValue(args[0]);
+                } else {
+                    content = args.map(arg => this.formatValue(arg)).join(' ');
                 }
 
-                // 尝试从路径中提取模块名
-                if (line.includes('/')) {
-                    const pathParts = line.split('/');
-                    for (const part of pathParts) {
-                        if (part.startsWith('PIX') || part.includes('PixelDoom')) {
-                            return part;
-                        }
-                    }
+                // 确保内容是有效的字符串
+                if (typeof content !== 'string') {
+                    content = String(content);
                 }
+            } catch (e) {
+                content = `[Error formatting message]`;
             }
 
-            return 'script';
+            // Create the message
+            const message = {
+                type,
+                content,
+                timestamp: new Date().toLocaleTimeString(),
+                source: scriptName
+            };
+
+            // Add to messages
+            this.consoleMessages.push(message);
+
+            // Limit console history size
+            if (this.consoleMessages.length > this.maxMessages) {
+                this.consoleMessages.shift();
+            }
         } catch (e) {
-            console.warn("提取脚本名称时出错:", e);
-            return 'script';
+            // 出错时不再尝试记录错误，以防止可能的递归
+            if (this.originalConsole && this.originalConsole.error && !this.isProcessingConsoleMessage) {
+                this.originalConsole.error("Error adding console message:", e);
+            }
+        } finally {
+            // 重置处理标志
+            this.isProcessingConsoleMessage = false;
         }
     }
 
@@ -707,19 +709,21 @@ export class UIConsole {
      * Toggle console visibility
      */
     public static Toggle(): void {
-        console.log(`Toggle status before: visible=${this.isVisible}`);
+        // 避免直接调用console方法，改用添加系统消息
+        this.addSystemMessage(`Toggle status before: visible=${this.isVisible}`, "info");
 
         if (!this.isInitialized) {
-            console.log("Console not initialized, initializing now...");
+            this.addSystemMessage("Console not initialized, initializing now...", "info");
             this.Initialize();
+            return; // 等待初始化完成后再继续
         }
 
         try {
             if (this.isVisible) {
-                console.log("Console currently visible, hiding...");
+                this.addSystemMessage("Console currently visible, hiding...", "info");
                 this.Hide();
             } else {
-                console.log("Console currently hidden, showing...");
+                this.addSystemMessage("Console currently hidden, showing...", "info");
                 this.Show();
                 // Re-enable auto-scroll when showing console
                 this.shouldAutoScroll = true;
@@ -730,19 +734,19 @@ export class UIConsole {
             if (imgui.windows && imgui.windows.get) {
                 const windowConfig = imgui.windows.get(this.windowId);
                 if (windowConfig) {
-                    console.log(`Window config isOpen=${windowConfig.isOpen}, console isVisible=${this.isVisible}`);
+                    this.addSystemMessage(`Window config isOpen=${windowConfig.isOpen}, console isVisible=${this.isVisible}`, "info");
 
                     // Ensure both states are consistent
                     if (windowConfig.isOpen !== this.isVisible) {
-                        console.log("Fixing inconsistent state");
+                        this.addSystemMessage("Fixing inconsistent state", "info");
                         windowConfig.isOpen = this.isVisible;
                     }
                 }
             }
 
-            console.log(`Toggle status after: visible=${this.isVisible}`);
+            this.addSystemMessage(`Toggle status after: visible=${this.isVisible}`, "info");
         } catch (error) {
-            console.error("Error during Toggle:", error);
+            this.addSystemMessage("Error during Toggle: " + error, "error");
             // Try to reset if error occurs
             this.Reset();
         }
@@ -1247,6 +1251,100 @@ export class UIConsole {
             }
         }
     }
+
+    /**
+     * Extract script name from stack trace
+     */
+    private static extractScriptName(stack: string | undefined): string {
+        if (!stack) return 'unknown';
+
+        try {
+            // 分析整个调用堆栈
+            const lines = stack.split('\n');
+
+            // 构建忽略文件列表 - 这些文件不应作为来源
+            const ignoreFiles = [
+                'uiconsole.js', 'uiconsole.ts',
+                'console.js', 'console.ts',
+                'imgui.js', 'imgui.ts',
+                'uidebug.js', 'uidebug.ts',
+                'engine.js', 'engine.ts',
+                'UIConsole.js', 'UIConsole.ts'
+            ];
+
+            // 跳过UIConsole内部的调用，找到真正的外部调用者
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+
+                // 跳过空行
+                if (!line) continue;
+
+                // 尝试匹配脚本路径
+                const match = line.match(/\/([^\/]+\.(?:js|ts))/);
+                if (match) {
+                    const scriptName = match[1];
+
+                    // 跳过内部文件，找到外部调用者
+                    if (!ignoreFiles.some(ignoreFile =>
+                        scriptName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
+                        return scriptName;
+                    }
+                }
+            }
+
+            // 如果没有找到外部脚本，尝试更宽松的匹配
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+
+                // 尝试匹配更多格式的路径
+                const patterns = [
+                    /([^\/\\]+\.(?:js|ts)):\d+:\d+/,  // filename.js:line:col
+                    /at\s+(?:\w+\s+)?\(([^)]+\.(?:js|ts))/,  // at function (filename.js)
+                    /at\s+([^\/\\]+\.(?:js|ts))/,      // at filename.js
+                    /([^\/\\]+\.(?:js|ts))/            // 简单匹配
+                ];
+
+                for (const pattern of patterns) {
+                    const match = line.match(pattern);
+                    if (match) {
+                        const fileName = match[1];
+
+                        // 检查是否在忽略列表中
+                        if (!ignoreFiles.some(ignoreFile =>
+                            fileName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
+                            return fileName;
+                        }
+                    }
+                }
+            }
+
+            // 模块名称匹配 - 尝试提取PIX前缀的模块
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // 匹配PIX开头的模块名
+                const moduleMatch = line.match(/PIX[A-Za-z0-9_]+/);
+                if (moduleMatch) {
+                    return moduleMatch[0];
+                }
+
+                // 尝试从路径中提取模块名
+                if (line.includes('/')) {
+                    const pathParts = line.split('/');
+                    for (const part of pathParts) {
+                        if (part.startsWith('PIX') || part.includes('PixelDoom')) {
+                            return part;
+                        }
+                    }
+                }
+            }
+
+            return 'script';
+        } catch (e) {
+            // IMPORTANT: Don't use console methods here to avoid infinite recursion
+            return 'script';
+        }
+    }
 }
 
 // Modify initialization process to ensure console works correctly
@@ -1379,3 +1477,19 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         UIConsole.SetToggleKey('n');
     }
 });
+
+var isBindButtonIntoDebugPanel = false;
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
+
+    var debug_category = IMGUIDebugButton.AddCategory("debug")
+    if (debug_category) {
+        IMGUIDebugButton.AddButtonToCategory(debug_category, "console", () => {
+            UIConsole.Toggle();
+        })
+    }
+
+})

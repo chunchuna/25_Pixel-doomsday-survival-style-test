@@ -18,18 +18,20 @@ import "./PixelDoom/Module/PIXCharacterAnimation.js"
 import "./PixelDoom/Module/PIXWeather.js"
 import "./PixelDoom/Module/PIXAudio.js"
 import "./PixelDoom/Module/PIXCharacterAudio.js"
-
-import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js"
 import "./PixelDoom/Module/PIXSortObject.js"
-
-import "./PixelDoom/Group/Player/PIXPlayerInventory.js"
-
 import "./PixelDoom/Module/PIXClickObject.js"
+import "./PixelDoom/Module/PIXAmbientLight.js"
 // ClickObject
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_ZhangPeng.js"
-import "./PixelDoom/Module/PIXAmbientLight.js"
+import "./PixelDoom/Group/Player/PIXPlayerInventory.js"
+import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js"
+import "./PixelDoom/Group/Debug/PIXDebugMode.js"
+
+
+
+
 
 
 //UI
@@ -50,21 +52,24 @@ import "./PixelDoom/UI/inventory_ui/UIInventory.js"
 import "./PixelDoom/UI/screeneffect_ui/UIScreenEffect.js"
 import "./PixelDoom/UI/debug_ui/UIDebug.js"
 
-runOnStartup(async runtime => {
-               // Code to run on the loading screen.
-               // Note layouts, objects etc. are not yet available.
 
-               runtime.addEventListener("beforeprojectstart", () => OnBeforeProjectStart(runtime));
+import "./PixelDoom/Group/Debug/PIXDebugMode.js"
+
+runOnStartup(async runtime => {
+    // Code to run on the loading screen.
+    // Note layouts, objects etc. are not yet available.
+
+    runtime.addEventListener("beforeprojectstart", () => OnBeforeProjectStart(runtime));
 });
 
 async function OnBeforeProjectStart(runtime: IRuntime) {
-               // Code to run just before 'On start of layout' on
-               // the first layout. Loading has finished and initial
-               // instances are created and available to use here.
+    // Code to run just before 'On start of layout' on
+    // the first layout. Loading has finished and initial
+    // instances are created and available to use here.
 
-               runtime.addEventListener("tick", () => Tick(runtime));
+    runtime.addEventListener("tick", () => Tick(runtime));
 }
 
 function Tick(runtime: IRuntime) {
-               // Code to run every tick
+    // Code to run every tick
 }

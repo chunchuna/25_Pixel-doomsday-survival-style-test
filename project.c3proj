@@ -456,6 +456,20 @@
 									],
 									"subfolders": [],
 									"name": "Save"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXDebugMode.ts",
+											"type": "application/typescript",
+											"sid": 100747382180709,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "Debug"
 								}
 							],
 							"name": "Group"

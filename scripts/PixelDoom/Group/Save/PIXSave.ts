@@ -77,45 +77,32 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var save_cat = IMGUIDebugButton.AddCategory("save")
     if (save_cat) {
         IMGUIDebugButton.AddButtonToCategory(save_cat, "save[c3tag && json]", () => {
-            UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
             MixC3Save.SaveGame('cundang-001')
-
         })
 
         IMGUIDebugButton.AddButtonToCategory(save_cat, "load game from c3 tag", () => {
-            UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
             MixC3Save.LoadGame("cundang-001")
-
         })
 
         IMGUIDebugButton.AddButtonToCategory(save_cat, "laod game from data", () => {
-            UISubtitleMain.ShowSubtitles("读取测试-通过data", 5)
             // 通过 data.LevelGameData 来加载关卡存档
             if (!data.LevelGameData) {
-                console.log("data 不存在data.LevelGameData里")
-                UISubtitleMain.ShowSubtitles("data 不存在data.LevelGameData里", 5)
+                console.log("data no file data.LevelGameData")
+                UISubtitleMain.ShowSubtitles("data no file data.LevelGameData", 5)
             }
             MixC3Save.LoadGameFromJson(data.LevelGameData)
-
         })
 
 
         IMGUIDebugButton.AddButtonToCategory(save_cat, "download game data to local", () => {
-            UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
             LocalSave.DataDownload()
-
-
         })
 
         IMGUIDebugButton.AddButtonToCategory(save_cat, "import game data to local", () => {
-            UISubtitleMain.ShowSubtitles("读取本地数据", 5)
             LocalSave.DataRead();
-
-
         })
 
         IMGUIDebugButton.AddButtonToCategory(save_cat, "clear data and save to localstorege", () => {
-            UISubtitleMain.ShowSubtitles("清空data", 5)
             data.LevelGameData = ""
             data.RunGameTiems = 0;
             localStorage.setItem("level_data", data.LevelGameData)
@@ -126,54 +113,52 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     }
 
-
-
     // USE DEBUG  PANEL NORMAL
 
-    if (!DEBUG.DebugMainUI) return
-    DEBUG.DebugMainUI.AddValue(data);
+    // if (!DEBUG.DebugMainUI) return
+    // DEBUG.DebugMainUI.AddValue(data);
 
-    var SaveFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("存档系统相关");
-    SaveFather.AddChildButton
+    // var SaveFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("存档系统相关");
+    // SaveFather.AddChildButton
 
 
-    SaveFather.AddChildButton("存档-标识符和json同时存档", () => {
-        UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
-        MixC3Save.SaveGame('cundang-001')
-    })
-    SaveFather.AddChildButton("读取测试-通过标识符读取", () => {
-        UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
-        MixC3Save.LoadGame("cundang-001")
-    })
+    // SaveFather.AddChildButton("存档-标识符和json同时存档", () => {
+    //     UISubtitleMain.ShowSubtitles("存档-标识符和json同时存档", 5)
+    //     MixC3Save.SaveGame('cundang-001')
+    // })
+    // SaveFather.AddChildButton("读取测试-通过标识符读取", () => {
+    //     UISubtitleMain.ShowSubtitles("读取测试-通过标识符", 5)
+    //     MixC3Save.LoadGame("cundang-001")
+    // })
 
-    SaveFather.AddChildButton("读取测试-通过json", () => {
-        UISubtitleMain.ShowSubtitles("读取测试-通过json", 5)
-        // 通过 data.LevelGameData 来加载关卡存档
-        if (!data.LevelGameData) {
-            console.log("data 不存在data.LevelGameData里")
-            UISubtitleMain.ShowSubtitles("data 不存在data.LevelGameData里", 5)
-        }
-        MixC3Save.LoadGameFromJson(data.LevelGameData)
-    })
+    // SaveFather.AddChildButton("读取测试-通过json", () => {
+    //     UISubtitleMain.ShowSubtitles("读取测试-通过json", 5)
+    //     // 通过 data.LevelGameData 来加载关卡存档
+    //     if (!data.LevelGameData) {
+    //         console.log("data 不存在data.LevelGameData里")
+    //         UISubtitleMain.ShowSubtitles("data 不存在data.LevelGameData里", 5)
+    //     }
+    //     MixC3Save.LoadGameFromJson(data.LevelGameData)
+    // })
 
-    SaveFather.AddChildButton("下载数据", () => {
-        UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
-        LocalSave.DataDownload()
-    })
+    // SaveFather.AddChildButton("下载数据", () => {
+    //     UISubtitleMain.ShowSubtitles("下载数据到本地", 5)
+    //     LocalSave.DataDownload()
+    // })
 
-    SaveFather.AddChildButton("读取本地数据", () => {
-        UISubtitleMain.ShowSubtitles("读取本地数据", 5)
-        LocalSave.DataRead();
-    })
+    // SaveFather.AddChildButton("读取本地数据", () => {
+    //     UISubtitleMain.ShowSubtitles("读取本地数据", 5)
+    //     LocalSave.DataRead();
+    // })
 
-    SaveFather.AddChildButton("清空data 并把数据存到localstoreg", () => {
-        UISubtitleMain.ShowSubtitles("清空data", 5)
-        data.LevelGameData = ""
-        data.RunGameTiems = 0;
-        localStorage.setItem("level_data", data.LevelGameData)
-        localStorage.setItem("run_game_times", String(data.RunGameTiems))
+    // SaveFather.AddChildButton("清空data 并把数据存到localstoreg", () => {
+    //     UISubtitleMain.ShowSubtitles("清空data", 5)
+    //     data.LevelGameData = ""
+    //     data.RunGameTiems = 0;
+    //     localStorage.setItem("level_data", data.LevelGameData)
+    //     localStorage.setItem("run_game_times", String(data.RunGameTiems))
 
-    })
+    // })
 
 })
 
