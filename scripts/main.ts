@@ -35,6 +35,7 @@ import "./PixelDoom/Module/PIXAmbientLight.js"
 //UI
 import "./PixelDoom/UI/imgui_lib/imgui.js"
 import "./PixelDoom/UI/debug_ui/UIvariableMonitoring.js"
+import "./PixelDoom/UI/debug_ui/UIDbugButton.js"
 import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"

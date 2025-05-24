@@ -1,11 +1,17 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
+import { IMGUIDebugButton } from "./UIDbugButton.js";
 
 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-
+    var debug_category = IMGUIDebugButton.AddCategory("debug")
+    if (debug_category) {
+        IMGUIDebugButton.AddButtonToCategory(debug_category,"varibale_monitoring",()=>{
+            VariableMonitoring.Toggle();
+        })
+    }
 
 })
 
@@ -19,10 +25,10 @@ export class VariableMonitoring {
     private static windowId: string = "variable_monitoring_window";
     private static isInitialized: boolean = false;
     private static monitoredValues: Map<string, { value: any, source: string }> = new Map();
-    
+
     // 存储展开状态的Map
     private static expandedItems: Map<string, boolean> = new Map();
-    
+
     // 当前详情窗口显示的变量名
     private static currentDetailItem: string | null = null;
     private static detailWindowId: string = "variable_detail_window";
@@ -79,13 +85,13 @@ export class VariableMonitoring {
             }
         }
     }
-    
+
     /**
      * 创建详情窗口
      */
     private static createDetailWindow(): void {
         const detailWindowId = this.detailWindowId;
-        
+
         // 创建详情窗口
         Imgui_chunchun.CreateTextWindow(
             detailWindowId,
@@ -93,7 +99,7 @@ export class VariableMonitoring {
             "",
             { x: 150, y: 150 }
         );
-        
+
         // 配置详情窗口
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
@@ -107,53 +113,53 @@ export class VariableMonitoring {
             }
         }
     }
-    
+
     /**
      * 渲染详情窗口
      */
     private static renderDetailWindow(): void {
         const ImGui = globalThis.ImGui;
-        
+
         if (!this.currentDetailItem) {
             ImGui.Text("No variable selected");
             return;
         }
-        
+
         const item = this.monitoredValues.get(this.currentDetailItem);
         if (!item) {
             ImGui.Text("Variable not found");
             return;
         }
-        
+
         // 显示变量信息
         ImGui.Text(`Name: ${this.currentDetailItem}`);
         ImGui.Text(`Source: ${item.source}`);
         ImGui.Separator();
-        
+
         // 为了安全处理，分批显示内容，避免一次性渲染太多导致内存溢出
         try {
             const fullContent = this.formatValue(item.value, true);
-            
+
             // 先显示内容类型
             ImGui.Text(`Type: ${typeof item.value}`);
             ImGui.Separator();
-            
+
             // 显示内容
             ImGui.BeginChild("ValueContent", new ImGui.ImVec2(0, 0), true);
-            
+
             // 批量显示内容，每行最多显示100个字符
             const maxCharsPerLine = 100;
             let remainingContent = fullContent;
-            
+
             while (remainingContent.length > 0) {
                 const lineContent = remainingContent.substring(0, maxCharsPerLine);
                 ImGui.Text(lineContent);
                 remainingContent = remainingContent.substring(maxCharsPerLine);
             }
-            
+
             ImGui.EndChild();
         } catch (e: any) {
-            ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+            ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0),
                 "Render Error: " + e.message);
         }
     }
@@ -190,7 +196,7 @@ export class VariableMonitoring {
                 ImGui.PushID(textId);
 
                 // 检查是否为长内容
-                const isLongContent = 
+                const isLongContent =
                     (typeof item.value === "string" && item.value.length > 100) ||
                     (typeof item.value === "object" && JSON.stringify(item.value).length > 100);
 
@@ -200,7 +206,7 @@ export class VariableMonitoring {
 
                 // 值列
                 ImGui.TableSetColumnIndex(1);
-                
+
                 // 对于长内容，显示按钮和摘要
                 if (isLongContent) {
                     // 显示查看详情按钮
@@ -208,7 +214,7 @@ export class VariableMonitoring {
                         // 显示详情窗口
                         this.showDetailWindow(name);
                     }
-                    
+
                     // 在按钮后显示摘要
                     ImGui.SameLine();
                     const summaryText = this.formatValue(item.value, false); // 摘要
@@ -217,11 +223,11 @@ export class VariableMonitoring {
                     // 普通文本显示
                     ImGui.Text(this.formatValue(item.value, false));
                 }
-                
+
                 // 来源列
                 ImGui.TableSetColumnIndex(2);
                 ImGui.Text(item.source);
-                
+
                 ImGui.PopID();
                 rowIndex++;
             });
@@ -235,13 +241,13 @@ export class VariableMonitoring {
                 "Use VariableMonitoring.AddValue() to add variables to monitor");
         }
     }
-    
+
     /**
      * 显示详情窗口
      */
     private static showDetailWindow(name: string): void {
         this.currentDetailItem = name;
-        
+
         // 打开详情窗口
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {

@@ -624,6 +624,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "UIDbugButton.ts",
+											"type": "application/typescript",
+											"sid": 213249310474377,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],
