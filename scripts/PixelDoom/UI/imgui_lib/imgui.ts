@@ -89,7 +89,7 @@ export class Imgui_chunchun {
             console.log('ImGui 初始化完成');
             
         } catch (error) {
-            console.error('ImGui 初始化失败:', error);
+            console.error("ImGui initialization failed:", error);
             throw error;
         }
     }
@@ -559,7 +559,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () 
         //Imgui_chunchun.CreateExampleWindow();
         
     } catch (error) {
-        console.error("ImGui 初始化失败:", error);
+        console.error("ImGui initialization failed:", error);
     }
 });
 

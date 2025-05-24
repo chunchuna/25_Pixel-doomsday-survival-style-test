@@ -1,4 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { UIInteractionPanelActionChooseMain_imgui } from "../UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { UISubtitleMain } from "../UI/subtitle_ui/UISubtitle.js";
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
@@ -206,7 +207,8 @@ export class ClickObject {
 
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
-            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
+           // UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
+           UIInteractionPanelActionChooseMain_imgui.ExplainConetntToButton(Content,WindowName)
       }
 }
 

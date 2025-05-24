@@ -354,6 +354,7 @@ export class UIInteractionPanelActionChooseMain {
       // 调整大小后重新定位到右下角
       positionWindowToBottomRight(InteractionUIState.windowElement);
     }
+
   }
 
   // 根据解析生成按钮

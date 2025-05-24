@@ -500,6 +500,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "UIInteractionPane_imgui.ts",
+											"type": "application/typescript",
+											"sid": 474403164076839,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

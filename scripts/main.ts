@@ -41,6 +41,7 @@ import "./PixelDoom/UI/debug_ui/UIDbugButton.js"
 import "./PixelDoom/UI/debug_ui/UIConsole.js"
 import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
+import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js"
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"
 import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
 
