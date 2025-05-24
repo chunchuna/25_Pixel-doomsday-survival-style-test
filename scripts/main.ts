@@ -29,6 +29,8 @@ import "./PixelDoom/Module/PIXClickObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_ZhangPeng.js"
+import "./PixelDoom/Module/PIXAmbientLight.js"
+
 
 //UI
 import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"

@@ -374,6 +374,14 @@
 									"script-info": {
 										"purpose": "none"
 									}
+								},
+								{
+									"name": "PIXAmbientLight.ts",
+									"type": "application/typescript",
+									"sid": 825340988952952,
+									"script-info": {
+										"purpose": "none"
+									}
 								}
 							],
 							"subfolders": [],
