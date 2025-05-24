@@ -369,30 +369,30 @@ export class Imgui_chunchun {
         const windowId = "example_window";
         
         this.windows.set(windowId, {
-            title: "示例窗口",
+            title: "example_window",
             isOpen: true,
             size: { width: 400, height: 300 },
             position: { x: 50, y: 50 },
             renderCallback: () => {
-                ImGui.Text("这是一个示例窗口!");
+                ImGui.Text("this is a  example_window");
                 ImGui.Separator();
                 
-                if (ImGui.Button("点击我")) {
-                    console.log("按钮被点击了!");
+                if (ImGui.Button("click me")) {
+                    console.log("button click");
                 }
                 
-                ImGui.Text("你可以在这里添加更多控件");
+                ImGui.Text("you can add more sub here");
                 
                 // 滑块示例
-                ImGui.SliderFloat("滑块", (value = this.sliderValue) => this.sliderValue = value, 0.0, 1.0);
+                ImGui.SliderFloat("value", (value = this.sliderValue) => this.sliderValue = value, 0.0, 1.0);
                 
                 // 复选框示例
-                ImGui.Checkbox("复选框", (value = this.checkboxValue) => this.checkboxValue = value);
+                ImGui.Checkbox("value", (value = this.checkboxValue) => this.checkboxValue = value);
                 
                 ImGui.Separator();
-                ImGui.TextColored(new ImGui.ImVec4(0.5, 0.8, 1.0, 1.0), "提示：");
-                ImGui.TextWrapped("当鼠标不在窗口上时，点击事件会穿透到下方的游戏元素。");
-                ImGui.TextWrapped("你可以拖动这个窗口来测试点击穿透功能。");
+                ImGui.TextColored(new ImGui.ImVec4(0.5, 0.8, 1.0, 1.0), "hint：");
+                ImGui.TextWrapped("when mouse not here the mouse can click other ui。");
+                ImGui.TextWrapped("you can drag window to tests");
             }
         });
     }
@@ -507,40 +507,6 @@ export class Imgui_chunchun {
         });
     }
     
-    // 创建点击测试窗口
-    static CreateClickTestWindow(): void {
-        const windowId = "click_test_window";
-        let clickCount = 0;
-        
-        this.windows.set(windowId, {
-            title: "点击穿透测试",
-            isOpen: true,
-            size: { width: 350, height: 200 },
-            position: { x: 200, y: 200 },
-            renderCallback: () => {
-                ImGui.Text("测试说明：");
-                ImGui.BulletText("点击窗口内的按钮会增加计数");
-                ImGui.BulletText("点击窗口外的空白区域会穿透到游戏");
-                ImGui.BulletText("拖动标题栏可以移动窗口");
-                
-                ImGui.Separator();
-                
-                if (ImGui.Button("点击计数", new ImGui.ImVec2(120, 30))) {
-                    clickCount++;
-                }
-                
-                ImGui.SameLine();
-                ImGui.Text(`点击次数: ${clickCount}`);
-                
-                ImGui.Separator();
-                
-                if (ImGui.Button("创建新窗口")) {
-                    this.CreateTextWindow(`test_${Date.now()}`, "新窗口", "这是一个新创建的窗口", 
-                        { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 });
-                }
-            }
-        });
-    }
     
     // 关闭窗口
     static CloseWindow(id: string): void {
@@ -590,7 +556,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () 
     try {
         await Imgui_chunchun.Initialize();
         Imgui_chunchun.CreateExampleWindow();
-        Imgui_chunchun.CreateClickTestWindow();
     } catch (error) {
         console.error("ImGui 初始化失败:", error);
     }
