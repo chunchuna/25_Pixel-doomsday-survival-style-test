@@ -655,7 +655,6 @@ interface Category {
 // Initialize IMGUI Debug Button Panel
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-    UISubtitleMain.ShowSubtitles("IMGUI button list - Press 'B' to toggle", 5)
 
     // 使用延时添加按钮，确保初始化完成后再添加
     setTimeout(() => {
