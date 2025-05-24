@@ -9,7 +9,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 测试昼夜循环：从当前颜色开始
     AmbientLight.simulat_day_night_cycle(
         50,                    // 白天到夜晚过渡10秒
-        120,                    // 夜晚到白天过渡10秒
+        300,                    // 夜晚到白天过渡10秒
         AmbientLight.dya_light_rgb,          // 白天颜色（略带黄色）
         AmbientLight.night_light_rgb,      // 夜晚颜色（深蓝色）
         "current"              // 从当前颜色开始，自动判断接近白天还是夜晚

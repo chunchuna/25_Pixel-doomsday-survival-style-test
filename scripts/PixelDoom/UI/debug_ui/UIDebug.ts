@@ -73,11 +73,11 @@ export class UIDebug {
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
-    private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
+    private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
     private static consoleFontSize: number = 16; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
-    private static consoleBackplateColor: string = '20, 30, 60'; // 底板颜色（RGB）
-    private static consoleBackplateOpacity: number = 0.5; // 底板透明度
+    private static consoleBackplateColor: string = '74, 74, 74'; // 底板颜色（RGB）
+    private static consoleBackplateOpacity: number = 0.9; // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
     private static mouseY: number = 0; // 记录鼠标Y位置
 
