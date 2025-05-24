@@ -19,6 +19,13 @@ export class VariableMonitoring {
     private static windowId: string = "variable_monitoring_window";
     private static isInitialized: boolean = false;
     private static monitoredValues: Map<string, { value: any, source: string }> = new Map();
+    
+    // 存储展开状态的Map
+    private static expandedItems: Map<string, boolean> = new Map();
+    
+    // 当前详情窗口显示的变量名
+    private static currentDetailItem: string | null = null;
+    private static detailWindowId: string = "variable_detail_window";
 
     /**
      * 获取变量监控器实例
@@ -37,14 +44,9 @@ export class VariableMonitoring {
     private static initialize(): void {
         if (this.isInitialized) return;
 
-        // 覆盖默认示例窗口创建方法
-        // const originalCreateExampleWindow = Imgui_chunchun.CreateExampleWindow;
-        // Imgui_chunchun.CreateExampleWindow = () => {
-        //     // 不执行任何操作，防止创建默认示例窗口
-        // };
-
         // 创建自定义的监控窗口
         this.createMonitoringWindow();
+        this.createDetailWindow();
         this.Hide()
 
         this.isInitialized = true;
@@ -77,6 +79,84 @@ export class VariableMonitoring {
             }
         }
     }
+    
+    /**
+     * 创建详情窗口
+     */
+    private static createDetailWindow(): void {
+        const detailWindowId = this.detailWindowId;
+        
+        // 创建详情窗口
+        Imgui_chunchun.CreateTextWindow(
+            detailWindowId,
+            "Variable Detail",
+            "",
+            { x: 150, y: 150 }
+        );
+        
+        // 配置详情窗口
+        const imgui = Imgui_chunchun as any;
+        if (imgui.windows && imgui.windows.get) {
+            const windowConfig = imgui.windows.get(detailWindowId);
+            if (windowConfig) {
+                windowConfig.size = { width: 600, height: 500 };
+                windowConfig.isOpen = false; // 默认关闭
+                windowConfig.renderCallback = () => {
+                    this.renderDetailWindow();
+                };
+            }
+        }
+    }
+    
+    /**
+     * 渲染详情窗口
+     */
+    private static renderDetailWindow(): void {
+        const ImGui = globalThis.ImGui;
+        
+        if (!this.currentDetailItem) {
+            ImGui.Text("No variable selected");
+            return;
+        }
+        
+        const item = this.monitoredValues.get(this.currentDetailItem);
+        if (!item) {
+            ImGui.Text("Variable not found");
+            return;
+        }
+        
+        // 显示变量信息
+        ImGui.Text(`Name: ${this.currentDetailItem}`);
+        ImGui.Text(`Source: ${item.source}`);
+        ImGui.Separator();
+        
+        // 为了安全处理，分批显示内容，避免一次性渲染太多导致内存溢出
+        try {
+            const fullContent = this.formatValue(item.value, true);
+            
+            // 先显示内容类型
+            ImGui.Text(`Type: ${typeof item.value}`);
+            ImGui.Separator();
+            
+            // 显示内容
+            ImGui.BeginChild("ValueContent", new ImGui.ImVec2(0, 0), true);
+            
+            // 批量显示内容，每行最多显示100个字符
+            const maxCharsPerLine = 100;
+            let remainingContent = fullContent;
+            
+            while (remainingContent.length > 0) {
+                const lineContent = remainingContent.substring(0, maxCharsPerLine);
+                ImGui.Text(lineContent);
+                remainingContent = remainingContent.substring(maxCharsPerLine);
+            }
+            
+            ImGui.EndChild();
+        } catch (e: any) {
+            ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+                "Render Error: " + e.message);
+        }
+    }
 
     /**
      * 渲染监控窗口
@@ -106,6 +186,13 @@ export class VariableMonitoring {
             let rowIndex = 0;
             this.monitoredValues.forEach((item, name) => {
                 ImGui.TableNextRow();
+                const textId = `value_${rowIndex}`;
+                ImGui.PushID(textId);
+
+                // 检查是否为长内容
+                const isLongContent = 
+                    (typeof item.value === "string" && item.value.length > 100) ||
+                    (typeof item.value === "object" && JSON.stringify(item.value).length > 100);
 
                 // 变量名列
                 ImGui.TableSetColumnIndex(0);
@@ -113,13 +200,29 @@ export class VariableMonitoring {
 
                 // 值列
                 ImGui.TableSetColumnIndex(1);
-                const valueStr = this.formatValue(item.value);
-                ImGui.Text(valueStr);
-
+                
+                // 对于长内容，显示按钮和摘要
+                if (isLongContent) {
+                    // 显示查看详情按钮
+                    if (ImGui.SmallButton("View")) {
+                        // 显示详情窗口
+                        this.showDetailWindow(name);
+                    }
+                    
+                    // 在按钮后显示摘要
+                    ImGui.SameLine();
+                    const summaryText = this.formatValue(item.value, false); // 摘要
+                    ImGui.Text(summaryText);
+                } else {
+                    // 普通文本显示
+                    ImGui.Text(this.formatValue(item.value, false));
+                }
+                
                 // 来源列
                 ImGui.TableSetColumnIndex(2);
                 ImGui.Text(item.source);
-
+                
+                ImGui.PopID();
                 rowIndex++;
             });
 
@@ -129,27 +232,57 @@ export class VariableMonitoring {
         // 显示提示信息
         if (this.monitoredValues.size === 0) {
             ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
-                "使用 VariableMonitoring.AddValue() 添加要监控的变量");
+                "Use VariableMonitoring.AddValue() to add variables to monitor");
+        }
+    }
+    
+    /**
+     * 显示详情窗口
+     */
+    private static showDetailWindow(name: string): void {
+        this.currentDetailItem = name;
+        
+        // 打开详情窗口
+        const imgui = Imgui_chunchun as any;
+        if (imgui.windows && imgui.windows.get) {
+            const windowConfig = imgui.windows.get(this.detailWindowId);
+            if (windowConfig) {
+                windowConfig.isOpen = true;
+            }
         }
     }
 
     /**
      * 格式化变量值显示
      */
-    private static formatValue(value: any): string {
+    private static formatValue(value: any, isExpanded: boolean = false): string {
         if (value === null) return "null";
         if (value === undefined) return "undefined";
 
         if (typeof value === "object") {
             try {
                 // 对象或数组转为JSON字符串
-                return JSON.stringify(value);
+                const jsonStr = JSON.stringify(value);
+                // 如果不是展开状态且字符串长度超过100，则截断显示
+                if (!isExpanded && jsonStr.length > 100) {
+                    return jsonStr.substring(0, 97) + "...";
+                }
+                return jsonStr;
             } catch (e) {
                 return "[Object]";
             }
         }
 
-        // 数字、字符串、布尔值直接转字符串
+        // 处理字符串
+        if (typeof value === "string") {
+            // 如果不是展开状态且字符串长度超过100，则截断显示
+            if (!isExpanded && value.length > 100) {
+                return value.substring(0, 97) + "...";
+            }
+            return value;
+        }
+
+        // 数字、布尔值直接转字符串
         return String(value);
     }
 

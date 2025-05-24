@@ -24,8 +24,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
 export class AmbientLight {
 
-    public static dya_light_rgb: [number, number, number] = [255 / 255, 255 / 255, 255 / 255]
-    public static night_light_rgb: [number, number, number] = [50 / 255, 50 / 255, 100 / 255]  // 深蓝色，更容易看出效果
+    public static dya_light_rgb: [number, number, number] = [225/ 255, 225 / 255, 225 / 255]
+    public static night_light_rgb: [number, number, number] = [28 / 255, 24 / 255, 57 / 255]  // 深蓝色，更容易看出效果
 
     private static Layout_allow_name = "Level"
     public static light_layer_name = "Vignette"

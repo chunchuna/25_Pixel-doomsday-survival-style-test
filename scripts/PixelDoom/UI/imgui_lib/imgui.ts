@@ -103,7 +103,7 @@ export class Imgui_chunchun {
         this.canvas.style.userSelect = 'none';
         
         // 降低 z-index 避免覆盖某些高层级 UI
-        this.canvas.style.zIndex = '2000';
+        this.canvas.style.zIndex = '1000';
         
         // 存储当前悬浮的元素
         let currentHoveredElement: Element | null = null;
