@@ -20,6 +20,13 @@
  * // 监控计算值
  * DEBUG.DebugMainUI.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
  * DEBUG.DebugMainUI.AddValueByReference(() => Math.floor(Math.random() * 100), '随机数');
+ * 
+ * // 自定义字体设置
+ * // 设置自定义字体路径（默认为 'Font/Roboto-Medium.ttf'）
+ * UIDebug.SetCustomFontPath('Font/MyCustomFont.ttf');
+ * 
+ * // 注意：确保字体文件路径相对于项目根目录是正确的
+ * // 字体文件格式支持：.ttf, .otf, .woff, .woff2
  */
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
@@ -37,6 +44,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
+    } else {
+        // 场景切换时检查并重新应用样式
+        UIDebug.checkAndReapplyStyles();
     }
 
 })
@@ -63,8 +73,8 @@ export class UIDebug {
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
-    private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
-    private static consoleFontSize: number = 10; // 控制台字体大小
+    private static consolePosition: 'top' | 'bottom' = 'bottom'; // 控制台位置
+    private static consoleFontSize: number = 16; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '20, 30, 60'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0.5; // 底板透明度
@@ -72,7 +82,7 @@ export class UIDebug {
     private static mouseY: number = 0; // 记录鼠标Y位置
 
     // 新增：随机控制台字体颜色相关变量
-    private static consoleRandomColor: boolean = false; // 随机控制台字体颜色开关
+    private static consoleRandomColor: boolean = true; // 随机控制台字体颜色开关
     private static consoleColorRandomGroupSize: number = 3; // 字体颜色行数控制随机（1-5）
     private static currentColorGroup: string = '#ffffff'; // 当前颜色组使用的颜色
     private static colorGroupCounter: number = 0; // 当前颜色组计数器
@@ -92,6 +102,11 @@ export class UIDebug {
     private static expandedItems: Set<string> = new Set(); // 展开的项目ID集合
     private static maxDisplayLength: number = 50; // 变量值最大显示长度（降低到50字符）
 
+    // 新增：自定义字体相关变量
+    private static customFontPath: string = 'Font/ProggyClean.ttf'; // 自定义字体路径
+    private static fontFamilyName: string = 'DebugUIFont'; // 字体族名称
+    private static isFontLoaded: boolean = false; // 字体是否已加载
+
     // 新增：子菜单系统相关变量
     private static menuItems: Map<string, MenuItemData> = new Map(); // 菜单项数据
     private static currentOpenSubmenus: Set<string> = new Set(); // 当前打开的子菜单
@@ -106,6 +121,12 @@ export class UIDebug {
      * @returns 调试面板实例
      */
     public static InitDebugPanel(toggleKey: string = '`'): DebugPanelInstance {
+        // 尝试从localStorage恢复字体设置（如果之前有保存的话）
+        const savedFontPath = localStorage.getItem('debug-ui-font-path');
+        if (savedFontPath) {
+            this.customFontPath = savedFontPath;
+        }
+        
         if (this.menuPanel) {
             console.warn('Debug panel already initialized');
             return this.createDebugPanelInstance();
@@ -540,6 +561,94 @@ export class UIDebug {
      */
     public static SetVariableDisplayMaxLength(length: number): void {
         this.maxDisplayLength = Math.max(20, Math.min(200, length));
+    }
+
+    /**
+     * 设置自定义字体路径
+     * @param fontPath 字体文件路径，相对于项目根目录
+     * @example UIDebug.SetCustomFontPath('Font/MyFont.ttf');
+     */
+    public static SetCustomFontPath(fontPath: string): void {
+        this.customFontPath = fontPath;
+        this.isFontLoaded = false;
+        
+        // 保存字体路径到localStorage，以便场景切换后恢复
+        try {
+            localStorage.setItem('debug-ui-font-path', fontPath);
+        } catch (e) {
+            console.warn('Failed to save font path to localStorage:', e);
+        }
+        
+        // 如果样式已经创建，重新创建以应用新字体
+        const existingStyle = document.getElementById('debug-ui-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+            this.createStyles();
+        }
+    }
+
+    /**
+     * 检查并重新应用样式（用于场景切换时）
+     */
+    public static checkAndReapplyStyles(): void {
+        const existingStyle = document.getElementById('debug-ui-styles');
+        if (!existingStyle) {
+            // 样式元素不存在，重新创建
+            this.createStyles();
+            
+            // 同时重新应用控制台样式
+            this.updateConsoleStyles();
+        } else {
+            // 样式元素存在，但可能被其他样式覆盖
+            // 将其移动到head的最后，确保优先级最高
+            existingStyle.remove();
+            document.head.appendChild(existingStyle);
+        }
+        
+        // 检查并恢复控制台元素
+        if (this.isConsoleEnabled && !document.body.contains(this.consoleContainer)) {
+            // 控制台元素不在DOM中，重新添加
+            if (this.consoleContainer) {
+                document.body.appendChild(this.consoleContainer);
+            }
+        }
+        
+        // 检查并恢复变量监控窗口
+        if (this.isVariableWindowVisible && this.variableMonitorWindow && !document.body.contains(this.variableMonitorWindow)) {
+            document.body.appendChild(this.variableMonitorWindow);
+        }
+        
+        // 检查并恢复菜单面板
+        if (this.menuPanel && !document.body.contains(this.menuPanel)) {
+            document.body.appendChild(this.menuPanel);
+        }
+        
+        // 恢复所有子菜单容器
+        this.submenuContainers.forEach((submenu, id) => {
+            if (!document.body.contains(submenu)) {
+                document.body.appendChild(submenu);
+            }
+        });
+    }
+
+    /**
+     * 强制刷新字体设置
+     * 如果字体显示不正确，可以手动调用此方法
+     */
+    public static RefreshFont(): void {
+        // 移除现有样式
+        const existingStyle = document.getElementById('debug-ui-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
+        // 重新创建样式
+        this.createStyles();
+        
+        // 重新应用控制台样式
+        this.updateConsoleStyles();
+        
+        console.log(`DEBUG UI字体已刷新: ${this.customFontPath}`);
     }
 
     /**
@@ -1191,7 +1300,29 @@ export class UIDebug {
      */
     private static createStyles(): void {
         const styleElement = document.createElement('style');
+        styleElement.id = 'debug-ui-styles'; // 添加ID以便后续查找和替换
         styleElement.textContent = `
+            /* 自定义字体声明 */
+            @font-face {
+                font-family: '${this.fontFamilyName}';
+                src: url('${this.customFontPath}') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap; /* 提高字体加载性能 */
+            }
+            
+            /* 强制所有DEBUG UI元素使用自定义字体 */
+            .debug-console,
+            .debug-console *,
+            .debug-menu,
+            .debug-menu *,
+            .variable-monitor-window,
+            .variable-monitor-window *,
+            .debug-submenu,
+            .debug-submenu * {
+                font-family: '${this.fontFamilyName}', monospace !important;
+            }
+            
             /* 控制台样式 */
             .debug-console {
                 position: fixed;
@@ -1201,7 +1332,7 @@ export class UIDebug {
                 max-height: 36vh;
                 overflow-y: auto;
                 color: #ffffff;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 z-index: 9999999999999;
                 padding: 5px;
                 scrollbar-width: none; /* Firefox */
@@ -1223,7 +1354,7 @@ export class UIDebug {
                 min-width: 150px;
                 border-radius: 6px;
                 color: #ffffff;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 z-index: 10000;
                 overflow: hidden;
                 box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
@@ -1268,7 +1399,7 @@ export class UIDebug {
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 color: #eee;
                 cursor: pointer;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 padding: 10px 15px;
                 text-align: left;
                 transition: all 0.15s;
@@ -1299,7 +1430,7 @@ export class UIDebug {
             .console-message {
                 margin: 2px 0;
                 padding: 2px 5px;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 pointer-events: none; /* 确保控制台消息完全不拦截点击事件 */
                 display: inline-block; /* 使用inline-block让宽度跟随内容 */
                 border-radius: 2px;
@@ -1382,7 +1513,7 @@ export class UIDebug {
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(10px);
                 z-index: 10001;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 color: #ffffff;
                 overflow: hidden;
                 display: flex;
@@ -1417,7 +1548,7 @@ export class UIDebug {
                 border-radius: 4px;
                 font-size: 10px;
                 transition: all 0.2s;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
             }
             
             .variable-monitor-collapse-all:hover {
@@ -1634,7 +1765,7 @@ export class UIDebug {
                 padding: 8px !important;
                 margin: 4px 0 !important;
                 white-space: pre-wrap !important;
-                font-family: monospace !important;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 scrollbar-width: thin !important;
                 scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1) !important;
             }
@@ -1688,7 +1819,7 @@ export class UIDebug {
                 min-width: 150px;
                 border-radius: 6px;
                 color: #ffffff;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 z-index: 10001;
                 overflow: hidden;
                 box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
@@ -1733,7 +1864,7 @@ export class UIDebug {
                 border: none;
                 color: #fff;
                 cursor: pointer;
-                font-family: monospace;
+                font-family: '${this.fontFamilyName}', monospace !important;
                 padding: 5px 15px;
                 text-align: center;
                 font-size: 10px;

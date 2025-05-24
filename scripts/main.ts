@@ -4,6 +4,8 @@
 
 import "./engine.js"
 
+import "./PixelDoom/UI/font/font.js"
+
 import "./PixelDoom/Global/PIXGlobal.js"
 
 import "./PixelDoom/Module/PIXCommandAddon.js"

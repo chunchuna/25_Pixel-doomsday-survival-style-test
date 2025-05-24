@@ -25,7 +25,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 async function handleWeather() {
+    Normal();
+    await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
+    
+    //Rain();
     // await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(3000); // 等待 3 秒
     // Normal();
     // await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(5000); // 等待 5 秒
@@ -87,18 +91,3 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     })
 })
 
-/**
- * 设置当前天气类型
- * @param weatherType 天气类型
- */
-export function setCurrentWeather(weatherType: WEATHER_TYPE | null): void {
-    WeatherState.CurrentWeather = weatherType;
-}
-
-/**
- * 设置当前计时器
- * @param interval 计时器ID
- */
-export function setCurrentInterval(interval: number | null): void {
-    WeatherState.CurrentInterval = interval;
-}

@@ -626,6 +626,34 @@
 									],
 									"subfolders": [],
 									"name": "window_lib_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "imgui.ts",
+											"type": "application/typescript",
+											"sid": 824413933083231,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "imgui_lib"
+								},
+								{
+									"items": [
+										{
+											"name": "font.ts",
+											"type": "application/typescript",
+											"sid": 711117837407077,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "font"
 								}
 							],
 							"name": "UI"
@@ -637,6 +665,62 @@
 					"items": [],
 					"subfolders": [],
 					"name": "resource"
+				},
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [],
+									"name": "emscripten"
+								}
+							],
+							"name": "@types"
+						},
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "embind"
+												}
+											],
+											"name": "imgui"
+										},
+										{
+											"items": [],
+											"subfolders": [],
+											"name": "src"
+										},
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "js"
+												}
+											],
+											"name": "www"
+										}
+									],
+									"name": "imgui-ts"
+								}
+							],
+							"name": "@zhobo63"
+						}
+					],
+					"name": "node_modules"
 				}
 			],
 			"autoReloadOnPreview": true
@@ -802,6 +886,36 @@
 					],
 					"subfolders": [],
 					"name": "Resource"
+				},
+				{
+					"items": [
+						{
+							"name": "Roboto-Medium.ttf",
+							"type": "application/font-sfnt",
+							"sid": 101049152298016,
+							"file-info": {
+								"purpose": "none"
+							}
+						},
+						{
+							"name": "Cousine-Regular.ttf",
+							"type": "application/font-sfnt",
+							"sid": 757982179865893,
+							"file-info": {
+								"purpose": "none"
+							}
+						},
+						{
+							"name": "ProggyClean.ttf",
+							"type": "application/font-sfnt",
+							"sid": 124460402992347,
+							"file-info": {
+								"purpose": "none"
+							}
+						}
+					],
+					"subfolders": [],
+					"name": "Font"
 				}
 			],
 			"autoReloadOnPreview": true
