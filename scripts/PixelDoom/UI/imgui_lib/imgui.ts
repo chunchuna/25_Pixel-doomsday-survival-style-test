@@ -59,7 +59,7 @@ export class Imgui_chunchun {
             this.canvas.style.width = '100%';
             this.canvas.style.height = '100%';
             this.canvas.style.pointerEvents = 'auto';
-            this.canvas.style.zIndex = '9999';
+            this.canvas.style.zIndex = '1000';
             document.body.appendChild(this.canvas);
             
             // 获取 WebGL 上下文
@@ -82,6 +82,9 @@ export class Imgui_chunchun {
             // 应用暗色主题
             ImGui.StyleColorsDark();
             
+            // 设置鼠标事件处理
+            this.setupMouseEventHandling();
+            
             this.isInitialized = true;
             console.log('ImGui 初始化完成');
             
@@ -91,6 +94,194 @@ export class Imgui_chunchun {
         }
     }
     
+    // 设置鼠标事件处理
+    private static setupMouseEventHandling(): void {
+        // canvas 始终接收事件，以便 ImGui 能够正常工作
+        this.canvas.style.pointerEvents = 'auto';
+        
+        // 确保 canvas 不会阻止下方元素的选择
+        this.canvas.style.userSelect = 'none';
+        
+        // 降低 z-index 避免覆盖某些高层级 UI
+        this.canvas.style.zIndex = '1000';
+        
+        // 存储当前悬浮的元素
+        let currentHoveredElement: Element | null = null;
+        let isDragging = false;
+        let dragTarget: Element | null = null;
+        
+        // 处理所有鼠标事件
+        const handleMouseEvent = (e: Event) => {
+            if (!(e instanceof MouseEvent)) return;
+            
+            const io = ImGui.GetIO();
+            const isOverImGui = io.WantCaptureMouse || 
+                               ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow) ||
+                               ImGui.IsAnyItemHovered() ||
+                               ImGui.IsAnyItemActive();
+            
+            if (!isOverImGui) {
+                // 临时禁用 canvas 捕获
+                this.canvas.style.pointerEvents = 'none';
+                
+                // 获取鼠标下的元素
+                const element = document.elementFromPoint(e.clientX, e.clientY);
+                
+                // 恢复 canvas 捕获
+                this.canvas.style.pointerEvents = 'auto';
+                
+                if (element && element !== this.canvas) {
+                    // 处理悬浮状态变化
+                    if (e.type === 'mousemove') {
+                        // 如果悬浮元素改变了
+                        if (currentHoveredElement !== element) {
+                            // 对旧元素发送 mouseleave
+                            if (currentHoveredElement) {
+                                const leaveEvent = new MouseEvent('mouseleave', {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window,
+                                    clientX: e.clientX,
+                                    clientY: e.clientY,
+                                    relatedTarget: element
+                                });
+                                currentHoveredElement.dispatchEvent(leaveEvent);
+                                
+                                const outEvent = new MouseEvent('mouseout', {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window,
+                                    clientX: e.clientX,
+                                    clientY: e.clientY,
+                                    relatedTarget: element
+                                });
+                                currentHoveredElement.dispatchEvent(outEvent);
+                            }
+                            
+                            // 对新元素发送 mouseenter
+                            currentHoveredElement = element;
+                            const enterEvent = new MouseEvent('mouseenter', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window,
+                                clientX: e.clientX,
+                                clientY: e.clientY,
+                                relatedTarget: currentHoveredElement
+                            });
+                            element.dispatchEvent(enterEvent);
+                            
+                            const overEvent = new MouseEvent('mouseover', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window,
+                                clientX: e.clientX,
+                                clientY: e.clientY,
+                                relatedTarget: currentHoveredElement
+                            });
+                            element.dispatchEvent(overEvent);
+                        }
+                    }
+                    
+                    // 处理拖拽
+                    if (e.type === 'mousedown') {
+                        isDragging = true;
+                        dragTarget = element;
+                    } else if (e.type === 'mouseup') {
+                        isDragging = false;
+                        dragTarget = null;
+                    }
+                    
+                    // 创建并发送事件
+                    const newEvent = new MouseEvent(e.type, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        detail: e.detail,
+                        screenX: e.screenX,
+                        screenY: e.screenY,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        ctrlKey: e.ctrlKey,
+                        altKey: e.altKey,
+                        shiftKey: e.shiftKey,
+                        metaKey: e.metaKey,
+                        button: e.button,
+                        buttons: e.buttons,
+                        relatedTarget: e.relatedTarget
+                    });
+                    
+                    // 如果正在拖拽，确保事件发送到正确的目标
+                    const targetElement = isDragging && dragTarget ? dragTarget : element;
+                    targetElement.dispatchEvent(newEvent);
+                    
+                    // 阻止原始事件
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            } else {
+                // 如果鼠标在 ImGui 上，清除悬浮状态
+                if (currentHoveredElement) {
+                    const leaveEvent = new MouseEvent('mouseleave', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        clientX: e.clientX,
+                        clientY: e.clientY
+                    });
+                    currentHoveredElement.dispatchEvent(leaveEvent);
+                    currentHoveredElement = null;
+                }
+            }
+        };
+        
+        // 监听所有相关的鼠标事件
+        const mouseEvents = [
+            'mousedown', 'mouseup', 'click', 'dblclick', 
+            'mousemove', 'mouseenter', 'mouseleave', 
+            'mouseover', 'mouseout', 'contextmenu'
+        ];
+        
+        mouseEvents.forEach(eventType => {
+            this.canvas.addEventListener(eventType, handleMouseEvent, true);
+        });
+        
+        // 处理鼠标滚轮事件
+        this.canvas.addEventListener('wheel', (e: WheelEvent) => {
+            const io = ImGui.GetIO();
+            const isOverImGui = io.WantCaptureMouse || 
+                               ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow);
+            
+            if (!isOverImGui) {
+                this.canvas.style.pointerEvents = 'none';
+                const element = document.elementFromPoint(e.clientX, e.clientY);
+                this.canvas.style.pointerEvents = 'auto';
+                
+                if (element && element !== this.canvas) {
+                    const wheelEvent = new WheelEvent('wheel', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        deltaX: e.deltaX,
+                        deltaY: e.deltaY,
+                        deltaZ: e.deltaZ,
+                        deltaMode: e.deltaMode
+                    });
+                    element.dispatchEvent(wheelEvent);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        }, true);
+    }
+    
+    // 检查是否有任何窗口被悬停
+    private static isAnyWindowHovered(): boolean {
+        // 检查是否有任何 ImGui 窗口被悬停
+        return ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow);
+    }
+    
     // 渲染循环
     static Render(): void {
         if (!this.isInitialized) return;
@@ -98,6 +289,9 @@ export class Imgui_chunchun {
         // 开始新帧
         ImGui_Impl.NewFrame(performance.now());
         ImGui.NewFrame();
+        
+        // 更新鼠标事件状态
+        this.updateMouseEventState();
         
         // 渲染所有窗口
         this.windows.forEach((config, id) => {
@@ -116,6 +310,34 @@ export class Imgui_chunchun {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         
         ImGui_Impl.RenderDrawData(ImGui.GetDrawData());
+    }
+    
+    // 更新鼠标事件状态
+    private static updateMouseEventState(): void {
+        // 这个方法现在不需要做任何事情
+        // 所有的鼠标事件处理逻辑已经在 setupMouseEventHandling 中完成
+        // 保留这个方法以避免破坏现有的调用
+        
+        /*
+        const io = ImGui.GetIO();
+        
+        // 检查是否需要捕获鼠标
+        const shouldCaptureMouse = io.WantCaptureMouse || 
+                                  ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow) ||
+                                  ImGui.IsAnyItemHovered() ||
+                                  ImGui.IsAnyItemActive();
+        
+        // 动态设置 pointer-events
+        if (shouldCaptureMouse) {
+            if (this.canvas.style.pointerEvents !== 'auto') {
+                this.canvas.style.pointerEvents = 'auto';
+            }
+        } else {
+            if (this.canvas.style.pointerEvents !== 'none') {
+                this.canvas.style.pointerEvents = 'none';
+            }
+        }
+        */
     }
     
     // 渲染单个窗口
@@ -142,7 +364,7 @@ export class Imgui_chunchun {
         ImGui.End();
     }
     
-    // 创建示例窗口
+        // 创建示例窗口
     static CreateExampleWindow(): void {
         const windowId = "example_window";
         
@@ -166,6 +388,11 @@ export class Imgui_chunchun {
                 
                 // 复选框示例
                 ImGui.Checkbox("复选框", (value = this.checkboxValue) => this.checkboxValue = value);
+                
+                ImGui.Separator();
+                ImGui.TextColored(new ImGui.ImVec4(0.5, 0.8, 1.0, 1.0), "提示：");
+                ImGui.TextWrapped("当鼠标不在窗口上时，点击事件会穿透到下方的游戏元素。");
+                ImGui.TextWrapped("你可以拖动这个窗口来测试点击穿透功能。");
             }
         });
     }
@@ -280,6 +507,41 @@ export class Imgui_chunchun {
         });
     }
     
+    // 创建点击测试窗口
+    static CreateClickTestWindow(): void {
+        const windowId = "click_test_window";
+        let clickCount = 0;
+        
+        this.windows.set(windowId, {
+            title: "点击穿透测试",
+            isOpen: true,
+            size: { width: 350, height: 200 },
+            position: { x: 200, y: 200 },
+            renderCallback: () => {
+                ImGui.Text("测试说明：");
+                ImGui.BulletText("点击窗口内的按钮会增加计数");
+                ImGui.BulletText("点击窗口外的空白区域会穿透到游戏");
+                ImGui.BulletText("拖动标题栏可以移动窗口");
+                
+                ImGui.Separator();
+                
+                if (ImGui.Button("点击计数", new ImGui.ImVec2(120, 30))) {
+                    clickCount++;
+                }
+                
+                ImGui.SameLine();
+                ImGui.Text(`点击次数: ${clickCount}`);
+                
+                ImGui.Separator();
+                
+                if (ImGui.Button("创建新窗口")) {
+                    this.CreateTextWindow(`test_${Date.now()}`, "新窗口", "这是一个新创建的窗口", 
+                        { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 });
+                }
+            }
+        });
+    }
+    
     // 关闭窗口
     static CloseWindow(id: string): void {
         const window = this.windows.get(id);
@@ -328,6 +590,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () 
     try {
         await Imgui_chunchun.Initialize();
         Imgui_chunchun.CreateExampleWindow();
+        Imgui_chunchun.CreateClickTestWindow();
     } catch (error) {
         console.error("ImGui 初始化失败:", error);
     }
