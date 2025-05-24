@@ -97,6 +97,23 @@ export class UIConsole {
                 source: 'System'
             });
 
+            // Process any pre-initialization messages
+            if (this.preInitBuffer && this.preInitBuffer.length > 0) {
+                this.addSystemMessage(`Processing ${this.preInitBuffer.length} pre-init messages`, "info");
+                
+                // Process each message in the buffer
+                for (const message of this.preInitBuffer) {
+                    try {
+                        this.addConsoleMessage(message.type, message.args);
+                    } catch (e) {
+                        this.addSystemMessage(`Error processing pre-init message: ${e}`, "error");
+                    }
+                }
+                
+                // Clear buffer after processing
+                this.preInitBuffer = [];
+            }
+
             // Add Chinese test message
             this.addSystemMessage("Chinese display test - This text should display correctly", "info");
         }, 200);
@@ -105,7 +122,7 @@ export class UIConsole {
     /**
      * 直接添加系统消息，绕过console方法以避免递归
      */
-    private static addSystemMessage(message: string, type: string = "info"): void {
+    public static addSystemMessage(message: string, type: string = "info"): void {
         // 直接添加消息而不调用console方法
         this.consoleMessages.push({
             type: type,
@@ -478,28 +495,51 @@ export class UIConsole {
 
         // Override log method
         console.log = (...args: any[]) => {
+            // First call the original method to ensure output is visible in browser console
+            if (this.originalConsole && this.originalConsole.log) {
+                this.originalConsole.log(...args);
+            }
+            // Then capture for our in-game console
             this.safeConsoleCapture('log', args);
         };
+        // Add override marker
+        (console.log as any).__overridden = true;
 
         // Override info method
         console.info = (...args: any[]) => {
+            if (this.originalConsole && this.originalConsole.info) {
+                this.originalConsole.info(...args);
+            }
             this.safeConsoleCapture('info', args);
         };
+        (console.info as any).__overridden = true;
 
         // Override warn method
         console.warn = (...args: any[]) => {
+            if (this.originalConsole && this.originalConsole.warn) {
+                this.originalConsole.warn(...args);
+            }
             this.safeConsoleCapture('warn', args);
         };
+        (console.warn as any).__overridden = true;
 
         // Override error method
         console.error = (...args: any[]) => {
+            if (this.originalConsole && this.originalConsole.error) {
+                this.originalConsole.error(...args);
+            }
             this.safeConsoleCapture('error', args);
         };
+        (console.error as any).__overridden = true;
 
         // Override debug method
         console.debug = (...args: any[]) => {
+            if (this.originalConsole && this.originalConsole.debug) {
+                this.originalConsole.debug(...args);
+            }
             this.safeConsoleCapture('debug', args);
         };
+        (console.debug as any).__overridden = true;
     }
 
     // 标志，指示是否正在处理控制台消息，用于防止递归
@@ -510,13 +550,8 @@ export class UIConsole {
      * 安全地捕获控制台消息，防止递归
      */
     private static safeConsoleCapture(type: string, args: any[]): void {
-        // 防止递归 - 如果已经在处理消息，或者控制台未初始化，使用原始控制台直接输出
-        if (this.isProcessingConsoleMessage || !this.isInitialized || !this.isOverridingConsole) {
-            if (this.originalConsole && this.originalConsole[type]) {
-                this.originalConsole[type](...args);
-            }
-            return;
-        }
+        // 防止递归 - 如果已经在处理消息，直接返回
+        if (this.isProcessingConsoleMessage) return;
 
         try {
             // 设置标志指示正在处理消息
@@ -524,13 +559,8 @@ export class UIConsole {
             
             // 添加到控制台消息
             this.addConsoleMessage(type, args);
-            
-            // 使用原始控制台方法输出到浏览器控制台
-            if (this.originalConsole && this.originalConsole[type]) {
-                this.originalConsole[type](...args);
-            }
         } catch (e) {
-            // 出错时使用原始控制台直接输出错误
+            // 出错时使用原始控制台直接输出错误 (但不在处理消息时)
             if (this.originalConsole && this.originalConsole.error && !this.isProcessingConsoleMessage) {
                 this.originalConsole.error("Error in console capture:", e);
             }
@@ -576,45 +606,42 @@ export class UIConsole {
      * Add a console message
      */
     private static addConsoleMessage(type: string, args: any[]): void {
-        if (!this.isInitialized) return;
-
-        // 如果已经在处理消息，跳过以防止递归
-        if (this.isProcessingConsoleMessage) return;
+        if (!this.isInitialized) {
+            // 如果控制台尚未初始化，将消息添加到临时缓冲区
+            if (!this.preInitBuffer) {
+                this.preInitBuffer = [];
+            }
+            this.preInitBuffer.push({ type, args });
+            return;
+        }
 
         try {
-            // 设置标志指示正在处理消息
-            this.isProcessingConsoleMessage = true;
-
-            // 检查是否来自控制台系统的错误消息
-            const isConsoleSystemMessage = args.length > 0 && 
-                typeof args[0] === 'string' && 
-                (args[0].includes('UIConsole') || 
-                args[0].includes('console initialization') ||
-                args[0].includes('IMGUI Console') ||
-                args[0].includes('Error extracting script name') ||
-                args[0].includes('提取脚本名称时出错'));
-
-            // 如果是控制台系统消息，简化来源提取
-            let scriptName = 'System';
-            if (!isConsoleSystemMessage) {
-                const stack = (new Error()).stack;
-                try {
-                    scriptName = this.extractScriptName(stack);
-                } catch (e) {
-                    scriptName = 'unknown';
-                }
-
-                // 如果仍然找不到来源，尝试从args中推断
+            // Get stack trace immediately for more accurate source detection
+            const stack = new Error().stack;
+            
+            // Extract script name from stack trace
+            let scriptName = 'unknown';
+            try {
+                scriptName = this.extractScriptName(stack);
+                
+                // Special handling for common prefixes
                 if (scriptName === 'script' || scriptName === 'unknown') {
-                    // 查看args中是否有常见的标识符
-                    const fullArgs = args.join(' ');
-                    if (fullArgs.includes('PIX')) {
-                        const match = fullArgs.match(/PIX[A-Z][a-zA-Z]+/);
-                        if (match) {
-                            scriptName = match[0];
+                    // Try to extract from message content
+                    const fullContent = args.join(' ');
+                    if (fullContent.includes('PIX')) {
+                        const pixMatch = fullContent.match(/PIX[A-Za-z0-9_]+/);
+                        if (pixMatch) {
+                            scriptName = pixMatch[0];
+                        }
+                    } else if (fullContent.includes('Pixel')) {
+                        const pixelMatch = fullContent.match(/Pixel[A-Za-z0-9_]+/);
+                        if (pixelMatch) {
+                            scriptName = pixelMatch[0];
                         }
                     }
                 }
+            } catch (e) {
+                scriptName = 'unknown';
             }
 
             // Process args into a single content value
@@ -650,14 +677,38 @@ export class UIConsole {
                 this.consoleMessages.shift();
             }
         } catch (e) {
-            // 出错时不再尝试记录错误，以防止可能的递归
-            if (this.originalConsole && this.originalConsole.error && !this.isProcessingConsoleMessage) {
+            // 直接使用原始console.error避免递归
+            if (this.originalConsole && this.originalConsole.error) {
                 this.originalConsole.error("Error adding console message:", e);
             }
-        } finally {
-            // 重置处理标志
-            this.isProcessingConsoleMessage = false;
         }
+    }
+
+    // 添加一个临时缓冲区，用于存储控制台初始化前的消息
+    private static preInitBuffer: {type: string, args: any[]}[] = [];
+
+    /**
+     * Diagnostic method that returns the current state of the console
+     * Used for debugging
+     */
+    public static GetDiagnosticInfo(): any {
+        // Get current messages and state
+        const messageCount = this.consoleMessages.length;
+        const sourceTypes: Record<string, number> = {};
+        
+        // Analyze message sources
+        for (const msg of this.consoleMessages) {
+            const source = msg.source || 'unknown';
+            sourceTypes[source] = (sourceTypes[source] || 0) + 1;
+        }
+        
+        return {
+            initialized: this.isInitialized,
+            messageCount,
+            sourceCounts: sourceTypes,
+            overriding: this.isOverridingConsole,
+            state: this.isVisible ? 'visible' : 'hidden'
+        };
     }
 
     /**
@@ -1259,89 +1310,72 @@ export class UIConsole {
         if (!stack) return 'unknown';
 
         try {
-            // 分析整个调用堆栈
+            // Split the stack into lines
             const lines = stack.split('\n');
 
-            // 构建忽略文件列表 - 这些文件不应作为来源
+            // Files to ignore - these should not be considered as sources
             const ignoreFiles = [
-                'uiconsole.js', 'uiconsole.ts',
-                'console.js', 'console.ts',
-                'imgui.js', 'imgui.ts',
-                'uidebug.js', 'uidebug.ts',
-                'engine.js', 'engine.ts',
-                'UIConsole.js', 'UIConsole.ts'
+                'uiconsole', 'console',
+                'imgui', 'uidebug',
+                'engine', 'UIConsole',
+                'UIDbugButton', 'debug_ui'
             ];
 
-            // 跳过UIConsole内部的调用，找到真正的外部调用者
-            for (let i = 1; i < lines.length; i++) {
+            // Find first caller that's not in the ignore list
+            for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-
-                // 跳过空行
                 if (!line) continue;
 
-                // 尝试匹配脚本路径
-                const match = line.match(/\/([^\/]+\.(?:js|ts))/);
-                if (match) {
-                    const scriptName = match[1];
-
-                    // 跳过内部文件，找到外部调用者
-                    if (!ignoreFiles.some(ignoreFile =>
-                        scriptName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
-                        return scriptName;
-                    }
-                }
-            }
-
-            // 如果没有找到外部脚本，尝试更宽松的匹配
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-
-                // 尝试匹配更多格式的路径
+                // Try to match script paths in various formats
                 const patterns = [
-                    /([^\/\\]+\.(?:js|ts)):\d+:\d+/,  // filename.js:line:col
-                    /at\s+(?:\w+\s+)?\(([^)]+\.(?:js|ts))/,  // at function (filename.js)
-                    /at\s+([^\/\\]+\.(?:js|ts))/,      // at filename.js
-                    /([^\/\\]+\.(?:js|ts))/            // 简单匹配
+                    /at\s+.*\(.*[\/\\]([^\/\\]+\.[^:)]+)/, // at Method (path/file.js:line:col)
+                    /at\s+.*[\/\\]([^\/\\]+\.[^:)]+)/, // at path/file.js:line:col
+                    /[\/\\]([^\/\\]+\.[^:)]+)/ // path/file.js
                 ];
 
                 for (const pattern of patterns) {
                     const match = line.match(pattern);
                     if (match) {
                         const fileName = match[1];
-
-                        // 检查是否在忽略列表中
-                        if (!ignoreFiles.some(ignoreFile =>
-                            fileName.toLowerCase().includes(ignoreFile.toLowerCase()))) {
-                            return fileName;
+                        
+                        // Skip internal files
+                        if (!ignoreFiles.some(ignore => 
+                            fileName.toLowerCase().includes(ignore.toLowerCase()))) {
+                            // Clean up the filename (remove line:col if present)
+                            const cleanName = fileName.split(':')[0];
+                            return cleanName;
                         }
+                    }
+                }
+
+                // Try to match module names (for functions without file paths)
+                const modulePattern = /at\s+([A-Za-z0-9_$]+)\./;
+                const moduleMatch = line.match(modulePattern);
+                if (moduleMatch) {
+                    const moduleName = moduleMatch[1];
+                    if (!ignoreFiles.some(ignore => 
+                        moduleName.toLowerCase().includes(ignore.toLowerCase()))) {
+                        return moduleName;
                     }
                 }
             }
 
-            // 模块名称匹配 - 尝试提取PIX前缀的模块
+            // If we can't find a good match, try one more approach - look for named functions
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-
-                // 匹配PIX开头的模块名
-                const moduleMatch = line.match(/PIX[A-Za-z0-9_]+/);
-                if (moduleMatch) {
-                    return moduleMatch[0];
-                }
-
-                // 尝试从路径中提取模块名
-                if (line.includes('/')) {
-                    const pathParts = line.split('/');
-                    for (const part of pathParts) {
-                        if (part.startsWith('PIX') || part.includes('PixelDoom')) {
-                            return part;
-                        }
+                const funcMatch = line.match(/at\s+([A-Za-z0-9_$]+)/);
+                if (funcMatch && funcMatch[1] !== 'at') {
+                    const funcName = funcMatch[1];
+                    if (!ignoreFiles.some(ignore => 
+                        funcName.toLowerCase().includes(ignore.toLowerCase()))) {
+                        return funcName;
                     }
                 }
             }
 
             return 'script';
         } catch (e) {
-            // IMPORTANT: Don't use console methods here to avoid infinite recursion
+            // Don't use console methods here to avoid infinite recursion
             return 'script';
         }
     }
@@ -1453,6 +1487,46 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                             (window as any).testConsoleKey = () => {
                                 UIConsole.Toggle();
                                 return `Console current state: ${UIConsole.IsVisible() ? 'visible' : 'hidden'}`;
+                            };
+                            
+                            // Add source extraction test function
+                            (window as any).testConsoleSource = () => {
+                                console.log("Test log from testConsoleSource");
+                                console.info("Test info from testConsoleSource");
+                                console.warn("Test warning from testConsoleSource");
+                                console.error("Test error from testConsoleSource");
+                                
+                                // Create artificial sources
+                                setTimeout(() => {
+                                    console.log("Test log from setTimeout");
+                                }, 10);
+                                
+                                const testObject = {
+                                    testMethod: function() {
+                                        console.log("Test log from testObject.testMethod");
+                                    }
+                                };
+                                testObject.testMethod();
+                                
+                                return "Console source tests sent";
+                            };
+                            
+                            // Add direct debug function to check current state
+                            (window as any).diagConsole = () => {
+                                // Test direct message capture using system message
+                                UIConsole.addSystemMessage("Direct test message from diagConsole", "info");
+                                
+                                // Force debug log to add message
+                                console.log("Test log directly from diagConsole");
+                                
+                                // Check if override is active and reset if needed
+                                if (!(console.log as any).__overridden) {
+                                    console.log("Console overrides appear to be lost, re-initializing...");
+                                    UIConsole.Reset();
+                                }
+                                
+                                // Return diagnostic info
+                                return UIConsole.GetDiagnosticInfo();
                             };
                         }, 100);
                     } else {

@@ -25,7 +25,7 @@ export function showImageWindow(
         title,
         width,
         height,
-        1.0 // 不透明度
+        1.0 
     );
 
     // 设置图片容器样式
