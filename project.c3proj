@@ -632,6 +632,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "UIConsole.ts",
+											"type": "application/typescript",
+											"sid": 729391775807656,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

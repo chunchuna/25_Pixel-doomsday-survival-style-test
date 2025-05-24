@@ -123,13 +123,6 @@ export class IMGUIDebugButton {
             if (event.key.toLowerCase() === this.toggleKey.toLowerCase()) {
                 this.Toggle();
                 console.log(`Debug button panel toggled by pressing '${this.toggleKey}' key`);
-
-                // Show notification using subtitle
-                if (this.isVisible) {
-                    UISubtitleMain.ShowSubtitles("Debug Button Panel: ON");
-                } else {
-                    UISubtitleMain.ShowSubtitles("Debug Button Panel: OFF");
-                }
             }
         });
     }

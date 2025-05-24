@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
+import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
 import type { DialogueSystem } from "../UI/dialogue_ui/UIDialogue.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
@@ -57,11 +58,21 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     //DEBUG 面板绘制 
     if (!DEBUG.DebugMainUI) return
     var LevelFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("LEVEL")
-    LevelFather.AddChildButton("main menu 场景", () => {
+    LevelFather.AddChildButton(" go main menu", () => {
         if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
         GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
 
     })
+
+    // IMGUI 面本绘制按钮
+    var level_cat = IMGUIDebugButton.AddCategory("Level")
+    if (level_cat) {
+        IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
+            if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
+            GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
+        })
+
+    }
 })
 
 export class GAMEPLAY_LEVEL {

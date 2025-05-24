@@ -32,6 +32,8 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
+import { UIConsole } from "./UIConsole.js";
+
 export var DEBUG = {
     DebugMainUI: null as DebugPanelInstance | null,
 }
@@ -43,6 +45,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!isCreatDebugPanel) {
 
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
+        DEBUG.DebugMainUI.DoNotUseButtonPanel();
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
     } else {
@@ -58,6 +61,7 @@ interface DebugPanelInstance {
     InitConsoleCapture(): DebugPanelInstance;
     AddValue(variable: any): DebugPanelInstance;
     AddValueByReference(variableGetter: () => any, variableName: string): DebugPanelInstance;
+    DoNotUseButtonPanel(): DebugPanelInstance;
 }
 
 interface FatherButtonInstance {
@@ -81,6 +85,7 @@ export class UIDebug {
     private static consoleBackplateOpacity: number = 0.9; // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
     private static mouseY: number = 0; // 记录鼠标Y位置
+    private static isButtonPanelEnabled: boolean = true; // 按钮面板启用状态
 
     // 新增：随机控制台字体颜色相关变量
     private static consoleRandomColor: boolean = true; // 随机控制台字体颜色开关
@@ -154,16 +159,7 @@ export class UIDebug {
         });
 
         // 添加键盘事件监听
-        document.addEventListener('keydown', (event) => {
-            if (event.key.toLocaleLowerCase() === this.toggleKey.toLocaleLowerCase()) {
-                this.toggleMenu();
-            }
-            // 添加Escape键快速收起所有展开的变量
-            if (event.key === 'Escape' && this.isVariableWindowVisible) {
-                this.collapseAllVariables();
-                event.preventDefault();
-            }
-        });
+        document.addEventListener('keydown', this.handleKeyDown);
 
         // 点击空白处隐藏菜单
         document.addEventListener('click', (event) => {
@@ -226,25 +222,20 @@ export class UIDebug {
         // 替换原始console方法
         this.overrideConsoleMethods();
 
-        var IMGUI_DEBUG_FATHER = this.DebuPanelAddFatherButton("IAMGUI")
-
-        IMGUI_DEBUG_FATHER.AddChildButton("Uvariable_Monitoring", () => {
-            VariableMonitoring.Toggle();
-
-        })
 
         var DebugFather = this.DebuPanelAddFatherButton("DEBUG")
-        DebugFather.AddChildButton('清除控制台', () => {
+        DebugFather.AddChildButton('clear console', () => {
             if (this.consoleContainer) {
                 this.consoleContainer.innerHTML = '';
             }
-
+            // 同时清除IMGUI控制台
+            UIConsole.Clear();
         })
 
         // 添加变量监控窗口控制按钮
-        DebugFather.AddChildButton('显示变量监控', () => {
+        DebugFather.AddChildButton('show monitoring', () => {
             this.toggleVariableMonitorWindow();
-        });
+        })
 
         DebugFather.AddChildButton("打开控制台", () => {
             UIDebug.SetConsoleAlwaysShow(true)
@@ -1227,7 +1218,7 @@ export class UIDebug {
      * 切换菜单的显示状态
      */
     private static toggleMenu(): void {
-        if (!this.menuPanel) return;
+        if (!this.menuPanel || !this.isButtonPanelEnabled) return;
 
         this.isMenuVisible = !this.isMenuVisible;
 
@@ -2763,8 +2754,56 @@ export class UIDebug {
             },
             AddValueByReference: (variableGetter: () => any, variableName: string) => {
                 return UIDebug.AddValueByReference(variableGetter, variableName);
+            },
+            DoNotUseButtonPanel: () => {
+                return UIDebug.DoNotUseButtonPanel();
             }
         };
+    }
+
+    /**
+     * 禁用按钮面板功能
+     * @returns 调试面板实例
+     */
+    public static DoNotUseButtonPanel(): DebugPanelInstance {
+        this.isButtonPanelEnabled = false;
+        
+        // 隐藏菜单面板
+        if (this.menuPanel) {
+            this.hideMenu();
+            // 移除键盘事件监听
+            document.removeEventListener('keydown', this.handleKeyDown);
+            // 重新添加一个只处理其他功能的键盘监听
+            document.addEventListener('keydown', this.handleKeyDownWithoutMenu);
+        }
+        
+        console.log("Debug button panel has been disabled");
+        return this.createDebugPanelInstance();
+    }
+    
+    /**
+     * 处理键盘事件的函数（含菜单功能）
+     */
+    private static handleKeyDown = (event: KeyboardEvent): void => {
+        if (event.key.toLocaleLowerCase() === this.toggleKey.toLocaleLowerCase()) {
+            this.toggleMenu();
+        }
+        // Escape键快速收起所有展开的变量
+        if (event.key === 'Escape' && this.isVariableWindowVisible) {
+            this.collapseAllVariables();
+            event.preventDefault();
+        }
+    }
+    
+    /**
+     * 处理键盘事件的函数（不含菜单功能）
+     */
+    private static handleKeyDownWithoutMenu = (event: KeyboardEvent): void => {
+        // 只处理Escape键收起变量
+        if (event.key === 'Escape' && this.isVariableWindowVisible) {
+            this.collapseAllVariables();
+            event.preventDefault();
+        }
     }
 }
 
