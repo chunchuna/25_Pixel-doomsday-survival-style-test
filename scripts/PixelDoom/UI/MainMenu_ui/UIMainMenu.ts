@@ -255,10 +255,10 @@ class UIMainMenu {
         return `
         <div class="game-main-panel">
           <div class="main-menu">
-            <button id="new-game-btn" class="menu-btn">Start</button>
+            <button id="new-game-btn" class="menu-btn">Play</button>
             <button id="settings-btn" class="menu-btn">Setting</button>
             <button id="load-game-btn" class="menu-btn">Load</button>
-            <button id="about-btn" class="menu-btn">About Game</button>
+            <button id="about-btn" class="menu-btn">About</button>
           </div>
         </div>
         `;

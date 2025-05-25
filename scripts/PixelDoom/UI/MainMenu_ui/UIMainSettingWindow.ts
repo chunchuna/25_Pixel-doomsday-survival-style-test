@@ -257,7 +257,16 @@ class SettingItem extends EventTarget {
     }
 
     private renderChoose() {
-        const options = this.options.map(opt => 
+        // 确保选项是数组并且有内容
+        if (!Array.isArray(this.options) || this.options.length === 0) {
+            console.error("No options provided for Choose setting:", this.label);
+            return;
+        }
+        
+        // 如果第一项是数组，使用它而不是外层数组
+        const optionsArray = Array.isArray(this.options[0]) ? this.options[0] : this.options;
+        
+        const options = optionsArray.map(opt => 
             `<option value="${opt}" ${this.value === opt ? 'selected' : ''}>${opt}</option>`
         ).join('');
 
@@ -285,7 +294,7 @@ class SettingItem extends EventTarget {
 
         select.addEventListener('change', () => {
             this.value = select.value;
-            this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value, name: this.value } }));
+            this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value, name: this.label } }));
         });
     }
 
@@ -316,7 +325,7 @@ export class SettingsTab {
     }
 
     public AddSetting(label: string, type: SettingType, value: any, ...options: any[]): SettingItem {
-        const setting = new SettingItem(label, type, value, options);
+        const setting = new SettingItem(label, type, value, options[0] instanceof Array ? options[0] : options);
         this.settings.push(setting);
         this.contentElement.appendChild(setting.getElement());
         return setting;
@@ -707,6 +716,7 @@ export class UIMainSettingWindow {
         
         // 游戏性选项卡
         const gameplayTab = addTab('Gameplay');
+        console.log("Adding difficulty setting with options:", ['Easy', 'Medium', 'Hard', 'Nightmare']);
         const difficultySetting = gameplayTab.AddSetting('Difficulty', SettingType.Choose, 'Medium', ['Easy', 'Medium', 'Hard', 'Nightmare']);
         difficultySetting.addEventListener('change', (e: any) => {
             console.log('Difficulty set to:', e.detail.value);
