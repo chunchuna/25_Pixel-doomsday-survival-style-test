@@ -15,11 +15,40 @@ This game uses a custom TypeScript-based framework called `pmlsdk$ProceduralStor
 - Utility functions for game development
 - Runtime integration with Construct 3
 
+### Key Modules
 
+#### Character System
+- Character controller with WASD movement
+- Animation system for breathing and movement
+- Character audio for footsteps and interactions
+
+#### Environment
+- Weather system with rain effects
+- Ambient lighting system for day/night cycles
+- Y-sorting for depth management of game objects
+
+#### Interaction System
+- Clickable object system for environmental interactions
+- Interactive UI panels for player choices
+- Dialogue system with subtitles
+
+![Interactive Panel](files/github/img/Interactive%20panel.png)
+
+#### UI Framework
+- Custom UI system built with imgui for debugging
+- Window management system
+- Inventory interface
+- Dialogue and subtitle system
+- Screen effects for visual feedback
+
+![Inventory System](files/github/img/inventory.png)
 
 ### Window Library System (UIWindowLib)
 
 The game includes a comprehensive window library that provides a unified approach to creating custom UI windows with consistent appearance and behavior.
+
+![Window System Example 1](files/github/img/show_1.png)
+![Window System Example 2](files/github/img/show_2.png)
 
 #### Core Features
 
@@ -66,10 +95,19 @@ The window system can be extended with a manager class that provides:
 
 This creates a unified and professional user interface system that maintains consistent styling while allowing for specialized window content and behavior.
 
+### Game Features
+- Pixel art visual style
+- Character movement and interaction
+- Environmental storytelling
+- Dynamic weather effects
+- Inventory system
+- Dialogue system
 
 ## Debugging Tools
 
 The game includes several advanced debugging tools built with custom ImGui implementation:
+
+![Debug Button Panel](files/github/img/debug%20button%20panel.png)
 
 ### Dual Console System
 
@@ -87,6 +125,9 @@ The game implements two complementary console systems, each with different purpo
   - Transparency control
   - Maintains state between scene transitions
   - Advanced stack tracing for accurate source attribution
+
+![ImGui Console](files/github/img/imgui%20console.png)
+![ImGui Console Extended](files/github/img/imgui%20console2.png)
 
 #### 2. HTML/CSS Fixed Console
 - **Activation**: Always visible (toggleable via debug panel)
@@ -213,6 +254,9 @@ The debug mode system provides a clean and centralized way to manage all debuggi
 
 ### Variable Monitoring
 A real-time variable monitoring system for tracking game state.
+
+![Variable Monitor](files/github/img/variable%20monitor.png)
+![Variable Monitor Details](files/github/img/Variable%20Monitor%20Details.png)
 
 - **Activation**: Press 'n' to toggle the variable monitoring panel
 - **Features**:
