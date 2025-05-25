@@ -1013,6 +1013,54 @@
 									"file-info": {
 										"purpose": "none"
 									}
+								},
+								{
+									"name": "inter.png",
+									"type": "image/png",
+									"sid": 382193268970650,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "imgui console2.png",
+									"type": "image/png",
+									"sid": 499228257073406,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "debug_button.png",
+									"type": "image/png",
+									"sid": 790242925961476,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "imgui console.png",
+									"type": "image/png",
+									"sid": 403559735544812,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "var detail.png",
+									"type": "image/png",
+									"sid": 808583831766297,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "inventory.png",
+									"type": "image/png",
+									"sid": 561012743337649,
+									"file-info": {
+										"purpose": "none"
+									}
 								}
 							],
 							"subfolders": [],

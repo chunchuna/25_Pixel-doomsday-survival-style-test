@@ -15,38 +15,6 @@ This game uses a custom TypeScript-based framework called `pmlsdk$ProceduralStor
 - Utility functions for game development
 - Runtime integration with Construct 3
 
-### Key Modules
-
-#### Character System
-- Character controller with WASD movement
-- Animation system for breathing and movement
-- Character audio for footsteps and interactions
-
-#### Environment
-- Weather system with rain effects
-- Ambient lighting system for day/night cycles
-- Y-sorting for depth management of game objects
-
-#### Interaction System
-- Clickable object system for environmental interactions
-- Interactive UI panels for player choices
-- Dialogue system with subtitles
-
-#### UI Framework
-- Custom UI system built with imgui for debugging
-- Window management system
-- Inventory interface
-- Dialogue and subtitle system
-- Screen effects for visual feedback
-
-### Game Features
-- Pixel art visual style
-- Character movement and interaction
-- Environmental storytelling
-- Dynamic weather effects
-- Inventory system
-- Dialogue system
-
 ## Debugging Tools
 
 The game includes several advanced debugging tools built with custom ImGui implementation:
@@ -54,14 +22,43 @@ The game includes several advanced debugging tools built with custom ImGui imple
 ### In-Game Console
 A powerful in-game console built with ImGui for runtime debugging and command execution.
 
-- **Activation**: Press the backtick key (`) to toggle the console window
 - **Features**:
   - Console output capture (logs, warnings, errors)
-  - Command input support
   - Timestamp display
   - Colorful message formatting
   - Scrollable message history
   - Resizable window interface
+
+#### Advanced Console Features
+
+The in-game console implements a sophisticated log interception system that captures all browser console output and redirects it to the in-game UI:
+
+- **Method Overriding**: The system overrides native `console.log`, `console.warn`, `console.error`, and other methods to intercept all messages
+- **Source Tracking**: Each message includes a highlighted source indicator showing which script generated the log:
+  ```
+  [UIDialogue.js] [12:45:23] Dialogue system initialized
+  ```
+- **Stack Trace Analysis**: The console automatically extracts the source file and line number from JavaScript error stacks, providing accurate attribution for each message
+- **Color Coding**: Different message types (log, warning, error) use distinct background colors for rapid visual identification
+- **Message Grouping**: Random color grouping option allows multiple related messages to share the same color for easier correlation
+- **Performance Optimization**: Advanced DOM rendering techniques ensure that even with thousands of log messages, performance remains stable
+- **Custom Font Rendering**: Monospace font with adjustable size ensures optimal readability of debug information
+- **Persistence Across Scenes**: Console content persists across scene transitions, allowing tracking of initialization sequences
+- **Copy Support**: Right-clicking messages allows copying content to the clipboard for external analysis
+- **Translucent Backplate**: Adjustable opacity background ensures console visibility without completely obscuring game elements
+
+**Code Example - Console Usage:**
+```typescript
+// Capture is automatic for all console methods
+console.log("Player position updated", player.position);
+console.warn("Low ammunition", player.ammo);
+console.error("Failed to load asset", assetId);
+
+// Access console programmatically
+UIConsole.Clear();  // Clear console
+UIConsole.SetShowTimestamps(true);  // Configure timestamp display
+UIConsole.SetUseRandomColors(true); // Enable color grouping
+```
 
 ### Variable Monitoring
 A real-time variable monitoring system for tracking game state.
