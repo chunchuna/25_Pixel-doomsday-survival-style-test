@@ -34,89 +34,80 @@ export class UIConsole {
 
         this.addSystemMessage("Starting to initialize IMGUI console...", "info");
 
-        // Preload font first - this needs to be done before creating the console window
-        this.preloadFont();
+        // Create console window
+        this.createConsoleWindow();
 
-        // Wait for font to load
+        // Resize window (to ensure better layout)
         setTimeout(() => {
-            // Add direct font style application
-            this.injectFontStyle();
+            this.resizeConsoleWindow();
+        }, 100);
 
-            // Create console window
-            this.createConsoleWindow();
+        // Override console methods to capture output
+        this.overrideConsoleMethods();
 
-            // Resize window (to ensure better layout)
-            setTimeout(() => {
-                this.resizeConsoleWindow();
-            }, 100);
-
-            // Override console methods to capture output
-            this.overrideConsoleMethods();
-
-            // Remove previous keyboard event listeners (avoid duplicates)
-            try {
-                const oldListener = (this as any)._keydownListener;
-                if (oldListener) {
-                    document.removeEventListener('keydown', oldListener, true);
-                    this.addSystemMessage("Removed old keyboard event listener", "info");
-                }
-            } catch (e) {
-                this.addSystemMessage("Error trying to remove old listener: " + e, "warn");
+        // Remove previous keyboard event listeners (avoid duplicates)
+        try {
+            const oldListener = (this as any)._keydownListener;
+            if (oldListener) {
+                document.removeEventListener('keydown', oldListener, true);
+                this.addSystemMessage("Removed old keyboard event listener", "info");
             }
+        } catch (e) {
+            this.addSystemMessage("Error trying to remove old listener: " + e, "warn");
+        }
 
-            // Define keyboard event handler - ensure it runs in capture phase
-            const keydownHandler = (event: KeyboardEvent) => {
+        // Define keyboard event handler - ensure it runs in capture phase
+        const keydownHandler = (event: KeyboardEvent) => {
 
-                // Add hardcoded handling for 'n'
-                if (event.key === 'n' || event.key === 'N' || event.key === this.toggleKey) {
-                    this.addSystemMessage("Console toggle triggered", "info");
-                    this.Toggle();
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            };
-
-            // Save reference for later removal
-            (this as any)._keydownListener = keydownHandler;
-
-            // Add keyboard event listener - use capture phase to ensure priority
-            document.addEventListener('keydown', keydownHandler, true);
-            this.addSystemMessage(`Keyboard event listener added, current hotkey: ${this.toggleKey}`, "info");
-
-            // Remove global keyboard test to avoid duplicates
-            this.setupGlobalKeyTest();
-
-            this.isInitialized = true;
-            this.addSystemMessage("IMGUI Console initialized", "info");
-
-            // Add welcome message
-            this.consoleMessages.push({
-                type: 'info',
-                content: `Welcome to IMGUI Console! Press '${this.toggleKey}' key to toggle visibility.`,
-                timestamp: new Date().toLocaleTimeString(),
-                source: 'System'
-            });
-
-            // Process any pre-initialization messages
-            if (this.preInitBuffer && this.preInitBuffer.length > 0) {
-                this.addSystemMessage(`Processing ${this.preInitBuffer.length} pre-init messages`, "info");
-                
-                // Process each message in the buffer
-                for (const message of this.preInitBuffer) {
-                    try {
-                        this.addConsoleMessage(message.type, message.args);
-                    } catch (e) {
-                        this.addSystemMessage(`Error processing pre-init message: ${e}`, "error");
-                    }
-                }
-                
-                // Clear buffer after processing
-                this.preInitBuffer = [];
+            // Add hardcoded handling for 'n'
+            if (event.key === 'n' || event.key === 'N' || event.key === this.toggleKey) {
+                this.addSystemMessage("Console toggle triggered", "info");
+                this.Toggle();
+                event.preventDefault();
+                event.stopPropagation();
             }
+        };
 
-            // Add Chinese test message
-            this.addSystemMessage("Chinese display test - This text should display correctly", "info");
-        }, 200);
+        // Save reference for later removal
+        (this as any)._keydownListener = keydownHandler;
+
+        // Add keyboard event listener - use capture phase to ensure priority
+        document.addEventListener('keydown', keydownHandler, true);
+        this.addSystemMessage(`Keyboard event listener added, current hotkey: ${this.toggleKey}`, "info");
+
+        // Remove global keyboard test to avoid duplicates
+        this.setupGlobalKeyTest();
+
+        this.isInitialized = true;
+        this.addSystemMessage("IMGUI Console initialized", "info");
+
+        // Add welcome message
+        this.consoleMessages.push({
+            type: 'info',
+            content: `Welcome to IMGUI Console! Press '${this.toggleKey}' key to toggle visibility.`,
+            timestamp: new Date().toLocaleTimeString(),
+            source: 'System'
+        });
+
+        // Process any pre-initialization messages
+        if (this.preInitBuffer && this.preInitBuffer.length > 0) {
+            this.addSystemMessage(`Processing ${this.preInitBuffer.length} pre-init messages`, "info");
+            
+            // Process each message in the buffer
+            for (const message of this.preInitBuffer) {
+                try {
+                    this.addConsoleMessage(message.type, message.args);
+                } catch (e) {
+                    this.addSystemMessage(`Error processing pre-init message: ${e}`, "error");
+                }
+            }
+            
+            // Clear buffer after processing
+            this.preInitBuffer = [];
+        }
+
+        // Add Chinese test message
+        this.addSystemMessage("Chinese display test - This text should display correctly", "info");
     }
 
     /**
@@ -340,13 +331,6 @@ export class UIConsole {
         const io = ImGui.GetIO();
         io.WantCaptureMouse = true; // 确保ImGui捕获鼠标事件
 
-        try {
-            // 配置字体以支持中文字符
-            this.configureFontForMultiLanguage(ImGui);
-        } catch (e) {
-            console.warn("配置字体时出错:", e);
-        }
-
         // Control bar
         if (ImGui.Button("Clear")) {
             this.consoleMessages = [];
@@ -419,21 +403,13 @@ export class UIConsole {
 
                 // Display source if enabled
                 if (this.showSourceInfo && message.source) {
-                    this.renderASCIISafeText(
-                        ImGui,
-                        `[${message.source}]`,
-                        new ImGui.ImVec4(1.0, 0.5, 0.5, 1.0)
-                    );
+                    ImGui.TextColored(color, `[${message.source}]`);
                     ImGui.SameLine();
                 }
 
                 // Display timestamp if enabled
                 if (this.showTimestamps && message.timestamp) {
-                    this.renderASCIISafeText(
-                        ImGui,
-                        `[${message.timestamp}]`,
-                        new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0)
-                    );
+                    ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0), `[${message.timestamp}]`);
                     ImGui.SameLine();
                 }
 
@@ -447,8 +423,8 @@ export class UIConsole {
                     displayContent = displayContent.substring(0, 1000) + "...";
                 }
 
-                // 使用支持中文的安全文本渲染方法
-                this.renderASCIISafeText(ImGui, displayContent, color);
+                // Display message text
+                ImGui.TextColored(color, displayContent);
             }
 
             // Auto-scroll to bottom (只有当shouldAutoScroll为true时)
@@ -976,333 +952,6 @@ export class UIConsole {
         return this.isInitialized;
     }
 
-    // 修改字体配置方法
-    private static isFontConfigured: boolean = false;
-    private static configureFontForMultiLanguage(ImGui: any): void {
-        // Only configure once
-        if (this.isFontConfigured) return;
-
-        try {
-            const io = ImGui.GetIO();
-
-            // Configure to use ProggyClean.ttf font
-            if (io && io.Fonts) {
-                // Explicitly load ProggyClean font
-                console.log("Loading ProggyClean.ttf font...");
-
-                // Set font path and size
-                const fontPath = "Font/ProggyClean.ttf";
-                const fontSize = 13.0;
-
-                try {
-                    // Try different methods to load the font
-                    if (io.Fonts.AddFontFromFileTTF) {
-                        try {
-                            // Method 1: Direct load without config
-                            const font = io.Fonts.AddFontFromFileTTF(fontPath, fontSize);
-                            console.log("Method 1: Font loaded:", font ? "success" : "failed");
-                        } catch (e) {
-                            console.warn("Method 1 loading failed:", e);
-
-                            try {
-                                // Method 2: Use null as config
-                                const font = io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null);
-                                console.log("Method 2: Font loaded:", font ? "success" : "failed");
-                            } catch (e2) {
-                                console.warn("Method 2 loading failed:", e2);
-
-                                try {
-                                    // Method 3: Try using default font
-                                    if (io.Fonts.AddFontDefault) {
-                                        const defaultFont = io.Fonts.AddFontDefault();
-                                        console.log("Method 3: Using default font:", defaultFont ? "success" : "failed");
-                                    }
-                                } catch (e3) {
-                                    console.warn("Could not load any font:", e3);
-                                }
-                            }
-                        }
-
-                        // Try rebuilding font texture
-                        try {
-                            if (io.Fonts.Build) {
-                                io.Fonts.Build();
-                                console.log("Font texture rebuilt");
-                            } else if (io.Fonts.GetTexDataAsRGBA32) {
-                                // Some ImGui implementations need explicit texture data request to trigger rebuild
-                                io.Fonts.GetTexDataAsRGBA32();
-                                console.log("Triggered font texture rebuild via GetTexDataAsRGBA32");
-                            }
-                        } catch (buildError) {
-                            console.warn("Failed to rebuild font texture:", buildError);
-                        }
-                    } else {
-                        console.log("This ImGui implementation doesn't support AddFontFromFileTTF");
-                    }
-                } catch (fontError) {
-                    console.warn("Error during font loading process:", fontError);
-                }
-
-                // Use global font scale as fallback
-                if (io.hasOwnProperty('FontGlobalScale')) {
-                    io.FontGlobalScale = 1.1;
-                    console.log("Applied global font scale: 1.1");
-                }
-
-                // Try to directly set font file path (some ImGui implementations might support this)
-                try {
-                    if (io.hasOwnProperty('FontFilename')) {
-                        io.FontFilename = fontPath;
-                        console.log("Directly set font file path:", fontPath);
-                    }
-                } catch (e) {
-                    console.log("Failed to set font path directly:", e);
-                }
-
-                // Mark as configured
-                this.isFontConfigured = true;
-                console.log("Font configuration complete");
-            } else {
-                console.warn("Cannot access ImGui font system");
-            }
-        } catch (e) {
-            console.warn("Font configuration failed:", e);
-        }
-    }
-
-    /**
-     * 预加载字体
-     */
-    private static preloadFont(): void {
-        console.log("Preloading ProggyClean.ttf font...");
-
-        try {
-            const fontLoader = new FontFace('IMGUI_Console_Font', 'url(Font/ProggyClean.ttf)');
-
-            fontLoader.load().then((loadedFace) => {
-                //@ts-ignore
-                document.fonts.add(loadedFace);
-                console.log('ProggyClean.ttf font preloaded successfully (FontFace API)');
-            }).catch((error) => {
-                console.warn('Font preloading failed (FontFace API):', error);
-                this.preloadFontWithCSS();
-            });
-        } catch (e) {
-            console.warn('FontFace API unavailable:', e);
-            this.preloadFontWithCSS();
-        }
-    }
-
-    /**
-     * 使用CSS预加载字体
-     */
-    private static preloadFontWithCSS(): void {
-        try {
-            const style = document.createElement('style');
-            style.textContent = `
-                @font-face {
-                    font-family: 'IMGUI_Console_Font';
-                    src: url('Font/ProggyClean.ttf') format('truetype');
-                    font-weight: normal;
-                    font-style: normal;
-                }
-            `;
-            document.head.appendChild(style);
-            console.log('ProggyClean.ttf font preloaded successfully (CSS @font-face)');
-
-            const testElement = document.createElement('div');
-            testElement.style.fontFamily = 'IMGUI_Console_Font';
-            testElement.style.position = 'absolute';
-            testElement.style.visibility = 'hidden';
-            testElement.textContent = 'Font Preload Test';
-            document.body.appendChild(testElement);
-
-            setTimeout(() => {
-                document.body.removeChild(testElement);
-            }, 100);
-        } catch (e) {
-            console.warn('CSS font preloading failed:', e);
-        }
-    }
-
-    /**
-     * Render text, ensuring Chinese characters display correctly
-     */
-    private static renderASCIISafeText(ImGui: any, text: string, color: any): void {
-        if (!text) {
-            ImGui.TextColored(color, "");
-            return;
-        }
-
-        // Check if text contains Chinese characters
-        const hasChinese = /[\u4e00-\u9fa5]/.test(text);
-
-        if (hasChinese) {
-            // Contains Chinese characters, try different display methods
-            try {
-                // Method 1: Use Unicode code points directly
-                // Convert string to Unicode escape sequence
-                const unicodeText = this.convertToUnicodeEscapeSequence(text);
-
-                // Use eval function to convert Unicode escape sequences back to string
-                // Note: eval is normally avoided in production, but is used here for debugging purposes
-                try {
-                    const evalText = eval(`"${unicodeText}"`);
-                    ImGui.TextColored(color, evalText);
-                    return;
-                } catch (evalError) {
-                    console.warn("Unicode escape sequence evaluation failed:", evalError);
-                }
-            } catch (e) {
-                console.warn("Unicode code point conversion failed:", e);
-            }
-
-            try {
-                // Method 2: Display one character at a time
-                for (let i = 0; i < text.length; i++) {
-                    const char = text[i];
-                    if (i > 0) ImGui.SameLine(0, 0); // Connect characters without spacing
-                    ImGui.TextColored(color, char);
-                }
-                return;
-            } catch (charError) {
-                console.warn("Character-by-character display failed:", charError);
-            }
-
-            try {
-                // Method 3: Display Unicode escape sequences
-                const asciiSafe = text.replace(/[^\x00-\x7F]/g, (char) => {
-                    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
-                });
-                ImGui.TextColored(color, asciiSafe);
-                return;
-            } catch (escapeError) {
-                console.warn("Unicode escape sequence display failed:", escapeError);
-            }
-        } else {
-            // No Chinese characters, display directly
-            try {
-                ImGui.TextColored(color, text);
-                return;
-            } catch (e) {
-                console.warn("Normal text display failed:", e);
-            }
-        }
-
-        // Final fallback: Display ASCII characters only
-        try {
-            const pureAscii = text.replace(/[^\x00-\x7F]/g, "?");
-            ImGui.TextColored(color, pureAscii);
-        } catch (fallbackError) {
-            // If all methods fail, display error message
-            try {
-                ImGui.TextColored(color, "[Text rendering error]");
-            } catch (finalError) {
-                // Cannot display any text, just log error
-                console.error("Cannot render any text:", finalError);
-            }
-        }
-    }
-
-    /**
-     * Convert string to Unicode escape sequence
-     */
-    private static convertToUnicodeEscapeSequence(text: string): string {
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            const char = text.charCodeAt(i);
-            if (char > 127) {
-                // Non-ASCII character, convert to Unicode escape sequence
-                result += `\\u${char.toString(16).padStart(4, '0')}`;
-            } else {
-                // ASCII character, add directly
-                const escChar = text[i];
-                // Handle special characters
-                if (escChar === '"') {
-                    result += '\\"';
-                } else if (escChar === '\\') {
-                    result += '\\\\';
-                } else if (escChar === '\n') {
-                    result += '\\n';
-                } else if (escChar === '\r') {
-                    result += '\\r';
-                } else if (escChar === '\t') {
-                    result += '\\t';
-                } else {
-                    result += escChar;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 向文档中注入字体样式
-     */
-    private static injectFontStyle(): void {
-        // Create style element
-        const style = document.createElement('style');
-        style.id = 'imgui-console-font-style';
-        style.textContent = `
-            /* IMGUI Console Font */
-            @font-face {
-                font-family: 'IMGUIConsoleFont';
-                src: url('Font/ProggyClean.ttf') format('truetype');
-                font-weight: normal;
-                font-style: normal;
-            }
-            
-            /* Ensure font is applied to ImGui elements */
-            canvas {
-                font-family: 'IMGUIConsoleFont', monospace !important;
-            }
-            
-            /* Add font preload for ImGui elements */
-            #IMGUI_CONSOLE_PRELOAD {
-                font-family: 'IMGUIConsoleFont', monospace;
-                position: absolute;
-                visibility: hidden;
-                pointer-events: none;
-            }
-        `;
-
-        // Add to document head
-        document.head.appendChild(style);
-
-        // Add preload element
-        const preloadElement = document.createElement('div');
-        preloadElement.id = 'IMGUI_CONSOLE_PRELOAD';
-        preloadElement.textContent = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        document.body.appendChild(preloadElement);
-
-        console.log("IMGUI console font style injected into document");
-    }
-
-    /**
-     * 调整控制台窗口大小和位置
-     */
-    private static resizeConsoleWindow(): void {
-        const imgui = Imgui_chunchun as any;
-        if (imgui.windows && imgui.windows.get) {
-            const windowConfig = imgui.windows.get(this.windowId);
-            if (windowConfig) {
-                // Adjust to more appropriate size
-                windowConfig.size = {
-                    width: Math.min(800, window.innerWidth * 0.8),
-                    height: Math.min(500, window.innerHeight * 0.7)
-                };
-
-                // Adjust position to screen center
-                windowConfig.position = {
-                    x: (window.innerWidth - windowConfig.size.width) / 2,
-                    y: (window.innerHeight - windowConfig.size.height) / 2
-                };
-
-                console.log("Adjusted console window size and position");
-            }
-        }
-    }
-
     /**
      * Extract script name from stack trace
      */
@@ -1379,6 +1028,31 @@ export class UIConsole {
             return 'script';
         }
     }
+
+    /**
+     * 调整控制台窗口大小和位置
+     */
+    private static resizeConsoleWindow(): void {
+        const imgui = Imgui_chunchun as any;
+        if (imgui.windows && imgui.windows.get) {
+            const windowConfig = imgui.windows.get(this.windowId);
+            if (windowConfig) {
+                // Adjust to more appropriate size
+                windowConfig.size = {
+                    width: Math.min(800, window.innerWidth * 0.8),
+                    height: Math.min(500, window.innerHeight * 0.7)
+                };
+
+                // Adjust position to screen center
+                windowConfig.position = {
+                    x: (window.innerWidth - windowConfig.size.width) / 2,
+                    y: (window.innerHeight - windowConfig.size.height) / 2
+                };
+
+                console.log("Adjusted console window size and position");
+            }
+        }
+    }
 }
 
 // Modify initialization process to ensure console works correctly
@@ -1404,50 +1078,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             console.warn("Error removing old listeners", e);
         }
 
-        // Inject global font style early
-        const injectGlobalFontStyle = () => {
-            try {
-                const style = document.createElement('style');
-                style.textContent = `
-                    @font-face {
-                        font-family: 'ProggyClean';
-                        src: url('Font/ProggyClean.ttf') format('truetype');
-                        font-weight: normal;
-                        font-style: normal;
-                    }
-                    
-                    /* Preload display element */
-                    #imgui-font-preload {
-                        position: absolute;
-                        visibility: hidden;
-                        font-family: 'ProggyClean', monospace;
-                        pointer-events: none;
-                    }
-                    
-                    /* Apply to canvas */
-                    canvas {
-                        font-family: 'ProggyClean', monospace !important;
-                    }
-                `;
-                document.head.appendChild(style);
-
-                // Create preload element
-                const preload = document.createElement('div');
-                preload.id = 'imgui-font-preload';
-                preload.textContent = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                document.body.appendChild(preload);
-
-                console.log("Global font style injected");
-                return true;
-            } catch (e) {
-                console.warn("Failed to inject global font style:", e);
-                return false;
-            }
-        };
-
-        // Immediately inject global font style
-        injectGlobalFontStyle();
-
         // Wait for ImGui to fully initialize
         const checkAndInitImGui = () => {
             // Check if ImGui is ready
@@ -1457,10 +1087,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                     // Try to configure ImGui font directly
                     const io = ImGui.GetIO();
                     if (io && io.Fonts) {
-                        // Get font size
-                        const fontSize = io.FontGlobalScale * 13.0;
-                        console.log(`ImGui ready, font scale: ${io.FontGlobalScale}, expected font size: ${fontSize}`);
-
                         // Initialize console
                         setTimeout(() => {
                             UIConsole.Initialize();
