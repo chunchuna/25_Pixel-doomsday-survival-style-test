@@ -79,14 +79,27 @@ export class DialogueSystem {
         // 创建标题
         const title = document.createElement('div');
         title.className = 'title';
-        title.textContent = '调查';
+        title.textContent = 'Dialogue';
         dialogueHeader.appendChild(title);
         
+        // 创建控制按钮容器
+        const controlsElement = document.createElement('div');
+        controlsElement.className = 'dialogue-controls';
+        
+        // 创建最小化按钮
+        const minimizeButton = document.createElement('div');
+        minimizeButton.id = 'minimize-button';
+        minimizeButton.textContent = '_';
+        controlsElement.appendChild(minimizeButton);
+        
         // 创建关闭按钮
-        this.closeButton = document.createElement('button');
+        this.closeButton = document.createElement('div');
         this.closeButton.id = 'close-button';
         this.closeButton.textContent = '×';
-        dialogueHeader.appendChild(this.closeButton);
+        controlsElement.appendChild(this.closeButton);
+        
+        // 添加控制按钮容器到头部
+        dialogueHeader.appendChild(controlsElement);
         
         // 创建对话内容区域
         this.dialogueContent = document.createElement('div');
@@ -96,102 +109,153 @@ export class DialogueSystem {
         this.choicesContainer = document.createElement('div');
         this.choicesContainer.id = 'choices-container';
         
+        // 创建调整大小角标
+        const resizerElement = document.createElement('div');
+        resizerElement.className = 'dialogue-resizer';
+        
+        // 调整大小角标图标
+        const resizerIcon = document.createElement('div');
+        resizerIcon.className = 'resizer-icon';
+        resizerElement.appendChild(resizerIcon);
+        
         // 组装对话面板
         this.dialoguePanel.appendChild(dialogueHeader);
         this.dialoguePanel.appendChild(this.dialogueContent);
         this.dialoguePanel.appendChild(this.choicesContainer);
+        this.dialoguePanel.appendChild(resizerElement);
         
         // 添加到文档
         document.body.appendChild(this.dialoguePanel);
         
         // 添加样式
         this.addDialogueStyles();
+        
+        // 添加拖拽功能
+        this.enableWindowDrag(this.dialoguePanel, dialogueHeader);
+        
+        // 添加调整大小功能
+        this.enableWindowResize(this.dialoguePanel, resizerElement);
+        
+        // 绑定最小化按钮点击事件
+        let isMinimized = false;
+        const originalHeight = this.dialoguePanel.offsetHeight;
+        
+        minimizeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            if (isMinimized) {
+                // 展开窗口
+                this.dialoguePanel.style.height = `${originalHeight}px`;
+                this.dialogueContent.style.display = 'block';
+                this.choicesContainer.style.display = 'flex';
+                resizerElement.style.display = 'block';
+            } else {
+                // 收起窗口
+                this.dialoguePanel.style.height = `${dialogueHeader.offsetHeight}px`;
+                this.dialogueContent.style.display = 'none';
+                this.choicesContainer.style.display = 'none';
+                resizerElement.style.display = 'none';
+            }
+            isMinimized = !isMinimized;
+        });
+        
+        // 点击窗口时将其置于前台
+        this.dialoguePanel.addEventListener('mousedown', () => {
+            this.bringToFront();
+        });
     }
     
     // 添加对话系统的样式
     private addDialogueStyles(): void {
         const style = document.createElement('style');
         style.setAttribute('data-dialogue-style', 'true');
-        style.textContent = `/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
-
-body {
-    background-color: #222;
-    color: #eee;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-} */
-
+        style.textContent = `
 #dialogue-panel {
     position: fixed;
     bottom: 20px;
     left: 10%;
-    width: 10%;
-    max-width: 800px;
-    min-width: 300px;
-    height: 60vh;
-    min-height: 400px;
-    background-color: rgba(10, 10, 10, 0.9);
-    border: 2px solid #555;
-    border-radius: 5px;
+    width: 380px;
+    max-width: 600px;
+    min-width: 280px;
+    height: 400px;
+    min-height: 300px;
+    background-color: rgba(0, 0, 0, 0.92);
+    border: 1px solid #333333;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
     opacity: 0;
-    transform: translateY(30px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.2s ease, opacity 0.2s ease;
     z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    font-family: Arial, sans-serif;
 }
 
 #dialogue-panel.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 #dialogue-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 12px;
+    padding: 0 10px;
     background-color: rgba(34, 34, 34, 0.95);
     border-bottom: 1px solid #333;
-    height: 15px;
+    height: 24px;
+    cursor: move;
+    user-select: none;
 }
 
 .title {
-    font-weight: 200;
-    color: #ddd;
-    font-size: 0.5em;
+    font-weight: 400;
+    color: #e0e0e0;
+    font-size: 11px;
 }
 
+.dialogue-controls {
+    display: flex;
+    gap: 6px;
+}
+
+#minimize-button,
 #close-button {
     background: none;
     border: none;
     color: #aaa;
-    font-size: 0.5em;
+    font-size: 14px;
     cursor: pointer;
-    transition: color 0.2s;
-    padding: 2px 6px;
-    line-height: 1;
+    transition: color 0.2s, background-color 0.2s;
+    padding: 0 6px;
+    width: 14px;
+    height: 14px;
+    text-align: center;
+    line-height: 14px;
+}
+
+#minimize-button {
+    line-height: 10px;
+}
+
+#minimize-button:hover {
+    color: #fff;
+    background-color: #555;
 }
 
 #close-button:hover {
     color: #fff;
+    background-color: #c14545;
 }
 
 #dialogue-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 15px;
+    padding: 10px;
     scrollbar-width: thin;
     scrollbar-color: #666 #222;
+    font-size: 13px;
 }
 
 #dialogue-content::-webkit-scrollbar {
@@ -199,107 +263,134 @@ body {
 }
 
 #dialogue-content::-webkit-scrollbar-track {
-    background: #222;
+    background: #000000;
 }
 
 #dialogue-content::-webkit-scrollbar-thumb {
-    background-color: #666;
-    border-radius: 4px;
+    background-color: #333333;
+    border-radius: 2px;
 }
 
 .dialogue-line {
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    max-width: 80%;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    border-radius: 2px;
+    max-width: 85%;
     position: relative;
     animation: fadeIn 0.3s ease;
-    font-size: 16px;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
+        transform: translateY(5px);
     }
 
     to {
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
 .dialogue-left {
-    background-color: #2a2a2a;
-    color: #ddd;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
     align-self: flex-start;
     margin-right: auto;
-    border-left: 3px solid #6a9955;
+    border-left: 2px solid #3a4a65;
 }
 
 .dialogue-right {
-    background-color: #3a3a3a;
-    color: #fff;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
     align-self: flex-end;
     margin-left: auto;
-    border-right: 3px solid #569cd6;
+    border-right: 2px solid #569cd6;
     text-align: right;
 }
 
 .character-name {
     font-weight: bold;
-    color: #f0db4f;
+    color: #569cd6;
     margin-right: 5px;
+    font-size: 12px;
+    display: inline-block;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(86, 156, 214, 0.3);
+}
+
+.dialogue-right .character-name {
+    color: #4ec9b0;
+    border-bottom: 1px solid rgba(78, 201, 176, 0.3);
 }
 
 #choices-container {
     display: flex;
     flex-direction: column;
-    padding: 10px 15px;
-    gap: 8px;
-    background-color: #1c1c1c;
+    padding: 8px 10px;
+    gap: 6px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border-top: 1px solid #222;
 }
 
 .choice-button {
-    background-color: #3c3c3c;
-    color: #ddd;
-    border: 1px solid #555;
-    border-left: 3px solid #f0db4f;
-    padding: 10px 15px;
+    background-color: #2a3a55;
+    color: #e0e0e0;
+    border: 1px solid #3a4a65;
+    padding: 8px 10px;
     text-align: left;
     cursor: pointer;
-    transition: background-color 0.2s;
-    border-radius: 3px;
-    font-size: 16px;
+    transition: background-color 0.2s, border-color 0.2s;
+    border-radius: 2px;
+    font-size: 13px;
 }
 
 .choice-button:hover {
-    background-color: #4c4c4c;
+    background-color: #3a4a65;
     color: #fff;
+    border-color: #569cd6;
 }
 
-/* Demo controls */
-#demo-controls {
+.continue-prompt {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.dialogue-resizer {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    width: 20px;
+    height: 20px;
+    bottom: 0;
+    right: 0;
+    cursor: nwse-resize;
+    z-index: 9999;
 }
 
-#demo-controls button {
-    background-color: #444;
-    color: #ddd;
-    border: 1px solid #666;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.resizer-icon {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #3a4a65;
+    border-bottom: 2px solid #3a4a65;
 }
 
-#demo-controls button:hover {
-    background-color: #555;
+.dialogue-resizer:hover .resizer-icon {
+    border-color: #569cd6;
 }
             `;
         document.head.appendChild(style);
@@ -317,10 +408,18 @@ body {
 
         // 显示对话面板
         this.dialoguePanel.classList.add('active');
+        
+        // 添加打开动画效果 - 使用requestAnimationFrame确保DOM已更新
+        requestAnimationFrame(() => {
+            // 短暂延迟以确保变换生效
+            setTimeout(() => {
+                this.dialoguePanel.style.opacity = '1';
+                this.dialoguePanel.style.transform = 'scale(1)';
+            }, 30);
+        });
 
         // 显示主对话内容
         this.displayMainDialogue();
-        
     }
 
     // 清理所有状态和事件监听器
@@ -577,10 +676,14 @@ body {
             characterSpan.className = 'character-name';
             characterSpan.textContent = line.character;
             lineElement.appendChild(characterSpan);
+            
+            // 添加换行，使角色名和文本分行显示
+            lineElement.appendChild(document.createElement('br'));
         }
 
         // 创建文本容器用于打字机效果
         const textContainer = document.createElement('span');
+        textContainer.className = 'dialogue-text';
         lineElement.appendChild(textContainer);
 
         // 将行添加到对话内容中
@@ -597,7 +700,7 @@ body {
                     // 使用Function构造器创建一个函数并执行
                     new Function(line.code)();
                 } catch (e) {
-                    console.error('执行对话代码时出错:', e);
+                    console.error('Error executing dialogue code:', e);
                 }
             }
             // 调用原始回调
@@ -955,11 +1058,21 @@ body {
 
     // 关闭对话面板
     public CloseDialogue(): void {
-        // 清理所有状态
-        this.cleanupAllState();
+        // 添加关闭动画
+        this.dialoguePanel.style.opacity = '0';
+        this.dialoguePanel.style.transform = 'scale(0.95)';
         
-        // 关闭对话面板
-        this.dialoguePanel.classList.remove('active');
+        // 等待动画完成后清理状态
+        setTimeout(() => {
+            // 清理所有状态
+            this.cleanupAllState();
+            
+            // 关闭对话面板
+            this.dialoguePanel.classList.remove('active');
+            
+            // 重置面板状态
+            this.dialoguePanel.style.transform = '';
+        }, 200);
     }
 
     // 完全销毁对话面板
@@ -982,6 +1095,176 @@ body {
         if (dialogueStyle) {
             dialogueStyle.remove();
         }
+    }
+
+    /**
+     * 窗口拖拽功能
+     */
+    private enableWindowDrag(windowElement: HTMLElement, dragHandle: HTMLElement) {
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+
+        const startDrag = (e: MouseEvent) => {
+            // 确保是从头部拖拽
+            if (e.target === dragHandle || dragHandle.contains(e.target as Node)) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                isDragging = true;
+
+                // 获取鼠标相对于窗口的位置
+                const rect = windowElement.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                // 添加拖动中的样式
+                document.body.style.userSelect = 'none';
+                document.body.style.cursor = 'move';
+
+                // 使用捕获阶段添加事件监听
+                document.addEventListener('mousemove', drag, true);
+                document.addEventListener('mouseup', stopDrag, true);
+            }
+        };
+
+        const drag = (e: MouseEvent) => {
+            if (!isDragging) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 更新窗口位置
+            const newLeft = e.clientX - offsetX;
+            const newTop = e.clientY - offsetY;
+
+            // 限制拖动不超出可视区域
+            const maxLeft = window.innerWidth - windowElement.offsetWidth;
+            const maxTop = window.innerHeight - dragHandle.offsetHeight;
+
+            windowElement.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+            windowElement.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
+        };
+
+        const stopDrag = (e: MouseEvent) => {
+            if (!isDragging) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            isDragging = false;
+
+            // 恢复样式
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+
+            // 移除事件监听
+            document.removeEventListener('mousemove', drag, true);
+            document.removeEventListener('mouseup', stopDrag, true);
+        };
+
+        // 使用捕获阶段添加事件
+        dragHandle.addEventListener('mousedown', startDrag, true);
+    }
+
+    /**
+     * 窗口大小调整功能
+     */
+    private enableWindowResize(windowElement: HTMLElement, resizeHandle: HTMLElement) {
+        let startX = 0;
+        let startY = 0;
+        let startWidth = 0;
+        let startHeight = 0;
+        let isResizing = false;
+
+        const startResize = (e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            isResizing = true;
+
+            // 记录初始值
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = windowElement.offsetWidth;
+            startHeight = windowElement.offsetHeight;
+
+            // 设置调整大小时的样式
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'nwse-resize';
+
+            // 使用捕获阶段添加事件监听
+            document.addEventListener('mousemove', resize, true);
+            document.addEventListener('mouseup', stopResize, true);
+        };
+
+        const resize = (e: MouseEvent) => {
+            if (!isResizing) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 计算新尺寸
+            const width = Math.max(280, startWidth + (e.clientX - startX));
+            const height = Math.max(300, startHeight + (e.clientY - startY));
+
+            // 设置新尺寸
+            windowElement.style.width = `${width}px`;
+            windowElement.style.height = `${height}px`;
+        };
+
+        const stopResize = (e: MouseEvent) => {
+            if (!isResizing) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            isResizing = false;
+
+            // 恢复样式
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+
+            // 移除事件监听
+            document.removeEventListener('mousemove', resize, true);
+            document.removeEventListener('mouseup', stopResize, true);
+        };
+
+        // 直接添加事件监听，使用捕获阶段
+        resizeHandle.addEventListener('mousedown', startResize, true);
+    }
+
+    /**
+     * 将对话窗口置于前台
+     */
+    private bringToFront(): void {
+        // 找到所有可能的弹窗元素
+        const dialogues = document.querySelectorAll('#dialogue-panel');
+        const windows = document.querySelectorAll('.pd-window');
+        
+        // 设置最高层级
+        let maxZIndex = 1000;
+        
+        // 检查所有窗口元素的当前z-index
+        windows.forEach((win) => {
+            const zIndex = parseInt(window.getComputedStyle(win).zIndex, 10) || 0;
+            if (!isNaN(zIndex) && zIndex > maxZIndex) {
+                maxZIndex = zIndex;
+            }
+        });
+        
+        // 检查所有对话框元素的当前z-index
+        dialogues.forEach((dlg) => {
+            if (dlg !== this.dialoguePanel) { // 不检查当前对话框
+                const zIndex = parseInt(window.getComputedStyle(dlg).zIndex, 10) || 0;
+                if (!isNaN(zIndex) && zIndex > maxZIndex) {
+                    maxZIndex = zIndex;
+                }
+            }
+        });
+        
+        // 设置当前对话框的z-index为最高+1
+        this.dialoguePanel.style.zIndex = (maxZIndex + 1).toString();
     }
 }
 
