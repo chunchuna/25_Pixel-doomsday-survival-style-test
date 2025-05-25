@@ -1015,7 +1015,7 @@
 									}
 								},
 								{
-									"name": "inter.png",
+									"name": "Interactive panel.png",
 									"type": "image/png",
 									"sid": 382193268970650,
 									"file-info": {
@@ -1031,7 +1031,7 @@
 									}
 								},
 								{
-									"name": "debug_button.png",
+									"name": "debug button panel.png",
 									"type": "image/png",
 									"sid": 790242925961476,
 									"file-info": {
@@ -1047,7 +1047,7 @@
 									}
 								},
 								{
-									"name": "var detail.png",
+									"name": "Variable Monitor Details.png",
 									"type": "image/png",
 									"sid": 808583831766297,
 									"file-info": {
@@ -1058,6 +1058,14 @@
 									"name": "inventory.png",
 									"type": "image/png",
 									"sid": 561012743337649,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "variable monitor.png",
+									"type": "image/png",
+									"sid": 608770681248863,
 									"file-info": {
 										"purpose": "none"
 									}
