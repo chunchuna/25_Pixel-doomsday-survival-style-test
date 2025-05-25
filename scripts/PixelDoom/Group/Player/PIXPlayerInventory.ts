@@ -49,7 +49,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryControl;
     
     // 切换到单列模式
-    inventoryControl.oneline();
     
     // 为主库存添加自定义更新回调
     inventoryManager.SetMainInventoryUpdateCallback({
@@ -81,7 +80,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 PLAYER_MAIN_INVENTORY_LEVEL.MAIN = control;
                 
                 // 应用单列模式
-                control.oneline();
+                //control.oneline();
             }, 100);
         }
 

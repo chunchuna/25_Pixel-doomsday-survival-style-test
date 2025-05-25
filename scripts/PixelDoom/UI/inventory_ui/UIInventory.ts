@@ -1487,18 +1487,14 @@ class UIInventory implements IUIInventory {
             sortButton.textContent = '整理 (R)';
             sortButton.onclick = () => this.sortInventoryByQuality();
 
+            // 添加R键整理背包的提示文本
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'inventory-prompt';
+            promptSpan.textContent = '[R]整理背包';
+
             headerDiv.appendChild(titleSpan);
             //headerDiv.appendChild(sortButton);
-
-            // 添加R键整理背包的提示文本
-            const sortPromptSpan = document.createElement('span');
-            sortPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
-            sortPromptSpan.style.fontSize = '12px';
-            sortPromptSpan.style.color = '#aaaaaa';
-            sortPromptSpan.style.fontStyle = 'italic';
-            sortPromptSpan.textContent = '[R]整理背包';
-
-            headerDiv.appendChild(sortPromptSpan);
+            headerDiv.appendChild(promptSpan);
         } else {
             // 添加其他库存的标题
             const titleSpan = document.createElement('span');
@@ -1509,17 +1505,13 @@ class UIInventory implements IUIInventory {
                 titleSpan.textContent = "正在查看其它库存";
             }
 
-            headerDiv.appendChild(titleSpan);
-
             // 创建ESC提示文本，放在header里
-            const escPromptSpan = document.createElement('span');
-            escPromptSpan.style.marginLeft = 'auto'; // 使提示靠右对齐
-            escPromptSpan.style.fontSize = '12px';
-            escPromptSpan.style.color = '#aaaaaa';
-            escPromptSpan.style.fontStyle = 'italic';
-            escPromptSpan.textContent = '[ESC]关闭';
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'inventory-prompt';
+            promptSpan.textContent = '[ESC]关闭';
 
-            headerDiv.appendChild(escPromptSpan);
+            headerDiv.appendChild(titleSpan);
+            headerDiv.appendChild(promptSpan);
         }
 
         container.appendChild(headerDiv);
@@ -1877,26 +1869,28 @@ class UIInventory implements IUIInventory {
             /* 库存容器样式 */
             .inventory-container {
                 position: fixed;
-                background-color: rgba(25, 25, 25, 0.1);
-                border: 2px solid rgba(68, 68, 68, 0.1);
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                padding: 15px;
+                background-color: #000000;
+                border: 1px solid #333333;
+                border-radius: 2px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+                padding: 10px;
                 display: flex;
                 flex-direction: column;
                 width: 225px;
                 height: 380px;
-                opacity: 0; /* 修改：默认不可见，防止闪烁 */
+                opacity: 0;
                 z-index: 5000;
-                backdrop-filter: blur(5px);
-                resize: none; /* 禁用默认resize */
-                overflow: hidden; /* 防止内容溢出 */
-                transition: opacity 0.1s ease; /* 添加过渡效果 */
+                font-family: Arial, sans-serif;
+                color: #d0d0d0;
+                resize: none;
+                overflow: hidden;
+                transition: opacity 0.2s ease-out, transform 0.2s ease-out;
             }
             
             /* 新创建的库存容器初始状态 */
             .inventory-container:not(.inventory-open):not(.inventory-close) {
-                opacity: 0; /* 修改：默认不可见 */
+                opacity: 0;
+                transform: scale(0.95);
             }
             
             /* 库存拖拽句柄 */
@@ -1905,35 +1899,25 @@ class UIInventory implements IUIInventory {
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: 20px;
+                height: 26px;
                 cursor: move;
                 z-index: 5002;
+                user-select: none;
             }
             
-            /* 移除旧的调整大小角标样式 */
-            .inventory-resize-handle {
-                display: none;
-            }
-            
-            /* 添加新的明确的尺寸调整按钮样式 */
+            /* 调整大小按钮样式 */
             .inventory-resize-button {
                 position: absolute;
-                bottom: 2px;
-                right: 2px;
-                width: 14px;
-                height: 14px;
-                background-color: rgba(50, 50, 50, 0.5);
-                color: white;
-                border: 1px solid rgba(80, 80, 80, 0.5);
-                border-radius: 2px;
+                bottom: 3px;
+                right: 3px;
+                width: 10px;
+                height: 10px;
                 cursor: nwse-resize;
                 z-index: 5010;
                 padding: 0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-                transition: opacity 0.2s ease;
                 user-select: none;
                 pointer-events: auto;
                 opacity: 0.7;
@@ -1944,67 +1928,19 @@ class UIInventory implements IUIInventory {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                background-image: linear-gradient(135deg, transparent 50%, rgba(120, 120, 120, 0.8) 50%, rgba(120, 120, 120, 0.8) 60%, transparent 60%),
-                              linear-gradient(135deg, transparent 65%, rgba(120, 120, 120, 0.8) 65%, rgba(120, 120, 120, 0.8) 75%, transparent 75%),
-                              linear-gradient(135deg, transparent 80%, rgba(120, 120, 120, 0.8) 80%, rgba(120, 120, 120, 0.8) 90%, transparent 90%);
+                border-right: 2px solid #3a3a3a;
+                border-bottom: 2px solid #3a3a3a;
             }
             
             /* 按钮悬停效果 */
             .inventory-resize-button:hover {
-                background-color: rgba(60, 60, 60, 0.7);
                 opacity: 1;
             }
             
             /* 按钮激活效果 */
             .inventory-resize-button:active,
             .inventory-container.resizing .inventory-resize-button {
-                background-color: rgba(70, 70, 70, 0.9);
-            }
-            
-            /* 移除先前的箭头样式 */
-            .resize-arrows,
-            .resize-arrow-h,
-            .resize-arrow-v {
-                display: none;
-            }
-            
-            /* 移除闪烁动画 */
-            @keyframes pulse-glow {
-                0%, 50%, 100% {
-                    box-shadow: none;
-                    border-color: rgba(80, 80, 80, 0.5);
-                }
-            }
-            
-            /* 角标内的图标 */
-            .resize-icon {
-                width: 16px;
-                height: 16px;
-                opacity: 0.9;
-            }
-            
-            .resize-icon svg {
-                width: 100%;
-                height: 100%;
-            }
-            
-            /* 角标悬停效果 */
-            .inventory-resize-handle:hover {
-                background-color: rgba(140, 140, 140, 0.9);
-                transform: scale(1.15);
-                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            }
-            
-            /* 拖拽大小时的视觉反馈 */
-            .inventory-container.resizing .inventory-resize-handle,
-            .inventory-resize-handle:active {
-                background-color: rgba(160, 160, 160, 1);
-                box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
-            }
-            
-            /* 拖拽大小时的视觉反馈 */
-            .inventory-container.resizing .inventory-resize-handle {
-                background-color: rgba(255, 255, 255, 0.2);
+                opacity: 1;
             }
             
             /* 库存头部样式 */
@@ -2014,35 +1950,49 @@ class UIInventory implements IUIInventory {
                 align-items: center;
                 margin-bottom: 15px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid rgba(68, 68, 68, 0.3);
-                color: #ccc;
+                border-bottom: 1px solid #333333;
+                color: #e0e0e0;
                 z-index: 5001;
                 pointer-events: auto;
-                background-color: rgba(40, 40, 40, 0.3);
-                padding: 10px;
-                border-radius: 3px;
-                height:15px;
+                background-color: rgba(0, 0, 0, 0.29);
+                padding: 5px 10px;
+                border-radius: 2px;
+                height: 15px;
             }
             
             /* 为库存类型添加不同的颜色 */
             #main-inventory .inventory-header {
-                border-bottom-color: #446688;
+                border-bottom-color: #333333;
             }
             
             #other-inventory .inventory-header {
-                border-bottom-color: #884466;
+                border-bottom-color: #333333;
             }
             
             .inventory-title {
-                font-size: 75%;
-                font-weight: bold;
+                font-size: 11px;
+                font-weight: normal;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 50%;
+                text-align: left;
+            }
+            
+            /* 提示文本样式 */
+            .inventory-header span:last-child {
+                font-size: 11px;
+                font-style: italic;
+                color: #aaaaaa;
+                white-space: nowrap;
+                text-align: right;
             }
             
             .sort-button, .close-button {
-                background-color: #333;
-                color: #ccc;
-                border: 1px solid #555;
-                border-radius: 3px;
+                background-color: #222222;
+                color: #d0d0d0;
+                border: 1px solid #333333;
+                border-radius: 2px;
                 padding: 5% 10% !important; 
                 cursor: pointer;
                 transition: all 0.2s ease;
@@ -2053,21 +2003,21 @@ class UIInventory implements IUIInventory {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 50%; 
+                font-size: 10px; 
                 white-space: nowrap; 
             }
             
             .sort-button:hover, .close-button:hover {
-                background-color: #444;
-                color: #fff;
+                background-color: #333333;
+                color: #ffffff;
             }
             
             .close-button {
-                background-color: #553333;
+                background-color: #332222;
             }
             
             .close-button:hover {
-                background-color: #774444;
+                background-color: #553333;
             }
             
             /* 库存打开动画 */
@@ -2095,11 +2045,11 @@ class UIInventory implements IUIInventory {
             }
             
             .inventory-open {
-                animation: fadeIn 0.3s ease-out forwards;
+                animation: fadeIn 0.2s ease-out forwards;
             }
             
             .inventory-close {
-                animation: fadeOut 0.3s ease-out forwards;
+                animation: fadeOut 0.2s ease-out forwards;
             }
             
             /* 整理完成通知 */
@@ -2108,14 +2058,15 @@ class UIInventory implements IUIInventory {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background-color: rgba(50, 50, 50, 0.9);
-                color: #fff;
+                background-color: #000000;
+                color: #e0e0e0;
                 padding: 10px 20px;
-                border-radius: 5px;
-                font-size: 16px;
+                border-radius: 2px;
+                border: 1px solid #333333;
+                font-size: 14px;
                 z-index: 5001;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-                animation: notification-appear 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+                animation: notification-appear 0.2s ease-out;
             }
             
             @keyframes notification-appear {
@@ -2130,7 +2081,7 @@ class UIInventory implements IUIInventory {
             }
             
             .inventory-notification.fade-out {
-                animation: notification-disappear 0.5s ease-out forwards;
+                animation: notification-disappear 0.2s ease-out forwards;
             }
             
             @keyframes notification-disappear {
@@ -2150,7 +2101,7 @@ class UIInventory implements IUIInventory {
                     transform: scale(1);
                 }
                 50% {
-                    transform: scale(1.15);
+                    transform: scale(1.1);
                 }
                 100% {
                     transform: scale(1);
@@ -2166,121 +2117,101 @@ class UIInventory implements IUIInventory {
                 overflow-y: auto;
                 flex-grow: 1;
                 padding-right: 10px;
-                margin-right: -10px; /* 防止滚动条占用空间 */
-                scrollbar-width: thin; /* Firefox */
-                scrollbar-color: #444 #222; /* Firefox: thumb track */
-                width: 100%; /* 确保占满容器宽度 */
+                margin-right: -10px;
+                scrollbar-width: thin;
+                scrollbar-color: #333333 #000000;
+                width: 100%;
             }
             
-            /* 自定义滚动条 - 更精致的黑灰风格 */
+            /* 自定义滚动条 */
             .inventory-scroll-container::-webkit-scrollbar {
                 width: 8px;
             }
             
             .inventory-scroll-container::-webkit-scrollbar-track {
-                background: #1a1a1a;
-                border-radius: 4px;
-                box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+                background: #000000;
+                border-radius: 2px;
             }
             
             .inventory-scroll-container::-webkit-scrollbar-thumb {
-                background: linear-gradient(to bottom, #444, #333);
-                border-radius: 4px;
-                border: 1px solid #1a1a1a;
+                background-color: #333333;
+                border-radius: 2px;
+                border: 1px solid #000000;
             }
             
             .inventory-scroll-container::-webkit-scrollbar-thumb:hover {
-                background: linear-gradient(to bottom, #555, #444);
-            }
-            
-            .inventory-scroll-container::-webkit-scrollbar-thumb:active {
-                background: linear-gradient(to bottom, #666, #555);
+                background-color: #444444;
             }
             
             /* 库存网格 */
             .inventory-grid {
                 display: grid;
-                gap: 5px; /* 设置固定的格子间隔 */
+                gap: 5px;
                 width: 100%;
                 grid-auto-rows: auto;
-                justify-content: start; /* 从左侧开始布局 */
+                justify-content: start;
             }
             
             /* 为主库存和其他库存设置不同的默认位置和视觉样式 */
             #main-inventory {
                 left: 25px;
                 top: 50%;
-                border-color:rgba(68, 102, 136, 0.08);
+                border-color: #333333;
             }
             
             #other-inventory {
                 right: 50px;
                 top: 50%;
-                border-color:rgba(136, 68, 102, 0.08);
+                border-color: #333333;
             }
             
             /* 物品格子 */
             .inventory-slot {
-                background-color: rgba(51, 51, 51, 0.3);
-                border: 1px solid rgba(85, 85, 85, 0.3);
-                border-radius: 4px;
+                background-color: #111111;
+                border: 1px solid #333333;
+                border-radius: 2px;
                 aspect-ratio: 1 / 1;
-                width: 40px; /* 默认尺寸，会被脚本动态调整 */
-                height: 40px; /* 默认尺寸，会被脚本动态调整 */
+                width: 40px;
+                height: 40px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 position: relative;
                 overflow: hidden;
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-                margin: 0; /* 确保没有外边距 */
-                padding: 0; /* 确保没有内边距 */
+                margin: 0;
+                padding: 0;
             }
             
             .inventory-slot.empty {
-                background-color: rgba(42, 42, 42, 0.5);
+                background-color: #0a0a0a;
             }
             
             /* 格子高亮效果 */
-            @keyframes pulseGlow {
-                0% {
-                    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3), 0 0 2px rgba(255, 255, 255, 0.3);
-                    border-color: #555;
-                }
-                50% {
-                    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), 0 0 10px rgba(255, 255, 255, 0.5);
-                    border-color: #888;
-                }
-                100% {
-                    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3), 0 0 2px rgba(255, 255, 255, 0.3);
-                    border-color: #555;
-                }
-            }
-            
             .slot-highlight {
-                animation: pulseGlow 1.5s infinite;
+                border-color: #444444;
+                background-color: #222222;
+                box-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
                 z-index: 5001;
-                border-color: #888;
-                background-color: #444;
             }
             
             .slot-highlight.empty {
-                background-color: #3a3a3a;
+                background-color: #161616;
             }
             
             /* 源格子样式（拖拽来源） */
             .source-slot {
-                background-color: rgba(70, 70, 90, 0.5);
-                border: 1px dashed #777;
+                background-color: #1a1a1a;
+                border: 1px dashed #444444;
                 opacity: 0.8;
             }
             
             /* 目标格子样式（可放置区域） */
             .target-slot {
-                background-color: rgba(70, 90, 70, 0.5);
-                border: 2px solid #88aa88;
-                box-shadow: 0 0 8px rgba(100, 255, 100, 0.3);
+                background-color: #222222;
+                border: 1px solid #444444;
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
             }
             
             /* 物品样式 */
@@ -2290,7 +2221,7 @@ class UIInventory implements IUIInventory {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #fff;
+                color: #e0e0e0;
                 font-size: 10px;
                 text-align: center;
                 word-break: break-word;
@@ -2311,21 +2242,21 @@ class UIInventory implements IUIInventory {
                 position: fixed;
                 pointer-events: none;
                 z-index: 5001;
-                background-color: rgba(80, 80, 80, 0.3);
-                border: 1px solid #888;
-                border-radius: 4px;
+                background-color: #111111;
+                border: 1px solid #333333;
+                border-radius: 2px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
                 transform: scale(0.8);
                 cursor: grabbing;
             }
             
             /* 物品选中效果 */
             .inventory-item.selected {
-                transform: scale(1.1);
-                box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+                transform: scale(1.05);
+                background-color: #222222;
             }
             
             /* 物品数量标签 */
@@ -2333,30 +2264,29 @@ class UIInventory implements IUIInventory {
                 position: absolute;
                 bottom: 2px;
                 left: 2px;
-                background-color: rgba(0, 0, 0, 0.7);
-                color: white;
+                background-color: #000000;
+                color: #e0e0e0;
                 font-size: 8px;
                 padding: 1px 4px;
-                border-radius: 3px;
+                border-radius: 2px;
                 pointer-events: none;
             }
             
             /* 物品描述面板 */
             .item-description-panel {
                 position: fixed;
-                background-color: rgba(25, 25, 25, 0.8);
-                border: 1px solid rgba(68, 68, 68, 0.8);
-                border-radius: 5px;
+                background-color: #000000;
+                border: 1px solid #333333;
+                border-radius: 2px;
                 padding: 10px;
                 min-width: 200px;
                 max-width: 300px;
                 z-index: 5002;
-                color: #fff;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                color: #e0e0e0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
                 pointer-events: none;
                 opacity: 0;
                 transition: opacity 0.2s ease;
-                backdrop-filter: blur(5px);
             }
             
             .item-description-panel[style*="display: block"] {
@@ -2364,66 +2294,67 @@ class UIInventory implements IUIInventory {
             }
             
             .item-name {
-                font-size: 16px;
-                font-weight: bold;
+                font-size: 14px;
+                font-weight: normal;
                 margin-bottom: 5px;
                 padding-bottom: 5px;
-                border-bottom: 1px solid #555;
+                border-bottom: 1px solid #333333;
             }
             
             .item-level {
                 margin-bottom: 5px;
+                font-size: 12px;
             }
             
             .item-description {
-                font-size: 14px;
+                font-size: 12px;
                 line-height: 1.4;
             }
             
             /* 不同等级的颜色 */
             .level-top, .item-name[data-level="TOP"] {
-                color: #ffd700; /* 金色 */
+                color: #e6c000;
             }
             
             .level-s, .item-name[data-level="S"] {
-                color: #ff5500; /* 橙色 */
+                color: #e65000;
             }
             
             .level-a\\+, .item-name[data-level="A+"] {
-                color: #ff0000; /* 红色 */
+                color: #e60000;
             }
             
             .level-a, .item-name[data-level="A"] {
-                color: #ff3366; /* 粉红色 */
+                color: #e63060;
             }
             
             .level-b, .item-name[data-level="B"] {
-                color: #9933ff; /* 紫色 */
+                color: #8030e0;
             }
             
             .level-c, .item-name[data-level="C"] {
-                color: #3399ff; /* 蓝色 */
+                color: #3090e0;
             }
             
             .level-d, .item-name[data-level="D"] {
-                color: #33cc33; /* 绿色 */
+                color: #30c030;
             }
             
             .level-e, .item-name[data-level="E"] {
-                color: #cccccc; /* 银灰色 */
+                color: #c0c0c0;
             }
             
             .level-low, .item-name[data-level="LOW"] {
-                color: #999999; /* 灰色 */
+                color: #909090;
             }
             
             .level-break, .item-name[data-level="BREAK"] {
-                color: #666666; /* 暗灰色 */
+                color: #606060;
             }
             
             /* 单列模式下的格子样式 */
             .inventory-slot.oneline-slot {
-                border-radius: 3px;
+                border-radius: 2px;
                 height: 30px !important;
                 width: 100% !important;
                 display: flex;
@@ -2441,7 +2372,7 @@ class UIInventory implements IUIInventory {
                 display: flex;
                 align-items: center;
                 justify-content: flex-start;
-                font-size: 12px;
+                font-size: 11px;
                 text-align: left;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -2455,26 +2386,26 @@ class UIInventory implements IUIInventory {
                 margin-right: 5px;
                 padding: 1px 5px;
                 font-size: 10px;
-                background-color: rgba(0, 0, 0, 0.5);
-                border-radius: 10px;
+                background-color: #000000;
+                border-radius: 2px;
             }
             
             /* 单列模式下的高亮效果 */
             .oneline-slot.slot-highlight {
-                background-color: rgba(60, 60, 60, 0.7);
-                border-color: #aaa;
+                background-color: #222222;
+                border-color: #444444;
             }
             
             /* 单列模式下的源格子样式 */
             .oneline-slot.source-slot {
-                background-color: rgba(70, 70, 90, 0.7);
-                border: 1px dashed #999;
+                background-color: #1a1a1a;
+                border: 1px dashed #444444;
             }
             
             /* 单列模式下的目标格子样式 */
             .oneline-slot.target-slot {
-                background-color: rgba(70, 90, 70, 0.7);
-                border: 1px solid #9c9;
+                background-color: #222222;
+                border: 1px solid #444444;
             }
             
             /* 飞行物品样式 */
@@ -2482,16 +2413,16 @@ class UIInventory implements IUIInventory {
                 position: fixed;
                 pointer-events: none;
                 z-index: 6000;
-                background-color: rgba(60, 60, 100, 0.6);
-                border: 1px solid rgba(100, 150, 255, 0.6);
-                border-radius: 5px;
+                background-color: #111111;
+                border: 1px solid #333333;
+                border-radius: 2px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #fff;
-                font-size: 12px;
+                color: #e0e0e0;
+                font-size: 11px;
                 text-align: center;
-                box-shadow: 0 0 15px rgba(100, 200, 255, 0.7);
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
                 transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -2503,25 +2434,16 @@ class UIInventory implements IUIInventory {
                 position: absolute;
                 bottom: 2px;
                 right: 2px;
-                background-color: rgba(0, 0, 0, 0.7);
-                color: white;
-                font-size: 10px;
-                padding: 2px 6px;
-                border-radius: 8px;
+                background-color: #000000;
+                color: #e0e0e0;
+                font-size: 9px;
+                padding: 2px 4px;
+                border-radius: 2px;
             }
             
             /* 飞行物品高亮效果 */
-            @keyframes flyingGlow {
-                0%, 100% {
-                    box-shadow: 0 0 15px rgba(100, 200, 255, 0.7);
-                }
-                50% {
-                    box-shadow: 0 0 20px rgba(150, 220, 255, 0.9);
-                }
-            }
-            
             .flying-item {
-                animation: flyingGlow 1s infinite;
+                opacity: 0.9;
             }
         `;
 

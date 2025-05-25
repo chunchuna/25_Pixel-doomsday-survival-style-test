@@ -4,7 +4,7 @@ import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 
 export class dEBUG_MOD {
-    static isEnable = true;
+    static isEnable = false;
     static isRunMod = false;
 
 

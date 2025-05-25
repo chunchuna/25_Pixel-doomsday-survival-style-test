@@ -17,7 +17,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
             // 确保实例有InventoryData属性，如果没有则进行处理
             if (!InventoryInstance.instVars.InventoryData) {
-                console.warn("实例没有InventoryData属性，将使用空库存");
+              
                 InventoryInstance.instVars.InventoryData = "[]";
             }
 
@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 varName: "InventoryData"
             };
             // 传入更新回调参数
-            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName).oneline();
+            inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName)
         }
         if (ButtonConetent_id == "find") {
             if (LastestChooseObject == null) return
