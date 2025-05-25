@@ -362,35 +362,30 @@ export class UICDTimer {
         console.log("Starting fade-out animation");
         
         try {
-            // Use direct animation on the HTML component itself
-            // Save initial opacity for reference
-            const initialOpacity = this.htmlInstance.opacity || 1;
+            // First, add a style with animation to the container
+            const animationStyle = `
+            <style>
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+                #cd-container-${this.id} {
+                    animation: fadeOut 1s ease forwards;
+                }
+            </style>`;
             
-            // Create fade animation function that uses direct component property
-            const fadeStep = 0.05;
-            const fadeInterval = 30; // ms
-            const fadeOut = () => {
-                // Reduce opacity
-                const newOpacity = Math.max(0, (this.htmlInstance.opacity || initialOpacity) - fadeStep);
-                this.htmlInstance.opacity = newOpacity;
-                
-                console.log(`Fading: opacity = ${newOpacity}`);
-                
-                if (newOpacity <= 0) {
-                    // Fade complete, destroy the component
+            // Apply the animation style
+            this.htmlInstance.setContent(animationStyle, "html", "", true);
+            
+            // Set a timeout to destroy after animation completes
+            setTimeout(() => {
+                if (this.htmlInstance) {
                     this.htmlInstance.destroy();
                     this.htmlInstance = null;
                     UICDTimer.instances.delete(this.id);
                     console.log(`Countdown timer ${this.id} faded out and destroyed`);
-                    return;
                 }
-                
-                // Continue fading
-                setTimeout(fadeOut, fadeInterval);
-            };
-            
-            // Start the fade animation
-            fadeOut();
+            }, 1100); // Animation duration + small buffer
         } catch (error: any) {
             // If any error occurs during animation, fall back to immediate destroy
             console.error(`Error during fade animation: ${error.message}. Destroying immediately.`);
@@ -527,9 +522,19 @@ export class UICDTimer {
             this.htmlInstance.height = this._height;
             
             // Create a container with a unique ID for this timer that uses 100% of the component size
+            // Include base styles directly in the HTML
             const containerHtml = `
-            <div id="cd-container-${this.id}" style="position:relative; width:100%; height:100%; border-radius:${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};">
-            </div>`;
+            <style>
+                #cd-container-${this.id} {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: ${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};
+                    opacity: 1;
+                    transition: opacity 0.3s ease; /* Add transition for any opacity changes */
+                }
+            </style>
+            <div id="cd-container-${this.id}"></div>`;
             
             // Set the container HTML
             this.htmlInstance.setContent(containerHtml, "html");
