@@ -63700,8 +63700,8 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": -40.5,
-						"y": 60,
+						"x": -53,
+						"y": 23,
 						"width": 62,
 						"height": 55,
 						"originX": 0.5,
@@ -63749,7 +63749,102 @@
 		{
 			"name": "HUD",
 			"overriden": 0,
-			"subLayers": [],
+			"subLayers": [
+				{
+					"name": "html_c3",
+					"overriden": 0,
+					"subLayers": [],
+					"instances": [
+						{
+							"type": "HTML_c3",
+							"properties": {
+								"tag": "div",
+								"content": "",
+								"content-type": "html",
+								"initially-visible": true,
+								"id": "",
+								"class": "",
+								"allow-context-menu": false,
+								"stop-input-events": "no",
+								"origin": "center",
+								"set-color": true,
+								"default-color": [
+									0,
+									0,
+									0,
+									0
+								],
+								"set-background-color": false,
+								"default-background-color": [
+									1,
+									1,
+									1,
+									0
+								],
+								"auto-font-size": true,
+								"allow-text-selection": false,
+								"style-attribute": ""
+							},
+							"uid": 230,
+							"sid": 944417215226775,
+							"tags": "",
+							"instanceVariables": {},
+							"behaviors": {},
+							"instanceFolderItem": {
+								"sid": 944417215226775,
+								"expanded": true,
+								"folderName": "",
+								"indexInFolder": -1,
+								"folderNestingLevel": -1
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": -118.80611626143838,
+								"y": 308.79185195712785,
+								"width": 1,
+								"height": 1,
+								"originX": 0.5,
+								"originY": 0.5,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								]
+							}
+						}
+					],
+					"sid": 616373020586474,
+					"effectTypes": [],
+					"isInitiallyVisible": true,
+					"isInitiallyInteractive": true,
+					"isHTMLElementsLayer": false,
+					"color": [
+						1,
+						1,
+						1,
+						1
+					],
+					"backgroundColor": [
+						0.3686274509803922,
+						0.3686274509803922,
+						0.3686274509803922,
+						1
+					],
+					"isTransparent": true,
+					"parallaxX": 1,
+					"parallaxY": 1,
+					"scaleRate": 1,
+					"forceOwnTexture": false,
+					"renderingMode": "3d",
+					"drawOrder": "z-order",
+					"useRenderCells": false,
+					"blendMode": "normal",
+					"zElevation": 0,
+					"global": false
+				}
+			],
 			"instances": [],
 			"sid": 909084043817910,
 			"effectTypes": [],
@@ -71950,6 +72045,13 @@
 			},
 			{
 				"sid": 299180630346589,
+				"expanded": true,
+				"folderName": "",
+				"indexInFolder": -1,
+				"folderNestingLevel": -1
+			},
+			{
+				"sid": 944417215226775,
 				"expanded": true,
 				"folderName": "",
 				"indexInFolder": -1,

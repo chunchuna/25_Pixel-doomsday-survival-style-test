@@ -122,7 +122,22 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 560050215940055,
+				"expanded": true,
+				"folderName": "",
+				"indexInFolder": -1,
+				"folderNestingLevel": -1
+			},
+			{
+				"sid": 213576096337517,
+				"expanded": true,
+				"folderName": "",
+				"indexInFolder": -1,
+				"folderNestingLevel": -1
+			}
+		],
 		"subfolders": []
 	},
 	"sid": 462969097931317,
