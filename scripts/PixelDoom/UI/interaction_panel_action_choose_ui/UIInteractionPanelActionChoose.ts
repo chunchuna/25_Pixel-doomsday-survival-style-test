@@ -1,12 +1,14 @@
 // 在文件顶部添加全局类型声明
 /**
- * 互动窗口实现
+ * Interaction Window Implementation
  * 
- * 更新说明:
- * 1. 互动窗口默认显示在右下角
- * 2. 窗口大小改变时保持在右下角位置
- * 3. 新增 WindowName 参数，可自定义窗口标题
- * 4. 修复关闭按钮关闭后无法再次打开的问题
+ * Update Notes:
+ * 1. Interaction window displays in bottom right corner by default
+ * 2. Window maintains bottom right position when resized
+ * 3. Added WindowName parameter for custom window title
+ * 4. Fixed issue where window couldn't be reopened after closing
+ * 5. Changed display to list mode with columns (Button Name, Button ID, Source)
+ * 6. Updated parsing method to handle IDs in format "Name{ID}"
  */
 declare global {
   interface Window {
@@ -18,18 +20,25 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 
-// 存储窗口引用和状态
+// Store window references and state
 class InteractionUIState {
   static windowElement: HTMLElement | null = null;
   static contentElement: HTMLElement | null = null;
   static closeFunction: (() => void) | null = null;
   static buttonsContainer: HTMLElement | null = null;
   static isInitialized: boolean = false;
-  static isWindowDestroyed: boolean = false; // 添加新状态，标记窗口是否被销毁
-  static resizeHandler: (() => void) | null = null; // 添加窗口大小改变处理函数
+  static isWindowDestroyed: boolean = false;
+  static resizeHandler: (() => void) | null = null;
 }
 
-/** 初始化 */
+// Interface for button data
+interface ButtonData {
+  name: string;
+  id: string;
+  source?: string;
+}
+
+/** Initialization */
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
   initInteractionUI();
   //UIInteractionPanelActionChooseMain.ShowChoosePanle()
@@ -40,154 +49,189 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 function initInteractionUI() {
-  // 使用窗口库不需要额外创建DOM元素
+  // Using window library doesn't require extra DOM elements
   InteractionUIState.isInitialized = true;
 }
 
-// 添加全局点击处理器，确保事件能够被正确处理
+// Add global click handler to ensure events are properly processed
 function ensureClickHandling() {
-  // 如果没有设置过全局点击事件处理器
+  // If global click event handler hasn't been set up
   if (!window.pixelDoomClickHandlerSet) {
-    // 标记为已设置，避免重复
+    // Mark as set up to avoid duplication
     window.pixelDoomClickHandlerSet = true;
     
-    // 添加全局样式，确保所有按钮都可点击
+    // Add global style to ensure all list items are clickable
     const styleElement = document.createElement('style');
     styleElement.textContent = `
-      .interaction-btn {
+      .interaction-item {
         pointer-events: auto !important;
         cursor: pointer !important;
         position: relative !important;
         z-index: 10000 !important;
       }
+      .interaction-list {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .interaction-list th {
+        background-color: #444;
+        color: #e0e0e0;
+        padding: 8px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #555;
+      }
+      .interaction-list td {
+        padding: 8px;
+        border-bottom: 1px solid #555;
+      }
+      .interaction-list tr:hover {
+        background-color: #444;
+      }
     `;
     document.head.appendChild(styleElement);
     
-    // 添加全局点击事件委托处理
+    // Add global click event delegation
     document.addEventListener('click', function(e) {
       const target = e.target as HTMLElement;
-      if (target && target.classList && target.classList.contains('interaction-btn')) {
-        // 尝试获取按钮内容
-        const buttonContent = target.getAttribute('data-button-content') || target.textContent || '';
+      const row = target.closest('.interaction-item') as HTMLElement;
+      
+      if (row && row.classList.contains('interaction-item')) {
+        // Get button ID from data attribute
+        const buttonId = row.getAttribute('data-button-id') || '';
+        const buttonName = row.getAttribute('data-button-name') || '';
         
-        console.log('全局委托捕获到点击:', buttonContent);
+        console.log('Global delegation captured click:', buttonName, 'ID:', buttonId);
         
-        // 弹出提示，测试点击是否被捕获
-        //window.alert("点击了按钮: " + buttonContent);
-        
-        // 触发事件
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonContent });
+        // Trigger event with button ID
+        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
       }
-    }, true); // 使用捕获阶段
+    }, true); // Use capture phase
   }
 }
 
-// 辅助函数：将窗口定位到右下角
+// Helper function: Position window to bottom right
 function positionWindowToBottomRight(windowElement: HTMLElement) {
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = parseInt(windowElement.style.width);
   const windowHeight = parseInt(windowElement.style.height);
   
-  // 设置窗口位置在右下角，留出一些边距
-  const rightPosition = viewportWidth - windowWidth - 20; // 20px 的右边距
-  const bottomPosition = viewportHeight - windowHeight - 20; // 20px 的下边距
+  // Set window position to bottom right with margin
+  const rightPosition = viewportWidth - windowWidth - 20; // 20px right margin
+  const bottomPosition = viewportHeight - windowHeight - 20; // 20px bottom margin
   
   UIWindowLib.setPosition(windowElement, rightPosition, bottomPosition);
 }
 
 export class UIInteractionPanelActionChooseMain {
-  // 用于存储打开和关闭事件的回调函数
+  // Store callbacks for open and close events
   private static openCallbacks: Function[] = [];
   private static closeCallbacks: Function[] = [];
 
-  // 增加一个静态属性来保存当前窗口标题
-  private static currentWindowName: string = "交互选项";
+  // Static property to store current window title
+  private static currentWindowName: string = "Interaction Options";
 
-  // 监听交互面板打开事件
+  // Listen for interaction panel open event
   static OnInteractionOpen(callback: Function) {
     if (typeof callback === 'function') {
       this.openCallbacks.push(callback);
     }
   }
 
-  // 监听交互面板关闭事件
+  // Listen for interaction panel close event
   static OnInteractionClose(callback: Function) {
     if (typeof callback === 'function') {
       this.closeCallbacks.push(callback);
     }
   }
 
-  // 显示UI面板
-  static ShowChoosePanle(windowName: string = "交互选项") {
-    // 保存当前窗口标题
+  // Parse button string to extract name and ID
+  private static parseButtonString(buttonString: string): ButtonData {
+    const match = buttonString.match(/(.+?)\{(.+?)\}/);
+    if (match) {
+      return {
+        name: match[1].trim(),
+        id: match[2].trim()
+      };
+    }
+    // If no ID format found, use the string as both name and ID
+    return {
+      name: buttonString.trim(),
+      id: buttonString.trim()
+    };
+  }
+
+  // Show UI panel
+  static ShowChoosePanle(windowName: string = "Interaction Options") {
+    // Save current window title
     this.currentWindowName = windowName;
     
-    // 确保窗口状态初始化 - 在某些情况下，窗口可能在其他地方被关闭，导致状态不一致
+    // Ensure window state is initialized
     InteractionUIState.isWindowDestroyed = false;
     
-    // 确保全局点击处理器已设置
+    // Ensure global click handler is set up
     ensureClickHandling();
     
-    // 移除之前的窗口大小改变监听器（如果存在）
+    // Remove previous window resize listener if exists
     if (InteractionUIState.resizeHandler) {
       window.removeEventListener('resize', InteractionUIState.resizeHandler);
       InteractionUIState.resizeHandler = null;
     }
     
-    // 完全重建窗口
+    // Completely rebuild window
     if (InteractionUIState.windowElement) {
       try {
-        // 尝试先移除旧窗口
+        // Try to remove old window first
         if (InteractionUIState.windowElement.parentNode) {
           InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
         }
       } catch (e) {
-        console.error("移除旧窗口失败:", e);
+        console.error("Failed to remove old window:", e);
       }
       
-      // 重置所有状态
+      // Reset all states
       InteractionUIState.windowElement = null;
       InteractionUIState.contentElement = null;
       InteractionUIState.buttonsContainer = null;
     }
     
-    // 创建新窗口 - 不指定位置，稍后会设置为右下角
+    // Create new window - position will be set to bottom right later
     const { windowElement, contentElement, close } = UIWindowLib.createWindow(
-      windowName, // 使用传入的窗口标题
-      300,        // 宽度
-      200,        // 高度，初始高度设为200
-      1.0         // 不透明度
+      windowName, // Use provided window title
+      500,        // Width - increased for list view
+      200,        // Height, initial height set to 200
+      1.0         // Opacity
     );
     
-    // 保存窗口引用
+    // Save window references
     InteractionUIState.windowElement = windowElement;
     InteractionUIState.contentElement = contentElement;
     InteractionUIState.isWindowDestroyed = false;
     
-    // 修改关闭函数，确保正确调用我们的关闭方法
+    // Modify close function to ensure our close method is called correctly
     const ourCloseFunction = () => {
-      close(); // 先调用原始的关闭函数
-      UIInteractionPanelActionChooseMain.CloseChoosePanle(); // 然后调用我们的关闭方法确保状态重置
+      close(); // Call original close function first
+      UIInteractionPanelActionChooseMain.CloseChoosePanle(); // Then call our close method to reset state
     };
     
-    // 保存我们修改过的关闭函数
+    // Save our modified close function
     InteractionUIState.closeFunction = ourCloseFunction;
     
-    // 找到并覆盖关闭按钮的点击处理程序
+    // Find and override close button click handler
     const closeButton = windowElement.querySelector('.pd-window-close') as HTMLElement;
     if (closeButton) {
-      // 移除原有的所有点击监听器（必须先克隆再替换元素）
+      // Remove all existing click listeners (must clone and replace element)
       const newCloseButton = closeButton.cloneNode(true) as HTMLElement;
       closeButton.parentNode?.replaceChild(newCloseButton, closeButton);
       
-      // 添加我们自己的点击处理程序
+      // Add our own click handler
       newCloseButton.addEventListener('click', (e) => {
         e.stopPropagation();
-        ourCloseFunction(); // 使用我们的关闭函数
+        ourCloseFunction(); // Use our close function
       }, true);
       
-      // 保持鼠标悬停效果
+      // Keep hover effect
       newCloseButton.addEventListener('mouseover', () => {
         newCloseButton.style.backgroundColor = '#c14545';
       }, true);
@@ -196,75 +240,99 @@ export class UIInteractionPanelActionChooseMain {
       }, true);
     }
     
-    // 设置内容区样式
+    // Set content area style
     contentElement.style.padding = '10px';
-    contentElement.style.zIndex = '10000'; // 确保最高层级
+    contentElement.style.zIndex = '10000'; // Ensure highest z-index
     
-    // 创建按钮容器
+    // Create list container
     const buttonsContainer = document.createElement('div');
     buttonsContainer.id = 'interaction_buttons_container_action_choose_ui';
     buttonsContainer.style.display = 'flex';
     buttonsContainer.style.flexDirection = 'column';
-    buttonsContainer.style.gap = '6px';
-    buttonsContainer.style.pointerEvents = 'auto'; // 确保可以接收点击事件
-    buttonsContainer.style.zIndex = '10001'; // 确保最高层级
+    buttonsContainer.style.width = '100%';
+    buttonsContainer.style.pointerEvents = 'auto'; // Ensure it can receive click events
+    buttonsContainer.style.zIndex = '10001'; // Ensure highest z-index
     
+    // Create table for list view
+    const table = document.createElement('table');
+    table.className = 'interaction-list';
+    table.style.width = '100%';
+    
+    // Create table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    const headers = ['Button Name', 'Button ID', 'Source'];
+    headers.forEach(headerText => {
+      const th = document.createElement('th');
+      th.textContent = headerText;
+      headerRow.appendChild(th);
+    });
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create table body
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    
+    buttonsContainer.appendChild(table);
     contentElement.appendChild(buttonsContainer);
     
-    // 保存按钮容器引用
+    // Save buttons container reference
     InteractionUIState.buttonsContainer = buttonsContainer;
     
-    // 立即将窗口定位到右下角
+    // Immediately position window to bottom right
     positionWindowToBottomRight(windowElement);
     
-    // 添加窗口大小改变事件监听器，保持窗口在右下角
+    // Add window resize event listener to keep window at bottom right
     const resizeHandler = () => {
       if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
         positionWindowToBottomRight(InteractionUIState.windowElement);
       }
     };
     
-    // 保存处理函数引用以便稍后可以移除
+    // Save handler reference for later removal
     InteractionUIState.resizeHandler = resizeHandler;
     window.addEventListener('resize', resizeHandler);
     
-    // 触发所有打开事件回调
+    // Trigger all open event callbacks
     this.openCallbacks.forEach(callback => {
       try {
         callback();
       } catch (error) {
-        console.error('交互面板打开回调执行错误:', error);
+        console.error('Interaction panel open callback execution error:', error);
       }
     });
   }
 
-  // 关闭UI面板
+  // Close UI panel
   static CloseChoosePanle() {
-    // 移除窗口大小改变监听器
+    // Remove window resize listener
     if (InteractionUIState.resizeHandler) {
       window.removeEventListener('resize', InteractionUIState.resizeHandler);
       InteractionUIState.resizeHandler = null;
     }
     
-    // 触发所有关闭事件回调
+    // Trigger all close event callbacks
     this.closeCallbacks.forEach(callback => {
       try {
         callback();
       } catch (error) {
-        console.error('交互面板关闭回调执行错误:', error);
+        console.error('Interaction panel close callback execution error:', error);
       }
     });
     
-    // 尝试移除窗口
+    // Try to remove window
     try {
       if (InteractionUIState.windowElement && InteractionUIState.windowElement.parentNode) {
         InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
       }
     } catch (error) {
-      console.error('关闭窗口时发生错误:', error);
+      console.error('Error closing window:', error);
     }
     
-    // 彻底重置所有状态 - 无论成功与否都重置
+    // Completely reset all states - regardless of success
     InteractionUIState.windowElement = null;
     InteractionUIState.contentElement = null;
     InteractionUIState.buttonsContainer = null;
@@ -272,115 +340,110 @@ export class UIInteractionPanelActionChooseMain {
     InteractionUIState.isWindowDestroyed = true;
   }
 
-  // 增加按钮进入面板
-  static AddChooseButtonIntoPanel(ButtonContent: string, ButtonIndex: any) {
-    // 确保窗口存在
+  // Add item to the list
+  static AddChooseButtonIntoPanel(buttonData: ButtonData, buttonIndex?: number) {
+    // Ensure window exists
     if (!InteractionUIState.contentElement || InteractionUIState.isWindowDestroyed) {
       this.ShowChoosePanle(this.currentWindowName);
     }
     
-    // 使用保存的按钮容器引用
+    // Use saved buttons container reference
     const container = InteractionUIState.buttonsContainer;
     if (!container) return;
     
-    const button = document.createElement('button');
-    button.className = 'interaction-btn'; // 添加类，用于全局事件委托
-    button.setAttribute('data-button-content', ButtonContent); // 存储按钮内容，便于事件委托获取
-    button.textContent = ButtonContent;
+    // Find table body
+    const table = container.querySelector('table.interaction-list');
+    if (!table) return;
     
-    // 设置按钮样式，确保可见和可点击
-    Object.assign(button.style, {
-      backgroundColor: '#333',
-      border: '1px solid #555',
-      color: '#e0e0e0',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'pointer !important',
-      transition: 'background-color 0.2s',
-      position: 'relative',
-      zIndex: '10002', // 确保最高层级
-      pointerEvents: 'auto', // 确保可以接收点击事件
-      userSelect: 'none', // 防止文本选择干扰点击
-      margin: '2px 0'
-    });
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
     
-    // 鼠标悬停效果
-    button.addEventListener('mouseover', () => {
-      button.style.backgroundColor = '#444';
-    }, true);
+    // Create table row
+    const row = document.createElement('tr');
+    row.className = 'interaction-item';
+    row.setAttribute('data-button-id', buttonData.id);
+    row.setAttribute('data-button-name', buttonData.name);
     
-    button.addEventListener('mouseout', () => {
-      button.style.backgroundColor = '#333';
-    }, true);
-
-    // 直接内联处理点击事件，确保最简单的方式能工作
-    button.onclick = function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      
-      console.log('直接点击处理程序触发:', ButtonContent);
-      //window.alert("按钮直接事件: " + ButtonContent);
-      
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: ButtonContent });
-      
-      return false;
-    };
+    // Create cells
+    const nameCell = document.createElement('td');
+    nameCell.textContent = buttonData.name;
     
-    // 添加按钮到指定位置或默认添加到第一个
-    if (ButtonIndex !== undefined && ButtonIndex >= 0 && ButtonIndex < container.children.length) {
-      container.insertBefore(button, container.children[ButtonIndex]);
+    const idCell = document.createElement('td');
+    idCell.textContent = buttonData.id;
+    
+    const sourceCell = document.createElement('td');
+    sourceCell.textContent = buttonData.source || '';
+    
+    // Add cells to row
+    row.appendChild(nameCell);
+    row.appendChild(idCell);
+    row.appendChild(sourceCell);
+    
+    // Add row to table at specified position
+    if (buttonIndex !== undefined && buttonIndex >= 0 && buttonIndex < tbody.children.length) {
+      tbody.insertBefore(row, tbody.children[buttonIndex]);
     } else {
-      container.appendChild(button);
+      tbody.appendChild(row);
     }
 
-    // 动画效果
-    button.style.opacity = '0';
-    button.style.transform = 'translateY(10px)';
+    // Animation effect
+    row.style.opacity = '0';
+    row.style.transform = 'translateY(10px)';
     
     setTimeout(() => {
-      button.style.opacity = '1';
-      button.style.transform = 'translateY(0)';
-    }, 100 * (ButtonIndex !== undefined ? ButtonIndex : container.children.length - 1));
+      row.style.opacity = '1';
+      row.style.transform = 'translateY(0)';
+    }, 100 * (buttonIndex !== undefined ? buttonIndex : tbody.children.length - 1));
     
-    // 调整窗口高度以适应内容
+    // Adjust window height to fit content
     if (InteractionUIState.windowElement) {
-      const height = Math.min(400, container.children.length * 45 + 40); // 限制最大高度
+      const height = Math.min(500, tbody.children.length * 45 + 80); // Limit max height, account for header
       UIWindowLib.setSize(
         InteractionUIState.windowElement, 
-        300, // 保持宽度不变
+        500, // Keep width fixed
         height
       );
       
-      // 调整大小后重新定位到右下角
+      // Reposition to bottom right after resizing
       positionWindowToBottomRight(InteractionUIState.windowElement);
     }
-
   }
 
-  // 根据解析生成按钮
-  static ExplainConetntToButton(Conteng: string, WindowName: string = "交互选项") {
-    // 确保窗口存在
+  // Parse input string and generate list items
+  static ExplainConetntToButton(content: string, windowName: string = "Interaction Options") {
+    // Ensure window exists
     if (!InteractionUIState.contentElement || InteractionUIState.isWindowDestroyed) {
-      this.ShowChoosePanle(WindowName);
+      this.ShowChoosePanle(windowName);
     }
     
-    const ButtonList = Conteng.split(',');
+    const buttonStrings = content.split(',');
     
-    // 使用保存的按钮容器引用
+    // Use saved buttons container reference
     const container = InteractionUIState.buttonsContainer;
     if (!container) return;
 
-    // 清空现有按钮
-    container.innerHTML = '';
+    // Find table body
+    const table = container.querySelector('table.interaction-list');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody) {
+      console.error('Table body not found');
+      return;
+    }
+    
+    // Clear existing list items
+    tbody.innerHTML = '';
 
-    // 添加新按钮
-    ButtonList.forEach((ButtonContent: string, Index: any) => {
-      UIInteractionPanelActionChooseMain.AddChooseButtonIntoPanel(ButtonContent.trim(), Index);
+    // Add new list items
+    buttonStrings.forEach((buttonString: string, index: number) => {
+      const buttonData = this.parseButtonString(buttonString);
+      UIInteractionPanelActionChooseMain.AddChooseButtonIntoPanel(buttonData, index);
     });
     
-    // 如果窗口元素存在，设置窗口标题
+    // If window element exists, set window title
     if (InteractionUIState.windowElement) {
-      UIWindowLib.setTitle(InteractionUIState.windowElement, WindowName);
+      UIWindowLib.setTitle(InteractionUIState.windowElement, windowName);
     }
   }
 }

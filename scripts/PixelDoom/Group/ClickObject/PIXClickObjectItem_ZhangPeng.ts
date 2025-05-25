@@ -5,8 +5,8 @@ import { DeserializeItemsOnly, inventoryManager, type InventoryUpdateCallback } 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
-        var ButtonConetent: string = e.data.ButtonContent_;
-        if (ButtonConetent == "查看库存") {
+        var ButtonConetent_id: string = e.data.ButtonContent_;
+        if (ButtonConetent_id == "inventory") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
 
@@ -31,7 +31,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             // 传入更新回调参数
             inventoryManager.ShowOtherInventory(InventoryData, 10, 6, updateInfo, InventoryInstance.instVars.InventoryName).oneline();
         }
-        if (ButtonConetent == "调查") {
+        if (ButtonConetent_id == "find") {
             if (LastestChooseObject == null) return
             if (LastestChooseObject.instVars.ID != "ZhangPeng") return
 

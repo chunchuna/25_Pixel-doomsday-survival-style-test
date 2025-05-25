@@ -1055,7 +1055,7 @@ export class UIConsole {
     }
 }
 
-// Modify initialization process to ensure console works correctly
+// // Modify initialization process to ensure console works correctly
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // Check if console is already initialized to avoid duplicates
     if (!UIConsole.IsInitialized()) {

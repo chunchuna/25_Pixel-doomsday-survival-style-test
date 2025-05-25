@@ -55,7 +55,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
       //点击对象 
       pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
-            if(ClickObject.is_OEPN_interaction_UI) return
+            if (ClickObject.is_OEPN_interaction_UI) return
 
             //console.log("点击了交互物")
 
@@ -207,8 +207,8 @@ export class ClickObject {
 
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
-           // UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
-           UIInteractionPanelActionChooseMain_imgui.ExplainConetntToButton(Content,WindowName)
+             UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
+            //UIInteractionPanelActionChooseMain_imgui.ExplainConetntToButton(Content, WindowName)
       }
 }
 
