@@ -68,25 +68,38 @@ function ensureClickHandling() {
         cursor: pointer !important;
         position: relative !important;
         z-index: 10000 !important;
+        transition: background-color 0.3s ease-in-out !important;
       }
       .interaction-list {
         width: 100%;
         border-collapse: collapse;
+        color: #ffffff;
+        font-family: monospace;
       }
       .interaction-list th {
-        background-color: #444;
-        color: #e0e0e0;
+        background-color: #1a3151;
+        color: #ffffff;
         padding: 8px;
         text-align: left;
         font-weight: bold;
-        border-bottom: 2px solid #555;
+        border-bottom: 1px solid #000000;
       }
       .interaction-list td {
         padding: 8px;
-        border-bottom: 1px solid #555;
+        border-bottom: 1px solid #333333;
+        background-color: #101010;
+        transition: background-color 0.3s ease-in-out;
       }
-      .interaction-list tr:hover {
-        background-color: #444;
+      .interaction-list tr:nth-child(odd) td {
+        background-color: #181818;
+      }
+      .interaction-list tr:hover td {
+        background-color: #1a3151 !important;
+      }
+      /* Ensure the row itself has proper hover behavior */
+      .interaction-list tbody tr {
+        transition: background-color 0.3s ease;
+        cursor: pointer;
       }
     `;
     document.head.appendChild(styleElement);
@@ -199,8 +212,8 @@ export class UIInteractionPanelActionChooseMain {
     // Create new window - position will be set to bottom right later
     const { windowElement, contentElement, close } = UIWindowLib.createWindow(
       windowName, // Use provided window title
-      500,        // Width - increased for list view
-      200,        // Height, initial height set to 200
+      350,        // Width - adjusted for better display
+      300,        // Height - adjusted for better display
       1.0         // Opacity
     );
     
@@ -240,8 +253,41 @@ export class UIInteractionPanelActionChooseMain {
       }, true);
     }
     
-    // Set content area style
-    contentElement.style.padding = '10px';
+    // Add dark blue theme to the window
+    if (windowElement) {
+      windowElement.style.backgroundColor = 'rgba(26, 38, 57, 0.95)';
+      windowElement.style.border = '1px solid #0c1323';
+      windowElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
+      
+      // Style the title bar if it exists
+      const titleBar = windowElement.querySelector('.pd-window-title-bar') as HTMLElement;
+      if (titleBar) {
+        titleBar.style.backgroundColor = '#203c73';
+        titleBar.style.color = '#ffffff';
+        titleBar.style.fontFamily = 'monospace';
+        titleBar.style.fontSize = '12px';
+        titleBar.style.textTransform = 'uppercase';
+        titleBar.style.letterSpacing = '1px';
+      }
+      
+      // Force size - make sure it takes effect
+      setTimeout(() => {
+        if (windowElement) {
+          windowElement.style.width = '350px';
+          windowElement.style.height = '300px';
+          
+          // Update size in UI library if method exists
+          UIWindowLib.setSize(windowElement, 500, 150);
+          
+          // Reposition after forced size change
+          positionWindowToBottomRight(windowElement);
+        }
+      }, 10);
+    }
+    
+    // Set content area style with dark theme
+    contentElement.style.padding = '0';
+    contentElement.style.backgroundColor = '#101010';
     contentElement.style.zIndex = '10000'; // Ensure highest z-index
     
     // Create list container
@@ -257,12 +303,17 @@ export class UIInteractionPanelActionChooseMain {
     const table = document.createElement('table');
     table.className = 'interaction-list';
     table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.borderSpacing = '0';
+    
+    // Remove padding since we don't need it for the arrow anymore
+    table.style.position = 'relative';
     
     // Create table header
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
     
-    const headers = ['Button Name', 'Button ID', 'Source'];
+    const headers = ['Action', 'Action ID', 'Source'];
     headers.forEach(headerText => {
       const th = document.createElement('th');
       th.textContent = headerText;
@@ -358,15 +409,30 @@ export class UIInteractionPanelActionChooseMain {
     const tbody = table.querySelector('tbody');
     if (!tbody) return;
     
-    // Create table row
+    // Create table row with specific class and event listeners
     const row = document.createElement('tr');
     row.className = 'interaction-item';
     row.setAttribute('data-button-id', buttonData.id);
     row.setAttribute('data-button-name', buttonData.name);
     
+    // Add explicit mouse events to handle hover
+    row.addEventListener('mouseover', () => {
+      row.querySelectorAll('td').forEach(cell => {
+        cell.style.backgroundColor = '#1a3151';
+      });
+    });
+    
+    row.addEventListener('mouseout', () => {
+      const isOdd = Array.from(tbody.children).indexOf(row) % 2 !== 0;
+      row.querySelectorAll('td').forEach(cell => {
+        cell.style.backgroundColor = isOdd ? '#181818' : '#101010';
+      });
+    });
+    
     // Create cells
     const nameCell = document.createElement('td');
     nameCell.textContent = buttonData.name;
+    nameCell.style.fontWeight = 'normal';
     
     const idCell = document.createElement('td');
     idCell.textContent = buttonData.id;
@@ -397,12 +463,18 @@ export class UIInteractionPanelActionChooseMain {
     
     // Adjust window height to fit content
     if (InteractionUIState.windowElement) {
-      const height = Math.min(500, tbody.children.length * 45 + 80); // Limit max height, account for header
+      const height = Math.min(500, tbody.children.length * 40 + 80); // Limit max height, account for header
+      const width = 350; // Fixed width
+      
       UIWindowLib.setSize(
         InteractionUIState.windowElement, 
-        500, // Keep width fixed
+        width,
         height
       );
+      
+      // Apply direct style as well to ensure size changes
+      InteractionUIState.windowElement.style.width = width + 'px';
+      InteractionUIState.windowElement.style.height = height + 'px';
       
       // Reposition to bottom right after resizing
       positionWindowToBottomRight(InteractionUIState.windowElement);
