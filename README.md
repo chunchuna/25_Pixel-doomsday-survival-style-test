@@ -249,6 +249,227 @@ The dialogue system integrates with the game's event system to trigger gameplay 
 
 This creates a seamless connection between narrative and gameplay mechanics.
 
+## Inventory System
+
+The game features a robust and flexible inventory system with support for multiple inventory types, item management, and intuitive drag-and-drop interactions.
+
+### Core Features
+
+- **Dual Inventory Structure**: Main player inventory and temporary/contextual "other" inventories
+- **Item Quality Tiers**: Support for item rarity/quality classification (S, A+, A, B, C, D, E, etc.)
+- **Drag and Drop Interface**: Intuitive item movement between inventories
+- **Serialization**: Support for saving/loading inventory states
+- **Grid and Oneline Modes**: Multiple display modes for different contexts
+- **Automatic Item Stacking**: Similar items automatically stack together
+- **Item Tooltips**: Detailed item information on hover
+- **Quick Pickup Feature**: Optional automatic item acquisition
+- **Customizable Layout**: Resizable and draggable inventory windows
+- **Visual Feedback**: Animations and effects for item interactions
+
+### Main vs Other Inventories
+
+The inventory system distinguishes between two inventory types:
+
+#### Main Inventory
+- **Purpose**: Represents the player's persistent inventory
+- **Persistence**: Remains bound across game sessions and scenes
+- **Access**: Toggled with a configurable hotkey (default 'i')
+- **Features**:
+  - Automatic state synchronization with game data
+  - Support for serialization/deserialization
+  - Main inventory callback system for UI updates
+  - Sorted display by item quality
+
+#### Other Inventories
+- **Purpose**: Represents temporary or contextual inventories (containers, shops, NPCs)
+- **Persistence**: Temporary, exists only during specific interactions
+- **Access**: Opened and closed via script calls
+- **Features**:
+  - Can be linked to source objects for data updates
+  - Custom naming support
+  - Independent of main inventory state
+  - Reference-based updating for dynamic content
+
+### Item Structure
+
+Items are defined using a simple interface:
+
+```typescript
+interface Item {
+    itemName: string;      // Name of the item
+    itemDescribe: string;  // Description text
+    itemLevel: ItemLevel;  // Quality tier
+}
+
+enum ItemLevel {
+    Top = "TOP",    // Highest tier
+    S = "S",        // Extremely rare
+    APlus = "A+",   // Very rare
+    A = "A",        // Rare
+    B = "B",        // Uncommon
+    C = "C",        // Common
+    D = "D",        // Basic
+    E = "E",        // Low quality
+    Low = "LOW",    // Poor quality
+    Break = "BREAK" // Broken/useless
+}
+```
+
+### Usage in Code
+
+#### Main Inventory Management
+
+```typescript
+// Creating a player inventory
+const playerItems: Item[] = [
+    { itemName: "Medkit", itemDescribe: "Restores health points", itemLevel: ItemLevel.A },
+    { itemName: "Pistol", itemDescribe: "Standard handgun", itemLevel: ItemLevel.C },
+    { itemName: "Ammo", itemDescribe: "Ammunition for weapons", itemLevel: ItemLevel.B }
+];
+
+// Bind the main player inventory (4 rows x 6 columns, toggled with 'i' key)
+const { unbind, oneline } = BindPlayerMainInventory(playerItems, 4, 6, "i");
+
+// Switch to oneline mode (compact display)
+oneline();
+
+// Register update callback for when inventory changes
+inventoryManager.SetMainInventoryUpdateCallback({
+    updateMethod: (items: Item[]) => {
+        // Update game state with new items
+        console.log("Inventory updated:", items.length, "items");
+    }
+});
+
+// Later, unbind inventory when needed
+unbind();
+```
+
+#### Other Inventory Management
+
+```typescript
+// Create a container inventory
+const containerItems: Item[] = [
+    { itemName: "Rusty Key", itemDescribe: "Opens an old door", itemLevel: ItemLevel.B },
+    { itemName: "Notes", itemDescribe: "Torn paper with writing", itemLevel: ItemLevel.D }
+];
+
+// Reference to container object for updates
+const containerInstance = someContainerObject;
+
+// Show the container inventory
+const { close, oneline } = ShowOtherInventory(
+    containerItems,
+    2, // rows
+    3, // columns
+    {
+        // Update callback configuration
+        instance: containerInstance,
+        updateMethod: (instance, items) => {
+            // Update container contents when inventory changes
+            instance.contents = items;
+        }
+    },
+    "Abandoned Locker" // Custom inventory name
+);
+
+// Later, close the inventory
+close();
+```
+
+#### Saving and Loading Inventories
+
+```typescript
+// Serialize inventory to string (for saving to storage)
+const serializedData = SerializeInventory(playerItems, 4, 6);
+localStorage.setItem('playerInventory', serializedData);
+
+// Later, deserialize from storage
+const savedData = localStorage.getItem('playerInventory');
+if (savedData) {
+    const { inventory, rows, columns } = DeserializeInventory(savedData);
+    // Restore player inventory
+    BindPlayerMainInventory(inventory, rows, columns, "i");
+}
+```
+
+#### Event Handling
+
+```typescript
+// Register callbacks for inventory events
+OnMainInventoryOpen(() => {
+    // Pause game or trigger other actions when inventory opens
+    GameState.setPaused(true);
+});
+
+OnMainInventoryClose(() => {
+    // Resume game when inventory closes
+    GameState.setPaused(false);
+});
+
+// Toggle quick pickup feature
+EnableQuickPickup(true); // Enable automatic item acquisition
+```
+
+### Custom Inventory Implementation
+
+To implement a custom inventory with special behavior:
+
+```typescript
+class SpecializedInventory {
+    private items: Item[] = [];
+    private inventoryOpen: boolean = false;
+    private closeFunction: (() => void) | null = null;
+    
+    constructor(initialItems: Item[]) {
+        this.items = initialItems;
+    }
+    
+    public open() {
+        // Show specialized inventory with custom layout
+        const { close } = ShowOtherInventory(
+            this.items,
+            3, // rows
+            4, // columns
+            {
+                instance: this,
+                updateMethod: (instance, items) => {
+                    instance.items = items;
+                    // Custom logic for special items
+                    this.processSpecialItems(items);
+                }
+            },
+            "Special Equipment"
+        );
+        
+        this.closeFunction = close;
+        this.inventoryOpen = true;
+    }
+    
+    public close() {
+        if (this.closeFunction) {
+            this.closeFunction();
+            this.inventoryOpen = false;
+        }
+    }
+    
+    private processSpecialItems(items: Item[]) {
+        // Custom logic for handling special items
+        const rarityCount = items.filter(item => 
+            item.itemLevel === ItemLevel.S || 
+            item.itemLevel === ItemLevel.APlus
+        ).length;
+        
+        // Trigger special effects based on inventory content
+        if (rarityCount >= 3) {
+            GameEvents.trigger('rare_collection_complete');
+        }
+    }
+}
+```
+
+This inventory system provides a flexible foundation for item management while maintaining a clean separation between persistent player inventory and contextual object inventories.
+
 ## Project Structure
 - `/scripts`: Contains TypeScript code
   - `/PixelDoom`: Main game codebase
