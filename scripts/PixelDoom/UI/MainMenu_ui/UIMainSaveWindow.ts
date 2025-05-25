@@ -5,7 +5,7 @@ import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 import { GameMainScene } from "./UIMainMenu.js";
 
 /**
- * 主存档窗口类
+ * Main save window class
  */
 export class UIMainSaveWindow {
     private static instance: UIMainSaveWindow | null = null;
@@ -17,7 +17,7 @@ export class UIMainSaveWindow {
     public Data: any;
 
     /**
-     * 获取单例实例
+     * Get singleton instance
      */
     public static getInstance(): UIMainSaveWindow {
         if (!this.instance) {
@@ -27,22 +27,22 @@ export class UIMainSaveWindow {
     }
 
     /**
-     * 私有构造函数，防止直接实例化
+     * Private constructor to prevent direct instantiation
      */
     private constructor() { }
 
     /**
-     * 显示存档窗口
+     * Show save window
      */
     public show(): void {
-        // 如果窗口已经存在，则直接返回
+        // If window already exists, return directly
         if (this.windowElement && document.body.contains(this.windowElement)) {
             return;
         }
 
-        // 创建窗口
+        // Create window
         const result = UIWindowLib.createWindow(
-            "存档管理",
+            "Save Management",
             600,
             500,
             1.0
@@ -52,12 +52,12 @@ export class UIMainSaveWindow {
         this.contentElement = result.contentElement;
         this.closeFunction = result.close;
 
-        // 初始化窗口内容
+        // Initialize window content
         this.initContent();
     }
 
     /**
-     * 关闭窗口
+     * Close window
      */
     public close(): void {
         if (this.closeFunction) {
@@ -71,81 +71,80 @@ export class UIMainSaveWindow {
     }
 
     /**
-     * 显示窗口（兼容性方法）
+     * Show window (compatibility method)
      */
     public showWindow(): void {
         this.show();
     }
 
     /**
-     * 关闭窗口（兼容性方法）
+     * Close window (compatibility method)
      */
     public closeWindow(): void {
         this.close();
     }
 
     /**
-     * 初始化窗口内容
+     * Initialize window content
      */
     private initContent(): void {
         if (!this.contentElement) return;
 
-        // 添加样式和HTML内容
+        // Add styles and HTML content
         this.contentElement.innerHTML = `
             <style>
                 .save-window-container {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    color: #e0e0e0;
+                    color: #d0d0d0;
                 }
                 
                 .save-window-title {
-                    font-size: 18px;
-                    font-weight: bold;
+                    font-size: 14px;
                     margin-bottom: 15px;
                     text-align: center;
-                    color: #f0f0f0;
+                    color: #e0e0e0;
                 }
                 
                 .save-slots-container {
                     flex: 1;
                     display: grid;
-                    grid-template-columns: repeat(2, 1fr);
+                    grid-template-columns: 1fr;
                     gap: 10px;
                     overflow-y: auto;
                     padding: 5px;
                     margin-bottom: 15px;
-                    border: 1px solid #3c3c3c;
-                    background-color: #232323;
-                    border-radius: 4px;
+                    border: 1px solid #222222;
+                    background-color: #000000;
+                    border-radius: 2px;
                 }
                 
                 .save-slot {
                     padding: 12px;
-                    background-color: #2a2a2a;
-                    border: 1px solid #444;
-                    border-radius: 4px;
+                    background-color: #0a0a0a;
+                    border: 1px solid #111111;
+                    border-radius: 2px;
                     cursor: pointer;
                     transition: background-color 0.2s;
                     position: relative;
                 }
                 
                 .save-slot:hover {
-                    background-color: #333;
-                    border-color: #555;
+                    background-color: #0f0f0f;
+                    border-color: #1a1a1a;
                 }
                 
                 .save-slot.selected {
-                    background-color: #3a3a3a;
-                    border-color: #666;
+                    background-color: #101010;
+                    border-color: #1a1a1a;
                 }
                 
                 .save-slot.empty {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    color: #666;
+                    color: #555555;
                     font-style: italic;
                 }
                 
@@ -157,33 +156,30 @@ export class UIMainSaveWindow {
                 
                 .save-slot-name {
                     font-weight: bold;
-                    color: #f0f0f0;
+                    color: #e0e0e0;
                 }
                 
                 .save-slot-date {
                     font-size: 12px;
-                    color: #999;
+                    color: #777777;
                 }
                 
                 .save-slot-preview {
                     width: 100%;
                     height: 80px;
-                    background-color: #1a3e5c;
-                    border-radius: 3px;
+                    background-color: #050505;
+                    border-radius: 2px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    color: #aed4ff;
+                    color: #aaaaaa;
                     font-size: 12px;
-                    box-shadow: 0 0 15px rgba(41, 121, 255, 0.4);
-                    border: 1px solid #3a6d9a;
-                    text-shadow: 0 0 5px rgba(173, 216, 255, 0.8);
-                    transition: all 0.3s ease;
+                    border: 1px solid #111111;
+                    transition: background-color 0.3s ease;
                 }
                 
                 .save-slot-preview:hover {
-                    box-shadow: 0 0 20px rgba(41, 121, 255, 0.6);
-                    background-color: #204a6e;
+                    background-color: #0a0a0a;
                 }
                 
                 .save-actions {
@@ -193,82 +189,93 @@ export class UIMainSaveWindow {
                 }
                 
                 .save-button {
-                    background-color: #444;
-                    border: none;
-                    color: #e0e0e0;
+                    background-color: #0a0a0a;
+                    border: 1px solid #1a1a1a;
+                    color: #cccccc;
                     padding: 10px 20px;
-                    border-radius: 4px;
+                    border-radius: 2px;
                     cursor: pointer;
                     transition: background-color 0.2s;
-                    font-weight: bold;
+                    font-weight: normal;
                     flex: 1;
                     margin: 0 5px;
                 }
                 
                 .save-button:hover {
-                    background-color: #555;
+                    background-color: #101010;
                 }
                 
                 .save-button.download {
-                    background-color: #2b5278;
+                    background-color: #0a0a0a;
                 }
                 
                 .save-button.download:hover {
-                    background-color: #366391;
+                    background-color: #101010;
                 }
                 
                 .save-button.load {
-                    background-color: #5a4a2d;
+                    background-color: #0a0a0a;
                 }
                 
                 .save-button.load:hover {
-                    background-color: #6d5935;
+                    background-color: #101010;
                 }
                 
                 .save-button:disabled {
-                    background-color: #333;
-                    color: #666;
+                    background-color: #000000;
+                    color: #333333;
+                    border-color: #111111;
                     cursor: not-allowed;
                 }
                 
-                /* 滚动条样式 */
+                .no-save-message {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    height: 100%;
+                    color: #555555;
+                    font-style: italic;
+                    font-size: 14px;
+                }
+                
+                /* Scrollbar styles */
                 .save-slots-container::-webkit-scrollbar {
                     width: 8px;
                 }
                 
                 .save-slots-container::-webkit-scrollbar-track {
-                    background-color: #1a1a1a;
-                    border-radius: 4px;
+                    background-color: #000000;
+                    border-radius: 2px;
                 }
                 
                 .save-slots-container::-webkit-scrollbar-thumb {
-                    background-color: #444;
-                    border-radius: 4px;
+                    background-color: #111111;
+                    border-radius: 2px;
                 }
                 
                 .save-slots-container::-webkit-scrollbar-thumb:hover {
-                    background-color: #555;
+                    background-color: #1a1a1a;
                 }
             </style>
             
             <div class="save-window-container">
-                <div class="save-window-title">存档管理</div>
                 
                 <div class="save-slots-container" id="save-slots-container">
-                    <!-- 存档插槽将在JS中动态生成 -->
+                    <!-- Save slots will be dynamically generated in JS -->
                 </div>
                 
                 <div class="save-actions">
-                    <button class="save-button download" id="download-save-btn">下载存档</button>
-                    <button class="save-button load" id="load-save-btn">读取存档</button>
+                    <button class="save-button download" id="download-save-btn">Download Save</button>
+                    <button class="save-button load" id="load-save-btn">Load Save</button>
                 </div>
             </div>
         `;
 
-        // 添加空存档插槽
+        // Add empty save slots
         this.renderSaveSlots();
 
-        // 添加按钮事件监听
+        // Add button event listeners
         setTimeout(() => {
             const downloadBtn = this.contentElement?.querySelector('#download-save-btn') as HTMLButtonElement;
             const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
@@ -286,48 +293,32 @@ export class UIMainSaveWindow {
                     this.handleLoadSave();
                 }, true);
 
-                // 初始状态禁用读取按钮
+                // Initial state disable load button
                 loadBtn.disabled = false;
             }
         }, 100);
     }
 
     /**
-     * 渲染存档插槽
+     * Render save slots
      */
     private renderSaveSlots(): void {
         console.warn(this.Data)
         const slotsContainer = this.contentElement?.querySelector('#save-slots-container');
         if (!slotsContainer) return;
 
-        // 清空容器
+        // Clear container
         slotsContainer.innerHTML = '';
 
-        // 检查Data是否为空
+        // Check if Data is empty
         if (data.LevelGameData === "") {
             //console.log(this.Data)
-            // Data为空，不显示任何插槽
-            slotsContainer.innerHTML = '<div class="no-save-message">没有可用的存档数据</div>';
-
-            // 添加空状态的样式
-            const style = document.createElement('style');
-            style.textContent = `
-                .no-save-message {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    width: 100%;
-                    height: 100%;
-                    color: #666;
-                    font-style: italic;
-                    font-size: 16px;
-                }
-            `;
-            slotsContainer.appendChild(style);
+            // Data is empty, don't show any slots
+            slotsContainer.innerHTML = '<div class="no-save-message">No save data available</div>';
             return;
         }
 
-        // Data不为空，生成一个可用插槽
+        // Data is not empty, generate one available slot
         const slotElement = document.createElement('div');
         slotElement.className = 'save-slot';
         slotElement.setAttribute('data-slot-id', '0');
@@ -336,14 +327,10 @@ export class UIMainSaveWindow {
         const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
         slotElement.innerHTML = `
-            <div class="save-slot-header">
-                <div class="save-slot-name">当前游戏存档</div>
-                <div class="save-slot-date">${dateStr}</div>
-            </div>
-            <div class="save-slot-preview">游戏存档数据可用</div>
+            <div class="save-slot-preview">Game save data available</div>
         `;
 
-        // 为存档插槽添加点击事件，但内部保持为空
+        // Add click event for save slot
         slotElement.addEventListener('click', (e) => {
             e.stopPropagation();
             GameMainScene.getInstance().HideALLMainMenuUI(() => {
@@ -360,10 +347,10 @@ export class UIMainSaveWindow {
 
         slotsContainer.appendChild(slotElement);
 
-        // 添加选中样式
+        // Add selected style
         slotElement.classList.add('selected');
 
-        // 启用读取按钮
+        // Enable load button
         const loadBtn = this.contentElement?.querySelector('#load-save-btn') as HTMLButtonElement;
         if (loadBtn) {
             loadBtn.disabled = false;
@@ -371,41 +358,42 @@ export class UIMainSaveWindow {
     }
 
     /**
-     * 选择存档插槽
-     * @param slotId 插槽ID
+     * Select save slot
+     * @param slotId Slot ID
      */
     private selectSlot(slotId: number): void {
-        // 点击存档插槽的处理逻辑 - 保持为空供用户自行填写
+        // Click save slot processing logic - kept empty for user to fill in
     }
 
     /**
-     * 处理下载存档
+     * Handle download save
      */
     private handleDownloadSave(): void {
-        // 直接使用PIXSave中的下载方法
+        // Directly use download method from PIXSave
         LocalSave.DataDownload();
-        console.log('[存档窗口] 已调用下载存档功能');
+        console.log('[Save Window] Download save function called');
     }
 
     /**
-     * 处理读取存档
+     * Handle load save
      */
     private handleLoadSave(): void {
-        // 直接使用PIXSave中的读取方法
+        // Directly use read method from PIXSave
         LocalSave.DataRead();
-        console.log('[存档窗口] 已调用读取存档功能');
+        console.log('[Save Window] Load save function called');
 
-        // 读取完成后关闭窗口
+        // Close window after reading is complete
         setTimeout(() => {
             this.close();
         }, 500);
     }
 }
 
-// 引擎初始化时调用
+// Called when engine initializes
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    // 可以在这里添加窗口启动逻辑
-    // 例如：UIMainSaveWindow.getInstance().show();
+    // Can add window startup logic here
+    // For example: UIMainSaveWindow.getInstance().show();
     //UIMainSaveWindow.getInstance().Data = data;
 
 });
+

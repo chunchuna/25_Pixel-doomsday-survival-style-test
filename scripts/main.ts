@@ -55,6 +55,7 @@ import "./PixelDoom/UI/debug_ui/UIDebug.js"
 
 
 import "./PixelDoom/Group/Debug/PIXDebugMode.js"
+import "./PixelDoom/UI/tweak_ui/tweak_window_test.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.
