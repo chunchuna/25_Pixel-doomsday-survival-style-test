@@ -2445,6 +2445,16 @@ class UIInventory implements IUIInventory {
             .flying-item {
                 opacity: 0.9;
             }
+            
+            /* 提示文本样式 */
+            .inventory-prompt {
+                font-size: 11px;
+                font-style: italic;
+                color: #aaaaaa;
+                white-space: nowrap;
+                text-align: right;
+                margin-left: auto;
+            }
         `;
 
         document.head.appendChild(styleElement);
@@ -3251,6 +3261,9 @@ class UIInventory implements IUIInventory {
         
         // 如果找到了合适的格子
         if (targetSlot !== -1) {
+            // 设置标记表示正在处理物品拖拽，避免自动调整格子大小
+            this.isHandlingItemDrag = true;
+            
             // 创建飞行动画效果
             this.createFlyingItemAnimation(item, sourceItemInfo.item, count, sourceSlot, targetSlot);
             
@@ -3287,14 +3300,38 @@ class UIInventory implements IUIInventory {
             // 同步更新原始库存数组
             this.syncOriginalInventoryArray();
             
-            // 重新渲染库存
+            // 保存主库存的滚动位置
+            const mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
+            if (mainScrollContainer) {
+                this.mainInventoryScrollPosition = mainScrollContainer.scrollTop;
+                // 禁用滚动动画
+                mainScrollContainer.style.scrollBehavior = 'auto';
+            }
+            
+            // 重新渲染库存，但延迟等待动画完成
             setTimeout(() => {
+                // 在渲染前确保仍然保持拖拽状态，避免格子大小调整
+                const wasHandlingDrag = this.isHandlingItemDrag;
+                
+                // 渲染主库存
                 this.renderMainInventory();
+                
+                // 恢复主库存滚动位置
+                if (mainScrollContainer && this.mainInventoryScrollPosition > 0) {
+                    mainScrollContainer.scrollTop = this.mainInventoryScrollPosition;
+                }
+                
+                // 渲染其他库存
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
                 
                 // 触发主库存更新回调
                 this.triggerMainInventoryCallback();
-            }, 300); // 延迟渲染，等待动画完成
+                
+                // 再延迟一点时间后再清除拖拽标记，确保UI稳定
+                setTimeout(() => {
+                    this.isHandlingItemDrag = false;
+                }, 50);
+            }, 350); // 延迟渲染，等待动画完成
         } else {
             // 如果没有找到合适的格子，显示提示信息
             this.showInventoryFullNotification();
@@ -3369,7 +3406,7 @@ class UIInventory implements IUIInventory {
                 flyingItem.parentNode.removeChild(flyingItem);
             }
             
-            // 在目标格子添加高亮效果
+            // 在目标格子添加高亮效果，但不触发格子大小调整
             targetSlotEl.classList.add('slot-highlight');
             setTimeout(() => {
                 targetSlotEl.classList.remove('slot-highlight');

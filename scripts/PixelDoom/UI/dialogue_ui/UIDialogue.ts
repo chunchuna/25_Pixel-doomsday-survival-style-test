@@ -337,9 +337,9 @@ export class DialogueSystem {
 }
 
 .choice-button {
-    background-color: #2a3a55;
+    background-color:rgb(0, 0, 0);
     color: #e0e0e0;
-    border: 1px solid #3a4a65;
+    border: 1px solid rgb(36, 36, 36);
     padding: 8px 10px;
     text-align: left;
     cursor: pointer;
@@ -349,9 +349,9 @@ export class DialogueSystem {
 }
 
 .choice-button:hover {
-    background-color: #3a4a65;
+    background-color:rgb(65, 65, 65);
     color: #fff;
-    border-color: #569cd6;
+    border-color: rgb(36, 36, 36);
 }
 
 .continue-prompt {

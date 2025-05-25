@@ -28,7 +28,7 @@ async function handleWeather() {
     Normal();
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
-    
+
     //Rain();
     // await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(3000); // 等待 3 秒
     // Normal();
@@ -40,6 +40,8 @@ async function Rain() {
 
     if (WeatherC3Timer == null) return
     WeatherState.CurrentWeather = WEATHER_TYPE.RAIN;
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
     if (WeatherC3Timer.behaviors.Timer.isTimerRunning("rain")) {
         WeatherC3Timer.behaviors.Timer.stopTimer("rain")
