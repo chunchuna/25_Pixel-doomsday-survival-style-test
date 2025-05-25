@@ -84,10 +84,11 @@ class SettingItem extends EventTarget {
                 'left': '0',
                 'right': '0',
                 'bottom': '0',
-                'backgroundColor': '#333',
+                'backgroundColor': '#101010',
                 'transition': '.3s',
                 'borderRadius': '22px',
-                'overflow': 'hidden'
+                'overflow': 'hidden',
+                'border': '1px solid #222'
             });
 
             // 添加滑块圆点
@@ -101,10 +102,9 @@ class SettingItem extends EventTarget {
                     'width': '14px',
                     'left': checkbox && checkbox.checked ? '28px' : '4px',
                     'bottom': '4px',
-                    'backgroundColor': checkbox && checkbox.checked ? '#fff' : '#d0d0d0',
+                    'backgroundColor': checkbox && checkbox.checked ? '#ccc' : '#777',
                     'transition': '.3s',
-                    'borderRadius': '50%',
-                    'boxShadow': checkbox && checkbox.checked ? '0 0 5px rgba(255, 255, 255, 0.5)' : 'none'
+                    'borderRadius': '50%'
                 });
             }
         }
@@ -116,8 +116,7 @@ class SettingItem extends EventTarget {
             const thumb = slider.querySelector('.slider-thumb') as HTMLElement;
             if (thumb) {
                 thumb.style.left = checkbox.checked ? '28px' : '4px';
-                thumb.style.backgroundColor = checkbox.checked ? '#fff' : '#d0d0d0';
-                thumb.style.boxShadow = checkbox.checked ? '0 0 5px rgba(255, 255, 255, 0.5)' : 'none';
+                thumb.style.backgroundColor = checkbox.checked ? '#ccc' : '#777';
             }
             
             this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value, name: this.label } }));
@@ -141,10 +140,9 @@ class SettingItem extends EventTarget {
                     appearance: none;
                     width: 100%;
                     height: 8px;
-                    background-color: #222;
+                    background-color: #101010;
                     border-radius: 3px;
-                    border: 1px solid #444;
-                    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+                    border: 1px solid #222;
                     outline: none;
                     margin: 10px 0;
                     cursor: pointer;
@@ -154,20 +152,18 @@ class SettingItem extends EventTarget {
                     width: 100%;
                     height: 8px;
                     cursor: pointer;
-                    background: #222;
+                    background: #101010;
                     border-radius: 3px;
-                    border: 1px solid #444;
-                    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+                    border: 1px solid #222;
                 }
                 
                 #${rangeId}::-moz-range-track {
                     width: 100%;
                     height: 8px;
                     cursor: pointer;
-                    background: #222;
+                    background: #101010;
                     border-radius: 3px;
-                    border: 1px solid #444;
-                    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+                    border: 1px solid #222;
                 }
                 
                 #${rangeId}::-webkit-slider-thumb {
@@ -177,10 +173,9 @@ class SettingItem extends EventTarget {
                     height: 16px;
                     background: #888;
                     border-radius: 50%;
-                    border: 1px solid #444;
+                    border: 1px solid #222;
                     margin-top: -4px;
                     cursor: pointer;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
                 }
                 
                 #${rangeId}::-moz-range-thumb {
@@ -188,9 +183,8 @@ class SettingItem extends EventTarget {
                     height: 16px;
                     background: #888;
                     border-radius: 50%;
-                    border: 1px solid #444;
+                    border: 1px solid #222;
                     cursor: pointer;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
                 }
                 
                 #${rangeId}::-webkit-slider-thumb:hover {
@@ -201,18 +195,16 @@ class SettingItem extends EventTarget {
                     background-color: #ccc;
                 }
                 
-                /* 完全自定义的滑动条外观 */
                 #${rangeId} {
-                    background: #222 !important; /* 强制背景色 */
+                    background: #101010 !important;
                 }
                 
-                /* 数字输入框样式 */
                 .number-input-${rangeId} {
                     width: 60px;
                     text-align: center;
-                    background-color: #333;
-                    color: #fff;
-                    border: 1px solid #555;
+                    background-color: #101010;
+                    color: #ccc;
+                    border: 1px solid #222;
                     border-radius: 3px;
                     padding: 2px 5px;
                 }
@@ -240,11 +232,10 @@ class SettingItem extends EventTarget {
                 '-webkit-appearance': 'none',
                 '-moz-appearance': 'none',
                 'appearance': 'none',
-                'background': '#222',
+                'background': '#101010',
                 'height': '8px',
                 'borderRadius': '3px',
-                'border': '1px solid #444',
-                'boxShadow': 'inset 0 1px 3px rgba(0, 0, 0, 0.3)',
+                'border': '1px solid #222',
                 'outline': 'none',
                 'width': '100%'
             });
@@ -279,15 +270,16 @@ class SettingItem extends EventTarget {
 
         const select = this.element.querySelector('select') as HTMLSelectElement;
         
-        // 应用UIWindowLib风格的样式
+        // 应用更符合UI库风格的样式
         if (select) {
             Object.assign(select.style, {
-                'backgroundColor': '#333',
-                'color': '#fff',
-                'border': '1px solid #555',
+                'backgroundColor': '#101010',
+                'color': '#ccc',
+                'border': '1px solid #222',
                 'borderRadius': '3px',
                 'padding': '5px',
-                'outline': 'none'
+                'outline': 'none',
+                'cursor': 'pointer'
             });
         }
 
@@ -339,12 +331,12 @@ export class SettingsTab {
     }
 
     public show() {
-        console.log(`显示选项卡: ${this.name}`);
+        console.log(`Showing tab: ${this.name}`);
         this.element.style.display = 'block';
     }
 
     public hide() {
-        console.log(`隐藏选项卡: ${this.name}`);
+        console.log(`Hiding tab: ${this.name}`);
         this.element.style.display = 'none';
     }
 }
@@ -373,13 +365,13 @@ export class UIMainSettingWindow {
         }
         
         // 创建新窗口
-        const window = UIWindowLib.createWindow("设置", 400, 300);
+        const window = UIWindowLib.createWindow("Settings", 400, 300);
         
         // 添加选项卡功能
         const tabs: SettingsTab[] = [];
         let activeTab: SettingsTab | null = null;
         
-        // 直接向窗口添加自定义样式，使用!important提高优先级
+        // 直接向窗口添加自定义样式
         const styleElement = document.createElement('style');
         styleElement.innerHTML = `
             /* 设置窗口的全局样式 */
@@ -391,13 +383,13 @@ export class UIMainSettingWindow {
             
             .tab-navbar {
                 display: flex !important;
-                background-color: rgba(30, 30, 30, 0.9) !important;
-                border-bottom: 1px solid rgba(60, 60, 60, 0.8) !important;
+                background-color: rgba(0, 0, 0, 0.9) !important;
+                border-bottom: 1px solid #222 !important;
             }
             
             .tab-button {
                 padding: 8px 15px !important;
-                color: #aaa !important;
+                color: #888 !important;
                 background-color: transparent !important;
                 border: none !important;
                 cursor: pointer !important;
@@ -406,20 +398,19 @@ export class UIMainSettingWindow {
             }
             
             .tab-button:hover {
-                color: #fff !important;
+                color: #ccc !important;
             }
             
             .tab-button.active {
-                color: #fff !important;
-                border-bottom: 2px solid rgba(100, 150, 255, 0.8) !important;
-                background-color: rgba(40, 40, 40, 0.7) !important;
+                color: #ddd !important;
+                border-bottom: 2px solid #444 !important;
+                background-color: rgba(20, 20, 20, 0.7) !important;
             }
             
             .settings-tabs {
                 flex: 1 !important;
                 overflow-y: auto !important;
                 padding: 10px !important;
-                /* 注：窗口内容区域的滚动条样式由UIWindowLib提供，应用于.pd-window-content类 */
             }
             
             .tab-content {
@@ -433,9 +424,9 @@ export class UIMainSettingWindow {
                 justify-content: space-between !important;
                 align-items: center !important;
                 padding: 8px 10px !important;
-                background-color: rgba(40, 40, 40, 0.8) !important;
-                border-radius: 4px !important;
-                border: 1px solid rgba(60, 60, 60, 0.4) !important;
+                background-color: rgba(10, 10, 10, 0.8) !important;
+                border-radius: 2px !important;
+                border: 1px solid #222 !important;
                 margin-bottom: 6px !important;
             }
             
@@ -445,18 +436,18 @@ export class UIMainSettingWindow {
                 height: 100% !important;
             }
             
-            /* 自定义滑动条样式 - 增强版 */
+            /* 自定义滑动条样式 */
             input[type="range"] {
                 -webkit-appearance: none !important;
                 -moz-appearance: none !important;
                 appearance: none !important;
                 height: 8px !important;
-                background-color: #333 !important;
+                background-color: #101010 !important;
                 border-radius: 3px !important;
                 outline: none !important;
                 margin: 10px 0 !important;
                 cursor: pointer !important;
-                border: 1px solid #444 !important;
+                border: 1px solid #222 !important;
                 width: 100% !important;
             }
             
@@ -465,10 +456,9 @@ export class UIMainSettingWindow {
                 width: 100% !important;
                 height: 8px !important;
                 cursor: pointer !important;
-                background: #222 !important;
+                background: #101010 !important;
                 border-radius: 3px !important;
-                border: 1px solid #444 !important;
-                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+                border: 1px solid #222 !important;
             }
             
             /* 滑动条轨道样式 - Firefox */
@@ -476,10 +466,9 @@ export class UIMainSettingWindow {
                 width: 100% !important;
                 height: 8px !important;
                 cursor: pointer !important;
-                background: #222 !important;
+                background: #101010 !important;
                 border-radius: 3px !important;
-                border: 1px solid #444 !important;
-                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+                border: 1px solid #222 !important;
             }
             
             /* 滑动条轨道样式 - IE */
@@ -493,17 +482,15 @@ export class UIMainSettingWindow {
             }
             
             input[type="range"]::-ms-fill-lower {
-                background: #222 !important;
-                border: 1px solid #444 !important;
+                background: #101010 !important;
+                border: 1px solid #222 !important;
                 border-radius: 3px !important;
-                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
             }
             
             input[type="range"]::-ms-fill-upper {
-                background: #222 !important;
-                border: 1px solid #444 !important;
+                background: #101010 !important;
+                border: 1px solid #222 !important;
                 border-radius: 3px !important;
-                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
             }
             
             /* 滑块样式 */
@@ -514,10 +501,9 @@ export class UIMainSettingWindow {
                 height: 16px !important;
                 background-color: #888 !important;
                 border-radius: 50% !important;
-                border: 1px solid #444 !important;
+                border: 1px solid #222 !important;
                 cursor: pointer !important;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-                margin-top: -4px !important; /* 调整位置使其居中 */
+                margin-top: -4px !important;
             }
             
             input[type="range"]::-moz-range-thumb {
@@ -525,9 +511,8 @@ export class UIMainSettingWindow {
                 height: 16px !important;
                 background-color: #888 !important;
                 border-radius: 50% !important;
-                border: 1px solid #444 !important;
+                border: 1px solid #222 !important;
                 cursor: pointer !important;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
             }
             
             input[type="range"]::-ms-thumb {
@@ -535,9 +520,8 @@ export class UIMainSettingWindow {
                 height: 16px !important;
                 background-color: #888 !important;
                 border-radius: 50% !important;
-                border: 1px solid #444 !important;
+                border: 1px solid #222 !important;
                 cursor: pointer !important;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
             }
             
             /* 悬停状态样式 */
@@ -551,9 +535,9 @@ export class UIMainSettingWindow {
             
             /* 自定义选择框样式 */
             select {
-                background-color: #333 !important;
-                color: #fff !important;
-                border: 1px solid #555 !important;
+                background-color: #101010 !important;
+                color: #ccc !important;
+                border: 1px solid #222 !important;
                 border-radius: 3px !important;
                 padding: 5px !important;
                 outline: none !important;
@@ -562,9 +546,9 @@ export class UIMainSettingWindow {
             
             /* 自定义数字输入框样式 */
             input[type="number"] {
-                background-color: #333 !important;
-                color: #fff !important;
-                border: 1px solid #555 !important;
+                background-color: #101010 !important;
+                color: #ccc !important;
+                border: 1px solid #222 !important;
                 border-radius: 3px !important;
                 padding: 2px 5px !important;
                 width: 60px !important;
@@ -592,11 +576,11 @@ export class UIMainSettingWindow {
                 left: 0 !important;
                 right: 0 !important;
                 bottom: 0 !important;
-                background-color: #333 !important;
+                background-color: #101010 !important;
                 transition: .3s !important;
                 border-radius: 22px !important;
                 overflow: hidden !important;
-                border: 1px solid #444 !important;
+                border: 1px solid #222 !important;
             }
             
             .slider:before, .slider-thumb {
@@ -606,20 +590,19 @@ export class UIMainSettingWindow {
                 width: 14px !important;
                 left: 4px !important;
                 bottom: 3px !important;
-                background-color: #d0d0d0 !important;
+                background-color: #777 !important;
                 transition: .3s !important;
                 border-radius: 50% !important;
             }
             
             input:checked + .slider {
-                background-color: #444 !important;
+                background-color: #222 !important;
             }
             
             input:checked + .slider:before, 
             input:checked + .slider .slider-thumb {
                 transform: translateX(24px) !important;
-                background-color: #fff !important;
-                box-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
+                background-color: #ccc !important;
             }
         `;
         
@@ -657,7 +640,7 @@ export class UIMainSettingWindow {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                console.log(`点击选项卡: ${tabName}`);
+                console.log(`Clicked tab: ${tabName}`);
                 
                 // 切换激活状态
                 const allButtons = navBar.querySelectorAll('.tab-button');
@@ -703,34 +686,34 @@ export class UIMainSettingWindow {
         
         // 预先添加默认选项卡和设置
         // 视频选项卡
-        const videoTab = addTab('视频');
-        const fullScreenSetting = videoTab.AddSetting('全屏', SettingType.Switch, this.isFullscreen);
+        const videoTab = addTab('Video');
+        const fullScreenSetting = videoTab.AddSetting('Fullscreen', SettingType.Switch, this.isFullscreen);
         fullScreenSetting.addEventListener('change', (e: any) => {
             this.isFullscreen = e.detail.value;
             this.toggleFullscreen();
         });
         
         // 声音选项卡
-        const audioTab = addTab('声音');
-        const muteSetting = audioTab.AddSetting('静音', SettingType.Switch, this.isMuted);
+        const audioTab = addTab('Audio');
+        const muteSetting = audioTab.AddSetting('Mute', SettingType.Switch, this.isMuted);
         muteSetting.addEventListener('change', (e: any) => {
             this.isMuted = e.detail.value;
-            console.log('静音状态:', this.isMuted);
+            console.log('Mute status:', this.isMuted);
         });
-        const volumeSetting = audioTab.AddSetting('音量', SettingType.Number, 50, 0, 100);
+        const volumeSetting = audioTab.AddSetting('Volume', SettingType.Number, 50, 0, 100);
         volumeSetting.addEventListener('change', (e: any) => {
-            console.log('音量设置为:', e.detail.value);
+            console.log('Volume set to:', e.detail.value);
         });
         
         // 游戏性选项卡
-        const gameplayTab = addTab('游戏性');
-        const difficultySetting = gameplayTab.AddSetting('难度', SettingType.Choose, '中', ['简单', '中', '困难', '噩梦']);
+        const gameplayTab = addTab('Gameplay');
+        const difficultySetting = gameplayTab.AddSetting('Difficulty', SettingType.Choose, 'Medium', ['Easy', 'Medium', 'Hard', 'Nightmare']);
         difficultySetting.addEventListener('change', (e: any) => {
-            console.log('难度设置为:', e.detail.value);
+            console.log('Difficulty set to:', e.detail.value);
         });
         
         // 确保选项卡导航可见
-        console.log(`已创建 ${tabs.length} 个选项卡`);
+        console.log(`Created ${tabs.length} tabs`);
     }
     
     /**
