@@ -992,6 +992,34 @@
 					],
 					"subfolders": [],
 					"name": "Font"
+				},
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [
+								{
+									"name": "show_2.png",
+									"type": "image/png",
+									"sid": 382859810141872,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "show_1.png",
+									"type": "image/png",
+									"sid": 350747904023515,
+									"file-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "img"
+						}
+					],
+					"name": "github"
 				}
 			],
 			"autoReloadOnPreview": true
