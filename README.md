@@ -15,50 +15,201 @@ This game uses a custom TypeScript-based framework called `pmlsdk$ProceduralStor
 - Utility functions for game development
 - Runtime integration with Construct 3
 
+
+
+### Window Library System (UIWindowLib)
+
+The game includes a comprehensive window library that provides a unified approach to creating custom UI windows with consistent appearance and behavior.
+
+#### Core Features
+
+- **Customizable Windows**: Create windows with configurable size, position, and opacity
+- **Drag & Drop Support**: All windows can be freely moved by dragging the title bar
+- **Resizable Interface**: Windows can be resized using the bottom-right corner handle
+- **Minimization**: Windows can be minimized to show only the title bar
+- **Z-Order Management**: Windows automatically stack with the most recently used on top
+- **Animation Effects**: Smooth opening/closing animations with scaling and fade effects
+- **Event Handling**: Optimized event system ensures proper interaction within windows
+- **Global Style System**: Consistent styling across all UI windows
+
+#### Basic Usage
+
+```typescript
+// Create a basic window
+const { windowElement, contentElement, close } = UIWindowLib.createWindow(
+    "Inventory",  // Window title
+    500,          // Width (px)
+    400,          // Height (px)
+    0.95          // Opacity (0-1)
+);
+
+// Add content to window
+contentElement.innerHTML = `
+    <div class="inventory-container">
+        <!-- Window content goes here -->
+    </div>
+`;
+
+// Close window programmatically when needed
+close();
+```
+
+#### Advanced Management
+
+The window system can be extended with a manager class that provides:
+
+- Type-based window creation and tracking
+- Consistent positioning and styling across window types
+- Hotkey integration for toggling windows
+- Window state management (open/closed status)
+- Global operations (close all, minimize all)
+
+This creates a unified and professional user interface system that maintains consistent styling while allowing for specialized window content and behavior.
+
+
 ## Debugging Tools
 
 The game includes several advanced debugging tools built with custom ImGui implementation:
 
-### In-Game Console
-A powerful in-game console built with ImGui for runtime debugging and command execution.
+### Dual Console System
 
-- **Features**:
-  - Console output capture (logs, warnings, errors)
-  - Timestamp display
-  - Colorful message formatting
-  - Scrollable message history
-  - Resizable window interface
+The game implements two complementary console systems, each with different purposes and capabilities:
 
-#### Advanced Console Features
+#### 1. ImGui-Based Floating Console
+- **Activation**: Press the backtick key (n) to toggle
+- **Implementation**: Built with ImGui rendering directly in the game canvas
+- **Key Features**:
+  - Freely positionable and resizable window
+  - Full mouse interaction support
+  - Copyable text with right-click
+  - Command input support
+  - Log filtering options
+  - Transparency control
+  - Maintains state between scene transitions
+  - Advanced stack tracing for accurate source attribution
 
-The in-game console implements a sophisticated log interception system that captures all browser console output and redirects it to the in-game UI:
+#### 2. HTML/CSS Fixed Console
+- **Activation**: Always visible (toggleable via debug panel)
+- **Implementation**: DOM-based overlay using HTML elements
+- **Key Features**:
+  - Fixed at top or bottom of screen
+  - Non-interactive display (doesn't capture mouse events)
+  - Lightweight resource usage
+  - Color-coded message categories
+  - Source file attribution
+  - Position toggleable (top/bottom)
+  - Multiple display modes
+  - Customizable opacity settings
 
-- **Method Overriding**: The system overrides native `console.log`, `console.warn`, `console.error`, and other methods to intercept all messages
-- **Source Tracking**: Each message includes a highlighted source indicator showing which script generated the log:
-  ```
-  [UIDialogue.js] [12:45:23] Dialogue system initialized
-  ```
-- **Stack Trace Analysis**: The console automatically extracts the source file and line number from JavaScript error stacks, providing accurate attribution for each message
-- **Color Coding**: Different message types (log, warning, error) use distinct background colors for rapid visual identification
-- **Message Grouping**: Random color grouping option allows multiple related messages to share the same color for easier correlation
-- **Performance Optimization**: Advanced DOM rendering techniques ensure that even with thousands of log messages, performance remains stable
-- **Custom Font Rendering**: Monospace font with adjustable size ensures optimal readability of debug information
-- **Persistence Across Scenes**: Console content persists across scene transitions, allowing tracking of initialization sequences
-- **Copy Support**: Right-clicking messages allows copying content to the clipboard for external analysis
-- **Translucent Backplate**: Adjustable opacity background ensures console visibility without completely obscuring game elements
+#### Console Implementation Comparison
 
-**Code Example - Console Usage:**
+| Feature | ImGui Console | HTML/CSS Console |
+|---------|--------------|-----------------|
+| Positioning | Freely movable | Fixed to screen edge |
+| Interaction | Full mouse support | Display only (non-interactive) |
+| Resource usage | Higher (renders to canvas) | Lower (uses DOM elements) |
+| Message filtering | Yes (via UI controls) | No (displays all) |
+| Command input | Yes | No |
+| Copy support | Yes | No |
+| Persistence | Retains logs between scenes | Clears on scene change |
+| Integration | Part of ImGui debug toolkit | Part of HTML UI layer |
+| Use case | Deep debugging and command input | Passive monitoring and quick feedback |
+
+#### Code Example - Using Both Console Systems:
+
 ```typescript
-// Capture is automatic for all console methods
-console.log("Player position updated", player.position);
-console.warn("Low ammunition", player.ammo);
-console.error("Failed to load asset", assetId);
+// Log to both console systems simultaneously
+console.log("Player position:", player.position);
 
-// Access console programmatically
-UIConsole.Clear();  // Clear console
-UIConsole.SetShowTimestamps(true);  // Configure timestamp display
-UIConsole.SetUseRandomColors(true); // Enable color grouping
+// ImGui console specific features
+UIConsole.Clear();  // Clear ImGui console only
+UIConsole.SetShowTimestamps(true);
+
+// HTML console specific features
+UIDebug.SetConsolePosition('top');  // Move HTML console to top
+UIDebug.SetConsoleAlwaysShow(false);  // Hide HTML console
 ```
+
+#### When to Use Each Console
+
+- **ImGui Console**: For interactive debugging, entering commands, and complex log analysis
+- **HTML Console**: For quick visual feedback, passive monitoring, and non-intrusive display
+
+Both consoles automatically intercept standard `console.log`, `console.warn`, and `console.error` calls, making them fully compatible with existing code.
+
+### Debug Mode System
+
+The game includes a centralized debug mode management system that allows developers to quickly enable or disable all debugging tools at once.
+
+#### Core Features
+
+- **One-Click Debug Toggle**: Enable or disable all debugging tools with a single flag
+- **Sequential Tool Activation**: Ensures debugging tools initialize in the correct order
+- **Runtime Toggle Support**: Can be enabled/disabled during gameplay
+- **Automatic Initialization**: Activates debugging tools on game startup (when enabled)
+
+#### Implementation Details
+
+The debug mode system is implemented in `PIXDebugMode.ts` and manages the following debug components:
+- Variable monitoring
+- Debug button panel
+- ImGui console
+
+```typescript
+// Debug mode manager class
+export class dEBUG_MOD {
+    static isEnable = true;  // Master switch for debug mode
+    static isRunMod = false; // Flag to prevent multiple initializations
+    
+    // Asynchronously activates all debug tools in sequence
+    static async asynload() {
+        if (dEBUG_MOD.isRunMod) return
+        if (dEBUG_MOD.isEnable) {
+            // Activate debugging tools in sequence with delay
+            VariableMonitoring.Toggle();
+            IMGUIDebugButton.Toggle();
+            await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
+            UIConsole.Toggle();
+            
+            dEBUG_MOD.isRunMod = true;
+        }
+    }
+}
+```
+
+#### Usage Examples
+
+**Enable/Disable Debug Mode Before Game Start:**
+```typescript
+// In PIXDebugMode.ts
+dEBUG_MOD.isEnable = true;  // Enable debug mode
+// or
+dEBUG_MOD.isEnable = false; // Disable debug mode
+```
+
+**Toggle Debug Mode During Runtime:**
+```typescript
+// Disable all debugging tools
+dEBUG_MOD.isEnable = false;
+
+// Re-enable all debugging tools
+dEBUG_MOD.isEnable = true;
+dEBUG_MOD.isRunMod = false; // Reset the run flag
+dEBUG_MOD.asynload();       // Re-initialize tools
+```
+
+**Creating a Debug Toggle Button:**
+```typescript
+// Add a debug mode toggle button to the debug panel
+IMGUIDebugButton.AddButton("Toggle Debug Mode", () => {
+    dEBUG_MOD.isEnable = !dEBUG_MOD.isEnable;
+    if (dEBUG_MOD.isEnable && !dEBUG_MOD.isRunMod) {
+        dEBUG_MOD.asynload();
+    }
+});
+```
+
+The debug mode system provides a clean and centralized way to manage all debugging tools, allowing developers to quickly switch between development and testing environments without modifying multiple parts of the codebase.
 
 ### Variable Monitoring
 A real-time variable monitoring system for tracking game state.
@@ -144,6 +295,203 @@ DEBUG.DebugMainUI.DebuPanelAddButton("Test Function", () => {
     // Test code here
 });
 ```
+
+## Interactive Object System
+
+The game features a powerful string-based interaction system that enables players to interact with environmental objects through a dynamic, context-sensitive interface.
+
+### Core Features
+
+- **String-Parsed Interaction Definitions**: Define possible interactions with a simple comma-separated string format
+- **Dynamic Interaction Panel**: Context-sensitive UI panel that appears when interacting with objects
+- **Distance-Based Interaction**: Automatic range checking for realistic interaction constraints
+- **Visual Feedback**: Object highlighting on hover with outline effects
+- **Event-Driven Architecture**: Clean separation between interaction definition and handlers
+- **Automatic UI Closing**: UI closes when player moves away from interaction range
+- **Integration with Dialogue & Inventory**: Seamless connection to other game systems
+
+### How It Works
+
+The interactive object system uses a simple yet powerful string-based definition format. Each interactive object stores its available actions as a comma-separated string, which is parsed at runtime to generate interaction options.
+
+#### Object Definition Structure
+
+Interactive objects have these key properties:
+- **ID**: Unique identifier for the object
+- **ObjectName**: Display name shown in the interaction UI
+- **Actions**: Comma-separated string of available interactions
+
+When a player clicks on an interactive object:
+1. The system checks if the player is within interaction range
+2. The object's action string is parsed into individual options
+3. An interaction panel appears showing available actions
+4. The player can select an action, triggering the associated event
+
+### Code Example - Defining Interactive Objects
+
+In Construct 3, create an object with these instance variables:
+
+```typescript
+// Interactive object instance variables
+{
+    ID: "ZhangPeng",           // Unique object identifier
+    ObjectName: "Tent",        // Friendly name
+    Actions: "inventory,find"  // Available actions as comma-separated string
+}
+```
+
+### String-Based Action Parsing
+
+The action string can be a simple list or use a special format for enhanced functionality:
+
+```typescript
+// Simple comma-separated list
+"open,close,examine,use"
+
+// With custom IDs (Format: ActionName{ActionID})
+"Search{find},Open Inventory{inventory},Take{pickup}"
+```
+
+The parser extracts both display names and functional IDs, allowing for friendly action names while maintaining consistent event handling.
+
+### Interaction Panel
+
+The interaction panel displays all available actions from the parsed string in a table format showing:
+- Action Name
+- Action ID (for debugging)
+- Source (object that provides the action)
+
+The panel is automatically positioned in the bottom-right corner of the screen and resizes based on content.
+
+### Code Example - Interaction Event Handling
+
+```typescript
+// Listen for interaction button clicks
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_(
+        "ChoosePanleButtonClick:ClickButton", 
+        (e: any) => {
+            // Get clicked button ID
+            const buttonId = e.data.ButtonContent_;
+            
+            // Get the last clicked object
+            if (LastestChooseObject == null) return;
+            
+            // Handle different actions based on object type and button ID
+            if (LastestChooseObject.instVars.ID == "ZhangPeng") {
+                if (buttonId == "inventory") {
+                    // Open inventory for this object
+                    openObjectInventory(LastestChooseObject);
+                } 
+                else if (buttonId == "find") {
+                    // Start dialogue for this object
+                    DialogueMainController.ShowDialogue(DIA_CONTENT_ZHANGPENG_01);
+                }
+            }
+        }
+    );
+});
+
+// Helper function to open object inventory
+function openObjectInventory(interactiveObject) {
+    // Ensure object has inventory data
+    if (!interactiveObject.instVars.InventoryData) {
+        interactiveObject.instVars.InventoryData = "[]";
+    }
+    
+    // Parse inventory data
+    const inventoryData = DeserializeItemsOnly(
+        interactiveObject.instVars.InventoryData
+    );
+    
+    // Create update callback to synchronize changes
+    const updateInfo = {
+        instance: interactiveObject,
+        varName: "InventoryData"
+    };
+    
+    // Show inventory UI
+    inventoryManager.ShowOtherInventory(
+        inventoryData, 
+        4, 6, 
+        updateInfo, 
+        interactiveObject.instVars.InventoryName
+    );
+}
+```
+
+### Visual Highlighting System
+
+The system includes automatic visual feedback for interactive objects:
+
+```typescript
+// Enable outline effect when mouse hovers over an object
+static EnableOutLine(object: InstanceType.ClickObjectEntity, ifEnable: boolean) {
+    object.effects[0].isActive = ifEnable;
+}
+
+// Add event handlers for mouse interactions
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_(
+    "ClickObject:MouseOverObject", 
+    (e: any) => {
+        var GetChooseObject = e.data.object;
+        ClickObject.EnableOutLine(GetChooseObject, true);
+        document.documentElement.style.cursor = "pointer";
+    }
+);
+```
+
+### Distance-Based Interaction
+
+The system automatically enforces a maximum interaction distance:
+
+```typescript
+// Define maximum interaction distance
+static ClickObjectClickMaxDistance = 200;
+
+// Check distance during interaction
+var DistanceFromObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(
+    interactiveObject.x,
+    interactiveObject.y,
+    player.x,
+    player.y
+);
+
+if (DistanceFromObject > ClickObject.ClickObjectClickMaxDistance) {
+    UISubtitleMain.ShowSubtitles("Too far to interact!", 2);
+    return;
+}
+```
+
+### Integration with Game Systems
+
+The interaction system seamlessly connects to other game systems:
+
+```typescript
+// Example: Connecting interaction to dialogue system
+if (buttonId == "find") {
+    // Start a dialogue sequence
+    DialogueMainController.ShowDialogue(`
+        左-> The tent looks abandoned
+        右->choose:Look closer
+            左-> You notice signs of a hasty departure
+        右->choose:Check for supplies
+            左-> [code-(openInventoryFunction())]
+    `);
+}
+
+// Example: Connecting interaction to inventory system
+if (buttonId == "inventory") {
+    // Open object's inventory
+    const items = DeserializeItemsOnly(object.instVars.InventoryData);
+    inventoryManager.ShowOtherInventory(items, 3, 5, {
+        instance: object,
+        varName: "InventoryData"
+    }, "Abandoned Tent");
+}
+```
+
+This interaction system provides a flexible foundation for environmental storytelling, allowing designers to create rich, interactive game worlds with minimal code duplication.
 
 ## Dialogue System
 
