@@ -708,6 +708,28 @@
 									],
 									"subfolders": [],
 									"name": "font"
+								},
+								{
+									"items": [
+										{
+											"name": "tweak_lib.js",
+											"type": "application/javascript",
+											"sid": 921024933240172,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "tweak_window_test.ts",
+											"type": "application/typescript",
+											"sid": 782181815522667,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "tweak_ui"
 								}
 							],
 							"name": "UI"

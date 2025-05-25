@@ -6,7 +6,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 export class UIWindowLib {
     private static idCounter: number = 0;
     private static activeWindows: Set<string> = new Set();
-    
+
     /**
      * 创建一个新窗口
      * @param title 窗口标题
@@ -26,7 +26,7 @@ export class UIWindowLib {
         x?: number,
         y?: number,
         parent: HTMLElement = document.body
-    ): { 
+    ): {
         windowElement: HTMLElement,
         contentElement: HTMLElement,
         close: () => void
@@ -34,16 +34,16 @@ export class UIWindowLib {
         // 生成唯一ID
         const windowId = `pd-window-${++this.idCounter}`;
         this.activeWindows.add(windowId);
-        
+
         // 确保全局样式只添加一次
         this.ensureGlobalStyles();
-        
+
         // 创建窗口元素 - 使用完全分离的元素结构
         const windowElement = document.createElement('div');
         windowElement.id = windowId;
         windowElement.className = 'pd-window';
         windowElement.setAttribute('tabindex', '-1'); // 使窗口可聚焦
-        
+
         // 设置窗口样式 - 使用fixed定位代替absolute
         Object.assign(windowElement.style, {
             width: `${width}px`,
@@ -51,17 +51,17 @@ export class UIWindowLib {
             opacity: '0', // 初始设置为透明，用于打开动画
             transform: 'scale(0.95)', // 初始缩放比例
             position: 'fixed', // 改为fixed定位，解决点击问题
-            backgroundColor: '#282828',
-            border: '1px solid #3c3c3c',
-            borderRadius: '4px',
+            backgroundColor: '#000000', // 更改为纯黑色背景
+            border: '1px solid #333333',
+            borderRadius: '2px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
             overflow: 'hidden',
             fontFamily: 'Arial, sans-serif',
-            color: '#e0e0e0',
+            color: '#d0d0d0',
             zIndex: '9999', // 提高z-index值
             transition: 'opacity 0.2s ease-out, transform 0.2s ease-out' // 添加过渡效果
         });
-        
+
         // 设置窗口位置
         if (x !== undefined && y !== undefined) {
             windowElement.style.left = `${x}px`;
@@ -73,15 +73,15 @@ export class UIWindowLib {
             windowElement.style.left = `${(viewportWidth - width) / 2}px`;
             windowElement.style.top = `${(viewportHeight - height) / 2}px`;
         }
-        
+
         // 创建窗口组件 - 每个部分都是独立的DOM元素
         // 1. 创建窗口头部
         const headerElement = document.createElement('div');
         headerElement.className = 'pd-window-header';
         Object.assign(headerElement.style, {
-            height: '28px',
-            backgroundColor: '#1c1c1c',
-            borderBottom: '1px solid #3c3c3c',
+            height: '26px',
+            backgroundColor: 'rgba(0, 0, 0, 0.29)', // 更改为半透明黑色
+            borderBottom: '1px solidrgb(0, 0, 0)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -90,93 +90,72 @@ export class UIWindowLib {
             userSelect: 'none',
             position: 'relative'
         });
-        
+
         // 2. 创建标题
         const titleElement = document.createElement('div');
         titleElement.className = 'pd-window-title';
         titleElement.textContent = title;
         Object.assign(titleElement.style, {
-            fontSize: '12px',
-            fontWeight: 'bold',
+            fontSize: '11px',
+            fontWeight: 'normal',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            textAlign: 'center',
+            width: '100%', // 使标题居中显示
+            color: '#e0e0e0'
         });
-        
+
         // 3. 创建控制按钮容器
         const controlsElement = document.createElement('div');
         controlsElement.className = 'pd-window-controls';
         Object.assign(controlsElement.style, {
             display: 'flex',
-            gap: '6px'
+            gap: '6px',
+            position: 'absolute',
+            right: '5px'
         });
-        
+
         // 4. 创建最小化按钮
         const minimizeButton = document.createElement('div');
         minimizeButton.className = 'pd-window-minimize';
         Object.assign(minimizeButton.style, {
             width: '14px',
             height: '14px',
-            borderRadius: '2px',
-            backgroundColor: '#555',
             cursor: 'pointer',
-            position: 'relative'
+            position: 'relative',
+            fontSize: '14px',
+            lineHeight: '12px',
+            textAlign: 'center',
+            color: '#aaa'
         });
         // 添加减号图标
-        const minIconElement = document.createElement('div');
-        Object.assign(minIconElement.style, {
-            width: '8px',
-            height: '2px',
-            backgroundColor: '#222',
-            position: 'absolute',
-            left: '3px',
-            top: '6px'
-        });
-        minimizeButton.appendChild(minIconElement);
-        
+        minimizeButton.textContent = '_';
+
         // 5. 创建关闭按钮
         const closeButton = document.createElement('div');
         closeButton.className = 'pd-window-close';
         Object.assign(closeButton.style, {
             width: '14px',
             height: '14px',
-            borderRadius: '2px',
-            backgroundColor: '#913a3a',
             cursor: 'pointer',
-            position: 'relative'
+            position: 'relative',
+            fontSize: '14px',
+            lineHeight: '12px',
+            textAlign: 'center',
+            color: '#aaa'
         });
-        // 添加叉号图标
-        const closeIcon1 = document.createElement('div');
-        Object.assign(closeIcon1.style, {
-            width: '8px',
-            height: '2px',
-            backgroundColor: '#222',
-            position: 'absolute',
-            left: '3px',
-            top: '6px',
-            transform: 'rotate(45deg)'
-        });
-        const closeIcon2 = document.createElement('div');
-        Object.assign(closeIcon2.style, {
-            width: '8px',
-            height: '2px',
-            backgroundColor: '#222',
-            position: 'absolute',
-            left: '3px',
-            top: '6px',
-            transform: 'rotate(-45deg)'
-        });
-        closeButton.appendChild(closeIcon1);
-        closeButton.appendChild(closeIcon2);
-        
+        closeButton.textContent = 'X';
+
         // 6. 创建窗口主体
         const bodyElement = document.createElement('div');
         bodyElement.className = 'pd-window-body';
         Object.assign(bodyElement.style, {
-            height: 'calc(100% - 28px)',
-            overflow: 'hidden'
+            height: 'calc(100% - 26px)',
+            overflow: 'hidden',
+            backgroundColor: '#000000' // 更改为纯黑色背景
         });
-        
+
         // 7. 创建内容区域
         const contentElement = document.createElement('div');
         contentElement.className = 'pd-window-content';
@@ -184,10 +163,11 @@ export class UIWindowLib {
             height: '100%',
             width: '100%',
             overflowY: 'auto',
-            padding: '10px',
-            boxSizing: 'border-box'
+            padding: '8px',
+            boxSizing: 'border-box',
+            color: '#d0d0d0'
         });
-        
+
         // 8. 创建调整大小角标
         const resizerElement = document.createElement('div');
         resizerElement.className = 'pd-window-resizer';
@@ -200,7 +180,7 @@ export class UIWindowLib {
             cursor: 'nwse-resize',
             zIndex: '9999' // 确保总是在最上层
         });
-        
+
         // 调整大小角标图标
         const resizerIcon = document.createElement('div');
         Object.assign(resizerIcon.style, {
@@ -209,11 +189,11 @@ export class UIWindowLib {
             right: '3px',
             width: '10px',
             height: '10px',
-            borderRight: '2px solid #555',
-            borderBottom: '2px solid #555'
+            borderRight: '2px solid #3a4a65',
+            borderBottom: '2px solid #3a4a65'
         });
         resizerElement.appendChild(resizerIcon);
-        
+
         // 组装窗口
         controlsElement.appendChild(minimizeButton);
         controlsElement.appendChild(closeButton);
@@ -223,26 +203,26 @@ export class UIWindowLib {
         windowElement.appendChild(headerElement);
         windowElement.appendChild(bodyElement);
         windowElement.appendChild(resizerElement);
-        
+
         // 添加到父元素
         parent.appendChild(windowElement);
-        
+
         // 为内容区域添加额外的事件处理，确保可以点击
         this.applyExtraClickHandling(contentElement);
-        
+
         // 绑定窗口事件 - 确保更可靠的拖拽
         this.enableWindowDrag(windowElement, headerElement);
-        
+
         // 绑定窗口大小调整 - 使用更可靠的实现
         this.enableWindowResize(windowElement, resizerElement);
-        
+
         // 绑定收起按钮点击事件
         let isMinimized = false;
         const originalHeight = height;
-        
+
         minimizeButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            
+
             if (isMinimized) {
                 // 展开窗口
                 windowElement.style.height = `${originalHeight}px`;
@@ -256,7 +236,7 @@ export class UIWindowLib {
             }
             isMinimized = !isMinimized;
         }, true); // 使用捕获阶段
-        
+
         // 确保按钮悬停效果
         minimizeButton.addEventListener('mouseover', () => {
             minimizeButton.style.backgroundColor = '#666';
@@ -264,40 +244,40 @@ export class UIWindowLib {
         minimizeButton.addEventListener('mouseout', () => {
             minimizeButton.style.backgroundColor = '#555';
         }, true);
-        
+
         closeButton.addEventListener('mouseover', () => {
             closeButton.style.backgroundColor = '#c14545';
         }, true);
         closeButton.addEventListener('mouseout', () => {
             closeButton.style.backgroundColor = '#913a3a';
         }, true);
-        
+
         // 绑定关闭按钮点击事件
         const close = () => {
             // 添加关闭动画
             windowElement.style.opacity = '0';
             windowElement.style.transform = 'scale(0.95)';
-            
+
             // 等待动画完成后移除元素
             setTimeout(() => {
                 // 从活动窗口集合中移除
                 this.activeWindows.delete(windowId);
-                
+
                 // 移除元素
                 windowElement.remove();
             }, 200); // 与CSS过渡时间匹配
         };
-        
+
         closeButton.addEventListener('click', (e) => {
             e.stopPropagation();
             close();
         }, true); // 使用捕获阶段
-        
+
         // 点击窗口时将其置于前台
         windowElement.addEventListener('mousedown', () => {
             this.bringToFront(windowElement);
         }, true);
-        
+
         // 添加打开动画效果 - 使用requestAnimationFrame确保DOM已更新
         requestAnimationFrame(() => {
             // 短暂延迟以确保变换生效
@@ -306,14 +286,14 @@ export class UIWindowLib {
                 windowElement.style.transform = 'scale(1)';
             }, 30);
         });
-        
-        return { 
-            windowElement, 
+
+        return {
+            windowElement,
             contentElement,
             close
         };
     }
-    
+
     /**
      * 确保全局样式只被添加一次
      */
@@ -321,7 +301,7 @@ export class UIWindowLib {
         if (!document.getElementById('pd-window-global-styles')) {
             const styleElement = document.createElement('style');
             styleElement.id = 'pd-window-global-styles';
-            
+
             styleElement.textContent = `
                 /* 窗口滚动条样式 */
                 .pd-window-content::-webkit-scrollbar {
@@ -329,12 +309,12 @@ export class UIWindowLib {
                 }
                 
                 .pd-window-content::-webkit-scrollbar-track {
-                    background: #282828;
+                    background: #000000;
                 }
                 
                 .pd-window-content::-webkit-scrollbar-thumb {
-                    background-color: #444;
-                    border-radius: 4px;
+                    background-color: #333333;
+                    border-radius: 2px;
                 }
                 
                 /* 确保输入元素在窗口内部正常工作 */
@@ -342,8 +322,8 @@ export class UIWindowLib {
                 .pd-window-content textarea,
                 .pd-window-content select,
                 .pd-window-content button {
-                    background-color: #333;
-                    border: 1px solid #555;
+                    background-color: #2a3a55;
+                    border: 1px solid #3a4a65;
                     color: #e0e0e0;
                     padding: 5px;
                     z-index: 9999;
@@ -363,11 +343,11 @@ export class UIWindowLib {
                     transform-origin: center;
                 }
             `;
-            
+
             document.head.appendChild(styleElement);
         }
     }
-    
+
     /**
      * 窗口拖拽功能 - 使用更高优先级的事件处理
      */
@@ -375,72 +355,72 @@ export class UIWindowLib {
         let offsetX = 0;
         let offsetY = 0;
         let isDragging = false;
-        
+
         // 使用捕获阶段以确保事件不被阻断
         const startDrag = (e: MouseEvent) => {
             // 确保是从头部拖拽
             if (e.target === dragHandle || dragHandle.contains(e.target as Node)) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 isDragging = true;
-                
+
                 // 获取鼠标相对于窗口的位置
                 const rect = windowElement.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
-                
+
                 this.bringToFront(windowElement);
-                
+
                 // 添加拖动中的样式
                 document.body.style.userSelect = 'none';
                 document.body.style.cursor = 'move';
-                
+
                 // 使用捕获阶段添加事件监听
                 document.addEventListener('mousemove', drag, true);
                 document.addEventListener('mouseup', stopDrag, true);
             }
         };
-        
+
         const drag = (e: MouseEvent) => {
             if (!isDragging) return;
-            
+
             e.preventDefault();
             e.stopPropagation();
-            
+
             // 更新窗口位置
             const newLeft = e.clientX - offsetX;
             const newTop = e.clientY - offsetY;
-            
+
             // 限制拖动不超出可视区域
             const maxLeft = window.innerWidth - windowElement.offsetWidth;
             const maxTop = window.innerHeight - dragHandle.offsetHeight;
-            
+
             windowElement.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
             windowElement.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
         };
-        
+
         const stopDrag = (e: MouseEvent) => {
             if (!isDragging) return;
-            
+
             e.preventDefault();
             e.stopPropagation();
-            
+
             isDragging = false;
-            
+
             // 恢复样式
             document.body.style.userSelect = '';
             document.body.style.cursor = '';
-            
+
             // 移除事件监听
             document.removeEventListener('mousemove', drag, true);
             document.removeEventListener('mouseup', stopDrag, true);
         };
-        
+
         // 使用捕获阶段添加事件
         dragHandle.addEventListener('mousedown', startDrag, true);
     }
-    
+
     /**
      * 窗口大小调整功能 - 使用更可靠的实现
      */
@@ -450,66 +430,66 @@ export class UIWindowLib {
         let startWidth = 0;
         let startHeight = 0;
         let isResizing = false;
-        
+
         // 使用捕获阶段以确保事件不被阻断
         const startResize = (e: MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             isResizing = true;
-            
+
             // 记录初始值
             startX = e.clientX;
             startY = e.clientY;
             startWidth = windowElement.offsetWidth;
             startHeight = windowElement.offsetHeight;
-            
+
             this.bringToFront(windowElement);
-            
+
             // 设置调整大小时的样式
             document.body.style.userSelect = 'none';
             document.body.style.cursor = 'nwse-resize';
-            
+
             // 使用捕获阶段添加事件监听
             document.addEventListener('mousemove', resize, true);
             document.addEventListener('mouseup', stopResize, true);
         };
-        
+
         const resize = (e: MouseEvent) => {
             if (!isResizing) return;
-            
+
             e.preventDefault();
             e.stopPropagation();
-            
+
             // 计算新尺寸
             const width = Math.max(200, startWidth + (e.clientX - startX));
             const height = Math.max(100, startHeight + (e.clientY - startY));
-            
+
             // 设置新尺寸
             windowElement.style.width = `${width}px`;
             windowElement.style.height = `${height}px`;
         };
-        
+
         const stopResize = (e: MouseEvent) => {
             if (!isResizing) return;
-            
+
             e.preventDefault();
             e.stopPropagation();
-            
+
             isResizing = false;
-            
+
             // 恢复样式
             document.body.style.userSelect = '';
             document.body.style.cursor = '';
-            
+
             // 移除事件监听
             document.removeEventListener('mousemove', resize, true);
             document.removeEventListener('mouseup', stopResize, true);
         };
-        
+
         // 直接添加事件监听，使用捕获阶段
         resizeHandle.addEventListener('mousedown', startResize, true);
-        
+
         // 增加调整大小角标的可见性
         resizeHandle.addEventListener('mouseover', () => {
             const icon = resizeHandle.firstChild as HTMLElement;
@@ -517,7 +497,7 @@ export class UIWindowLib {
                 icon.style.borderColor = '#888';
             }
         }, true);
-        
+
         resizeHandle.addEventListener('mouseout', () => {
             const icon = resizeHandle.firstChild as HTMLElement;
             if (icon) {
@@ -525,39 +505,39 @@ export class UIWindowLib {
             }
         }, true);
     }
-    
+
     /**
      * 应用额外的点击处理，确保窗口内容可点击
      */
     private static applyExtraClickHandling(element: HTMLElement): void {
         // 监听所有鼠标事件
         const events = ['click', 'mousedown', 'mouseup'];
-        
+
         // 确保所有子元素可以接收点击事件
         function processElement(el: HTMLElement) {
             // 为按钮和输入框特别添加高优先级事件处理
-            if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || 
+            if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' ||
                 el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' ||
                 el.classList.contains('example-button')) {
-                
+
                 events.forEach(eventType => {
                     el.addEventListener(eventType, (e) => {
                         e.stopPropagation();
                     }, true);
                 });
             }
-            
+
             // 递归处理所有子元素
             Array.from(el.children).forEach(child => {
                 processElement(child as HTMLElement);
             });
         }
-        
+
         // 开始处理
         setTimeout(() => {
             processElement(element);
         }, 100);
-        
+
         // 监控DOM变化，为新添加的元素添加事件监听
         const observer = new MutationObserver((mutations) => {
             mutations.forEach(mutation => {
@@ -570,14 +550,14 @@ export class UIWindowLib {
                 }
             });
         });
-        
+
         // 配置并启动观察器
-        observer.observe(element, { 
-            childList: true, 
-            subtree: true 
+        observer.observe(element, {
+            childList: true,
+            subtree: true
         });
     }
-    
+
     /**
      * 将窗口置于前台
      */
@@ -591,11 +571,11 @@ export class UIWindowLib {
                 maxZIndex = Math.max(maxZIndex, zIndex);
             }
         });
-        
+
         // 设置更高的z-index
         windowElement.style.zIndex = (maxZIndex + 1).toString();
     }
-    
+
     /**
      * 设置窗口位置
      * @param windowElement 窗口元素
@@ -606,7 +586,7 @@ export class UIWindowLib {
         windowElement.style.left = `${x}px`;
         windowElement.style.top = `${y}px`;
     }
-    
+
     /**
      * 设置窗口大小
      * @param windowElement 窗口元素
@@ -617,7 +597,7 @@ export class UIWindowLib {
         windowElement.style.width = `${Math.max(200, width)}px`;
         windowElement.style.height = `${Math.max(100, height)}px`;
     }
-    
+
     /**
      * 设置窗口标题
      * @param windowElement 窗口元素
@@ -629,7 +609,7 @@ export class UIWindowLib {
             titleElement.textContent = title;
         }
     }
-    
+
     /**
      * 设置窗口透明度
      * @param windowElement 窗口元素
@@ -638,117 +618,135 @@ export class UIWindowLib {
     public static setOpacity(windowElement: HTMLElement, opacity: number): void {
         windowElement.style.opacity = opacity.toString();
     }
-    
+
     /**
      * 显示一个示例窗口
      * @returns 创建的示例窗口对象
      */
-    public static showExampleWindow(): { 
+    public static showExampleWindow(): {
         windowElement: HTMLElement,
         contentElement: HTMLElement,
         close: () => void
     } {
         // 创建一个示例窗口
         const { windowElement, contentElement, close } = this.createWindow(
-            "示例窗口",
+            "debug_panel",
             500,
             400,
             1.0
         );
-        
+
         // 添加一些示例内容
         contentElement.innerHTML = `
             <style>
-                .example-container {
-                    padding: 10px;
-                    color: #e0e0e0;
+                .debug-container {
+                    padding: 5px;
+                    color: #d0d0d0;
                 }
                 
-                .example-title {
-                    font-size: 16px;
-                    font-weight: bold;
+                .debug-section {
                     margin-bottom: 10px;
-                    color: #f0f0f0;
+                    border-radius: 0px;
+                    overflow: hidden;
                 }
                 
-                .example-text {
-                    margin-bottom: 15px;
-                    line-height: 1.5;
-                }
-                
-                .example-button {
-                    background-color: #444;
-                    border: none;
-                    color: #e0e0e0;
-                    padding: 6px 12px;
-                    border-radius: 3px;
-                    cursor: pointer;
-                    transition: background-color 0.2s;
-                }
-                
-                .example-button:hover {
-                    background-color: #555;
-                }
-                
-                .example-input {
-                    background-color: #333;
-                    border: 1px solid #555;
-                    color: #e0e0e0;
+                .debug-section-header {
+                    background-color: #2a3a55;
                     padding: 5px 10px;
-                    border-radius: 3px;
-                    margin-bottom: 10px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    user-select: none;
+                }
+                
+                .debug-section-content {
+                    background-color: #000000;
+                }
+                
+                .debug-item {
+                    padding: 5px 15px;
+                    font-size: 11px;
+                    cursor: pointer;
+                }
+                
+                .debug-item:hover {
+                    background-color: #2a3a55;
+                }
+                
+                .debug-button {
+                    background-color: #2a3a55;
+                    border: none;
+                    color: #d0d0d0;
+                    padding: 6px 12px;
                     width: 100%;
+                    text-align: center;
+                    font-size: 11px;
+                    cursor: pointer;
+                    margin-bottom: 2px;
+                }
+                
+                .debug-button:hover {
+                    background-color: #3a4a65;
                 }
             </style>
             
-            <div class="example-container">
-                <div class="example-title">窗口库使用示例</div>
-                
-                <div class="example-text">
-                    这是一个使用 UIWindowLib 创建的示例窗口。窗口可以拖动、调整大小、收起和关闭。
+            <div class="debug-container">
+                <div class="debug-section">
+                    <div class="debug-section-header">debug</div>
+                    <div class="debug-section-content">
+                        <div class="debug-item">variable_monitoring</div>
+                        <div class="debug-item">console</div>
+                    </div>
                 </div>
                 
-                <div class="example-text">
-                    您可以轻松地向窗口内容区域添加自定义 HTML、CSS 和交互逻辑。
+                <div class="debug-section">
+                    <div class="debug-section-header">save</div>
+                    <div class="debug-section-content">
+                        <div class="debug-item">save[c3tag && json]</div>
+                        <div class="debug-item">load game from c3 tag</div>
+                        <div class="debug-item">load game from data</div>
+                        <div class="debug-item">download game data to local</div>
+                        <div class="debug-item">import game data to local</div>
+                        <div class="debug-item">clear data and save to localstorage</div>
+                    </div>
                 </div>
                 
-                <input type="text" class="example-input" placeholder="输入一些文本...">
-                
-                <button class="example-button" id="example-button">测试按钮</button>
+                <div class="debug-section">
+                    <div class="debug-section-header">Level</div>
+                    <div class="debug-section-content">
+                        <div class="debug-item">go layout [main_menu]</div>
+                    </div>
+                </div>
             </div>
         `;
-        
+
         // 为DOM变化添加一个小延迟，确保内容已加载
         setTimeout(() => {
-            // 添加按钮交互逻辑
-            const testButton = contentElement.querySelector('#example-button') as HTMLElement;
-            if (testButton) {
-                // 使用捕获阶段添加事件
-                testButton.addEventListener('click', (e) => {
+            // 折叠/展开部分的交互逻辑
+            const sectionHeaders = contentElement.querySelectorAll('.debug-section-header');
+            sectionHeaders.forEach(header => {
+                header.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    alert('您点击了示例窗口中的按钮！');
+                    const content = (header as HTMLElement).nextElementSibling as HTMLElement;
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
                 }, true);
-            }
-            
-            // 为输入框添加事件
-            const inputField = contentElement.querySelector('.example-input') as HTMLInputElement;
-            if (inputField) {
-                inputField.addEventListener('click', (e) => {
+            });
+
+            // 为调试项添加事件
+            const debugItems = contentElement.querySelectorAll('.debug-item');
+            debugItems.forEach(item => {
+                item.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    console.log('Clicked:', (item as HTMLElement).textContent);
                 }, true);
-                
-                inputField.addEventListener('input', (e) => {
-                    e.stopPropagation();
-                }, true);
-            }
+            });
         }, 100);
-        
+
         return { windowElement, contentElement, close };
     }
 }
 
 // 引擎初始化时调用
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 启动主窗口
-    //UIWindowLib.showExampleWindow();
+    UIWindowLib.showExampleWindow();
 })

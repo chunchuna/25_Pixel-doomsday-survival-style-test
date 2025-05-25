@@ -73,28 +73,44 @@ function ensureClickHandling() {
       .interaction-list {
         width: 100%;
         border-collapse: collapse;
-        color: #ffffff;
+        color: #d0d0d0;
         font-family: monospace;
       }
       .interaction-list th {
-        background-color: #1a3151;
-        color: #ffffff;
-        padding: 8px;
+        background-color: rgba(0, 0, 0, 0.4);
+        color: #a0a0a0;
+        padding: 6px 8px;
         text-align: left;
-        font-weight: bold;
-        border-bottom: 1px solid #000000;
+        font-weight: normal;
+        font-size: 10px;
+        border-bottom: 1px solid #333333;
+        text-transform: lowercase;
+        opacity: 0.8;
       }
       .interaction-list td {
         padding: 8px;
         border-bottom: 1px solid #333333;
-        background-color: #101010;
+        background-color: transparent;
         transition: background-color 0.3s ease-in-out;
+        font-size: 15px;
       }
       .interaction-list tr:nth-child(odd) td {
-        background-color: #181818;
+        background-color: rgba(0, 0, 0, 0.2);
       }
       .interaction-list tr:hover td {
-        background-color: #1a3151 !important;
+        background-color: rgba(128, 128, 128, 0.4) !important;
+        border-bottom: 1px solid rgba(200, 200, 200, 0.3) !important;
+      }
+      
+      /* First cell in hovered row gets left border */
+      .interaction-list tr:hover td:first-child {
+        border-left: 2px solid rgba(200, 200, 200, 0.3) !important;
+        padding-left: 6px !important;
+      }
+      
+      /* Last cell in hovered row gets right border */
+      .interaction-list tr:hover td:last-child {
+        border-right: 2px solid rgba(200, 200, 200, 0.3) !important;
       }
       /* Ensure the row itself has proper hover behavior */
       .interaction-list tbody tr {
@@ -243,52 +259,24 @@ export class UIInteractionPanelActionChooseMain {
         e.stopPropagation();
         ourCloseFunction(); // Use our close function
       }, true);
-      
-      // Keep hover effect
-      newCloseButton.addEventListener('mouseover', () => {
-        newCloseButton.style.backgroundColor = '#c14545';
-      }, true);
-      newCloseButton.addEventListener('mouseout', () => {
-        newCloseButton.style.backgroundColor = '#913a3a';
-      }, true);
     }
     
-    // Add dark blue theme to the window
-    if (windowElement) {
-      windowElement.style.backgroundColor = 'rgba(26, 38, 57, 0.95)';
-      windowElement.style.border = '1px solid #0c1323';
-      windowElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
-      
-      // Style the title bar if it exists
-      const titleBar = windowElement.querySelector('.pd-window-title-bar') as HTMLElement;
-      if (titleBar) {
-        titleBar.style.backgroundColor = '#203c73';
-        titleBar.style.color = '#ffffff';
-        titleBar.style.fontFamily = 'monospace';
-        titleBar.style.fontSize = '12px';
-        titleBar.style.textTransform = 'uppercase';
-        titleBar.style.letterSpacing = '1px';
-      }
-      
-      // Force size - make sure it takes effect
-      setTimeout(() => {
-        if (windowElement) {
-          windowElement.style.width = '350px';
-          windowElement.style.height = '300px';
-          
-          // Update size in UI library if method exists
-          UIWindowLib.setSize(windowElement, 500, 150);
-          
-          // Reposition after forced size change
-          positionWindowToBottomRight(windowElement);
-        }
-      }, 10);
-    }
+    // We're using the default window styling now, so no need to override styles
     
-    // Set content area style with dark theme
+    // Set content area style for the list
     contentElement.style.padding = '0';
-    contentElement.style.backgroundColor = '#101010';
     contentElement.style.zIndex = '10000'; // Ensure highest z-index
+    
+    // Force proper size and position
+    setTimeout(() => {
+      if (windowElement) {
+        // Update size in UI library
+        UIWindowLib.setSize(windowElement, 350, 300);
+        
+        // Reposition after forced size change
+        positionWindowToBottomRight(windowElement);
+      }
+    }, 10);
     
     // Create list container
     const buttonsContainer = document.createElement('div');
@@ -317,6 +305,10 @@ export class UIInteractionPanelActionChooseMain {
     headers.forEach(headerText => {
       const th = document.createElement('th');
       th.textContent = headerText;
+      th.style.fontSize = '10px';
+      th.style.fontWeight = 'normal';
+      th.style.color = '#a0a0a0';
+      th.style.textTransform = 'lowercase';
       headerRow.appendChild(th);
     });
     
@@ -417,15 +409,38 @@ export class UIInteractionPanelActionChooseMain {
     
     // Add explicit mouse events to handle hover
     row.addEventListener('mouseover', () => {
-      row.querySelectorAll('td').forEach(cell => {
-        cell.style.backgroundColor = '#1a3151';
+      row.querySelectorAll('td').forEach((cell, index) => {
+        cell.style.backgroundColor = 'rgba(128, 128, 128, 0.4)';
+        cell.style.borderBottom = '1px solid rgba(200, 200, 200, 0.3)';
+        
+        // Add left border to first cell
+        if (index === 0) {
+          cell.style.borderLeft = '2px solid rgba(200, 200, 200, 0.3)';
+          cell.style.paddingLeft = '6px';
+        }
+        
+        // Add right border to last cell
+        if (index === row.childElementCount - 1) {
+          cell.style.borderRight = '2px solid rgba(200, 200, 200, 0.3)';
+        }
       });
     });
     
     row.addEventListener('mouseout', () => {
       const isOdd = Array.from(tbody.children).indexOf(row) % 2 !== 0;
-      row.querySelectorAll('td').forEach(cell => {
-        cell.style.backgroundColor = isOdd ? '#181818' : '#101010';
+      row.querySelectorAll('td').forEach((cell, index) => {
+        cell.style.backgroundColor = isOdd ? 'rgba(0, 0, 0, 0.2)' : 'transparent';
+        cell.style.borderBottom = '1px solid #333333';
+        
+        // Reset borders
+        if (index === 0) {
+          cell.style.borderLeft = 'none';
+          cell.style.paddingLeft = '8px';
+        }
+        
+        if (index === row.childElementCount - 1) {
+          cell.style.borderRight = 'none';
+        }
       });
     });
     

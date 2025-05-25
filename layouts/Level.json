@@ -309,7 +309,7 @@
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
 										"ID": "LuYingYiZi",
-										"Actions": "使用,销毁,检查,维修,调查",
+										"Actions": "使用{use},销毁{destroy},检查{check},维修{fix},调查{find}",
 										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
 									},
 									"behaviors": {},
@@ -379,7 +379,7 @@
 										"GetYPosition": 0,
 										"ObjectName": "露营椅子",
 										"ID": "LuYingYiZi",
-										"Actions": "使用,销毁,检查,维修,调查",
+										"Actions": "使用{use},销毁{destroy},检查{check},维修{fix},调查{find}",
 										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
 									},
 									"behaviors": {},
@@ -449,7 +449,7 @@
 										"GetYPosition": 0,
 										"ObjectName": "帐篷",
 										"ID": "ZhangPeng",
-										"Actions": "查看库存,使用,破坏,检查,调查",
+										"Actions": "inventory{inventory},use{use},destroy{destroy},check{check},talk{find}",
 										"CheckDescribe": "充满了各种物资的帐篷，是谁留下来了的呢？",
 										"InventoryData": "[\n  {\n    \"name\": \"温暖的衣服\",\n    \"desc\": \"充满温度的衣服，可以保暖\",\n    \"level\": \"B\",\n    \"count\": 5\n  },\n  {\n    \"name\": \"手机\",\n    \"desc\": \"可以用于通讯和照明的只能工具\",\n    \"level\": \"S\",\n    \"count\": 1\n  }\n]",
 										"InventoryName": "帐篷内的物品"
@@ -62820,8 +62820,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1225.126168494736,
-										"y": 878.4581464694431,
+										"x": 1320.085931491825,
+										"y": 866.9974791268776,
 										"width": 75.1802114521298,
 										"height": 180.9023838066874,
 										"originX": 0.5104166666666666,
