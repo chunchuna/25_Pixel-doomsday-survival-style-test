@@ -2,6 +2,27 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    // c3 build in timer example
+    
+    var timer_c3 = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100)
+    timer_c3.behaviors.Timer.startTimer(5, "test", "once")
+    timer_c3.behaviors.Timer.addEventListener("timer", (e) => {
+        if (e.tag = "test") {
+            console.log("c3 build in timer test")
+        }
+
+    })
+    //startTimer(duration: number, name: string, type?: TimerBehaviorTimerType): void;
+    //type TimerBehaviorTimerType = "once" | "regular";
+
+})
+
+
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // for Test
 
@@ -13,7 +34,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (!PlayerInstance) return
 
 
-        UICDTimer.CreateCD(10, CDType.CIRCLE_CLOCKWISE).setPosition(PlayerInstance.x, PlayerInstance.y).OnTimeArrive(() => {
+        UICDTimer.CreateCD(50, CDType.CIRCLE_CLOCKWISE).setPosition(PlayerInstance.x, PlayerInstance.y).OnTimeArrive(() => {
             UISubtitleMain.ShowSubtitles("CD IS Over!!!")
 
             console.warn("CD TEST IS OVER")
@@ -41,6 +62,30 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         UICDTimer.CreateCD(5, CDType.PROGRESS_BAR, "test4", PlayerInstance.x, PlayerInstance.y)
             .OnTimeArrive(() => console.warn("PROGRESS_BAR test completed"));
     })
+    
+    // 添加快速测试按钮，使用短时间测试淡出效果
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "测试淡出效果 (0.3秒)", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return
+        
+        // 创建多个不同类型的短时间倒计时，测试淡出效果
+        UICDTimer.CreateCD(0.3, CDType.CIRCLE_DRAIN, "fadetest1", PlayerInstance.x - 50, PlayerInstance.y - 50)
+            .setSize(80, 80)
+            .setColors("rgba(255, 0, 0, 0.7)", "rgba(0, 0, 0, 0.5)")
+            .OnTimeArrive(() => console.warn("CIRCLE_DRAIN 测试完成"));
+            
+        UICDTimer.CreateCD(0.3, CDType.CIRCLE_CLOCKWISE, "fadetest2", PlayerInstance.x + 50, PlayerInstance.y - 50)
+            .setSize(80, 80)
+            .setColors("rgba(0, 255, 0, 0.7)", "rgba(0, 0, 0, 0.5)")
+            .OnTimeArrive(() => console.warn("CIRCLE_CLOCKWISE 测试完成"));
+            
+        UICDTimer.CreateCD(0.3, CDType.PROGRESS_BAR, "fadetest3", PlayerInstance.x, PlayerInstance.y + 50)
+            .setSize(150, 30)
+            .setColors("rgba(0, 0, 255, 0.7)", "rgba(0, 0, 0, 0.5)")
+            .OnTimeArrive(() => console.warn("PROGRESS_BAR 测试完成"));
+            
+        console.log("启动快速测试 - 0.3秒后将显示淡出效果");
+    });
 
 });
 
@@ -56,21 +101,26 @@ export enum CDType {
 export class UICDTimer {
     private static instances: Map<string, UICDTimer> = new Map();
     private id: string;
-    private htmlInstance: any;
-    private startTime: number = 0;
+    private htmlElement: any; // HTML element instance
+    private timerInstance: any; // C3 Timer instance
     private duration: number;
     private type: CDType;
     private onTimeArriveCallback: (() => void) | null = null;
-    private animationFrameId: number | null = null;
     private isPaused: boolean = false;
-    private pausedTimeRemaining: number = 0;
     private layer: string;
+    private timerTag: string;
+    
+    // 添加一个私有属性来跟踪当前进度
+    private _currentProgress: number = 0;
+    
+    // 淡出动画持续时间（毫秒）
+    public static FADE_OUT_DURATION: number = 1500
 
-    // Store default colors for easy reference
+    // Default colors for easy reference
     private fillColor: string = "rgba(0, 255, 0, 0.7)";
     private backgroundColor: string = "rgba(0, 0, 0, 0.5)";
 
-    // Add private properties to store dimensions
+    // Properties to store dimensions
     private _width: number;
     private _height: number;
 
@@ -79,16 +129,17 @@ export class UICDTimer {
         this.duration = duration;
         this.type = type;
         this.layer = layer;
-        
+        this.timerTag = `cd_${id}_${Date.now()}`;
+
         // Set default dimensions based on type
         this._width = this.type === CDType.PROGRESS_BAR ? 150 : 100;
         this._height = this.type === CDType.PROGRESS_BAR ? 30 : 100;
-        
-        // Calculate position consistently
+
+        // Calculate position
         let posX = 0;
         let posY = 0;
-        
-        // Get player instance for positioning if coordinates not provided
+
+        // Use player position if coordinates not provided
         if (x === undefined || y === undefined) {
             const PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
             if (PlayerInstance) {
@@ -101,21 +152,63 @@ export class UICDTimer {
             posX = x;
             posY = y;
         }
-        
-        // Create HTML instance with precise positioning
-        this.htmlInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(layer, posX, posY);
-        
-        // Render the appropriate HTML based on timer type
+
+        // Create HTML display element
+        try {
+            // Use any type to bypass type checking
+            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
+            this.htmlElement = objects.HTML_c3.createInstance(layer, posX, posY);
+            
+            // Set HTML element size
+            this.htmlElement.width = this._width;
+            this.htmlElement.height = this._height;
+            
+            // Render initial HTML
         this.renderHTML();
-        
-        // Start the timer
-        this.start();
-        
-        console.log(`Created ${this.type} countdown timer with ID: ${this.id}, duration: ${this.duration}s, position: (${posX}, ${posY})`);
+            
+            // Create C3 timer instance and set event listeners
+            this.createTimerInstance();
+            
+            console.log(`Created ${this.type} countdown timer with ID: ${this.id}, duration: ${this.duration}s, position: (${posX}, ${posY})`);
+        } catch (error: any) {
+            console.error(`Failed to create CD timer: ${error.message}`);
+        }
     }
 
     /**
-     * Creates a new countdown timer or returns an existing one
+     * Creates C3 timer instance
+     */
+    private createTimerInstance(): void {
+        try {
+            // Create C3 Timer instance
+            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
+            this.timerInstance = objects.C3Ctimer.createInstance("Other", -100, -100);
+            
+            // Listen for timer events
+            this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === this.timerTag) {
+                    // 直接开始淡出，保持当前进度状态（不更新为100%）
+                    this.fadeOutAndDestroy();
+                    
+                    // Execute callback if provided
+                    if (this.onTimeArriveCallback) {
+                        this.onTimeArriveCallback();
+                    }
+                    
+                    console.log("Countdown complete");
+                }
+            });
+
+        // Start the timer
+        this.start();
+
+        } catch (error: any) {
+            console.error(`Failed to create timer instance: ${error.message}`);
+        }
+    }
+
+    /**
+     * Creates a new countdown timer or returns existing one
      * @param duration Duration in seconds
      * @param type Visual style of the countdown
      * @param id Unique identifier for this timer
@@ -154,16 +247,10 @@ export class UICDTimer {
      * Pauses the countdown
      */
     public pause(): void {
-        if (!this.isPaused && this.animationFrameId !== null) {
+        if (!this.isPaused && this.timerInstance) {
             this.isPaused = true;
-            cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = null;
-
-            // Calculate remaining time
-            const elapsed = (Date.now() - this.startTime) / 1000;
-            this.pausedTimeRemaining = Math.max(0, this.duration - elapsed);
-
-            console.log(`Countdown paused with ${this.pausedTimeRemaining.toFixed(2)} seconds remaining`);
+            this.timerInstance.behaviors.Timer.setTimerPaused(this.timerTag, true);
+            console.log(`Countdown paused`);
         }
     }
 
@@ -171,10 +258,9 @@ export class UICDTimer {
      * Resumes a paused countdown
      */
     public continue(): void {
-        if (this.isPaused) {
+        if (this.isPaused && this.timerInstance) {
             this.isPaused = false;
-            this.startTime = Date.now() - ((this.duration - this.pausedTimeRemaining) * 1000);
-            this.update();
+            this.timerInstance.behaviors.Timer.setTimerPaused(this.timerTag, false);
             console.log("Countdown resumed");
         }
     }
@@ -185,9 +271,9 @@ export class UICDTimer {
      * @param y Y position
      */
     public setPosition(x: number, y: number): UICDTimer {
-        if (this.htmlInstance) {
-            this.htmlInstance.x = x;
-            this.htmlInstance.y = y;
+        if (this.htmlElement) {
+            this.htmlElement.x = x;
+            this.htmlElement.y = y;
         }
         return this;
     }
@@ -197,25 +283,24 @@ export class UICDTimer {
      * @param layer Layer name
      */
     public setLayer(layer: string): UICDTimer {
-        if (this.htmlInstance && this.layer !== layer) {
+        if (this.htmlElement && this.layer !== layer) {
             // Store current position
-            const x = this.htmlInstance.x;
-            const y = this.htmlInstance.y;
+            const x = this.htmlElement.x;
+            const y = this.htmlElement.y;
 
             // Destroy current instance
-            this.htmlInstance.destroy();
+            this.htmlElement.destroy();
 
             // Create new instance on the specified layer
-            this.htmlInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(layer, x, y);
+            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
+            this.htmlElement = objects.HTML_c3.createInstance(layer, x, y);
             this.layer = layer;
 
             // Re-render HTML
             this.renderHTML();
 
             // Update visual based on current progress
-            const elapsed = (Date.now() - this.startTime) / 1000;
-            const progress = Math.min(1, elapsed / this.duration);
-            this.updateVisual(progress);
+            this.updateVisualFromTimer();
         }
         return this;
     }
@@ -226,29 +311,27 @@ export class UICDTimer {
      * @param height Height in pixels
      */
     public setSize(width: number, height: number): UICDTimer {
-        if (this.htmlInstance) {
+        if (this.htmlElement) {
             try {
                 // Store the new size
                 this._width = width;
                 this._height = height;
-                
+
                 // Set size directly on the HTML component
-                this.htmlInstance.width = width;
-                this.htmlInstance.height = height;
-                
+                this.htmlElement.width = width;
+                this.htmlElement.height = height;
+
                 // Update the container to match
                 const containerHtml = `
                 <div id="cd-container-${this.id}" style="position:relative; width:100%; height:100%; border-radius:${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};">
                 </div>`;
-                
+
                 // Set the container HTML
-                this.htmlInstance.setContent(containerHtml, "html");
-                
+                this.htmlElement.setContent(containerHtml, "html");
+
                 // Update the visual to reflect current progress
-                const elapsed = (Date.now() - this.startTime) / 1000;
-                const progress = Math.min(1, elapsed / this.duration);
-                this.updateVisual(progress);
-                
+                this.updateVisualFromTimer();
+
                 console.log(`Set size to ${width}x${height}`);
             } catch (error: any) {
                 console.error(`Failed to set size: ${error.message}`);
@@ -263,7 +346,7 @@ export class UICDTimer {
      * @param backgroundColor Color for the background part (e.g. "rgba(0, 0, 0, 0.3)")
      */
     public setColors(fillColor: string, backgroundColor: string): UICDTimer {
-        if (this.htmlInstance) {
+        if (this.htmlElement) {
             try {
                 this.fillColor = fillColor;
                 this.backgroundColor = backgroundColor;
@@ -272,9 +355,7 @@ export class UICDTimer {
                 this.renderHTML();
 
                 // Update the visual based on current progress
-                const elapsed = (Date.now() - this.startTime) / 1000;
-                const progress = Math.min(1, elapsed / this.duration);
-                this.updateVisual(progress);
+                this.updateVisualFromTimer();
 
                 console.log(`Updated colors: fill=${fillColor}, bg=${backgroundColor}`);
             } catch (error: any) {
@@ -288,14 +369,15 @@ export class UICDTimer {
      * Destroys the countdown timer and removes the HTML element
      */
     public destroy(): void {
-        if (this.animationFrameId !== null) {
-            cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = null;
+        if (this.timerInstance) {
+            this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
+            this.timerInstance.destroy();
+            this.timerInstance = null;
         }
 
-        if (this.htmlInstance) {
-            this.htmlInstance.destroy();
-            this.htmlInstance = null;
+        if (this.htmlElement) {
+            this.htmlElement.destroy();
+            this.htmlElement = null;
         }
 
         UICDTimer.instances.delete(this.id);
@@ -306,138 +388,187 @@ export class UICDTimer {
      * Starts the countdown
      */
     private start(): void {
-        this.startTime = Date.now();
-        this.update();
-        console.log(`Countdown started for ${this.duration} seconds`);
+        if (this.timerInstance && this.timerInstance.behaviors.Timer) {
+            // Use C3's Timer component to start the timer
+            this.timerInstance.behaviors.Timer.startTimer(this.duration, this.timerTag, "once");
+            
+            // Start progress update loop
+            this.startProgressUpdateLoop();
+            
+            console.log(`Countdown started for ${this.duration} seconds with tag ${this.timerTag}`);
+        }
     }
 
     /**
-     * Updates the countdown visual and checks for completion
+     * Starts progress update loop
      */
-    private update(): void {
-        if (this.isPaused) return;
-
-        const now = Date.now();
-        const elapsed = (now - this.startTime) / 1000;
-        const remaining = Math.max(0, this.duration - elapsed);
-        const progress = Math.min(1, elapsed / this.duration);
-
-        // Update the visual based on progress
-        this.updateVisual(progress);
-
-        // Check if countdown is complete
-        if (remaining <= 0) {
-            // Countdown complete
-            this.updateVisual(1); // Ensure visual shows 100%
-
-            // Start the fade-out animation
-            this.fadeOutAndDestroy();
-
-            // Execute callback if provided
-            if (this.onTimeArriveCallback) {
-                this.onTimeArriveCallback();
+    private startProgressUpdateLoop(): void {
+        // Create an update function to update the visual effect
+        const updateFunction = () => {
+            if (!this.htmlElement || !this.timerInstance) return;
+            
+            try {
+                // If timer is still running, update visual effect
+                if (this.timerInstance.behaviors.Timer.isTimerRunning(this.timerTag)) {
+                    this.updateVisualFromTimer();
+                    requestAnimationFrame(updateFunction);
+                }
+            } catch (error: any) {
+                console.error(`Error in progress update loop: ${error.message}`);
             }
+        };
+        
+        // Start update loop
+        requestAnimationFrame(updateFunction);
+    }
 
-            console.log("Countdown complete");
-
-            // Clean up animation
-            if (this.animationFrameId) {
-                cancelAnimationFrame(this.animationFrameId);
-                this.animationFrameId = null;
+    /**
+     * Gets current progress from C3 timer and updates visual
+     */
+    private updateVisualFromTimer(): void {
+        try {
+            if (!this.timerInstance || !this.timerInstance.behaviors.Timer) return;
+            
+            const timer = this.timerInstance.behaviors.Timer;
+            
+            // Check if timer is running
+            if (timer.isTimerRunning(this.timerTag)) {
+                // Get current time and total duration
+                const currentTime = timer.getCurrentTime(this.timerTag);
+                const duration = timer.getDuration(this.timerTag);
+                
+                // Calculate progress (from 1 to 0 for countdown effect)
+                let progress = 0;
+                if (duration > 0) {
+                    // For countdown we need to invert the progress (1->0 instead of 0->1)
+                    progress = 1 - (currentTime / duration);
+                    
+                    // Debug log to check values
+                    //console.log(`Timer update - currentTime: ${currentTime}, duration: ${duration}, countdown progress: ${progress}`);
+                }
+                
+                // Update visual effect
+                this.updateVisual(progress);
             }
-
-            return;
+        } catch (error: any) {
+            console.error(`Failed to update from timer: ${error.message}`);
         }
-
-        // Continue the animation loop
-        this.animationFrameId = requestAnimationFrame(() => this.update());
     }
 
     /**
      * Performs fade-out animation and destroys the component when done
      */
     private fadeOutAndDestroy(): void {
-        if (!this.htmlInstance) return;
-        
+        if (!this.htmlElement) return;
+
         console.log("Starting fade-out animation");
-        
+
         try {
-            // First, add a style with animation to the container
-            const animationStyle = `
-            <style>
-                @keyframes fadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-                #cd-container-${this.id} {
-                    animation: fadeOut 1s ease forwards;
-                }
-            </style>`;
+            // 保持当前状态（不强制设为100%）
             
-            // Apply the animation style
-            this.htmlInstance.setContent(animationStyle, "html", "", true);
+            // 使用手动透明度淡出动画
+            const totalDuration = UICDTimer.FADE_OUT_DURATION;
+            const startTime = Date.now();
+            const initialOpacity = 1.0;
             
-            // Set a timeout to destroy after animation completes
-            setTimeout(() => {
-                if (this.htmlInstance) {
-                    this.htmlInstance.destroy();
-                    this.htmlInstance = null;
+            // 创建淡出效果函数
+            const fadeStep = () => {
+                if (!this.htmlElement) return;
+                
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / totalDuration, 1.0);
+                const currentOpacity = initialOpacity * (1 - progress);
+                
+                // 应用透明度但保持当前视觉状态不变
+                // 使用getCurrentVisualHtml方法获取当前进度的HTML
+                const htmlContent = `
+                <div style="position:relative; width:100%; height:100%; opacity:${currentOpacity};">
+                    ${this.getCurrentVisualHtml()}
+                </div>`;
+                
+                this.htmlElement.setContent(htmlContent, "html");
+                
+                // 如果淡出未完成，继续下一帧
+                if (progress < 1.0) {
+                    requestAnimationFrame(fadeStep);
+                } else {
+                    // 淡出完成，销毁计时器
+                    if (this.htmlElement) {
+                        this.htmlElement.destroy();
+                        this.htmlElement = null;
+                    }
+                    
+                    if (this.timerInstance) {
+                        this.timerInstance.destroy();
+                        this.timerInstance = null;
+                    }
+                    
                     UICDTimer.instances.delete(this.id);
                     console.log(`Countdown timer ${this.id} faded out and destroyed`);
                 }
-            }, 1100); // Animation duration + small buffer
+            };
+            
+            // 开始淡出动画
+            requestAnimationFrame(fadeStep);
+            
         } catch (error: any) {
-            // If any error occurs during animation, fall back to immediate destroy
+            // 如果动画过程中发生任何错误，立即销毁
             console.error(`Error during fade animation: ${error.message}. Destroying immediately.`);
-            if (this.htmlInstance) {
-                this.htmlInstance.destroy();
-                this.htmlInstance = null;
-                UICDTimer.instances.delete(this.id);
-            }
+            this.destroy();
         }
     }
 
     /**
-     * Updates the visual representation based on the current progress
+     * Gets the current visual content HTML based on timer type
      */
-    private updateVisual(progress: number): void {
-        try {
-            // Adjust progress for visualization based on type
-            const displayProgress = this.type === CDType.CIRCLE_DRAIN ? 1 - progress : progress;
-            
-            // Format the display progress as a percentage (0-100)
-            const progressPercent = Math.min(100, Math.max(0, displayProgress * 100));
-            
-            // Update the visual display based on type
-            switch (this.type) {
-                case CDType.CIRCLE_FILL:
-                    this.updateCircleFill(progressPercent);
-                    break;
-                    
-                case CDType.CIRCLE_DRAIN:
-                    this.updateCircleDrain(progressPercent);
-                    break;
-                    
-                case CDType.CIRCLE_CLOCKWISE:
-                    this.updateClockwise(progressPercent);
-                    break;
-                    
-                case CDType.CIRCLE_PULSE:
-                    this.updatePulse(progressPercent, progress);
-                    break;
-                    
-                case CDType.PROGRESS_BAR:
-                    this.updateProgressBar(progressPercent);
-                    break;
-            }
-        } catch (error: any) {
-            console.error(`Failed to update countdown visual: ${error.message}`);
+    private getContentHtml(): string {
+        // Get the completed state (100%)
+        switch (this.type) {
+            case CDType.CIRCLE_FILL:
+                return this.createCircleFillHtml(100);
+            case CDType.CIRCLE_DRAIN:
+                return this.createCircleDrainHtml(100);
+            case CDType.CIRCLE_CLOCKWISE:
+                return this.createClockwiseHtml(100);
+            case CDType.CIRCLE_PULSE:
+                return this.createPulseHtml(100, 1);
+            case CDType.PROGRESS_BAR:
+                return this.createProgressBarHtml(100);
+            default:
+                return this.createCircleFillHtml(100);
         }
     }
 
-    private updateCircleFill(progressPercent: number): void {
-        // For the CIRCLE_FILL type, we need to update both the fill rotation and the mask
-        const html = `
+    /**
+     * 根据当前进度获取HTML内容
+     */
+    private getCurrentVisualHtml(): string {
+        // 使用当前保存的进度值生成HTML
+        const displayProgress = this.type === CDType.CIRCLE_DRAIN ? 1 - this._currentProgress : this._currentProgress;
+        const progressPercent = Math.min(100, Math.max(0, displayProgress * 100));
+        
+        // 根据类型返回相应的HTML
+        switch (this.type) {
+            case CDType.CIRCLE_FILL:
+                return this.createCircleFillHtml(progressPercent);
+            case CDType.CIRCLE_DRAIN:
+                return this.createCircleDrainHtml(progressPercent);
+            case CDType.CIRCLE_CLOCKWISE:
+                return this.createClockwiseHtml(progressPercent);
+            case CDType.CIRCLE_PULSE:
+                return this.createPulseHtml(progressPercent, this._currentProgress);
+            case CDType.PROGRESS_BAR:
+                return this.createProgressBarHtml(progressPercent);
+            default:
+                return this.createCircleFillHtml(progressPercent);
+        }
+    }
+
+    /**
+     * Creates HTML for circle fill visualization
+     */
+    private createCircleFillHtml(progressPercent: number): string {
+        return `
         <div style="position:relative; width:100%; height:100%;">
             <div style="width:100%; height:100%; position:relative;">
                 <div style="width:50%; height:100%; position:absolute; overflow:hidden; transform:rotate(${Math.min(180, progressPercent * 3.6)}deg);">
@@ -449,16 +580,14 @@ export class UICDTimer {
                 <div style="width:80%; height:80%; background-color:${this.backgroundColor}; border-radius:50%; position:absolute; top:10%; left:10%;"></div>
             </div>
         </div>`;
-
-        this.htmlInstance.setContent(html, "html");
     }
 
-    private updateCircleDrain(progressPercent: number): void {
-        // For CIRCLE_DRAIN, we need to invert the progress (100% -> 0%)
+    /**
+     * Creates HTML for circle drain visualization
+     */
+    private createCircleDrainHtml(progressPercent: number): string {
         const invertedProgress = 100 - progressPercent;
-
-        // Create the HTML for the draining circle effect
-        const html = `
+        return `
         <div style="position:relative; width:100%; height:100%;">
             <div style="width:100%; height:100%; position:relative;">
                 <div style="width:50%; height:100%; position:absolute; overflow:hidden; transform:rotate(${Math.min(180, invertedProgress * 3.6)}deg);">
@@ -470,59 +599,110 @@ export class UICDTimer {
                 <div style="width:80%; height:80%; background-color:${this.backgroundColor}; border-radius:50%; position:absolute; top:10%; left:10%;"></div>
             </div>
         </div>`;
-
-        this.htmlInstance.setContent(html, "html");
     }
 
-    private updateClockwise(progressPercent: number): void {
-        // Create a CSS conic gradient for the clockwise timer
+    /**
+     * Creates HTML for clockwise visualization
+     */
+    private createClockwiseHtml(progressPercent: number): string {
         const degrees = progressPercent * 3.6;
-        const html = `
+        return `
         <div style="position:relative; width:100%; height:100%;">
             <div style="width:100%; height:100%; border-radius:50%; background:conic-gradient(${this.fillColor} 0deg, ${this.fillColor} ${degrees}deg, ${this.backgroundColor} ${degrees}deg, ${this.backgroundColor} 360deg);"></div>
             <div style="width:80%; height:80%; background-color:${this.backgroundColor}; border-radius:50%; position:absolute; top:10%; left:10%;"></div>
         </div>`;
-
-        this.htmlInstance.setContent(html, "html");
     }
 
-    private updatePulse(progressPercent: number, rawProgress: number): void {
-        // Calculate a pulsing effect using sine
+    /**
+     * Creates HTML for pulse visualization
+     */
+    private createPulseHtml(progressPercent: number, rawProgress: number): string {
         const scale = 0.8 + (Math.sin(rawProgress * Math.PI * 10) * 0.1);
         const degrees = progressPercent * 3.6;
-
-        const html = `
+        return `
         <div style="position:relative; width:100%; height:100%; transform:scale(${scale});">
             <div style="width:100%; height:100%; border-radius:50%; background:conic-gradient(${this.fillColor} 0deg, ${this.fillColor} ${degrees}deg, ${this.backgroundColor} ${degrees}deg, ${this.backgroundColor} 360deg);"></div>
             <div style="width:80%; height:80%; background-color:${this.backgroundColor}; border-radius:50%; position:absolute; top:10%; left:10%;"></div>
         </div>`;
-
-        this.htmlInstance.setContent(html, "html");
     }
 
-    private updateProgressBar(progressPercent: number): void {
-        // Create a simple progress bar
-        const html = `
+    /**
+     * Creates HTML for progress bar visualization
+     */
+    private createProgressBarHtml(progressPercent: number): string {
+        return `
         <div style="position:relative; width:100%; height:100%;">
             <div style="width:100%; height:100%; background-color:${this.backgroundColor}; border-radius:15px; overflow:hidden;">
                 <div style="width:${progressPercent}%; height:100%; background-color:${this.fillColor};"></div>
             </div>
         </div>`;
-
-        this.htmlInstance.setContent(html, "html");
     }
 
-    /**
-     * Renders the initial HTML and CSS for the countdown timer
-     */
+    private updateCircleFill(progressPercent: number): void {
+        this.htmlElement.setContent(this.createCircleFillHtml(progressPercent), "html");
+    }
+
+    private updateCircleDrain(progressPercent: number): void {
+        this.htmlElement.setContent(this.createCircleDrainHtml(progressPercent), "html");
+    }
+
+    private updateClockwise(progressPercent: number): void {
+        this.htmlElement.setContent(this.createClockwiseHtml(progressPercent), "html");
+    }
+
+    private updatePulse(progressPercent: number, rawProgress: number): void {
+        this.htmlElement.setContent(this.createPulseHtml(progressPercent, rawProgress), "html");
+    }
+
+    private updateProgressBar(progressPercent: number): void {
+        this.htmlElement.setContent(this.createProgressBarHtml(progressPercent), "html");
+    }
+
+    private updateVisual(progress: number): void {
+        try {
+            // 保存当前进度值，用于淡出时保持状态
+            this._currentProgress = progress;
+            
+            // Adjust progress for visualization based on type
+            const displayProgress = this.type === CDType.CIRCLE_DRAIN ? 1 - progress : progress;
+
+            // Format the display progress as a percentage (0-100)
+            const progressPercent = Math.min(100, Math.max(0, displayProgress * 100));
+
+            // Update the visual display based on type
+            switch (this.type) {
+                case CDType.CIRCLE_FILL:
+                    this.updateCircleFill(progressPercent);
+                    break;
+
+                case CDType.CIRCLE_DRAIN:
+                    this.updateCircleDrain(progressPercent);
+                    break;
+
+                case CDType.CIRCLE_CLOCKWISE:
+                    this.updateClockwise(progressPercent);
+                    break;
+
+                case CDType.CIRCLE_PULSE:
+                    this.updatePulse(progressPercent, progress);
+                    break;
+
+                case CDType.PROGRESS_BAR:
+                    this.updateProgressBar(progressPercent);
+                    break;
+            }
+        } catch (error: any) {
+            console.error(`Failed to update countdown visual: ${error.message}`);
+        }
+    }
+
     private renderHTML(): void {
         try {
-            // Set the component size directly
-            this.htmlInstance.width = this._width;
-            this.htmlInstance.height = this._height;
-            
-            // Create a container with a unique ID for this timer that uses 100% of the component size
-            // Include base styles directly in the HTML
+           
+            this.htmlElement.width = this._width;
+            this.htmlElement.height = this._height;
+
+        
             const containerHtml = `
             <style>
                 #cd-container-${this.id} {
@@ -531,20 +711,31 @@ export class UICDTimer {
                     height: 100%;
                     border-radius: ${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};
                     opacity: 1;
-                    transition: opacity 0.3s ease; /* Add transition for any opacity changes */
+                    transition: opacity 0.1s ease; /* Add transition for any opacity changes */
                 }
             </style>
             <div id="cd-container-${this.id}"></div>`;
+
             
-            // Set the container HTML
-            this.htmlInstance.setContent(containerHtml, "html");
-            
-            // Initialize with 0% progress
+            this.htmlElement.setContent(containerHtml, "html");
+
+
             this.updateVisual(0);
-            
+
             console.log(`Rendered ${this.type} countdown timer HTML with size ${this._width}x${this._height}`);
         } catch (error: any) {
             console.error(`Failed to render countdown timer: ${error.message}`);
+        }
+    }
+
+    /**
+     * Sets the fade-out duration for all countdown timers
+     * @param duration Duration in milliseconds
+     */
+    public static SetFadeOutDuration(duration: number): void {
+        if (duration > 0) {
+            UICDTimer.FADE_OUT_DURATION = duration;
+            console.log(`Set fade-out duration to ${duration}ms`);
         }
     }
 }

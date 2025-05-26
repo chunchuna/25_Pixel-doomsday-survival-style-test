@@ -6,21 +6,14 @@ export enum GAME_TYPE {
     MAIN_MENU = "MainMenu"
 }
 
-/**
- * 在屏幕中心创建一个显示图片的窗口
- * @param imageUrl 图片的URL或路径
- * @param title 窗口标题，默认为"图片查看器"
- * @param width 窗口宽度，默认为600
- * @param height 窗口高度，默认为500
- * @returns 窗口控制对象，包含窗口元素、内容元素和关闭函数
- */
+
 export function showImageWindow(
     imageUrl: string,
     title: string = "图片查看器",
     width: number = 600,
     height: number = 500
 ) {
-    // 创建窗口
+   
     const { windowElement, contentElement, close } = UIWindowLib.createWindow(
         title,
         width,
@@ -28,7 +21,7 @@ export function showImageWindow(
         1.0 
     );
 
-    // 设置图片容器样式
+  
     contentElement.innerHTML = `
         <style>
             .image-container {
