@@ -81,12 +81,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 })
 
-var test_value = 50;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    if (!PlayerInstance) return
+
+
+
     for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
 
-        var cd = UICDTimer.CreateFromVariables(Gouhuos.instVars.ChaiHuoLiang, 0, 100, CDType.CIRCLE_CLOCKWISE).setPosition(Gouhuos.x, Gouhuos.y).setColors("rgba(162, 179, 238, 0.7)", "rgba(12, 12, 12, 0.16)").setSize(100, 100)
+
+        var test = UICDTimer.CreateFromDirectVariable(() => Gouhuos.instVars.ChaiHuoLiang, 0, 100, CDType.CIRCLE_CLOCKWISE, "GouHuoRanLiao", Gouhuos.x - 25, Gouhuos.y - 50)
+            .setSize(30, 30)
+            .setColors("rgba(255, 165, 0, 0.8)", "rgba(50, 50, 50, 0.6)");
+
 
         Gouhuos.behaviors.Timer.startTimer(1, "gouhuoranshaojiance", "regular")
         Gouhuos.behaviors.Timer.addEventListener("timer", (e) => {
@@ -95,8 +103,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
                 if (!Gouhuos.instVars.ZhengZaiRanShao) return
                 if (Gouhuos.instVars.ChaiHuoLiang >= 0) {
-                    Gouhuos.instVars.ChaiHuoLiang -= 10;
-                    console.log("id:" + Gouhuos.uid + "burn now!" + Gouhuos.instVars.ChaiHuoLiang)
+                    Gouhuos.instVars.ChaiHuoLiang -= 1;
                 } else if (Gouhuos.instVars.ChaiHuoLiang <= 0) {
                     GouHuo.ExtinguishedGouHuo(Gouhuos)
                 }

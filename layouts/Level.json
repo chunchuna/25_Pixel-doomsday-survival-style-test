@@ -380,8 +380,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1439.8451159928256,
-										"y": 894.0390201524621,
+										"x": 1437.8405585254943,
+										"y": 893.6381041914678,
 										"width": 86.30491926640632,
 										"height": 86.30491926640632,
 										"originX": 0.46875,
@@ -61621,8 +61621,8 @@
 							"tags": "",
 							"instanceVariables": {
 								"GetYPosition": 0,
-								"ObjectName": "篝火",
-								"ID": "GouHuo",
+								"ObjectName": "GouHuo",
+								"ID": "Gouhuo",
 								"Actions": "burn{burn},extinguished{extinguished}",
 								"CheckDescribe": "一把普通的露营椅，被雨水打湿了",
 								"IsGouHuo": false,
@@ -61680,6 +61680,22 @@
 														"state": true
 													},
 													{
+														"iv": "ObjectName",
+														"state": false
+													},
+													{
+														"iv": "ID",
+														"state": false
+													},
+													{
+														"iv": "Actions",
+														"state": false
+													},
+													{
+														"iv": "CheckDescribe",
+														"state": true
+													},
+													{
 														"iv": "IsGouHuo",
 														"state": true
 													},
@@ -61689,7 +61705,7 @@
 													},
 													{
 														"iv": "ChaiHuoLiang",
-														"state": true
+														"state": false
 													},
 													{
 														"iv": "ZhengZaiRanShao",
@@ -61711,6 +61727,35 @@
 									{
 										"id": "effect",
 										"component": [
+											{
+												"key": "BetterOutline",
+												"state": [
+													[
+														"color",
+														true
+													],
+													[
+														"width",
+														false
+													],
+													[
+														"precision-step",
+														false
+													],
+													[
+														"samples",
+														false
+													],
+													[
+														"opacity",
+														true
+													],
+													[
+														"<<effect-template-enable>>",
+														false
+													]
+												]
+											},
 											{
 												"key": "像素化蒙版",
 												"state": [
@@ -61747,35 +61792,6 @@
 													[
 														"<<effect-template-enable>>",
 														true
-													]
-												]
-											},
-											{
-												"key": "BetterOutline",
-												"state": [
-													[
-														"color",
-														true
-													],
-													[
-														"width",
-														false
-													],
-													[
-														"precision-step",
-														false
-													],
-													[
-														"samples",
-														false
-													],
-													[
-														"opacity",
-														true
-													],
-													[
-														"<<effect-template-enable>>",
-														false
 													]
 												]
 											}

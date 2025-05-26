@@ -216,6 +216,7 @@ export class UICDTimer {
     private variableMaxValue: number = 100;
     private lastVariableValue: number = 0;
     private variableUpdateLoop: number | null = null;
+    private variableGetter: (() => number) | null = null; // Function to get current variable value
 
     // Private property to track current progress
     private _currentProgress: number = 0;
@@ -231,12 +232,13 @@ export class UICDTimer {
     private _width: number;
     private _height: number;
 
-    private constructor(id: string, duration: number, type: CDType, x?: number, y?: number, layer: string = "html_c3") {
+    private constructor(id: string, duration: number, type: CDType, x?: number, y?: number, layer: string = "html_c3", isVariableBased: boolean = false) {
         this.id = id;
         this.duration = duration;
         this.type = type;
         this.layer = layer;
         this.timerTag = `cd_${id}_${Date.now()}`;
+        this.isVariableBased = isVariableBased; // Set this early
 
         // Set default dimensions based on type
         this._width = this.type === CDType.PROGRESS_BAR ? 150 : 100;
@@ -262,16 +264,35 @@ export class UICDTimer {
 
         // Create HTML display element
         try {
-            // Use any type to bypass type checking
-            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
-            this.htmlElement = objects.HTML_c3.createInstance(layer, posX, posY);
+            // Try to use HTML_c3 object first
+            try {
+                this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(layer, posX, posY);
+                console.log(`Created HTML_c3 element successfully`);
+            } catch (htmlError: any) {
+                console.warn(`HTML_c3 object not available: ${htmlError.message}`);
+                
+                // Try alternative: use hudongtishi_ui as a fallback
+                try {
+                    this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.hudongtishi_ui.createInstance(layer, posX, posY, true);
+                    console.log(`Created hudongtishi_ui element as fallback`);
+                } catch (fallbackError: any) {
+                    console.error(`No suitable UI object found for timer display: ${fallbackError.message}`);
+                    console.error(`Available objects might not include HTML_c3 or hudongtishi_ui`);
+                    
+                    // Create a simple console-based timer as last resort
+                    this.htmlElement = null;
+                    console.warn(`Timer ${this.id} will run in console-only mode`);
+                }
+            }
 
-            // Set HTML element size
-            this.htmlElement.width = this._width;
-            this.htmlElement.height = this._height;
+            // Set HTML element size if element was created
+            if (this.htmlElement) {
+                this.htmlElement.width = this._width;
+                this.htmlElement.height = this._height;
 
-            // Render initial HTML
-            this.renderHTML();
+                // Render initial HTML
+                this.renderHTML();
+            }
 
             // Create C3 timer instance and set event listeners (only for time-based timers)
             if (!this.isVariableBased) {
@@ -297,11 +318,14 @@ export class UICDTimer {
         y?: number,
         layer: string = "html_c3"
     ): UICDTimer {
-        const instance = new UICDTimer(id, 0, type, x, y, layer);
-        instance.isVariableBased = true;
+        const instance = new UICDTimer(id, 0, type, x, y, layer, true);
         instance.monitoredVariable = monitoredVariable;
         instance.variableMinValue = minValue;
         instance.variableMaxValue = maxValue;
+        
+        // Set up variable getter function based on the type of monitored variable
+        instance.setupVariableGetter();
+        
         instance.lastVariableValue = instance.getVariableValue();
 
         // Start variable monitoring
@@ -315,9 +339,8 @@ export class UICDTimer {
      */
     private createTimerInstance(): void {
         try {
-            // Create C3 Timer instance
-            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
-            this.timerInstance = objects.C3Ctimer.createInstance("Other", -100, -100);
+            // Create C3 Timer instance using full runtime path
+            this.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
 
             // Listen for timer events
             this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -364,15 +387,94 @@ export class UICDTimer {
             UICDTimer.instances.get(id)?.destroy();
         }
 
-        // Create new instance
-        const instance = new UICDTimer(id, duration, type, x, y, layer);
+        // Create new instance (time-based timer)
+        const instance = new UICDTimer(id, duration, type, x, y, layer, false);
         UICDTimer.instances.set(id, instance);
         return instance;
     }
 
     /**
+     * Creates a variable-based timer UI that monitors a direct variable reference
+     * This method allows you to pass a getter function that returns the current variable value
+     * Usage: UICDTimer.CreateFromDirectVariable(() => Gouhuos.instVars.ChaiHuoLiang, 0, 100, CDType.CIRCLE_CLOCKWISE)
+     * @param variableGetter Function that returns the current variable value
+     * @param minValue Minimum value of the variable
+     * @param maxValue Maximum value of the variable
+     * @param type Visual style of the timer UI
+     * @param id Unique identifier for this timer
+     * @param x X position (default: player position)
+     * @param y Y position (default: player position)
+     * @param layer Layer name to create the timer on (default: "html_c3")
+     */
+    public static CreateFromDirectVariable(
+        variableGetter: () => number,
+        minValue: number,
+        maxValue: number,
+        type: CDType = CDType.CIRCLE_FILL,
+        id: string = "direct_variable_default",
+        x?: number,
+        y?: number,
+        layer: string = "html_c3"
+    ): UICDTimer {
+        // Use the regular CreateFromVariables method with the getter function
+        return UICDTimer.CreateFromVariables(variableGetter, minValue, maxValue, type, id, x, y, layer);
+    }
+
+    /**
+     * Creates a variable-based timer UI that monitors an instance variable directly
+     * This is a convenience method for monitoring object properties like instance.instVars.property
+     * @param instance The object instance containing the variable
+     * @param propertyPath The property path (e.g., "instVars.ChaiHuoLiang")
+     * @param minValue Minimum value of the variable
+     * @param maxValue Maximum value of the variable
+     * @param type Visual style of the timer UI
+     * @param id Unique identifier for this timer
+     * @param x X position (default: player position)
+     * @param y Y position (default: player position)
+     * @param layer Layer name to create the timer on (default: "html_c3")
+     */
+    public static CreateFromInstanceVariable(
+        instance: any,
+        propertyPath: string,
+        minValue: number,
+        maxValue: number,
+        type: CDType = CDType.CIRCLE_FILL,
+        id: string = "instance_variable_default",
+        x?: number,
+        y?: number,
+        layer: string = "html_c3"
+    ): UICDTimer {
+        // Create a getter function that accesses the property path
+        const variableGetter = () => {
+            try {
+                const pathParts = propertyPath.split('.');
+                let current = instance;
+                
+                for (const part of pathParts) {
+                    if (current && typeof current === 'object' && part in current) {
+                        current = current[part];
+                    } else {
+                        console.warn(`Property path '${propertyPath}' not found on instance`);
+                        return minValue;
+                    }
+                }
+                
+                const numValue = Number(current);
+                return isNaN(numValue) ? minValue : numValue;
+            } catch (error: any) {
+                console.error(`Error accessing property path '${propertyPath}': ${error.message}`);
+                return minValue;
+            }
+        };
+
+        // Use the regular CreateFromVariables method with the getter function
+        return UICDTimer.CreateFromVariables(variableGetter, minValue, maxValue, type, id, x, y, layer);
+    }
+
+    /**
      * Creates a variable-based timer UI that monitors a variable and displays progress
-     * @param monitoredVariable The variable to monitor (object with a property or direct value)
+     * This method now supports direct variable monitoring by creating a smart wrapper
+     * @param monitoredVariable The variable to monitor (can be object with property, direct value, or getter function)
      * @param minValue Minimum value of the variable
      * @param maxValue Maximum value of the variable
      * @param type Visual style of the timer UI
@@ -396,8 +498,20 @@ export class UICDTimer {
             UICDTimer.variableInstances.get(id)?.destroy();
         }
 
+        // For direct variable access, we need to create a smart monitoring approach
+        // If the variable is a direct property access (like obj.prop), we create a getter function
+        let smartVariable = monitoredVariable;
+        
+        // If it's a direct number or primitive, we can't monitor changes effectively
+        // But we'll create a wrapper that can be updated
+        if (typeof monitoredVariable === 'number' || typeof monitoredVariable === 'string') {
+            console.warn("Direct primitive values cannot be monitored for changes. Consider using CreateFromInstanceVariable for object properties.");
+            // Create a wrapper object that holds the initial value
+            smartVariable = { value: Number(monitoredVariable) };
+        }
+
         // Create new variable-based instance
-        const instance = UICDTimer.createVariableBasedTimer(id, monitoredVariable, minValue, maxValue, type, x, y, layer);
+        const instance = UICDTimer.createVariableBasedTimer(id, smartVariable, minValue, maxValue, type, x, y, layer);
         UICDTimer.variableInstances.set(id, instance);
 
         console.log(`Created variable-based timer UI with ID: ${id}, monitoring range: ${minValue}-${maxValue}`);
@@ -405,10 +519,71 @@ export class UICDTimer {
     }
 
     /**
+     * Sets up the variable getter function based on the monitored variable type
+     */
+    private setupVariableGetter(): void {
+        if (this.monitoredVariable === null || this.monitoredVariable === undefined) {
+            this.variableGetter = () => this.variableMinValue;
+            return;
+        }
+
+        // If it's already a function, use it directly
+        if (typeof this.monitoredVariable === 'function') {
+            this.variableGetter = this.monitoredVariable;
+            return;
+        }
+
+        // If it's a direct number value, create a getter that always returns the current value
+        if (typeof this.monitoredVariable === 'number') {
+            // For direct number values, we need to create a reference that can be updated
+            console.warn("Direct number values cannot be monitored for changes. Consider using CreateFromDirectVariable for dynamic monitoring.");
+            this.variableGetter = () => this.monitoredVariable;
+            return;
+        }
+
+        // If it's an object with a value property
+        if (typeof this.monitoredVariable === 'object' && 'value' in this.monitoredVariable) {
+            this.variableGetter = () => this.monitoredVariable.value;
+            return;
+        }
+
+        // For other object types, try to access common property names or use the object itself
+        if (typeof this.monitoredVariable === 'object') {
+            // Check for common property names, including ChaiHuoLiang for your specific use case
+            const commonProps = ['ChaiHuoLiang', 'value', 'val', 'amount', 'count', 'level'];
+            for (const prop of commonProps) {
+                if (prop in this.monitoredVariable) {
+                    this.variableGetter = () => this.monitoredVariable[prop];
+                    console.log(`Using property '${prop}' for variable monitoring`);
+                    return;
+                }
+            }
+            
+            // If no common properties found, try to convert the object to number
+            this.variableGetter = () => {
+                const numValue = Number(this.monitoredVariable);
+                return isNaN(numValue) ? this.variableMinValue : numValue;
+            };
+            return;
+        }
+
+        // Try to convert to number as fallback
+        this.variableGetter = () => {
+            const numValue = Number(this.monitoredVariable);
+            return isNaN(numValue) ? this.variableMinValue : numValue;
+        };
+    }
+
+    /**
      * Gets the current value from the monitored variable
      */
     private getVariableValue(): number {
         try {
+            if (this.variableGetter) {
+                return this.variableGetter();
+            }
+
+            // Fallback to original logic if getter is not set
             if (this.monitoredVariable === null || this.monitoredVariable === undefined) {
                 return this.variableMinValue;
             }
@@ -449,7 +624,8 @@ export class UICDTimer {
         if (!this.isVariableBased) return;
 
         const updateFunction = () => {
-            if (!this.htmlElement || !this.isVariableBased) {
+            // Only stop if this is no longer a variable-based timer
+            if (!this.isVariableBased) {
                 if (this.variableUpdateLoop) {
                     cancelAnimationFrame(this.variableUpdateLoop);
                     this.variableUpdateLoop = null;
@@ -472,10 +648,9 @@ export class UICDTimer {
                         progress = Math.max(0, Math.min(1, (currentValue - this.variableMinValue) / range));
                     }
 
-                    // Update visual
+                    // Update visual (this will handle null htmlElement gracefully)
                     this.updateVisual(progress);
 
-                    console.log(`Variable updated: ${currentValue}, progress: ${(progress * 100).toFixed(1)}%`);
                 }
 
                 // Continue monitoring
@@ -577,9 +752,8 @@ export class UICDTimer {
             // Destroy current instance
             this.htmlElement.destroy();
 
-            // Create new instance on the specified layer
-            const objects = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects as any;
-            this.htmlElement = objects.HTML_c3.createInstance(layer, x, y);
+            // Create new instance on the specified layer using full runtime path
+            this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(layer, x, y);
             this.layer = layer;
 
             // Re-render HTML
@@ -937,29 +1111,46 @@ export class UICDTimer {
     }
 
     private updateCircleFill(progressPercent: number): void {
-        this.htmlElement.setContent(this.createCircleFillHtml(progressPercent), "html");
+        if (this.htmlElement && this.htmlElement.setContent) {
+            this.htmlElement.setContent(this.createCircleFillHtml(progressPercent), "html");
+        }
     }
 
     private updateCircleDrain(progressPercent: number): void {
-        this.htmlElement.setContent(this.createCircleDrainHtml(progressPercent), "html");
+        if (this.htmlElement && this.htmlElement.setContent) {
+            this.htmlElement.setContent(this.createCircleDrainHtml(progressPercent), "html");
+        }
     }
 
     private updateClockwise(progressPercent: number): void {
-        this.htmlElement.setContent(this.createClockwiseHtml(progressPercent), "html");
+        if (this.htmlElement && this.htmlElement.setContent) {
+            this.htmlElement.setContent(this.createClockwiseHtml(progressPercent), "html");
+        }
     }
 
     private updatePulse(progressPercent: number, rawProgress: number): void {
-        this.htmlElement.setContent(this.createPulseHtml(progressPercent, rawProgress), "html");
+        if (this.htmlElement && this.htmlElement.setContent) {
+            this.htmlElement.setContent(this.createPulseHtml(progressPercent, rawProgress), "html");
+        }
     }
 
     private updateProgressBar(progressPercent: number): void {
-        this.htmlElement.setContent(this.createProgressBarHtml(progressPercent), "html");
+        if (this.htmlElement && this.htmlElement.setContent) {
+            this.htmlElement.setContent(this.createProgressBarHtml(progressPercent), "html");
+        }
     }
 
     private updateVisual(progress: number): void {
         try {
             // Save current progress value for maintaining state during fade-out
             this._currentProgress = progress;
+
+            // If no HTML element is available, provide console feedback
+            if (!this.htmlElement) {
+                const progressPercent = Math.min(100, Math.max(0, progress * 100));
+                console.log(`Timer ${this.id} progress: ${progressPercent.toFixed(1)}% (console-only mode)`);
+                return;
+            }
 
             // Adjust progress for visualization based on type
             const displayProgress = this.type === CDType.CIRCLE_DRAIN ? 1 - progress : progress;
@@ -996,31 +1187,39 @@ export class UICDTimer {
 
     private renderHTML(): void {
         try {
+            // If no HTML element is available, skip rendering
+            if (!this.htmlElement) {
+                console.log(`Timer ${this.id} running in console-only mode - no visual display`);
+                return;
+            }
 
             this.htmlElement.width = this._width;
             this.htmlElement.height = this._height;
 
+            // Check if the element supports HTML content (like HTML_c3)
+            if (this.htmlElement.setContent) {
+                const containerHtml = `
+                <style>
+                    #cd-container-${this.id} {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: ${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};
+                        opacity: 1;
+                        transition: opacity 0.1s ease; /* Add transition for any opacity changes */
+                    }
+                </style>
+                <div id="cd-container-${this.id}"></div>`;
 
-            const containerHtml = `
-            <style>
-                #cd-container-${this.id} {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                    border-radius: ${this.type === CDType.PROGRESS_BAR ? '15px' : '50%'};
-                    opacity: 1;
-                    transition: opacity 0.1s ease; /* Add transition for any opacity changes */
-                }
-            </style>
-            <div id="cd-container-${this.id}"></div>`;
+                this.htmlElement.setContent(containerHtml, "html");
 
+                this.updateVisual(0);
 
-            this.htmlElement.setContent(containerHtml, "html");
-
-
-            this.updateVisual(0);
-
-            console.log(`Rendered ${this.type} countdown timer HTML with size ${this._width}x${this._height}`);
+                console.log(`Rendered ${this.type} countdown timer HTML with size ${this._width}x${this._height}`);
+            } else {
+                // For non-HTML elements, just log the progress
+                console.log(`Timer ${this.id} created but visual display not supported by this object type`);
+            }
         } catch (error: any) {
             console.error(`Failed to render countdown timer: ${error.message}`);
         }
