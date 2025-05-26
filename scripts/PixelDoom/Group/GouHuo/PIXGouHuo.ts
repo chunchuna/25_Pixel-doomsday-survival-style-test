@@ -24,7 +24,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             var ChooseGouHuo = LastestChooseObject as InstanceType.GouHuo
             GouHuo.BurnGouHuo(ChooseGouHuo)
 
-
         }
 
         if (ButtonConetent_id == "extinguished") {
@@ -42,30 +41,39 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (!PlayerInstance) return
 
-
-
     for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
-
-
-        var test = UICDTimer.CreateFromDirectVariable(() => Gouhuos.instVars.ChaiHuoLiang, 0, 100, CDType.CIRCLE_CLOCKWISE, "GouHuoRanLiao", Gouhuos.x - 25, Gouhuos.y - 50)
+        // Create a closure to capture the current Gouhuos instance
+        (function(currentGouHuo) {
+            console.log(`Creating timer for GouHuo ${currentGouHuo.uid} at position (${currentGouHuo.x}, ${currentGouHuo.y})`);
+            
+            var test = UICDTimer.CreateFromDirectVariable(
+                () => currentGouHuo.instVars.ChaiHuoLiang, 
+                0, 
+                100, 
+                CDType.CIRCLE_CLOCKWISE, 
+                "GouHuoRanLiao" + String(currentGouHuo.uid), 
+                currentGouHuo.x - 25, 
+                currentGouHuo.y - 50
+            )
             .setSize(30, 30)
             .setColors("rgba(255, 165, 0, 0.8)", "rgba(50, 50, 50, 0.6)");
 
+            currentGouHuo.behaviors.Timer.startTimer(1, "gouhuoranshaojiance", "regular")
+            currentGouHuo.behaviors.Timer.addEventListener("timer", (e) => {
 
-        Gouhuos.behaviors.Timer.startTimer(1, "gouhuoranshaojiance", "regular")
-        Gouhuos.behaviors.Timer.addEventListener("timer", (e) => {
+                if (e.tag === "gouhuoranshaojiance") {
 
-            if (e.tag === "gouhuoranshaojiance") {
-
-                if (!Gouhuos.instVars.ZhengZaiRanShao) return
-                if (Gouhuos.instVars.ChaiHuoLiang >= 0) {
-                    Gouhuos.instVars.ChaiHuoLiang -= 1;
-                } else if (Gouhuos.instVars.ChaiHuoLiang <= 0) {
-                    GouHuo.ExtinguishedGouHuo(Gouhuos)
+                    if (!currentGouHuo.instVars.ZhengZaiRanShao) return
+                    if (currentGouHuo.instVars.ChaiHuoLiang >= 0) {
+                        currentGouHuo.instVars.ChaiHuoLiang -= 1;
+                        //console.log(`GouHuo ${currentGouHuo.uid} burning: ChaiHuoLiang = ${currentGouHuo.instVars.ChaiHuoLiang}`);
+                    } else if (currentGouHuo.instVars.ChaiHuoLiang <= 0) {
+                        GouHuo.ExtinguishedGouHuo(currentGouHuo)
+                    }
                 }
-            }
 
-        })
+            })
+        })(Gouhuos); // Pass the current Gouhuos instance to the closure
     }
 
 })
