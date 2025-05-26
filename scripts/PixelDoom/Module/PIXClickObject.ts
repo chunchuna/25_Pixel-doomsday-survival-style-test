@@ -93,14 +93,22 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                   return
             }
 
-            console.log(GetChooseObject.getChildAt(0)?.objectType.name)
+            // console.log(GetChooseObject.getChildAt(0)?.objectType.name)
 
-            if (GetChooseObject.getChildAt(0)?.objectType.name == "hudongtishi_ui") {
-                  //@ts-ignore
-                  var Child: InstanceType.HuDongTiShi = GetChooseObject.getChildAt(0);
-                  GetChooseObject.removeChild(Child)
-                  // 销毁这个元素
-                  Child.setContent("", "html", "#HuDongTiShi");
+            // if (GetChooseObject.getChildAt(0)?.objectType.name == "hudongtishi_ui") {
+            //       //@ts-ignore
+            //       var Child: InstanceType.HuDongTiShi = GetChooseObject.getChildAt(0);
+            //       GetChooseObject.removeChild(Child)
+            //       // 销毁这个元素
+            //       Child.setContent("", "html", "#HuDongTiShi");
+            // }
+
+            for (const child of GetChooseObject.children()) {
+                  if (child && child.objectType.name === "hudongtishi_ui") {
+                        GetChooseObject.removeChild(child)
+                        //@ts-ignore
+                        child.setContent("", "html", "#HuDongTiShi");
+                  }
             }
 
 
@@ -207,7 +215,7 @@ export class ClickObject {
 
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
-             UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
+            UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
             //UIInteractionPanelActionChooseMain_imgui.ExplainConetntToButton(Content, WindowName)
       }
 }

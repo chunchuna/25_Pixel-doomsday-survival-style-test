@@ -1,0 +1,46 @@
+{
+	"name": "GouHuo",
+	"plugin-id": "Sprite",
+	"sid": 849523057714328,
+	"instanceVariables": [
+		{
+			"name": "IsGouHuo",
+			"type": "boolean",
+			"desc": "",
+			"show": true,
+			"sid": 357189395801270
+		},
+		{
+			"name": "LightUID",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 928097298512761
+		},
+		{
+			"name": "ChaiHuoLiang",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 183963135497151
+		},
+		{
+			"name": "ZhengZaiRanShao",
+			"type": "boolean",
+			"desc": "",
+			"show": true,
+			"sid": 933309604376978
+		}
+	],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Timer",
+			"name": "Timer",
+			"sid": 402508755470346
+		}
+	],
+	"effectTypes": [],
+	"members": [
+		"HuoYanm"
+	]
+}

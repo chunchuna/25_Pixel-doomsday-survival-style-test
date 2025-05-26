@@ -59,6 +59,8 @@ import "./PixelDoom/UI/tweak_ui/tweak_window_test.js"
 
 import "./PixelDoom/UI/time_cd_ui/UICd.js"
 
+import "./PixelDoom/Group/GouHuo/PIXGouHuo.js"
+
 runOnStartup(async runtime => {
     // Code to run on the loading screen.
     // Note layouts, objects etc. are not yet available.

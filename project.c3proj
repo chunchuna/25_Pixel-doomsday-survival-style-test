@@ -244,14 +244,14 @@
 			"CharacterSineAnimation",
 			"PlantshakingSineAnimation",
 			"ClickObjectEntity",
-			"InventoryData"
+			"InventoryData",
+			"GouHuo"
 		],
 		"subfolders": []
 	},
 	"layouts": {
 		"items": [
 			"Level",
-			"Object",
 			"MainMenu"
 		],
 		"subfolders": [
@@ -266,6 +266,14 @@
 				],
 				"subfolders": [],
 				"name": "UI"
+			},
+			{
+				"items": [
+					"Object",
+					"GouHuo"
+				],
+				"subfolders": [],
+				"name": "Object"
 			}
 		]
 	},
@@ -483,6 +491,20 @@
 									],
 									"subfolders": [],
 									"name": "Debug"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXGouHuo.ts",
+											"type": "application/typescript",
+											"sid": 299115829443534,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "GouHuo"
 								}
 							],
 							"name": "Group"
@@ -763,6 +785,67 @@
 						}
 					],
 					"name": "PixelDoom"
+				},
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [],
+									"name": "emscripten"
+								}
+							],
+							"name": "@types"
+						},
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "embind"
+												}
+											],
+											"name": "imgui"
+										},
+										{
+											"items": [],
+											"subfolders": [],
+											"name": "src"
+										},
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "js"
+												}
+											],
+											"name": "www"
+										}
+									],
+									"name": "imgui-ts"
+								}
+							],
+							"name": "@zhobo63"
+						}
+					],
+					"name": "node_modules"
+				},
+				{
+					"items": [],
+					"subfolders": [],
+					"name": "resource"
 				}
 			],
 			"autoReloadOnPreview": true
