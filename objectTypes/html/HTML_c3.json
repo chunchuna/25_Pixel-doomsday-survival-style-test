@@ -4,6 +4,14 @@
 	"sid": 418218807062492,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
-	"instanceVariables": [],
+	"instanceVariables": [
+		{
+			"name": "id",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 372714346072632
+		}
+	],
 	"behaviorTypes": []
 }
