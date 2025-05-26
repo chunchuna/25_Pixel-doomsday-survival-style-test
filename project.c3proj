@@ -779,6 +779,20 @@
 									],
 									"subfolders": [],
 									"name": "time_cd_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIBubble.ts",
+											"type": "application/typescript",
+											"sid": 963848710099983,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "bubble_ui"
 								}
 							],
 							"name": "UI"

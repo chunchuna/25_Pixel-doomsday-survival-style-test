@@ -60,6 +60,7 @@ import "./PixelDoom/UI/tweak_ui/tweak_window_test.js"
 import "./PixelDoom/UI/time_cd_ui/UICd.js"
 
 import "./PixelDoom/Group/GouHuo/PIXGouHuo.js"
+import "./PixelDoom/UI/bubble_ui/UIBubble.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.
