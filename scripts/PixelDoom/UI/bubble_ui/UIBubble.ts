@@ -9,16 +9,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UIBubble.ShowBubble("Hello World! This is a test bubble message.", 3, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x, PlayerInstance.y)
+        UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 3, BubbleType.SPEECH)
+            .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset)
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show typewriter bubble", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UIBubble.ShowBubble("This text will appear with typewriter effect!", 5, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x, PlayerInstance.y - 100)
+        UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 5, BubbleType.SPEECH)
+            .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset)
             .enableTypewriter(50); // 50ms per character
     });
 
@@ -26,7 +26,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UIBubble.ShowBubble("I'm thinking about something...", 4, BubbleType.THOUGHT)
+        UIBubble.ShowBubble("I'm thinking about something...", 4, BubbleType.SYSTEM)
             .setPosition(PlayerInstance.x + 50, PlayerInstance.y - 80)
             .setSize(200, 80);
     });
@@ -36,7 +36,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (!PlayerInstance) return;
 
         const longText = "This is a very long message that will appear with typewriter effect and the bubble will grow as the text appears!";
-        
+
         UIBubble.ShowBubble(longText, 8, BubbleType.SPEECH)
             .setPosition(PlayerInstance.x - 150, PlayerInstance.y - 200)
             .enableTypewriter(80); // 80ms per character
@@ -99,43 +99,49 @@ export enum BubbleType {
 export class UIBubble {
     private static instances: Map<string, UIBubble> = new Map();
     private static idCounter: number = 0;
-    
+
     private id: string;
     private htmlElement: any; // HTML element instance
     private content: string;
     private duration: number;
     private type: BubbleType;
     private layer: string;
-    
+
     // Position and size properties
     private _x: number = 0;
     private _y: number = 0;
     private _width: number = 0; // 0 means auto-size
     private _height: number = 0; // 0 means auto-size
-    
+
     // Color properties
     private backgroundColor: string = "#000000";
     private borderColor: string = "#333333";
     private textColor: string = "#d0d0d0";
-    
+
     // Animation properties
     private static FADE_IN_DURATION: number = 300; // milliseconds
     private static FADE_OUT_DURATION: number = 500; // milliseconds
-    
+
     // Typewriter effect properties
     private typewriterEnabled: boolean = false;
     private typewriterSpeed: number = 50; // milliseconds per character
     private typewriterCurrentIndex: number = 0;
     private typewriterTimer: number | null = null;
     private displayedContent: string = "";
-    
+
     // Auto-destroy timer
     private destroyTimer: number | null = null;
-    
+
     // Animation state
     private isAnimatingIn: boolean = false;
     private isAnimatingOut: boolean = false;
     private hasPlayedEntranceAnimation: boolean = false;
+
+    //  Postion OffSet 
+
+    public static PositionYOffset: number = -250;
+    public static PostionXOffset: number = -20;
+
 
     private constructor(content: string, duration: number, type: BubbleType, layer: string = "html_c3") {
         this.id = `bubble_${++UIBubble.idCounter}_${Date.now()}`;
@@ -143,19 +149,19 @@ export class UIBubble {
         this.duration = duration;
         this.type = type;
         this.layer = layer;
-        
+
         // Initialize displayed content (will be empty for typewriter effect)
         this.displayedContent = "";
-        
+
         // Set default colors based on type
         this.setDefaultColors();
-        
+
         // Calculate auto-size based on content
         this.calculateAutoSize();
-        
+
         // Create HTML element
         this.createHtmlElement();
-        
+
         console.log(`Created ${this.type} bubble with ID: ${this.id}, duration: ${this.duration}s`);
     }
 
@@ -176,17 +182,17 @@ export class UIBubble {
         if (!id) {
             id = `auto_${type}_${Date.now()}`;
         }
-        
+
         // If instance with this ID already exists, destroy it first
         if (UIBubble.instances.has(id)) {
             UIBubble.instances.get(id)?.destroy();
         }
-        
+
         // Create new instance
         const instance = new UIBubble(content, duration, type);
         instance.id = id; // Override the auto-generated ID
         UIBubble.instances.set(id, instance);
-        
+
         return instance;
     }
 
@@ -199,7 +205,7 @@ export class UIBubble {
         this.typewriterSpeed = speed;
         this.typewriterCurrentIndex = 0;
         this.displayedContent = ""; // Start with empty content
-        
+
         // Recalculate size for empty content
         this.calculateAutoSize();
         if (this.htmlElement) {
@@ -207,12 +213,12 @@ export class UIBubble {
             this.htmlElement.height = this._height;
             this.renderHTML(); // Re-render with empty content
         }
-        
+
         // Start typewriter effect after entrance animation
         setTimeout(() => {
             this.startTypewriterEffect();
         }, UIBubble.FADE_IN_DURATION + 100);
-        
+
         return this;
     }
 
@@ -242,7 +248,7 @@ export class UIBubble {
                 this.textColor = "#ffcc99";
                 break;
             case BubbleType.SYSTEM:
-                this.backgroundColor = "#2d2d2d";
+                this.backgroundColor = "rgb(0, 0, 0)";
                 this.borderColor = "#555555";
                 this.textColor = "#cccccc";
                 break;
@@ -254,11 +260,11 @@ export class UIBubble {
      */
     private calculateAutoSize(): void {
         const contentLength = this.typewriterEnabled ? this.displayedContent.length : this.content.length;
-        
+
         // Base size calculation
         let baseWidth = 150;
         let baseHeight = 60;
-        
+
         // Adjust based on content length
         if (contentLength > 50) {
             baseWidth = Math.min(400, 150 + (contentLength - 50) * 2);
@@ -267,13 +273,13 @@ export class UIBubble {
             baseWidth = 150 + (contentLength - 20) * 1.5;
             baseHeight = 60;
         }
-        
+
         // Minimum size for typewriter effect
         if (this.typewriterEnabled && contentLength === 0) {
             baseWidth = 100;
             baseHeight = 50;
         }
-        
+
         // Adjust based on bubble type
         switch (this.type) {
             case BubbleType.THOUGHT:
@@ -288,7 +294,7 @@ export class UIBubble {
                 baseHeight += 5;
                 break;
         }
-        
+
         this._width = Math.round(baseWidth);
         this._height = Math.round(baseHeight);
     }
@@ -306,22 +312,22 @@ export class UIBubble {
                     this._y = PlayerInstance.y - 100; // Above player by default
                 }
             }
-            
+
             // Create HTML element using HTML_c3 object
             this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(
-                this.layer, 
-                this._x, 
+                this.layer,
+                this._x,
                 this._y
             );
-            
+
             // Set element size
             this.htmlElement.width = this._width;
             this.htmlElement.height = this._height;
-            
+
             // Render initial HTML and start entrance animation
             this.renderHTML();
             this.playEntranceAnimation();
-            
+
         } catch (error: any) {
             console.error(`Failed to create bubble HTML element: ${error.message}`);
             // Create console-only bubble as fallback
@@ -335,7 +341,7 @@ export class UIBubble {
      */
     private renderHTML(): void {
         if (!this.htmlElement || !this.htmlElement.setContent) return;
-        
+
         const bubbleHtml = this.generateBubbleHTML();
         this.htmlElement.setContent(bubbleHtml, "html");
     }
@@ -346,11 +352,11 @@ export class UIBubble {
     private generateBubbleHTML(): string {
         const tailHtml = this.generateTailHTML();
         const currentContent = this.typewriterEnabled ? this.displayedContent : this.content;
-        
+
         // Only apply entrance animation if it hasn't been played yet
-        const animationStyle = !this.hasPlayedEntranceAnimation ? 
+        const animationStyle = !this.hasPlayedEntranceAnimation ?
             `animation: bubbleEnter ${UIBubble.FADE_IN_DURATION}ms ease-out;` : '';
-        
+
         return `
         <div id="bubble-${this.id}" style="
             position: relative;
@@ -433,7 +439,7 @@ export class UIBubble {
      */
     private generateTailHTML(): string {
         const tailSize = 8;
-        
+
         switch (this.type) {
             case BubbleType.SPEECH:
                 return `
@@ -458,7 +464,7 @@ export class UIBubble {
                     border-top: ${tailSize}px solid ${this.borderColor};
                     z-index: -1;
                 "></div>`;
-                
+
             case BubbleType.THOUGHT:
                 return `
                 <div style="
@@ -481,7 +487,7 @@ export class UIBubble {
                     border: 1px solid ${this.borderColor};
                     border-radius: 50%;
                 "></div>`;
-                
+
             default:
                 // No tail for INFO, WARNING, SYSTEM types
                 return '';
@@ -520,10 +526,10 @@ export class UIBubble {
      */
     private playEntranceAnimation(): void {
         if (!this.htmlElement) return;
-        
+
         this.isAnimatingIn = true;
         this.hasPlayedEntranceAnimation = true; // Mark that entrance animation has been played
-        
+
         // Animation complete after CSS animation duration
         setTimeout(() => {
             this.isAnimatingIn = false;
@@ -536,18 +542,18 @@ export class UIBubble {
      */
     private startTypewriterEffect(): void {
         if (!this.typewriterEnabled || this.typewriterCurrentIndex >= this.content.length) return;
-        
+
         const typeNextCharacter = () => {
             if (this.typewriterCurrentIndex < this.content.length) {
                 this.displayedContent = this.content.substring(0, this.typewriterCurrentIndex + 1);
                 this.typewriterCurrentIndex++;
-                
+
                 // Update bubble size if needed
                 this.updateSizeForTypewriter();
-                
+
                 // Update content
                 this.updateTypewriterContent();
-                
+
                 // Schedule next character
                 this.typewriterTimer = setTimeout(typeNextCharacter, this.typewriterSpeed);
             } else {
@@ -555,7 +561,7 @@ export class UIBubble {
                 this.updateTypewriterContent(false);
             }
         };
-        
+
         typeNextCharacter();
     }
 
@@ -564,17 +570,17 @@ export class UIBubble {
      */
     private updateSizeForTypewriter(): void {
         if (!this.htmlElement) return;
-        
+
         // Recalculate size based on current displayed content
         const oldWidth = this._width;
         const oldHeight = this._height;
-        
+
         this.calculateAutoSize();
-        
+
         // Always update size to allow smooth growth
         this.htmlElement.width = this._width;
         this.htmlElement.height = this._height;
-        
+
         // Log size changes for debugging
         if (Math.abs(this._width - oldWidth) > 5 || Math.abs(this._height - oldHeight) > 3) {
             console.log(`Bubble ${this.id} resized: ${oldWidth}x${oldHeight} -> ${this._width}x${this._height} (chars: ${this.displayedContent.length})`);
@@ -599,21 +605,21 @@ export class UIBubble {
             this.destroy();
             return;
         }
-        
+
         this.isAnimatingOut = true;
-        
+
         // Stop typewriter effect if running
         if (this.typewriterTimer) {
             clearTimeout(this.typewriterTimer);
             this.typewriterTimer = null;
         }
-        
+
         // Update HTML to use exit animation
         if (this.htmlElement && this.htmlElement.setContent) {
             const exitHtml = this.generateExitBubbleHTML();
             this.htmlElement.setContent(exitHtml, "html");
         }
-        
+
         // Destroy after animation completes
         setTimeout(() => {
             this.destroy();
@@ -626,7 +632,7 @@ export class UIBubble {
     private generateExitBubbleHTML(): string {
         const tailHtml = this.generateTailHTML();
         const currentContent = this.typewriterEnabled ? this.displayedContent : this.content;
-        
+
         return `
         <div id="bubble-${this.id}" style="
             position: relative;
@@ -692,13 +698,13 @@ export class UIBubble {
      */
     private startAutoDestroy(): void {
         if (this.duration <= 0) return;
-        
+
         // Calculate total duration including typewriter effect
         let totalDuration = this.duration * 1000;
         if (this.typewriterEnabled) {
             totalDuration += this.content.length * this.typewriterSpeed;
         }
-        
+
         this.destroyTimer = setTimeout(() => {
             this.playExitAnimation();
         }, totalDuration);
@@ -712,12 +718,12 @@ export class UIBubble {
     public setPosition(x: number, y: number): UIBubble {
         this._x = x;
         this._y = y;
-        
+
         if (this.htmlElement) {
             this.htmlElement.x = x;
             this.htmlElement.y = y;
         }
-        
+
         return this;
     }
 
@@ -729,13 +735,13 @@ export class UIBubble {
     public setSize(width: number, height: number): UIBubble {
         this._width = width;
         this._height = height;
-        
+
         if (this.htmlElement) {
             this.htmlElement.width = width;
             this.htmlElement.height = height;
             this.renderHTML(); // Re-render with new size
         }
-        
+
         return this;
     }
 
@@ -749,11 +755,11 @@ export class UIBubble {
         this.backgroundColor = backgroundColor;
         this.borderColor = borderColor;
         this.textColor = textColor;
-        
+
         if (this.htmlElement) {
             this.renderHTML(); // Re-render with new colors
         }
-        
+
         return this;
     }
 
@@ -763,13 +769,13 @@ export class UIBubble {
      */
     public setContent(newContent: string): UIBubble {
         this.content = newContent;
-        
+
         // Reset typewriter if enabled
         if (this.typewriterEnabled) {
             this.typewriterCurrentIndex = 0;
             this.displayedContent = "";
         }
-        
+
         // Recalculate auto-size
         this.calculateAutoSize();
         if (this.htmlElement) {
@@ -777,7 +783,7 @@ export class UIBubble {
             this.htmlElement.height = this._height;
             this.renderHTML(); // Re-render with new content
         }
-        
+
         return this;
     }
 
@@ -791,7 +797,7 @@ export class UIBubble {
             this.duration += additionalTime;
             this.startAutoDestroy();
         }
-        
+
         return this;
     }
 
@@ -804,12 +810,12 @@ export class UIBubble {
             clearTimeout(this.destroyTimer);
             this.destroyTimer = null;
         }
-        
+
         if (this.typewriterTimer) {
             clearTimeout(this.typewriterTimer);
             this.typewriterTimer = null;
         }
-        
+
         // Destroy HTML element
         if (this.htmlElement) {
             try {
@@ -819,10 +825,10 @@ export class UIBubble {
             }
             this.htmlElement = null;
         }
-        
+
         // Remove from instances map
         UIBubble.instances.delete(this.id);
-        
+
         console.log(`Bubble ${this.id} destroyed`);
     }
 
