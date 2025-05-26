@@ -13,5 +13,11 @@
 			"sid": 372714346072632
 		}
 	],
-	"behaviorTypes": []
+	"behaviorTypes": [
+		{
+			"behaviorId": "NoSave",
+			"name": "不存档",
+			"sid": 646793688319339
+		}
+	]
 }

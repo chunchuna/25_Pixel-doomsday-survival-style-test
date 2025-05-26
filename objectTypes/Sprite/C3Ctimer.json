@@ -18,6 +18,11 @@
 			"behaviorId": "Timer",
 			"name": "Timer",
 			"sid": 300080109999850
+		},
+		{
+			"behaviorId": "NoSave",
+			"name": "不存档",
+			"sid": 763369689999675
 		}
 	],
 	"effectTypes": [],

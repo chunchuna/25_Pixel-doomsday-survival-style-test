@@ -63,28 +63,118 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .OnTimeArrive(() => console.warn("PROGRESS_BAR test completed"));
     })
     
-    // 添加快速测试按钮，使用短时间测试淡出效果
-    IMGUIDebugButton.AddButtonToCategory(cd_system, "测试淡出效果 (0.3秒)", () => {
+    // Add quick test button for fade effect with short duration
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Test fade effect (0.3s)", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
         
-        // 创建多个不同类型的短时间倒计时，测试淡出效果
+        // Create multiple short-duration timers to test fade effect
         UICDTimer.CreateCD(0.3, CDType.CIRCLE_DRAIN, "fadetest1", PlayerInstance.x - 50, PlayerInstance.y - 50)
             .setSize(80, 80)
             .setColors("rgba(255, 0, 0, 0.7)", "rgba(0, 0, 0, 0.5)")
-            .OnTimeArrive(() => console.warn("CIRCLE_DRAIN 测试完成"));
+            .OnTimeArrive(() => console.warn("CIRCLE_DRAIN test completed"));
             
         UICDTimer.CreateCD(0.3, CDType.CIRCLE_CLOCKWISE, "fadetest2", PlayerInstance.x + 50, PlayerInstance.y - 50)
             .setSize(80, 80)
             .setColors("rgba(0, 255, 0, 0.7)", "rgba(0, 0, 0, 0.5)")
-            .OnTimeArrive(() => console.warn("CIRCLE_CLOCKWISE 测试完成"));
+            .OnTimeArrive(() => console.warn("CIRCLE_CLOCKWISE test completed"));
             
         UICDTimer.CreateCD(0.3, CDType.PROGRESS_BAR, "fadetest3", PlayerInstance.x, PlayerInstance.y + 50)
             .setSize(150, 30)
             .setColors("rgba(0, 0, 255, 0.7)", "rgba(0, 0, 0, 0.5)")
-            .OnTimeArrive(() => console.warn("PROGRESS_BAR 测试完成"));
+            .OnTimeArrive(() => console.warn("PROGRESS_BAR test completed"));
             
-        console.log("启动快速测试 - 0.3秒后将显示淡出效果");
+        console.log("Started quick test - fade effect will show after 0.3 seconds");
+    });
+
+    // Add test buttons for variable-based timers
+    var testVariable = { value: 50 }; // Test variable object
+    
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Test variable UI - Circle Fill", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return
+        
+        // Reset test variable
+        testVariable.value = 0;
+        
+        // Create variable-based timer
+        UICDTimer.CreateFromVariables(testVariable, 0, 100, CDType.CIRCLE_FILL, "var_test1", PlayerInstance.x - 100, PlayerInstance.y)
+            .setSize(80, 80)
+            .setColors("rgba(255, 165, 0, 0.8)", "rgba(50, 50, 50, 0.6)");
+            
+        console.log("Created variable monitoring UI - Use console command to change value: testVariable.value = number(0-100)");
+        
+        // Make testVariable globally accessible for testing
+        (window as any).testVariable = testVariable;
+    });
+    
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Test variable UI - Progress Bar", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return
+        
+        // Reset test variable
+        testVariable.value = 25;
+        
+        // Create variable-based progress bar
+        UICDTimer.CreateFromVariables(testVariable, 0, 100, CDType.PROGRESS_BAR, "var_test2", PlayerInstance.x, PlayerInstance.y + 100)
+            .setSize(200, 25)
+            .setColors("rgba(0, 255, 255, 0.9)", "rgba(30, 30, 30, 0.7)");
+            
+        console.log("Created progress bar variable monitoring UI - Use console command to change value: testVariable.value = number(0-100)");
+        
+        // Make testVariable globally accessible for testing
+        (window as any).testVariable = testVariable;
+    });
+    
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Auto-changing variable test", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return
+        
+        // Create auto-changing variable
+        var autoVariable = { value: 0 };
+        var direction = 1;
+        
+        // Create multiple variable-based timers with different styles
+        UICDTimer.CreateFromVariables(autoVariable, 0, 100, CDType.CIRCLE_CLOCKWISE, "auto_test1", PlayerInstance.x - 150, PlayerInstance.y - 50)
+            .setSize(60, 60)
+            .setColors("rgba(255, 100, 100, 0.8)", "rgba(40, 40, 40, 0.6)");
+            
+        UICDTimer.CreateFromVariables(autoVariable, 0, 100, CDType.CIRCLE_DRAIN, "auto_test2", PlayerInstance.x, PlayerInstance.y - 50)
+            .setSize(60, 60)
+            .setColors("rgba(100, 255, 100, 0.8)", "rgba(40, 40, 40, 0.6)");
+            
+        UICDTimer.CreateFromVariables(autoVariable, 0, 100, CDType.PROGRESS_BAR, "auto_test3", PlayerInstance.x - 75, PlayerInstance.y + 50)
+            .setSize(150, 20)
+            .setColors("rgba(100, 100, 255, 0.8)", "rgba(40, 40, 40, 0.6)");
+        
+        // Start auto-changing the variable
+        const autoUpdate = () => {
+            autoVariable.value += direction * 2;
+            
+            if (autoVariable.value >= 100) {
+                direction = -1;
+                autoVariable.value = 100;
+            } else if (autoVariable.value <= 0) {
+                direction = 1;
+                autoVariable.value = 0;
+            }
+            
+            setTimeout(autoUpdate, 50); // Update every 50ms
+        };
+        
+        autoUpdate();
+        console.log("Started auto-changing variable test - variable will change between 0-100 automatically");
+    });
+
+    // Add management buttons
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Destroy all timers", () => {
+        UICDTimer.DestroyAllTimersAndVariables();
+        console.log("Destroyed all timers");
+    });
+    
+    IMGUIDebugButton.AddButtonToCategory(cd_system, "Show timer info", () => {
+        const info = UICDTimer.GetTimerInfo();
+        console.log(`Timer info: time-based=${info.timeBased}, variable-based=${info.variableBased}, total=${info.total}`);
     });
 
 });
@@ -100,6 +190,7 @@ export enum CDType {
 
 export class UICDTimer {
     private static instances: Map<string, UICDTimer> = new Map();
+    private static variableInstances: Map<string, UICDTimer> = new Map(); // For variable-based timers
     private id: string;
     private htmlElement: any; // HTML element instance
     private timerInstance: any; // C3 Timer instance
@@ -110,10 +201,18 @@ export class UICDTimer {
     private layer: string;
     private timerTag: string;
     
-    // 添加一个私有属性来跟踪当前进度
+    // Variable monitoring properties
+    private isVariableBased: boolean = false;
+    private monitoredVariable: any = null;
+    private variableMinValue: number = 0;
+    private variableMaxValue: number = 100;
+    private lastVariableValue: number = 0;
+    private variableUpdateLoop: number | null = null;
+    
+    // Private property to track current progress
     private _currentProgress: number = 0;
     
-    // 淡出动画持续时间（毫秒）
+    // Fade-out animation duration (milliseconds)
     public static FADE_OUT_DURATION: number = 1500
 
     // Default colors for easy reference
@@ -164,15 +263,43 @@ export class UICDTimer {
             this.htmlElement.height = this._height;
             
             // Render initial HTML
-        this.renderHTML();
+            this.renderHTML();
             
-            // Create C3 timer instance and set event listeners
-            this.createTimerInstance();
+            // Create C3 timer instance and set event listeners (only for time-based timers)
+            if (!this.isVariableBased) {
+                this.createTimerInstance();
+            }
             
             console.log(`Created ${this.type} countdown timer with ID: ${this.id}, duration: ${this.duration}s, position: (${posX}, ${posY})`);
         } catch (error: any) {
             console.error(`Failed to create CD timer: ${error.message}`);
         }
+    }
+
+    /**
+     * Constructor for variable-based timer
+     */
+    private static createVariableBasedTimer(
+        id: string,
+        monitoredVariable: any,
+        minValue: number,
+        maxValue: number,
+        type: CDType,
+        x?: number,
+        y?: number,
+        layer: string = "html_c3"
+    ): UICDTimer {
+        const instance = new UICDTimer(id, 0, type, x, y, layer);
+        instance.isVariableBased = true;
+        instance.monitoredVariable = monitoredVariable;
+        instance.variableMinValue = minValue;
+        instance.variableMaxValue = maxValue;
+        instance.lastVariableValue = instance.getVariableValue();
+        
+        // Start variable monitoring
+        instance.startVariableMonitoring();
+        
+        return instance;
     }
 
     /**
@@ -187,7 +314,7 @@ export class UICDTimer {
             // Listen for timer events
             this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.timerTag) {
-                    // 直接开始淡出，保持当前进度状态（不更新为100%）
+                    // Start fade-out directly, maintaining current progress state (don't update to 100%)
                     this.fadeOutAndDestroy();
                     
                     // Execute callback if provided
@@ -199,8 +326,8 @@ export class UICDTimer {
                 }
             });
 
-        // Start the timer
-        this.start();
+            // Start the timer
+            this.start();
 
         } catch (error: any) {
             console.error(`Failed to create timer instance: ${error.message}`);
@@ -233,6 +360,157 @@ export class UICDTimer {
         const instance = new UICDTimer(id, duration, type, x, y, layer);
         UICDTimer.instances.set(id, instance);
         return instance;
+    }
+
+    /**
+     * Creates a variable-based timer UI that monitors a variable and displays progress
+     * @param monitoredVariable The variable to monitor (object with a property or direct value)
+     * @param minValue Minimum value of the variable
+     * @param maxValue Maximum value of the variable
+     * @param type Visual style of the timer UI
+     * @param id Unique identifier for this timer
+     * @param x X position (default: player position)
+     * @param y Y position (default: player position)
+     * @param layer Layer name to create the timer on (default: "html_c3")
+     */
+    public static CreateFromVariables(
+        monitoredVariable: any,
+        minValue: number,
+        maxValue: number,
+        type: CDType = CDType.CIRCLE_FILL,
+        id: string = "variable_default",
+        x?: number,
+        y?: number,
+        layer: string = "html_c3"
+    ): UICDTimer {
+        // If instance with this ID already exists, destroy it first
+        if (UICDTimer.variableInstances.has(id)) {
+            UICDTimer.variableInstances.get(id)?.destroy();
+        }
+
+        // Create new variable-based instance
+        const instance = UICDTimer.createVariableBasedTimer(id, monitoredVariable, minValue, maxValue, type, x, y, layer);
+        UICDTimer.variableInstances.set(id, instance);
+        
+        console.log(`Created variable-based timer UI with ID: ${id}, monitoring range: ${minValue}-${maxValue}`);
+        return instance;
+    }
+
+    /**
+     * Gets the current value from the monitored variable
+     */
+    private getVariableValue(): number {
+        try {
+            if (this.monitoredVariable === null || this.monitoredVariable === undefined) {
+                return this.variableMinValue;
+            }
+
+            // If it's a direct number value
+            if (typeof this.monitoredVariable === 'number') {
+                return this.monitoredVariable;
+            }
+
+            // If it's an object with a value property
+            if (typeof this.monitoredVariable === 'object' && 'value' in this.monitoredVariable) {
+                return this.monitoredVariable.value;
+            }
+
+            // If it's a function, call it
+            if (typeof this.monitoredVariable === 'function') {
+                return this.monitoredVariable();
+            }
+
+            // Try to convert to number
+            const numValue = Number(this.monitoredVariable);
+            if (!isNaN(numValue)) {
+                return numValue;
+            }
+
+            console.warn(`Unable to get numeric value from monitored variable, using min value`);
+            return this.variableMinValue;
+        } catch (error: any) {
+            console.error(`Error getting variable value: ${error.message}`);
+            return this.variableMinValue;
+        }
+    }
+
+    /**
+     * Starts monitoring the variable for changes
+     */
+    private startVariableMonitoring(): void {
+        if (!this.isVariableBased) return;
+
+        const updateFunction = () => {
+            if (!this.htmlElement || !this.isVariableBased) {
+                if (this.variableUpdateLoop) {
+                    cancelAnimationFrame(this.variableUpdateLoop);
+                    this.variableUpdateLoop = null;
+                }
+                return;
+            }
+
+            try {
+                const currentValue = this.getVariableValue();
+                
+                // Only update if value has changed
+                if (currentValue !== this.lastVariableValue) {
+                    this.lastVariableValue = currentValue;
+                    
+                    // Calculate progress (0-1) based on min/max values
+                    const range = this.variableMaxValue - this.variableMinValue;
+                    let progress = 0;
+                    
+                    if (range > 0) {
+                        progress = Math.max(0, Math.min(1, (currentValue - this.variableMinValue) / range));
+                    }
+                    
+                    // Update visual
+                    this.updateVisual(progress);
+                    
+                    console.log(`Variable updated: ${currentValue}, progress: ${(progress * 100).toFixed(1)}%`);
+                }
+                
+                // Continue monitoring
+                this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+            } catch (error: any) {
+                console.error(`Error in variable monitoring: ${error.message}`);
+                // Continue monitoring even if there's an error
+                this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+            }
+        };
+
+        // Start monitoring loop
+        this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+        console.log(`Started variable monitoring for timer ${this.id}`);
+    }
+
+    /**
+     * Updates the monitored variable reference (useful for dynamic variable binding)
+     * @param newVariable New variable to monitor
+     * @param newMinValue New minimum value (optional)
+     * @param newMaxValue New maximum value (optional)
+     */
+    public updateMonitoredVariable(newVariable: any, newMinValue?: number, newMaxValue?: number): UICDTimer {
+        if (!this.isVariableBased) {
+            console.warn("Cannot update monitored variable on time-based timer");
+            return this;
+        }
+
+        this.monitoredVariable = newVariable;
+        
+        if (newMinValue !== undefined) {
+            this.variableMinValue = newMinValue;
+        }
+        
+        if (newMaxValue !== undefined) {
+            this.variableMaxValue = newMaxValue;
+        }
+        
+        // Reset last value to force update
+        this.lastVariableValue = this.getVariableValue() - 1;
+        
+        console.log(`Updated monitored variable for timer ${this.id}, new range: ${this.variableMinValue}-${this.variableMaxValue}`);
+        return this;
     }
 
     /**
@@ -369,6 +647,12 @@ export class UICDTimer {
      * Destroys the countdown timer and removes the HTML element
      */
     public destroy(): void {
+        // Stop variable monitoring if it's a variable-based timer
+        if (this.isVariableBased && this.variableUpdateLoop) {
+            cancelAnimationFrame(this.variableUpdateLoop);
+            this.variableUpdateLoop = null;
+        }
+
         if (this.timerInstance) {
             this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
             this.timerInstance.destroy();
@@ -380,8 +664,14 @@ export class UICDTimer {
             this.htmlElement = null;
         }
 
-        UICDTimer.instances.delete(this.id);
-        console.log(`Countdown timer ${this.id} destroyed`);
+        // Remove from appropriate instances map
+        if (this.isVariableBased) {
+            UICDTimer.variableInstances.delete(this.id);
+        } else {
+            UICDTimer.instances.delete(this.id);
+        }
+        
+        console.log(`${this.isVariableBased ? 'Variable-based' : 'Time-based'} timer ${this.id} destroyed`);
     }
 
     /**
@@ -464,14 +754,14 @@ export class UICDTimer {
         console.log("Starting fade-out animation");
 
         try {
-            // 保持当前状态（不强制设为100%）
+            // Maintain current state (don't force to 100%)
             
-            // 使用手动透明度淡出动画
+            // Use manual opacity fade-out animation
             const totalDuration = UICDTimer.FADE_OUT_DURATION;
             const startTime = Date.now();
             const initialOpacity = 1.0;
             
-            // 创建淡出效果函数
+            // Create fade effect function
             const fadeStep = () => {
                 if (!this.htmlElement) return;
                 
@@ -479,8 +769,8 @@ export class UICDTimer {
                 const progress = Math.min(elapsed / totalDuration, 1.0);
                 const currentOpacity = initialOpacity * (1 - progress);
                 
-                // 应用透明度但保持当前视觉状态不变
-                // 使用getCurrentVisualHtml方法获取当前进度的HTML
+                // Apply opacity while maintaining current visual state
+                // Use getCurrentVisualHtml method to get current progress HTML
                 const htmlContent = `
                 <div style="position:relative; width:100%; height:100%; opacity:${currentOpacity};">
                     ${this.getCurrentVisualHtml()}
@@ -488,11 +778,11 @@ export class UICDTimer {
                 
                 this.htmlElement.setContent(htmlContent, "html");
                 
-                // 如果淡出未完成，继续下一帧
+                // If fade-out is not complete, continue to next frame
                 if (progress < 1.0) {
                     requestAnimationFrame(fadeStep);
                 } else {
-                    // 淡出完成，销毁计时器
+                    // Fade-out complete, destroy timer
                     if (this.htmlElement) {
                         this.htmlElement.destroy();
                         this.htmlElement = null;
@@ -508,11 +798,11 @@ export class UICDTimer {
                 }
             };
             
-            // 开始淡出动画
+            // Start fade-out animation
             requestAnimationFrame(fadeStep);
             
         } catch (error: any) {
-            // 如果动画过程中发生任何错误，立即销毁
+            // If any error occurs during animation, destroy immediately
             console.error(`Error during fade animation: ${error.message}. Destroying immediately.`);
             this.destroy();
         }
@@ -540,14 +830,14 @@ export class UICDTimer {
     }
 
     /**
-     * 根据当前进度获取HTML内容
+     * Gets HTML content based on current progress
      */
     private getCurrentVisualHtml(): string {
-        // 使用当前保存的进度值生成HTML
+        // Use current saved progress value to generate HTML
         const displayProgress = this.type === CDType.CIRCLE_DRAIN ? 1 - this._currentProgress : this._currentProgress;
         const progressPercent = Math.min(100, Math.max(0, displayProgress * 100));
         
-        // 根据类型返回相应的HTML
+        // Return corresponding HTML based on type
         switch (this.type) {
             case CDType.CIRCLE_FILL:
                 return this.createCircleFillHtml(progressPercent);
@@ -660,7 +950,7 @@ export class UICDTimer {
 
     private updateVisual(progress: number): void {
         try {
-            // 保存当前进度值，用于淡出时保持状态
+            // Save current progress value for maintaining state during fade-out
             this._currentProgress = progress;
             
             // Adjust progress for visualization based on type
@@ -737,5 +1027,60 @@ export class UICDTimer {
             UICDTimer.FADE_OUT_DURATION = duration;
             console.log(`Set fade-out duration to ${duration}ms`);
         }
+    }
+
+    /**
+     * Gets a variable-based timer instance by ID
+     * @param id Timer ID
+     */
+    public static GetVariableTimer(id: string): UICDTimer | undefined {
+        return UICDTimer.variableInstances.get(id);
+    }
+
+    /**
+     * Gets a time-based timer instance by ID
+     * @param id Timer ID
+     */
+    public static GetTimer(id: string): UICDTimer | undefined {
+        return UICDTimer.instances.get(id);
+    }
+
+    /**
+     * Destroys all variable-based timers
+     */
+    public static DestroyAllVariableTimers(): void {
+        const timers = Array.from(UICDTimer.variableInstances.values());
+        timers.forEach(timer => timer.destroy());
+        console.log(`Destroyed ${timers.length} variable-based timers`);
+    }
+
+    /**
+     * Destroys all time-based timers
+     */
+    public static DestroyAllTimers(): void {
+        const timers = Array.from(UICDTimer.instances.values());
+        timers.forEach(timer => timer.destroy());
+        console.log(`Destroyed ${timers.length} time-based timers`);
+    }
+
+    /**
+     * Destroys all timers (both time-based and variable-based)
+     */
+    public static DestroyAllTimersAndVariables(): void {
+        UICDTimer.DestroyAllTimers();
+        UICDTimer.DestroyAllVariableTimers();
+    }
+
+    /**
+     * Gets information about all active timers
+     */
+    public static GetTimerInfo(): { timeBased: number, variableBased: number, total: number } {
+        const timeBasedCount = UICDTimer.instances.size;
+        const variableBasedCount = UICDTimer.variableInstances.size;
+        return {
+            timeBased: timeBasedCount,
+            variableBased: variableBasedCount,
+            total: timeBasedCount + variableBasedCount
+        };
     }
 }

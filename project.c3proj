@@ -80,6 +80,13 @@
 		},
 		{
 			"type": "behavior",
+			"id": "NoSave",
+			"name": "不存档",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
 			"id": "Sin",
 			"name": "正弦运动",
 			"author": "Scirra",

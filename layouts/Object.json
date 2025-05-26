@@ -64,6 +64,9 @@
 					"behaviors": {
 						"Timer": {
 							"properties": {}
+						},
+						"不存档": {
+							"properties": {}
 						}
 					},
 					"instanceFolderItem": {
