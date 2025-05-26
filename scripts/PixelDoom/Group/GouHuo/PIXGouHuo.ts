@@ -6,59 +6,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
+    // Clean up any existing timers from previous scene loads
+    console.log("Cleaning up existing timers before creating new ones");
+    UICDTimer.DestroyAllTimersAndVariables();
+
     for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
         GouHuo.ExtinguishedGouHuo(Gouhuos)
     }
 
 })
-
-export class GouHuo {
-    static BurnGouHuo(GouHuo: InstanceType.GouHuo) {
-
-        if (!GouHuo) return
-        if (GouHuo.instVars.ZhengZaiRanShao) return
-        GouHuo.instVars.ZhengZaiRanShao = true;
-
-        // Get layout and light layer first
-        const layout = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.getLayout("Level");
-        const lightLayer = layout.getLayer("Light");
-        if (!lightLayer) return;
-
-        // Process all children (fire light sources)
-        for (const child of GouHuo.children()) {
-            // Check if child is a GouHouGuang (fire light) instance
-            if (child && child.objectType.name === "GouHouGuang") {
-                const gouHuoLight = child as InstanceType.GouHouGuang;
-                gouHuoLight.isVisible = true;
-                gouHuoLight.moveToLayer(lightLayer);
-            }
-
-
-        }
-
-        GouHuo.isVisible = true;
-        console.warn("Burn GouHUO")
-    }
-
-    static ExtinguishedGouHuo(GouHuo: InstanceType.GouHuo) {
-        if (!GouHuo) return;
-        if (!GouHuo.instVars.ZhengZaiRanShao) return; // Already extinguished
-
-        // Set campfire state to extinguished
-        GouHuo.instVars.ZhengZaiRanShao = false;
-
-        // Hide all fire light sources
-        for (const child of GouHuo.children()) {
-            if (child && child.objectType.name === "GouHouGuang") {
-                const gouHuoLight = child as InstanceType.GouHouGuang;
-                gouHuoLight.isVisible = false;
-            }
-        }
-        GouHuo.isVisible = false;
-        console.warn("Extinguished GouHuo")
-
-    }
-}
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
@@ -113,3 +69,51 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     }
 
 })
+
+export class GouHuo {
+    static BurnGouHuo(GouHuo: InstanceType.GouHuo) {
+
+        if (!GouHuo) return
+        if (GouHuo.instVars.ZhengZaiRanShao) return
+        GouHuo.instVars.ZhengZaiRanShao = true;
+
+        // Get layout and light layer first
+        const layout = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.getLayout("Level");
+        const lightLayer = layout.getLayer("Light");
+        if (!lightLayer) return;
+
+        // Process all children (fire light sources)
+        for (const child of GouHuo.children()) {
+            // Check if child is a GouHouGuang (fire light) instance
+            if (child && child.objectType.name === "GouHouGuang") {
+                const gouHuoLight = child as InstanceType.GouHouGuang;
+                gouHuoLight.isVisible = true;
+                gouHuoLight.moveToLayer(lightLayer);
+            }
+
+
+        }
+
+        GouHuo.isVisible = true;
+        console.warn("Burn GouHUO")
+    }
+
+    static ExtinguishedGouHuo(GouHuo: InstanceType.GouHuo) {
+        if (!GouHuo) return;
+        if (!GouHuo.instVars.ZhengZaiRanShao) return; // Already extinguished
+
+        // Set campfire state to extinguished
+        GouHuo.instVars.ZhengZaiRanShao = false;
+
+        // Hide all fire light sources
+        for (const child of GouHuo.children()) {
+            if (child && child.objectType.name === "GouHouGuang") {
+                const gouHuoLight = child as InstanceType.GouHouGuang;
+                gouHuoLight.isVisible = false;
+            }
+        }
+        GouHuo.isVisible = false;
+        console.warn("Extinguished GouHuo")
+
+    }
+}

@@ -580,7 +580,16 @@ export class UICDTimer {
     private getVariableValue(): number {
         try {
             if (this.variableGetter) {
-                return this.variableGetter();
+                const value = this.variableGetter();
+                // Check if the value is valid (not NaN or undefined)
+                if (typeof value === 'number' && !isNaN(value)) {
+                    return value;
+                } else {
+                    // If getter returns invalid value, the object might be destroyed
+                    console.warn(`Variable getter returned invalid value for timer ${this.id}, stopping monitoring`);
+                    this.destroy();
+                    return this.variableMinValue;
+                }
             }
 
             // Fallback to original logic if getter is not set
@@ -600,7 +609,14 @@ export class UICDTimer {
 
             // If it's a function, call it
             if (typeof this.monitoredVariable === 'function') {
-                return this.monitoredVariable();
+                const value = this.monitoredVariable();
+                if (typeof value === 'number' && !isNaN(value)) {
+                    return value;
+                } else {
+                    console.warn(`Function returned invalid value for timer ${this.id}, stopping monitoring`);
+                    this.destroy();
+                    return this.variableMinValue;
+                }
             }
 
             // Try to convert to number
@@ -613,6 +629,9 @@ export class UICDTimer {
             return this.variableMinValue;
         } catch (error: any) {
             console.error(`Error getting variable value: ${error.message}`);
+            // If there's an error accessing the variable, the object might be destroyed
+            console.warn(`Stopping monitoring for timer ${this.id} due to error`);
+            this.destroy();
             return this.variableMinValue;
         }
     }
@@ -624,8 +643,8 @@ export class UICDTimer {
         if (!this.isVariableBased) return;
 
         const updateFunction = () => {
-            // Only stop if this is no longer a variable-based timer
-            if (!this.isVariableBased) {
+            // Only stop if this is no longer a variable-based timer or if it's been destroyed
+            if (!this.isVariableBased || !this.variableUpdateLoop) {
                 if (this.variableUpdateLoop) {
                     cancelAnimationFrame(this.variableUpdateLoop);
                     this.variableUpdateLoop = null;
@@ -635,6 +654,11 @@ export class UICDTimer {
 
             try {
                 const currentValue = this.getVariableValue();
+
+                // If getVariableValue destroyed the timer due to error, stop the loop
+                if (!this.variableUpdateLoop) {
+                    return;
+                }
 
                 // Only update if value has changed
                 if (currentValue !== this.lastVariableValue) {
@@ -650,15 +674,21 @@ export class UICDTimer {
 
                     // Update visual (this will handle null htmlElement gracefully)
                     this.updateVisual(progress);
-
                 }
 
-                // Continue monitoring
-                this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+                // Continue monitoring only if the timer still exists
+                if (this.variableUpdateLoop) {
+                    this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+                }
             } catch (error: any) {
                 console.error(`Error in variable monitoring: ${error.message}`);
-                // Continue monitoring even if there's an error
-                this.variableUpdateLoop = requestAnimationFrame(updateFunction);
+                console.warn(`Stopping monitoring for timer ${this.id} due to error in monitoring loop`);
+                // Stop monitoring and destroy the timer
+                if (this.variableUpdateLoop) {
+                    cancelAnimationFrame(this.variableUpdateLoop);
+                    this.variableUpdateLoop = null;
+                }
+                this.destroy();
             }
         };
 
@@ -829,6 +859,14 @@ export class UICDTimer {
      * Destroys the countdown timer and removes the HTML element
      */
     public destroy(): void {
+        // Prevent multiple destructions
+        if (!this.isVariableBased && !UICDTimer.instances.has(this.id)) {
+            return; // Already destroyed
+        }
+        if (this.isVariableBased && !UICDTimer.variableInstances.has(this.id)) {
+            return; // Already destroyed
+        }
+
         // Stop variable monitoring if it's a variable-based timer
         if (this.isVariableBased && this.variableUpdateLoop) {
             cancelAnimationFrame(this.variableUpdateLoop);
@@ -836,13 +874,21 @@ export class UICDTimer {
         }
 
         if (this.timerInstance) {
-            this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
-            this.timerInstance.destroy();
+            try {
+                this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
+                this.timerInstance.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying timer instance: ${error.message}`);
+            }
             this.timerInstance = null;
         }
 
         if (this.htmlElement) {
-            this.htmlElement.destroy();
+            try {
+                this.htmlElement.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying HTML element: ${error.message}`);
+            }
             this.htmlElement = null;
         }
 
