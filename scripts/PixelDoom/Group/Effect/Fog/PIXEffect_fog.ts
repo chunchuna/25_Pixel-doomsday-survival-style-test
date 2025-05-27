@@ -135,9 +135,15 @@ export class PIXEffect_fog {
             id = `auto_${type}_${style}_${Date.now()}`;
         }
 
-        // If instance with this ID already exists, destroy it first
+        // If instance with this ID already exists, start fade-out for graceful replacement
         if (PIXEffect_fog.instances.has(id)) {
-            PIXEffect_fog.instances.get(id)?.destroy();
+            const existingFog = PIXEffect_fog.instances.get(id);
+            if (existingFog && !existingFog.isDestroyed) {
+                console.log(`Replacing existing fog ${id} with fade-out transition`);
+                existingFog.startFadeOut();
+                // Remove from instances map immediately to allow new fog creation
+                PIXEffect_fog.instances.delete(id);
+            }
         }
 
         // Create new instance
@@ -311,7 +317,7 @@ export class PIXEffect_fog {
     /**
      * Starts fade-out animation
      */
-    private startFadeOut(): void {
+    public startFadeOut(): void {
         if (this.isFadingOut || this.isDestroyed) return;
 
         this.isFadingOut = true;
@@ -1025,6 +1031,29 @@ export class PIXEffect_fog {
         }
 
         console.log(`Fog effect ${this.id} destroyed (particles cleared, performance optimized)`);
+    }
+
+    /**
+     * Gracefully destroys the fog with fade-out animation
+     */
+    public destroyWithFadeOut(): void {
+        if (this.isDestroyed || this.isFadingOut) return;
+        
+        console.log(`Starting graceful destruction of fog ${this.id} with fade-out`);
+        this.startFadeOut();
+    }
+
+    /**
+     * Gracefully destroys a fog by ID with fade-out animation
+     * @param id Fog ID to destroy
+     */
+    public static DestroyFogWithFadeOut(id: string): boolean {
+        const fog = PIXEffect_fog.instances.get(id);
+        if (fog && !fog.isDestroyed) {
+            fog.destroyWithFadeOut();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2119,5 +2148,49 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .setSize(400, 300)
             .setOpacity(0.8)
             .setColor("#9c27b0");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Graceful Replacement", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        // Create first fog
+        console.log("Creating first fog...");
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.HEAVY, 0, "replacement_test")
+            .setPosition(x - 200, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.8)
+            .setColor("#ff0000");
+
+        // Replace it after 3 seconds
+        setTimeout(() => {
+            console.log("Replacing with new fog (should fade out old one)...");
+            PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MYSTICAL, 0, "replacement_test")
+                .setPosition(x - 200, y - 200)
+                .setSize(400, 300)
+                .setOpacity(0.8)
+                .setColor("#00ff00");
+        }, 3000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Graceful Destroy", () => {
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        if (fogInfo.count > 0) {
+            const fogId = fogInfo.fogs[0];
+            console.log(`Gracefully destroying fog: ${fogId}`);
+            PIXEffect_fog.DestroyFogWithFadeOut(fogId);
+        } else {
+            console.log("No fog to destroy");
+        }
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Destroy All Fog Gracefully", () => {
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        console.log(`Gracefully destroying ${fogInfo.count} fog effects...`);
+        
+        fogInfo.fogs.forEach(fogId => {
+            PIXEffect_fog.DestroyFogWithFadeOut(fogId);
+        });
     });
 }); 
