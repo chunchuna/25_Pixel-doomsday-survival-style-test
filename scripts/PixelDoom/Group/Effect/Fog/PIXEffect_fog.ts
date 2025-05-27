@@ -23,18 +23,18 @@ export class PIXEffect_fog {
     private static idCounter: number = 0;
     private static currentEditingFog: PIXEffect_fog | null = null;
 
-    private id: string;
-    private htmlElement: any; // HTML element instance
-    private type: FogType;
-    private style: FogStyle;
-    private layer: string;
-    private duration: number; // Duration in seconds (0 = persistent)
+    protected id: string;
+    protected htmlElement: any; // HTML element instance
+    protected type: FogType;
+    protected style: FogStyle;
+    protected layer: string;
+    protected duration: number; // Duration in seconds (0 = persistent)
 
     // Position and size properties
-    private _x: number = 0;
-    private _y: number = 0;
-    private _width: number = 800;  // HTML component size
-    private _height: number = 600; // HTML component size
+    protected _x: number = 0;
+    protected _y: number = 0;
+    protected _width: number = 800;  // HTML component size
+    protected _height: number = 600; // HTML component size
 
     // Fog parameters
     private fogParams = {
@@ -56,7 +56,7 @@ export class PIXEffect_fog {
     private particles: any[] = [];
     private animationId: number | null = null;
     private time: number = 0;
-    private isDestroyed: boolean = false;
+    protected isDestroyed: boolean = false;
 
     // Auto-destroy timer
     private destroyTimer: number | null = null;
@@ -443,12 +443,60 @@ export class PIXEffect_fog {
      */
     public setLayer(layer: string): PIXEffect_fog {
         this.layer = layer;
-        // Note: Layer change requires recreating the element
+        
+        // If HTML element exists, we need to recreate it on the new layer
         if (this.htmlElement) {
-            this.destroy();
-            this.createHtmlElement();
+            // Store current state
+            const wasDestroyed = this.isDestroyed;
+            const currentId = this.id;
+            
+            // Temporarily stop animation
+            if (this.animationId) {
+                clearTimeout(this.animationId);
+                this.animationId = null;
+            }
+            
+            // Destroy only the HTML element, not the fog instance
+            try {
+                this.htmlElement.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying fog HTML element during layer change: ${error.message}`);
+            }
+            this.htmlElement = null;
+            
+            // Recreate HTML element on new layer without destroying the instance
+            this.createHtmlElementForLayerChange();
         }
+        
         return this;
+    }
+
+    /**
+     * Creates HTML element specifically for layer changes (doesn't affect instance management)
+     */
+    private createHtmlElementForLayerChange(): void {
+        try {
+            // Create HTML element using HTML_c3 object
+            this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(
+                this.layer,
+                this._x,
+                this._y
+            );
+
+            // Set element size
+            this.htmlElement.width = this._width;
+            this.htmlElement.height = this._height;
+
+            // Render HTML and restart animation
+            this.renderHTML();
+            this.startAnimation();
+
+            console.log(`Fog ${this.id} recreated on layer: ${this.layer}`);
+
+        } catch (error: any) {
+            console.error(`Failed to recreate fog HTML element on new layer: ${error.message}`);
+            this.htmlElement = null;
+        }
     }
 
     /**
@@ -556,6 +604,23 @@ export class PIXEffect_fog {
      */
     public getId(): string {
         return this.id;
+    }
+
+    /**
+     * Gets fog debug information
+     */
+    public getDebugInfo(): any {
+        return {
+            id: this.id,
+            type: this.type,
+            style: this.style,
+            layer: this.layer,
+            isDestroyed: this.isDestroyed,
+            hasHtmlElement: !!this.htmlElement,
+            position: { x: this._x, y: this._y },
+            size: { width: this._width, height: this._height },
+            duration: this.duration
+        };
     }
 
     /**
@@ -835,14 +900,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MYSTICAL, 10,"whole level fog")
-            .setPosition(-1920, -1080)
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 50,"whole_level_fog")
+            .setPosition(0, 0)
             .setSize(1920, 1080)
             .setScale(1.2)
             .setSpeed(0.8)
             .setOpacity(0.4).setLayer("HtmlUI_fix")
 
-        PIXEffect_fog.OpenFogEditor("whole level fog")
+        PIXEffect_fog.OpenFogEditor("whole_level_fog")
 
     })
 
@@ -962,6 +1027,23 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         const info = PIXEffect_fog.GetFogInfo();
         console.log(`Active fog effects: ${info.count}`);
         console.log(`Fog IDs: ${info.fogs.join(", ")}`);
+        
+        // Show detailed info for each fog
+        info.fogs.forEach(fogId => {
+            const fog = PIXEffect_fog.GetFog(fogId);
+            if (fog) {
+                console.log(`Fog ${fogId}:`, fog.getDebugInfo());
+            }
+        });
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Edit Whole Level Fog", () => {
+        const fog = PIXEffect_fog.GetFog("whole_level_fog");
+        if (fog) {
+            PIXEffect_fog.OpenFogEditor("whole_level_fog");
+        } else {
+            console.log("Whole level fog not found. Available fogs:", PIXEffect_fog.GetFogInfo().fogs);
+        }
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Fog Layers", () => {
