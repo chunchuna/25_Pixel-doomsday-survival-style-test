@@ -81,16 +81,24 @@ async function Normal() {
 
 async function Fog() {
 
+
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+
+    await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(2)
+    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 25, "whole_level_fog")
+        .setPosition(0, 0)
+        .setSize(6000, 3000).setScale(1.2)
+
+
     var FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
 
 
-    FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(5, 30), "fogtimer", "regular")
+    FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(25, 60), "fogtimer", "regular")
 
 
     FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
         if (e.tag === "fogtimer") {
-            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 15, "whole_level_fog")
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 70, "whole_level_fog")
                 .setPosition(0, 0)
                 .setSize(6000, 3000).setScale(2.2)
         }
