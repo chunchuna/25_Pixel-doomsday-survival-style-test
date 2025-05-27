@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
+import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { CDType, UICDTimer } from "../../UI/time_cd_ui/UICd.js";
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
@@ -42,21 +43,28 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!PlayerInstance) return
 
     for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
+
+
+
         // Create a closure to capture the current Gouhuos instance
-        (function(currentGouHuo) {
+        (function (currentGouHuo) {
+
+            // Pass the entire instVars object so it can track changes automatically
+            VariableMonitoring.AddValue("GouHuoInstVars" + Gouhuos.uid, Gouhuos.instVars, String(Gouhuos.uid))
+
             console.log(`Creating timer for GouHuo ${currentGouHuo.uid} at position (${currentGouHuo.x}, ${currentGouHuo.y})`);
-            
+
             var test = UICDTimer.CreateFromDirectVariable(
-                () => currentGouHuo.instVars.ChaiHuoLiang, 
-                0, 
-                100, 
-                CDType.CIRCLE_CLOCKWISE, 
-                "GouHuoRanLiao" + String(currentGouHuo.uid), 
-                currentGouHuo.x - 25, 
+                () => currentGouHuo.instVars.ChaiHuoLiang,
+                0,
+                100,
+                CDType.CIRCLE_CLOCKWISE,
+                "GouHuoRanLiao" + String(currentGouHuo.uid),
+                currentGouHuo.x - 25,
                 currentGouHuo.y - 50
             )
-            .setSize(30, 30)
-            .setColors("rgba(255, 165, 0, 0.8)", "rgba(50, 50, 50, 0.6)");
+                .setSize(30, 30)
+                .setColors("rgba(255, 165, 0, 0.8)", "rgba(50, 50, 50, 0.6)");
 
             currentGouHuo.behaviors.Timer.startTimer(1, "gouhuoranshaojiance", "regular")
             currentGouHuo.behaviors.Timer.addEventListener("timer", (e) => {
@@ -66,6 +74,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                     if (!currentGouHuo.instVars.ZhengZaiRanShao) return
                     if (currentGouHuo.instVars.ChaiHuoLiang >= 0) {
                         currentGouHuo.instVars.ChaiHuoLiang -= 1;
+                        
+                        // Update the monitoring panel with the new value
+
+                        
                         //console.log(`GouHuo ${currentGouHuo.uid} burning: ChaiHuoLiang = ${currentGouHuo.instVars.ChaiHuoLiang}`);
                     } else if (currentGouHuo.instVars.ChaiHuoLiang <= 0) {
                         GouHuo.ExtinguishedGouHuo(currentGouHuo)

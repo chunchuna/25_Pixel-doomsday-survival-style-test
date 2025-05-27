@@ -1,4 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { ImGuiFontManager } from "./FontManager.js";
 
 // Declare global ImGui objects
 declare global {
@@ -374,7 +375,7 @@ export class Imgui_chunchun {
             size: { width: 400, height: 300 },
             position: { x: 50, y: 50 },
             renderCallback: () => {
-                ImGui.Text("this is a  example_window");
+                ImGui.Text("this is a  example_window 测试中文");
                 ImGui.Separator();
                 
                 if (ImGui.Button("click me")) {
@@ -531,10 +532,76 @@ export class Imgui_chunchun {
     
     // Get window state
     static IsWindowOpen(id: string): boolean {
-        const window = this.windows.get(id);
-        return window ? window.isOpen : false;
+        const config = this.windows.get(id);
+        return config ? config.isOpen : false;
     }
     
+    // Font management methods
+    /**
+     * Load Chinese font for ImGui
+     * @param fontPath Path to Chinese TTF font file (e.g., 'Font/NotoSansCJK-Regular.ttf')
+     * @param fontSize Font size in pixels (default: 16)
+     */
+    static async LoadChineseFont(fontPath: string, fontSize: number = 16): Promise<void> {
+        if (!this.isInitialized) {
+            throw new Error("ImGui must be initialized before loading fonts");
+        }
+        await ImGuiFontManager.LoadChineseFont(fontPath, fontSize);
+    }
+
+    /**
+     * Load basic font (ASCII only) for testing
+     * @param fontPath Path to font file
+     * @param fontSize Font size in pixels (default: 16)
+     */
+    static async LoadBasicFont(fontPath: string, fontSize: number = 16): Promise<void> {
+        if (!this.isInitialized) {
+            throw new Error("ImGui must be initialized before loading fonts");
+        }
+        await ImGuiFontManager.LoadBasicFont(fontPath, fontSize);
+    }
+
+    /**
+     * Load font with custom character set
+     * @param fontPath Path to font file
+     * @param fontSize Font size in pixels
+     * @param characters String containing characters to include
+     */
+    static async LoadFontWithCustomChars(fontPath: string, fontSize: number, characters: string): Promise<void> {
+        if (!this.isInitialized) {
+            throw new Error("ImGui must be initialized before loading fonts");
+        }
+        await ImGuiFontManager.LoadFontWithCustomChars(fontPath, fontSize, characters);
+    }
+
+    /**
+     * Initialize with default font only (safest option)
+     */
+    static InitializeWithDefaultFont(): void {
+        ImGuiFontManager.InitializeWithDefaultFont();
+    }
+
+    /**
+     * Push Chinese font for rendering
+     */
+    static PushChineseFont(): void {
+        ImGuiFontManager.PushChineseFont();
+    }
+
+    /**
+     * Pop font (restore previous font)
+     */
+    static PopFont(): void {
+        ImGuiFontManager.PopFont();
+    }
+
+    /**
+     * Check if Chinese font is loaded
+     */
+    static IsChineseFontLoaded(): boolean {
+        return ImGuiFontManager.IsChineseFontLoaded();
+    }
+
     // Destroy ImGui
     static Destroy(): void {
         if (!this.isInitialized) return;
@@ -555,7 +622,7 @@ export class Imgui_chunchun {
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () => {
     try {
         await Imgui_chunchun.Initialize();
-        //Imgui_chunchun.CreateExampleWindow();
+        Imgui_chunchun.CreateExampleWindow();
         
     } catch (error) {
         console.error("ImGui initialization failed:", error);

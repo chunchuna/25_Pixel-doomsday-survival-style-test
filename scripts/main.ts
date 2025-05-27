@@ -36,6 +36,7 @@ import "./PixelDoom/Group/Debug/PIXDebugMode.js"
 
 //UI
 import "./PixelDoom/UI/imgui_lib/imgui.js"
+import "./PixelDoom/UI/imgui_lib/ChineseFontExample.js"
 import "./PixelDoom/UI/debug_ui/UIvariableMonitoring.js"
 import "./PixelDoom/UI/debug_ui/UIDbugButton.js"
 import "./PixelDoom/UI/debug_ui/UIConsole.js"

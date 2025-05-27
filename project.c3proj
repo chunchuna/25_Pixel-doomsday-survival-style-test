@@ -745,6 +745,22 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "FontManager.ts",
+											"type": "application/typescript",
+											"sid": 125911520766595,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "ChineseFontExample.ts",
+											"type": "application/typescript",
+											"sid": 505159952491084,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],
@@ -1103,6 +1119,14 @@
 							"name": "ProggyClean.ttf",
 							"type": "application/font-sfnt",
 							"sid": 124460402992347,
+							"file-info": {
+								"purpose": "none"
+							}
+						},
+						{
+							"name": "NotoSansCJK-Regular.otf",
+							"type": "application/font-sfnt",
+							"sid": 299237270871315,
 							"file-info": {
 								"purpose": "none"
 							}

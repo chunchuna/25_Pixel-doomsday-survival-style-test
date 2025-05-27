@@ -115,11 +115,10 @@ async function Fog() {
 
     // Create initial fog
     console.log("Creating initial level fog...");
-    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 25, "whole_level_fog")
+    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 60, "whole_level_fog")
         .setPosition(0, 0)
         .setSize(6000, 3000)
         .setScale(1.2);
-
     // Create or reuse timer for fog cycling
     if (!FogTimer) {
         FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
@@ -144,7 +143,7 @@ async function Fog() {
                 PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 70, "whole_level_fog")
                     .setPosition(0, 0)
                     .setSize(6000, 3000)
-                    .setScale(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(1.5, 2.5)); // Random scale for variety
+                    .setScale(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(2, 2.5)); // Random scale for variety
 
                 // Set next timer with random interval
                 if (FogTimer) {
