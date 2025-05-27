@@ -49,7 +49,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
             // Start the timer
             timerInstance.behaviors.Timer.startTimer(intervalSeconds, timerTag, "regular");
             
-            console.log(`Started C3Timer interval with ${intervalSeconds}s interval`);
+            //console.log(`Started C3Timer interval with ${intervalSeconds}s interval`);
             return timerInstance; // Return timer instance for manual cleanup if needed
         } catch (error: any) {
             console.error(`Failed to create C3Timer interval: ${error.message}`);

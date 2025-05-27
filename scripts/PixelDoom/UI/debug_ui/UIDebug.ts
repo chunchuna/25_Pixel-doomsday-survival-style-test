@@ -121,6 +121,291 @@ export class UIDebug {
     private static submenuContainers: Map<string, HTMLElement> = new Map(); // 子菜单DOM容器
     private static submenuTimeouts: Map<string, number> = new Map(); // 子菜单延迟隐藏定时器
 
+    // 新增：HTML控制台文本折叠相关变量
+    private static consoleTextCollapseThreshold: number = 200; // 文本折叠阈值（字符数）
+    private static consoleExpandedMessages: Set<string> = new Set(); // 已展开的消息ID集合
+
+    /**
+     * 初始化调试面板
+     * @param toggleKey 用于显示/隐藏面板的按键
+     * @returns 调试面板实例
+     */
+    public static InitDebugPanel(toggleKey: string = '`'): DebugPanelInstance {
+        // 尝试从localStorage恢复字体设置（如果之前有保存的话）
+        const savedFontPath = localStorage.getItem('debug-ui-font-path');
+        if (savedFontPath) {
+            this.customFontPath = savedFontPath;
+        }
+
+        if (this.menuPanel) {
+            console.warn('Debug panel already initialized');
+            return this.createDebugPanelInstance();
+        }
+
+        this.toggleKey = toggleKey;
+
+        // 创建面板样式
+        this.createStyles();
+
+        // 创建菜单元素
+        this.createMenuElement();
+
+        // 创建控制台元素
+        this.createConsoleElement();
+
+        // 创建变量监控窗口
+        this.createVariableMonitorWindow();
+
+        // 添加鼠标移动事件监听，记录鼠标位置
+        document.addEventListener('mousemove', (event) => {
+            this.mouseX = event.clientX;
+            this.mouseY = event.clientY;
+        });
+
+        // 添加键盘事件监听
+        document.addEventListener('keydown', this.handleKeyDown);
+
+        // 点击空白处隐藏菜单
+        document.addEventListener('click', (event) => {
+            if (this.isMenuVisible && this.menuPanel && !this.menuPanel.contains(event.target as Node)) {
+                // 检查是否点击在任何子菜单上
+                let clickedInSubmenu = false;
+                this.submenuContainers.forEach((submenu) => {
+                    if (submenu.contains(event.target as Node)) {
+                        clickedInSubmenu = true;
+                    }
+                });
+
+                // 如果没有点击在子菜单上，则隐藏所有菜单
+                if (!clickedInSubmenu) {
+                    this.hideMenu();
+                }
+            }
+        });
+
+        return this.createDebugPanelInstance();
+    }
+
+    /**
+     * 添加调试按钮到面板
+     * @param name 按钮名称
+     * @param callback 点击按钮时的回调函数
+     * @returns 调试面板实例
+     */
+    public static DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance {
+        if (!this.buttonsContainer) {
+            console.error('Debug panel not initialized. Call InitDebugPanel first.');
+            return this.createDebugPanelInstance();
+        }
+
+        const button = document.createElement('button');
+        button.textContent = name;
+        button.className = 'debug-menu-button';
+        button.addEventListener('click', () => {
+            callback();
+            this.hideMenu(); // 点击按钮后隐藏菜单
+        });
+
+        this.buttonsContainer.appendChild(button);
+
+        return this.createDebugPanelInstance();
+    }
+
+    /**
+     * 初始化控制台捕获功能
+     * @returns 调试面板实例
+     */
+    public static InitConsoleCapture(): DebugPanelInstance {
+        if (this.isConsoleEnabled) {
+            console.warn('Console capture already initialized');
+            return this.createDebugPanelInstance();
+        }
+
+        this.isConsoleEnabled = true;
+
+        // 替换原始console方法
+        this.overrideConsoleMethods();
+
+
+        var DebugFather = this.DebuPanelAddFatherButton("DEBUG")
+        DebugFather.AddChildButton('clear console', () => {
+            if (this.consoleContainer) {
+                this.consoleContainer.innerHTML = '';
+            }
+            // 同时清除IMGUI控制台
+            UIConsole.Clear();
+        })
+
+        // 添加变量监控窗口控制按钮
+        DebugFather.AddChildButton('show monitoring', () => {
+            this.toggleVariableMonitorWindow();
+        })
+
+        DebugFather.AddChildButton("打开控制台", () => {
+            UIDebug.SetConsoleAlwaysShow(true)
+        })
+
+        DebugFather.AddChildButton("关闭控制台", () => {
+            UIDebug.SetConsoleAlwaysShow(false)
+        })
+
+        // 添加控制台文本折叠控制按钮
+        var ConsoleFather = DebugFather.AddChildFatherButton("Console Settings")
+        ConsoleFather.AddChildButton('Set collapse threshold: 100', () => {
+            UIDebug.SetConsoleTextCollapseThreshold(100);
+            console.log('Console text collapse threshold set to 100 characters');
+        })
+        
+        ConsoleFather.AddChildButton('Set collapse threshold: 200', () => {
+            UIDebug.SetConsoleTextCollapseThreshold(200);
+            console.log('Console text collapse threshold set to 200 characters');
+        })
+        
+        ConsoleFather.AddChildButton('Set collapse threshold: 500', () => {
+            UIDebug.SetConsoleTextCollapseThreshold(500);
+            console.log('Console text collapse threshold set to 500 characters');
+        })
+        
+        ConsoleFather.AddChildButton('Disable text collapse', () => {
+            UIDebug.SetConsoleTextCollapseThreshold(10000);
+            console.log('Console text collapse disabled');
+        })
+
+        return this.createDebugPanelInstance();
+    }
+
+    /**
+     * 设置控制台是否始终显示
+     * @param show 是否始终显示
+     */
+    public static SetConsoleAlwaysShow(show: boolean): void {
+/**
+ * Debug UI System
+ * 提供游戏内调试面板功能
+ * 
+ * 使用示例：
+ * 
+ * // 基本用法
+ * DEBUG.DebugMainUI.AddValue(someVariable);
+ * 
+ * // 实时变量监控（推荐用于会变化的变量）
+ * let gameScore = 0;
+ * DEBUG.DebugMainUI.AddValueByReference(() => gameScore, '游戏分数');
+ * 
+ * // 监控对象属性
+ * const player = { x: 0, y: 0, health: 100 };
+ * DEBUG.DebugMainUI.AddValueByReference(() => player, '玩家对象');
+ * DEBUG.DebugMainUI.AddValueByReference(() => player.x, '玩家X坐标');
+ * DEBUG.DebugMainUI.AddValueByReference(() => player.health, '玩家血量');
+ * 
+ * // 监控计算值
+ * DEBUG.DebugMainUI.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
+ * DEBUG.DebugMainUI.AddValueByReference(() => Math.floor(Math.random() * 100), '随机数');
+ * 
+ * // 自定义字体设置
+ * // 设置自定义字体路径（默认为 'Font/Roboto-Medium.ttf'）
+ * UIDebug.SetCustomFontPath('Font/MyCustomFont.ttf');
+ * 
+ * // 注意：确保字体文件路径相对于项目根目录是正确的
+ * // 字体文件格式支持：.ttf, .otf, .woff, .woff2
+ */
+
+import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
+import { VariableMonitoring } from "./UIvariableMonitoring.js";
+import { UIConsole } from "./UIConsole.js";
+
+export var DEBUG = {
+    DebugMainUI: null as DebugPanelInstance | null,
+}
+
+
+var isCreatDebugPanel = false;
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    if (!isCreatDebugPanel) {
+
+        DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
+        DEBUG.DebugMainUI.DoNotUseButtonPanel();
+        DEBUG.DebugMainUI.InitConsoleCapture()
+        isCreatDebugPanel = true
+    } else {
+        // 场景切换时检查并重新应用样式
+        UIDebug.checkAndReapplyStyles();
+    }
+
+})
+
+interface DebugPanelInstance {
+    DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance;
+    DebuPanelAddFatherButton(name: string): FatherButtonInstance;
+    InitConsoleCapture(): DebugPanelInstance;
+    AddValue(variable: any): DebugPanelInstance;
+    AddValueByReference(variableGetter: () => any, variableName: string): DebugPanelInstance;
+    DoNotUseButtonPanel(): DebugPanelInstance;
+}
+
+interface FatherButtonInstance {
+    AddChildButton(name: string, callback: () => void): FatherButtonInstance;
+    AddChildFatherButton(name: string): FatherButtonInstance;
+}
+
+export class UIDebug {
+    private static menuPanel: HTMLDivElement | null = null;
+    private static buttonsContainer: HTMLDivElement | null = null;
+    private static isMenuVisible: boolean = false;
+    private static toggleKey: string = "";
+    private static consoleContainer: HTMLDivElement | null = null;
+    private static originalConsole: any = {};
+    private static isConsoleEnabled: boolean = false;
+    private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
+    private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
+    private static consoleFontSize: number = 12; // 控制台字体大小
+    private static consoleUseBackplate: boolean = true; // 是否使用底板样式
+    private static consoleBackplateColor: string = '74, 74, 74'; // 底板颜色（RGB）
+    private static consoleBackplateOpacity: number = 0.9; // 底板透明度
+    private static mouseX: number = 0; // 记录鼠标X位置
+    private static mouseY: number = 0; // 记录鼠标Y位置
+    private static isButtonPanelEnabled: boolean = true; // 按钮面板启用状态
+
+    // 新增：随机控制台字体颜色相关变量
+    private static consoleRandomColor: boolean = true; // 随机控制台字体颜色开关
+    private static consoleColorRandomGroupSize: number = 3; // 字体颜色行数控制随机（1-5）
+    private static currentColorGroup: string = '#ffffff'; // 当前颜色组使用的颜色
+    private static colorGroupCounter: number = 0; // 当前颜色组计数器
+    private static availableColors: string[] = [
+        '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7',
+        '#fd79a8', '#fdcb6e', '#6c5ce7', '#74b9ff', '#00b894',
+        '#e17055', '#a29bfe', '#fd79a8', '#fdcb6e', '#55a3ff'
+    ]; // 可用颜色列表
+
+    // 新增：变量监控窗口相关变量
+    private static variableMonitorWindow: HTMLDivElement | null = null;
+    private static variableList: HTMLDivElement | null = null;
+    private static monitoredVariables: Map<string, any> = new Map(); // 监控的变量列表
+    private static isVariableWindowVisible: boolean = false;
+    private static isDragging: boolean = false;
+    private static dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+    private static expandedItems: Set<string> = new Set(); // 展开的项目ID集合
+    private static maxDisplayLength: number = 50; // 变量值最大显示长度（降低到50字符）
+
+    // 新增：自定义字体相关变量
+    private static customFontPath: string = 'Font/ProggyClean.ttf'; // 自定义字体路径
+    private static fontFamilyName: string = 'DebugUIFont'; // 字体族名称
+    private static isFontLoaded: boolean = false; // 字体是否已加载
+
+    // 新增：子菜单系统相关变量
+    private static menuItems: Map<string, MenuItemData> = new Map(); // 菜单项数据
+    private static currentOpenSubmenus: Set<string> = new Set(); // 当前打开的子菜单
+    private static menuScrollTop: number = 0; // 菜单滚动位置
+    private static menuMaxVisibleItems: number = 10; // 菜单最大可见项数
+    private static submenuContainers: Map<string, HTMLElement> = new Map(); // 子菜单DOM容器
+    private static submenuTimeouts: Map<string, number> = new Map(); // 子菜单延迟隐藏定时器
+
+    // 新增：HTML控制台文本折叠相关变量
+    private static consoleTextCollapseThreshold: number = 200; // 文本折叠阈值（字符数）
+    private static consoleExpandedMessages: Set<string> = new Set(); // 已展开的消息ID集合
+
     /**
      * 初始化调试面板
      * @param toggleKey 用于显示/隐藏面板的按键
@@ -1143,9 +1428,13 @@ export class UIDebug {
         const stack = (new Error()).stack;
         const scriptName = this.extractScriptName(stack);
 
+        // 生成唯一消息ID
+        const messageId = 'console_msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
         // 创建消息包装容器
         const messageWrapper = document.createElement('div');
         messageWrapper.className = 'console-message-wrapper';
+        messageWrapper.id = messageId;
 
         // 创建消息元素
         const messageElement = document.createElement('div');
@@ -1181,21 +1470,62 @@ export class UIDebug {
             }
         });
 
-        // 创建消息内容元素
-        const contentElement = document.createElement('span');
-        contentElement.className = 'console-content';
-        contentElement.textContent = messageContent;
+        // 创建消息内容容器
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'console-content-container';
 
-        // 按顺序添加元素：来源 -> 时间戳 -> 内容
-        messageElement.appendChild(sourceElement);
-        messageElement.appendChild(timestamp);
-        messageElement.appendChild(contentElement);
+        // 检查是否需要折叠显示
+        const needsCollapse = messageContent.length > this.consoleTextCollapseThreshold;
+
+        if (needsCollapse) {
+            // 创建折叠状态的内容
+            const collapsedContent = document.createElement('span');
+            collapsedContent.className = 'console-content console-content-collapsed';
+            const previewText = messageContent.substring(0, this.consoleTextCollapseThreshold) + '...';
+            collapsedContent.textContent = previewText;
+
+            // 创建展开状态的内容（初始隐藏）
+            const expandedContent = document.createElement('pre');
+            expandedContent.className = 'console-content console-content-expanded';
+            expandedContent.textContent = messageContent;
+            expandedContent.style.display = 'none';
+
+            // 创建展开/折叠按钮
+            const toggleButton = document.createElement('button');
+            toggleButton.className = 'console-toggle-button';
+            toggleButton.textContent = '📄';
+            toggleButton.title = 'Click to expand/collapse';
+
+            // 添加点击事件
+            toggleButton.addEventListener('click', () => {
+                this.toggleConsoleMessage(messageId, collapsedContent, expandedContent, toggleButton);
+            });
+
+            // 组装内容容器
+            contentContainer.appendChild(collapsedContent);
+            contentContainer.appendChild(expandedContent);
+            contentContainer.appendChild(toggleButton);
+        } else {
+            // 不需要折叠，直接显示
+            const contentElement = document.createElement('span');
+            contentElement.className = 'console-content';
+            contentElement.textContent = messageContent;
+            contentContainer.appendChild(contentElement);
+        }
 
         // 应用随机颜色（如果启用）
         if (this.consoleRandomColor) {
             const color = this.getCurrentConsoleColor();
-            contentElement.style.color = color; // 只对内容应用随机颜色
+            const contentElements = contentContainer.querySelectorAll('.console-content');
+            contentElements.forEach(element => {
+                (element as HTMLElement).style.color = color;
+            });
         }
+
+        // 按顺序添加元素：来源 -> 时间戳 -> 内容容器
+        messageElement.appendChild(sourceElement);
+        messageElement.appendChild(timestamp);
+        messageElement.appendChild(contentContainer);
 
         // 将消息元素添加到包装容器
         messageWrapper.appendChild(messageElement);
@@ -1209,8 +1539,36 @@ export class UIDebug {
         // 限制最大消息数量，防止内存过度使用
         while (this.consoleContainer.childElementCount > 1000) {
             if (this.consoleContainer.firstChild) {
-                this.consoleContainer.removeChild(this.consoleContainer.firstChild);
+                // 清理展开状态记录
+                const firstChild = this.consoleContainer.firstChild as HTMLElement;
+                if (firstChild.id) {
+                    this.consoleExpandedMessages.delete(firstChild.id);
+                }
+                this.consoleContainer.removeChild(firstChild);
             }
+        }
+    }
+
+    /**
+     * 切换控制台消息的展开/折叠状态
+     */
+    private static toggleConsoleMessage(messageId: string, collapsedElement: HTMLElement, expandedElement: HTMLElement, toggleButton: HTMLElement): void {
+        const isExpanded = this.consoleExpandedMessages.has(messageId);
+
+        if (isExpanded) {
+            // 折叠
+            collapsedElement.style.display = 'inline';
+            expandedElement.style.display = 'none';
+            toggleButton.textContent = '📄';
+            toggleButton.title = 'Click to expand';
+            this.consoleExpandedMessages.delete(messageId);
+        } else {
+            // 展开
+            collapsedElement.style.display = 'none';
+            expandedElement.style.display = 'block';
+            toggleButton.textContent = '📋';
+            toggleButton.title = 'Click to collapse';
+            this.consoleExpandedMessages.add(messageId);
         }
     }
 
@@ -1880,6 +2238,89 @@ export class UIDebug {
             
             .debug-menu-scroll-down::before {
                 content: "▼ 向下";
+            }
+            
+            /* 控制台内容样式 */
+            .console-content {
+                flex: 1;
+            }
+            
+            /* 控制台内容容器样式 */
+            .console-content-container {
+                display: flex;
+                align-items: flex-start;
+                gap: 6px;
+                flex: 1;
+                min-width: 0;
+            }
+            
+            /* 折叠状态的控制台内容 */
+            .console-content-collapsed {
+                flex: 1;
+                word-break: break-word;
+                white-space: pre-wrap;
+            }
+            
+            /* 展开状态的控制台内容 */
+            .console-content-expanded {
+                flex: 1;
+                word-break: break-word;
+                white-space: pre-wrap;
+                background-color: rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+                padding: 8px;
+                margin: 4px 0;
+                max-height: 300px;
+                overflow-y: auto;
+                font-family: '${this.fontFamilyName}', monospace !important;
+                font-size: inherit;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+            }
+            
+            /* 展开内容的滚动条样式 */
+            .console-content-expanded::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .console-content-expanded::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+            }
+            
+            .console-content-expanded::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+            }
+            
+            .console-content-expanded::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
+            }
+            
+            /* 控制台展开/折叠按钮 */
+            .console-toggle-button {
+                background: none;
+                border: none;
+                color: #fd79a8;
+                cursor: pointer;
+                font-size: 12px;
+                padding: 2px 4px;
+                border-radius: 3px;
+                transition: all 0.2s;
+                flex-shrink: 0;
+                background-color: rgba(253, 121, 168, 0.1);
+                pointer-events: auto; /* 确保按钮可以点击 */
+                user-select: none;
+            }
+            
+            .console-toggle-button:hover {
+                background-color: rgba(253, 121, 168, 0.3);
+                transform: scale(1.1);
+            }
+            
+            .console-toggle-button:active {
+                transform: scale(0.95);
             }
         `;
 
@@ -2804,6 +3245,14 @@ export class UIDebug {
             this.collapseAllVariables();
             event.preventDefault();
         }
+    }
+
+    /**
+     * 设置控制台文本折叠阈值
+     * @param threshold 超过此字符数的文本将被折叠显示
+     */
+    public static SetConsoleTextCollapseThreshold(threshold: number): void {
+        this.consoleTextCollapseThreshold = Math.max(50, Math.min(1000, threshold));
     }
 }
 

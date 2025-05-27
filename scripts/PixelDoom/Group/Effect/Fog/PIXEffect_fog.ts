@@ -284,7 +284,7 @@ export class PIXEffect_fog {
 
             // Start the timer
             this.timerInstance.behaviors.Timer.startTimer(this.duration, this.timerTag, "once");
-            console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
+            //console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
 
         } catch (error: any) {
             console.error(`Failed to create C3 timer for fog: ${error.message}`);
