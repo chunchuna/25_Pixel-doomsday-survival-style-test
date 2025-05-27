@@ -1,12 +1,12 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 
-// 声明全局 ImGui 对象
+// Declare global ImGui objects
 declare global {
     var ImGui: any;
     var ImGui_Impl: any;
 }
 
-// 窗口配置接口
+// Window configuration interface
 interface WindowConfig {
     title: string;
     isOpen: boolean;
@@ -24,7 +24,7 @@ export class Imgui_chunchun {
     private static sliderValue: number = 0.5;
     private static checkboxValue: boolean = false;
     
-    // 异步加载脚本
+    // Async script loading
     private static async loadScript(src: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -35,23 +35,22 @@ export class Imgui_chunchun {
         });
     }
     
-    // 初始化 ImGui
+    // Initialize ImGui
     static async Initialize(): Promise<void> {
         if (this.isInitialized) {
-            console.log("ImGui 已经初始化");
+            console.log("ImGui already initialized");
             return;
         }
         
         try {
-            console.log('开始加载 ImGui-JS...');
+            console.log('Starting to load ImGui-JS...');
             
-            // 加载 ImGui 和渲染器
-            await this.loadScript('https://flyover.github.io/imgui-js/dist/imgui.umd.js');
-            await this.loadScript('https://flyover.github.io/imgui-js/dist/imgui_impl.umd.js');
+            // Load ImGui and renderer from local files
+            await this.loadScript('Resource/script/lib/imgui/imgui.umd.js');
+            await this.loadScript('Resource/script/lib/imgui/imgui_impl.umd.js');
+            console.log('ImGui-JS loading completed');
             
-            console.log('ImGui-JS 加载完成');
-            
-            // 创建 Canvas
+            // Create Canvas
             this.canvas = document.createElement('canvas');
             this.canvas.style.position = 'absolute';
             this.canvas.style.left = '0';
@@ -62,31 +61,31 @@ export class Imgui_chunchun {
             this.canvas.style.zIndex = '1000';
             document.body.appendChild(this.canvas);
             
-            // 获取 WebGL 上下文
+            // Get WebGL context
             this.gl = this.canvas.getContext('webgl') as WebGLRenderingContext;
             if (!this.gl) {
-                throw new Error('无法获取 WebGL 上下文');
+                throw new Error('Failed to get WebGL context');
             }
             
-            // 初始化 ImGui
+            // Initialize ImGui
             await ImGui.default();
             ImGui.CreateContext();
             
-            // 初始化渲染器
+            // Initialize renderer
             ImGui_Impl.Init(this.canvas);
             
-            // 设置样式
+            // Setup style
             const io = ImGui.GetIO();
             io.ConfigFlags |= ImGui.ConfigFlags.NavEnableKeyboard;
             
-            // 应用暗色主题
+            // Apply dark theme
             ImGui.StyleColorsDark();
             
-            // 设置鼠标事件处理
+            // Setup mouse event handling
             this.setupMouseEventHandling();
             
             this.isInitialized = true;
-            console.log('ImGui 初始化完成');
+            console.log('ImGui initialization completed');
             
         } catch (error) {
             console.error("ImGui initialization failed:", error);
@@ -94,23 +93,23 @@ export class Imgui_chunchun {
         }
     }
     
-    // 设置鼠标事件处理
+    // Setup mouse event handling
     private static setupMouseEventHandling(): void {
-        // canvas 始终接收事件，以便 ImGui 能够正常工作
+        // Canvas always receives events so ImGui can work properly
         this.canvas.style.pointerEvents = 'auto';
         
-        // 确保 canvas 不会阻止下方元素的选择
+        // Ensure canvas doesn't prevent selection of elements below
         this.canvas.style.userSelect = 'none';
         
-        // 降低 z-index 避免覆盖某些高层级 UI
+        // Lower z-index to avoid covering certain high-level UI
         this.canvas.style.zIndex = '1000';
         
-        // 存储当前悬浮的元素
+        // Store currently hovered element
         let currentHoveredElement: Element | null = null;
         let isDragging = false;
         let dragTarget: Element | null = null;
         
-        // 处理所有鼠标事件
+        // Handle all mouse events
         const handleMouseEvent = (e: Event) => {
             if (!(e instanceof MouseEvent)) return;
             
@@ -121,21 +120,21 @@ export class Imgui_chunchun {
                                ImGui.IsAnyItemActive();
             
             if (!isOverImGui) {
-                // 临时禁用 canvas 捕获
+                // Temporarily disable canvas capture
                 this.canvas.style.pointerEvents = 'none';
                 
-                // 获取鼠标下的元素
+                // Get element under mouse
                 const element = document.elementFromPoint(e.clientX, e.clientY);
                 
-                // 恢复 canvas 捕获
+                // Restore canvas capture
                 this.canvas.style.pointerEvents = 'auto';
                 
                 if (element && element !== this.canvas) {
-                    // 处理悬浮状态变化
+                    // Handle hover state changes
                     if (e.type === 'mousemove') {
-                        // 如果悬浮元素改变了
+                        // If hovered element changed
                         if (currentHoveredElement !== element) {
-                            // 对旧元素发送 mouseleave
+                            // Send mouseleave to old element
                             if (currentHoveredElement) {
                                 const leaveEvent = new MouseEvent('mouseleave', {
                                     bubbles: true,
@@ -158,7 +157,7 @@ export class Imgui_chunchun {
                                 currentHoveredElement.dispatchEvent(outEvent);
                             }
                             
-                            // 对新元素发送 mouseenter
+                            // Send mouseenter to new element
                             currentHoveredElement = element;
                             const enterEvent = new MouseEvent('mouseenter', {
                                 bubbles: true,
@@ -182,7 +181,7 @@ export class Imgui_chunchun {
                         }
                     }
                     
-                    // 处理拖拽
+                    // Handle dragging
                     if (e.type === 'mousedown') {
                         isDragging = true;
                         dragTarget = element;
@@ -191,7 +190,7 @@ export class Imgui_chunchun {
                         dragTarget = null;
                     }
                     
-                    // 创建并发送事件
+                    // Create and send event
                     const newEvent = new MouseEvent(e.type, {
                         bubbles: true,
                         cancelable: true,
@@ -210,16 +209,16 @@ export class Imgui_chunchun {
                         relatedTarget: e.relatedTarget
                     });
                     
-                    // 如果正在拖拽，确保事件发送到正确的目标
+                    // If dragging, ensure event is sent to correct target
                     const targetElement = isDragging && dragTarget ? dragTarget : element;
                     targetElement.dispatchEvent(newEvent);
                     
-                    // 阻止原始事件
+                    // Prevent original event
                     e.preventDefault();
                     e.stopPropagation();
                 }
             } else {
-                // 如果鼠标在 ImGui 上，清除悬浮状态
+                // If mouse is over ImGui, clear hover state
                 if (currentHoveredElement) {
                     const leaveEvent = new MouseEvent('mouseleave', {
                         bubbles: true,
@@ -234,7 +233,7 @@ export class Imgui_chunchun {
             }
         };
         
-        // 监听所有相关的鼠标事件
+        // Listen to all relevant mouse events
         const mouseEvents = [
             'mousedown', 'mouseup', 'click', 'dblclick', 
             'mousemove', 'mouseenter', 'mouseleave', 
@@ -245,7 +244,7 @@ export class Imgui_chunchun {
             this.canvas.addEventListener(eventType, handleMouseEvent, true);
         });
         
-        // 处理鼠标滚轮事件
+        // Handle mouse wheel events
         this.canvas.addEventListener('wheel', (e: WheelEvent) => {
             const io = ImGui.GetIO();
             const isOverImGui = io.WantCaptureMouse || 
@@ -276,35 +275,35 @@ export class Imgui_chunchun {
         }, true);
     }
     
-    // 检查是否有任何窗口被悬停
+    // Check if any window is hovered
     private static isAnyWindowHovered(): boolean {
-        // 检查是否有任何 ImGui 窗口被悬停
+        // Check if any ImGui window is hovered
         return ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow);
     }
     
-    // 渲染循环
+    // Render loop
     static Render(): void {
         if (!this.isInitialized) return;
         
-        // 开始新帧
+        // Start new frame
         ImGui_Impl.NewFrame(performance.now());
         ImGui.NewFrame();
         
-        // 更新鼠标事件状态
+        // Update mouse event state
         this.updateMouseEventState();
         
-        // 渲染所有窗口
+        // Render all windows
         this.windows.forEach((config, id) => {
             if (config.isOpen) {
                 this.RenderWindow(config);
             }
         });
         
-        // 渲染 ImGui
+        // Render ImGui
         ImGui.EndFrame();
         ImGui.Render();
         
-        // 清空画布并渲染
+        // Clear canvas and render
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
@@ -312,22 +311,22 @@ export class Imgui_chunchun {
         ImGui_Impl.RenderDrawData(ImGui.GetDrawData());
     }
     
-    // 更新鼠标事件状态
+    // Update mouse event state
     private static updateMouseEventState(): void {
-        // 这个方法现在不需要做任何事情
-        // 所有的鼠标事件处理逻辑已经在 setupMouseEventHandling 中完成
-        // 保留这个方法以避免破坏现有的调用
+        // This method now does not need to do anything
+        // All mouse event handling logic is already completed in setupMouseEventHandling
+        // Keeping this method to avoid breaking existing calls
         
         /*
         const io = ImGui.GetIO();
         
-        // 检查是否需要捕获鼠标
+        // Check if mouse should be captured
         const shouldCaptureMouse = io.WantCaptureMouse || 
                                   ImGui.IsWindowHovered(ImGui.HoveredFlags.AnyWindow) ||
                                   ImGui.IsAnyItemHovered() ||
                                   ImGui.IsAnyItemActive();
         
-        // 动态设置 pointer-events
+        // Dynamically set pointer-events
         if (shouldCaptureMouse) {
             if (this.canvas.style.pointerEvents !== 'auto') {
                 this.canvas.style.pointerEvents = 'auto';
@@ -340,23 +339,23 @@ export class Imgui_chunchun {
         */
     }
     
-    // 渲染单个窗口
+    // Render single window
     private static RenderWindow(config: WindowConfig): void {
-        // 设置窗口大小
+        // Set window size
         if (config.size) {
             ImGui.SetNextWindowSize(new ImGui.ImVec2(config.size.width, config.size.height), ImGui.Cond.FirstUseEver);
         }
         
-        // 设置窗口位置
+        // Set window position
         if (config.position) {
             ImGui.SetNextWindowPos(new ImGui.ImVec2(config.position.x, config.position.y), ImGui.Cond.FirstUseEver);
         }
         
-        // 开始窗口
+        // Start window
         const flags = config.flags || 0;
         let isOpen = config.isOpen;
         if (ImGui.Begin(config.title, (value = isOpen) => config.isOpen = value, flags)) {
-            // 执行自定义渲染回调
+            // Execute custom render callback
             if (config.renderCallback) {
                 config.renderCallback();
             }
@@ -364,7 +363,7 @@ export class Imgui_chunchun {
         ImGui.End();
     }
     
-        // 创建示例窗口
+    // Create example window
     static CreateExampleWindow(): void {
         
         const windowId = "example_window";
@@ -384,10 +383,10 @@ export class Imgui_chunchun {
                 
                 ImGui.Text("you can add more sub here");
                 
-                // 滑块示例
+                // Slider example
                 ImGui.SliderFloat("value", (value = this.sliderValue) => this.sliderValue = value, 0.0, 1.0);
                 
-                // 复选框示例
+                // Checkbox example
                 ImGui.Checkbox("value", (value = this.checkboxValue) => this.checkboxValue = value);
                 
                 ImGui.Separator();
@@ -398,7 +397,7 @@ export class Imgui_chunchun {
         });
     }
     
-    // 创建文本窗口
+    // Create text window
     static CreateTextWindow(id: string, title: string, text: string, position?: { x: number; y: number }): void {
         this.windows.set(id, {
             title: title,
@@ -410,7 +409,7 @@ export class Imgui_chunchun {
         });
     }
     
-    // 创建输入窗口
+    // Create input window
     static CreateInputWindow(id: string, title: string, onSubmit: (text: string) => void): void {
         let inputText = "";
         
@@ -419,23 +418,23 @@ export class Imgui_chunchun {
             isOpen: true,
             size: { width: 300, height: 150 },
             renderCallback: () => {
-                ImGui.InputText("输入", (value = inputText) => inputText = value);
+                ImGui.InputText("Input", (value = inputText) => inputText = value);
                 
-                if (ImGui.Button("确定")) {
+                if (ImGui.Button("OK")) {
                     onSubmit(inputText);
                     this.CloseWindow(id);
                 }
                 
                 ImGui.SameLine();
                 
-                if (ImGui.Button("取消")) {
+                if (ImGui.Button("Cancel")) {
                     this.CloseWindow(id);
                 }
             }
         });
     }
     
-    // 创建确认对话框
+    // Create confirm dialog
     static CreateConfirmDialog(id: string, title: string, message: string, onConfirm: () => void, onCancel?: () => void): void {
         this.windows.set(id, {
             title: title,
@@ -446,14 +445,14 @@ export class Imgui_chunchun {
                 ImGui.Text(message);
                 ImGui.Separator();
                 
-                if (ImGui.Button("确定")) {
+                if (ImGui.Button("OK")) {
                     onConfirm();
                     this.CloseWindow(id);
                 }
                 
                 ImGui.SameLine();
                 
-                if (ImGui.Button("取消")) {
+                if (ImGui.Button("Cancel")) {
                     if (onCancel) onCancel();
                     this.CloseWindow(id);
                 }
@@ -461,7 +460,7 @@ export class Imgui_chunchun {
         });
     }
     
-    // 创建工具窗口
+    // Create tool window
     static CreateToolWindow(id: string, title: string, tools: Array<{ name: string; icon?: string; callback: () => void }>): void {
         this.windows.set(id, {
             title: title,
@@ -483,7 +482,7 @@ export class Imgui_chunchun {
         });
     }
     
-    // 创建属性编辑器窗口
+    // Create property editor window
     static CreatePropertyWindow(id: string, title: string, properties: any): void {
         this.windows.set(id, {
             title: title,
@@ -509,7 +508,7 @@ export class Imgui_chunchun {
     }
     
     
-    // 关闭窗口
+    // Close window
     static CloseWindow(id: string): void {
         const window = this.windows.get(id);
         if (window) {
@@ -517,12 +516,12 @@ export class Imgui_chunchun {
         }
     }
     
-    // 销毁窗口
+    // Destroy window
     static DestroyWindow(id: string): void {
         this.windows.delete(id);
     }
     
-    // 显示/隐藏窗口
+    // Show/hide window
     static ToggleWindow(id: string): void {
         const window = this.windows.get(id);
         if (window) {
@@ -530,13 +529,13 @@ export class Imgui_chunchun {
         }
     }
     
-    // 获取窗口状态
+    // Get window state
     static IsWindowOpen(id: string): boolean {
         const window = this.windows.get(id);
         return window ? window.isOpen : false;
     }
     
-    // 销毁 ImGui
+    // Destroy ImGui
     static Destroy(): void {
         if (!this.isInitialized) return;
         
@@ -552,7 +551,7 @@ export class Imgui_chunchun {
     }
 }
 
-// 初始化钩子
+// Initialize hook
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () => {
     try {
         await Imgui_chunchun.Initialize();
@@ -563,7 +562,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () 
     }
 });
 
-// 更新钩子
+// Update hook
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     Imgui_chunchun.Render();
 });

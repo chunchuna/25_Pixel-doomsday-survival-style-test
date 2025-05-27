@@ -27,7 +27,7 @@ export class PIXEffect_fog {
     // Performance optimization settings
     private static MAX_PARTICLES_GLOBAL: number = 500; // Global particle limit
     private static MAX_PARTICLES_PER_FOG: number = 150; // Per fog instance limit
-    private static PERFORMANCE_MODE: boolean = false; // Auto performance mode
+    private static PERFORMANCE_MODE: boolean = true; // Auto performance mode
     private static LOD_ENABLED: boolean = true; // Level of Detail system
     private static UPDATE_FREQUENCY: number = 16; // Animation update frequency in ms
 
