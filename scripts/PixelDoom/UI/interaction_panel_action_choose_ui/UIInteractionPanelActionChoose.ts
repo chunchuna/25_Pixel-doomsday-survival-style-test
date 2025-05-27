@@ -134,6 +134,8 @@ function ensureClickHandling() {
         
         // Trigger event with button ID
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
+        UIInteractionPanelActionChooseMain.CloseChoosePanle();
+        
       }
     }, true); // Use capture phase
   }

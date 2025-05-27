@@ -83,10 +83,16 @@ export class PIXEffect_fog {
     private timerTag: string = "";
 
     // Fade-out animation properties
-    private static FADE_OUT_DURATION: number = 2000; // 2 seconds fade-out
+    private static FADE_OUT_DURATION: number = 12000; // 2 seconds fade-out
     private isFadingOut: boolean = false;
     private fadeStartTime: number = 0;
     private initialOpacity: number = 1.0;
+
+    // Fade-in animation properties
+    private static FADE_IN_DURATION: number = 10000; // 3 seconds fade-in
+    private isFadingIn: boolean = false;
+    private fadeInStartTime: number = 0;
+    private targetOpacity: number = 1.0;
 
     private constructor(type: FogType, style: FogStyle = FogStyle.MEDIUM, duration: number = 0, layer: string = "html_c3") {
         this.id = `fog_${++PIXEffect_fog.idCounter}_${Date.now()}`;
@@ -98,8 +104,15 @@ export class PIXEffect_fog {
         // Set default parameters based on style
         this.setDefaultParameters();
 
+        // Store target opacity and start with 0 for fade-in effect
+        this.targetOpacity = this.fogParams.opacity;
+        this.fogParams.opacity = 0; // Start invisible
+
         // Create HTML element
         this.createHtmlElement();
+
+        // Start fade-in animation
+        this.startFadeIn();
 
         console.log(`Created ${this.style} fog with ID: ${this.id}, type: ${this.type}, duration: ${this.duration}s`);
     }
@@ -339,6 +352,53 @@ export class PIXEffect_fog {
             // Fade-out complete, destroy fog
             console.log(`Fade-out complete for fog ${this.id}, destroying`);
             this.destroy();
+        }
+    }
+
+    /**
+     * Starts fade-in animation
+     */
+    private startFadeIn(): void {
+        if (this.isFadingIn || this.isDestroyed) return;
+
+        this.isFadingIn = true;
+        this.fadeInStartTime = Date.now();
+
+        console.log(`Starting fade-in for fog ${this.id}`);
+
+        // Start fade-in animation loop
+        this.fadeInStep();
+    }
+
+    /**
+     * Performs one step of fade-in animation
+     */
+    private fadeInStep(): void {
+        if (!this.isFadingIn || this.isDestroyed) return;
+
+        const elapsed = Date.now() - this.fadeInStartTime;
+        const progress = Math.min(elapsed / PIXEffect_fog.FADE_IN_DURATION, 1.0);
+
+        // Calculate current opacity (fade from 0 to target)
+        const currentOpacity = this.targetOpacity * progress;
+
+        // Update fog opacity
+        this.fogParams.opacity = currentOpacity;
+
+        // Re-render with new opacity
+        if (this.htmlElement) {
+            this.renderHTML();
+        }
+
+        // Continue fade-in or complete when done
+        if (progress < 1.0) {
+            // Continue fade-in animation
+            setTimeout(() => this.fadeInStep(), 16); // ~60 FPS
+        } else {
+            // Fade-in complete
+            this.isFadingIn = false;
+            this.fogParams.opacity = this.targetOpacity; // Ensure exact target opacity
+            console.log(`Fade-in complete for fog ${this.id}`);
         }
     }
 
@@ -654,7 +714,16 @@ export class PIXEffect_fog {
      * @param opacity Opacity value (0-1)
      */
     public setOpacity(opacity: number): PIXEffect_fog {
-        this.fogParams.opacity = Math.max(0, Math.min(1, opacity));
+        const newOpacity = Math.max(0, Math.min(1, opacity));
+        
+        // If currently fading in, update target opacity
+        if (this.isFadingIn) {
+            this.targetOpacity = newOpacity;
+        } else {
+            this.fogParams.opacity = newOpacity;
+            this.targetOpacity = newOpacity;
+        }
+        
         return this;
     }
 
@@ -1600,6 +1669,24 @@ export class PIXEffect_fog {
 
         return fog;
     }
+
+    /**
+     * Sets the fade-in duration for all fog effects
+     * @param duration Duration in milliseconds
+     */
+    public static SetFadeInDuration(duration: number): void {
+        if (duration > 0) {
+            PIXEffect_fog.FADE_IN_DURATION = duration;
+            console.log(`Set fog fade-in duration to ${duration}ms`);
+        }
+    }
+
+    /**
+     * Gets the fade-in duration
+     */
+    public static GetFadeInDuration(): number {
+        return PIXEffect_fog.FADE_IN_DURATION;
+    }
 }
 
 
@@ -1999,5 +2086,38 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 .setColor(color)
                 .setSpeed(0.8);
         });
+    });
+
+    // Fade-in controls
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Fast Fade-in (500ms)", () => {
+        PIXEffect_fog.SetFadeInDuration(500);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Normal Fade-in (1500ms)", () => {
+        PIXEffect_fog.SetFadeInDuration(1500);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Slow Fade-in (3000ms)", () => {
+        PIXEffect_fog.SetFadeInDuration(3000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Show Fade-in Duration", () => {
+        const fadeInDuration = PIXEffect_fog.GetFadeInDuration();
+        const fadeOutDuration = PIXEffect_fog.GetFadeOutDuration();
+        console.log(`Current fade-in duration: ${fadeInDuration}ms`);
+        console.log(`Current fade-out duration: ${fadeOutDuration}ms`);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Fade-in Effect", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("Creating fog with fade-in effect...");
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 10, "fade_in_test")
+            .setPosition(x - 200, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.8)
+            .setColor("#9c27b0");
     });
 }); 

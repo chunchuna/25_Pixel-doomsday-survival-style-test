@@ -92,7 +92,7 @@ async function Fog() {
         if (e.tag === "fogtimer") {
             PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 15, "whole_level_fog")
                 .setPosition(0, 0)
-                .setSize(6000, 3000)
+                .setSize(6000, 3000).setScale(2.2)
         }
     })
 
