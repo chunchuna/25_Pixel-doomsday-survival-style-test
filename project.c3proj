@@ -745,6 +745,22 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "imgui.umd.js",
+											"type": "application/javascript",
+											"sid": 583694588344937,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "imgui_impl.umd.js",
+											"type": "application/javascript",
+											"sid": 406280983436007,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

@@ -23,6 +23,13 @@ export class PIXEffect_fog {
     private static idCounter: number = 0;
     private static currentEditingFog: PIXEffect_fog | null = null;
 
+    // Performance optimization settings
+    private static MAX_PARTICLES_GLOBAL: number = 500; // Global particle limit
+    private static MAX_PARTICLES_PER_FOG: number = 150; // Per fog instance limit
+    private static PERFORMANCE_MODE: boolean = false; // Auto performance mode
+    private static LOD_ENABLED: boolean = true; // Level of Detail system
+    private static UPDATE_FREQUENCY: number = 16; // Animation update frequency in ms
+
     protected id: string;
     protected htmlElement: any; // HTML element instance
     protected type: FogType;
@@ -35,6 +42,12 @@ export class PIXEffect_fog {
     protected _y: number = 0;
     protected _width: number = 800;  // HTML component size
     protected _height: number = 600; // HTML component size
+
+    // Performance tracking
+    protected lastFrameTime: number = 0;
+    protected frameCount: number = 0;
+    protected avgFrameTime: number = 16;
+    protected performanceLevel: number = 1; // 1 = high, 0.5 = medium, 0.25 = low
 
     // Fog parameters
     private fogParams = {
@@ -53,10 +66,16 @@ export class PIXEffect_fog {
     };
 
     // Animation properties
-    private particles: any[] = [];
-    private animationId: number | null = null;
-    private time: number = 0;
+    protected particles: any[] = [];
+    protected animationId: number | null = null;
+    protected time: number = 0;
     protected isDestroyed: boolean = false;
+
+    // Performance optimization properties
+    protected skipFrames: number = 0; // Skip frames for performance
+    protected lodLevel: number = 1; // Level of detail (1 = full, 0.5 = half, 0.25 = quarter)
+    protected isVisible: boolean = true; // Visibility culling
+    protected lastUpdateTime: number = 0;
 
     // C3 Timer properties (replacing JavaScript timers)
     private timerInstance: any = null;
@@ -317,20 +336,58 @@ export class PIXEffect_fog {
     }
 
     /**
-     * Initializes fog particles
+     * Initializes fog particles with performance optimizations
      */
     private initParticles(): void {
         this.particles = [];
-        const particleCount = Math.floor(this._width * this._height * 0.0001 * this.fogParams.density);
         
-        for (let i = 0; i < particleCount; i++) {
+        // Calculate base particle count
+        let baseParticleCount = Math.floor(this._width * this._height * 0.0001 * this.fogParams.density);
+        
+        // Apply performance optimizations
+        if (PIXEffect_fog.PERFORMANCE_MODE) {
+            baseParticleCount = Math.floor(baseParticleCount * 0.5); // Reduce by 50% in performance mode
+        }
+        
+        // Apply LOD (Level of Detail) based on fog size
+        if (PIXEffect_fog.LOD_ENABLED) {
+            const area = this._width * this._height;
+            if (area > 1000000) { // Very large fog (1000x1000+)
+                this.lodLevel = 0.25;
+                baseParticleCount = Math.floor(baseParticleCount * 0.25);
+            } else if (area > 500000) { // Large fog (700x700+)
+                this.lodLevel = 0.5;
+                baseParticleCount = Math.floor(baseParticleCount * 0.5);
+            } else if (area > 200000) { // Medium fog (450x450+)
+                this.lodLevel = 0.75;
+                baseParticleCount = Math.floor(baseParticleCount * 0.75);
+            } else {
+                this.lodLevel = 1.0; // Small fog, full detail
+            }
+        }
+        
+        // Apply per-fog particle limit
+        baseParticleCount = Math.min(baseParticleCount, PIXEffect_fog.MAX_PARTICLES_PER_FOG);
+        
+        // Check global particle limit
+        const currentGlobalParticles = this.getTotalActiveParticles();
+        const availableParticles = PIXEffect_fog.MAX_PARTICLES_GLOBAL - currentGlobalParticles;
+        const finalParticleCount = Math.min(baseParticleCount, Math.max(0, availableParticles));
+        
+        console.log(`Fog ${this.id}: Area=${this._width}x${this._height}, LOD=${this.lodLevel}, Particles=${finalParticleCount}/${baseParticleCount}`);
+        
+        // Create particles with optimized distribution
+        for (let i = 0; i < finalParticleCount; i++) {
             const baseSize = Math.random() * 100 + 50;
             const sizeVariation = 1 + (Math.random() - 0.5) * this.fogParams.particleVariation;
+            
+            // Scale particle size based on LOD
+            const lodScaledSize = baseSize * sizeVariation * (1 + (1 - this.lodLevel) * 2); // Larger particles for lower LOD
             
             this.particles.push({
                 x: Math.random() * this._width,
                 y: Math.random() * this._height,
-                size: baseSize * sizeVariation,
+                size: lodScaledSize,
                 baseSpeedX: (Math.random() - 0.5) * 0.3 + 0.2,
                 baseSpeedY: (Math.random() - 0.5) * 0.2 - 0.1,
                 opacity: Math.random() * 0.3 + 0.1,
@@ -338,40 +395,108 @@ export class PIXEffect_fog {
                 flowOffset: Math.random() * Math.PI * 2,
                 flowAmplitude: Math.random() * 0.3 + 0.1,
                 noiseOffset: Math.random() * 1000, // For noise pattern
-                rotationSpeed: (Math.random() - 0.5) * 0.02 // Slow rotation
+                rotationSpeed: (Math.random() - 0.5) * 0.02, // Slow rotation
+                // Performance optimization: pre-calculate some values
+                preCalcSin: Math.sin(Math.random() * Math.PI * 2),
+                preCalcCos: Math.cos(Math.random() * Math.PI * 2),
+                updateCounter: Math.floor(Math.random() * 10) // Stagger updates
             });
         }
     }
 
     /**
-     * Updates particle positions
+     * Gets total active particles across all fog instances
      */
-    private updateParticles(): void {
-        this.particles.forEach(particle => {
-            const flowTime = this.time * 0.0005;
-            const flowX = Math.sin(flowTime + particle.flowOffset) * particle.flowAmplitude * 0.5;
-            const flowY = Math.cos(flowTime * 0.7 + particle.flowOffset) * particle.flowAmplitude * 0.3;
-            
-            particle.x += (particle.baseSpeedX + flowX) * this.fogParams.speed;
-            particle.y += (particle.baseSpeedY + flowY) * this.fogParams.speed;
-
-            // Update noise offset for organic movement
-            particle.noiseOffset += 0.01;
-
-            // Wrap around screen
-            if (particle.x > this._width + particle.size) {
-                particle.x = -particle.size;
-            }
-            if (particle.x < -particle.size) {
-                particle.x = this._width + particle.size;
-            }
-            if (particle.y > this._height + particle.size) {
-                particle.y = -particle.size;
-            }
-            if (particle.y < -particle.size) {
-                particle.y = this._height + particle.size;
+    private getTotalActiveParticles(): number {
+        let total = 0;
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                total += fog.particles.length;
             }
         });
+        return total;
+    }
+
+    /**
+     * Updates particle positions with performance optimizations
+     */
+    private updateParticles(): void {
+        const currentTime = Date.now();
+        
+        // Performance monitoring
+        if (this.lastFrameTime > 0) {
+            const frameTime = currentTime - this.lastFrameTime;
+            this.avgFrameTime = (this.avgFrameTime * 0.9) + (frameTime * 0.1); // Smooth average
+            
+            // Adjust performance level based on frame time
+            if (this.avgFrameTime > 25) { // Below 40 FPS
+                this.performanceLevel = 0.25;
+                this.skipFrames = 3; // Update every 4th frame
+            } else if (this.avgFrameTime > 20) { // Below 50 FPS
+                this.performanceLevel = 0.5;
+                this.skipFrames = 1; // Update every 2nd frame
+            } else {
+                this.performanceLevel = 1.0;
+                this.skipFrames = 0; // Update every frame
+            }
+        }
+        this.lastFrameTime = currentTime;
+        
+        // Skip frame if needed for performance
+        if (this.skipFrames > 0 && this.frameCount % (this.skipFrames + 1) !== 0) {
+            this.frameCount++;
+            return;
+        }
+        
+        // Optimized particle update with batching
+        const flowTime = this.time * 0.0005;
+        const speedMultiplier = this.fogParams.speed * this.performanceLevel;
+        
+        // Update particles in batches to reduce computation
+        const batchSize = Math.max(1, Math.floor(this.particles.length * this.performanceLevel));
+        const startIndex = (this.frameCount * batchSize) % this.particles.length;
+        const endIndex = Math.min(startIndex + batchSize, this.particles.length);
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            const particle = this.particles[i];
+            
+            // Staggered updates for better performance
+            particle.updateCounter++;
+            if (particle.updateCounter % 2 !== 0 && this.performanceLevel < 1.0) {
+                continue; // Skip this particle this frame
+            }
+            
+            // Use pre-calculated values for better performance
+            const flowX = particle.preCalcSin * particle.flowAmplitude * 0.5;
+            const flowY = particle.preCalcCos * particle.flowAmplitude * 0.3;
+            
+            particle.x += (particle.baseSpeedX + flowX) * speedMultiplier;
+            particle.y += (particle.baseSpeedY + flowY) * speedMultiplier;
+
+            // Update noise offset less frequently for performance
+            if (particle.updateCounter % 3 === 0) {
+                particle.noiseOffset += 0.01;
+                // Update pre-calculated values occasionally
+                particle.preCalcSin = Math.sin(flowTime + particle.flowOffset);
+                particle.preCalcCos = Math.cos(flowTime * 0.7 + particle.flowOffset);
+            }
+
+            // Wrap around screen (optimized boundary checking)
+            const size = particle.size;
+            if (particle.x > this._width + size) {
+                particle.x = -size;
+            } else if (particle.x < -size) {
+                particle.x = this._width + size;
+            }
+            
+            if (particle.y > this._height + size) {
+                particle.y = -size;
+            } else if (particle.y < -size) {
+                particle.y = this._height + size;
+            }
+        }
+        
+        this.frameCount++;
     }
 
     /**
@@ -450,19 +575,43 @@ export class PIXEffect_fog {
     }
 
     /**
-     * Starts the animation loop
+     * Starts the animation loop with performance optimizations
      */
     private startAnimation(): void {
         const animate = () => {
             if (this.isDestroyed) return;
 
-            this.time += 16;
-            this.updateParticles();
-            this.renderHTML();
+            const currentTime = Date.now();
+            const deltaTime = currentTime - this.lastUpdateTime;
+            
+            // Adaptive frame rate based on performance
+            let targetFrameTime = PIXEffect_fog.UPDATE_FREQUENCY;
+            if (this.performanceLevel < 1.0) {
+                targetFrameTime = Math.floor(PIXEffect_fog.UPDATE_FREQUENCY / this.performanceLevel);
+            }
+            
+            // Only update if enough time has passed
+            if (deltaTime >= targetFrameTime) {
+                this.time += deltaTime;
+                this.updateParticles();
+                
+                // Only re-render if particles were actually updated
+                if (this.skipFrames === 0 || this.frameCount % (this.skipFrames + 1) === 0) {
+                    this.renderHTML();
+                }
+                
+                this.lastUpdateTime = currentTime;
+            }
 
-            this.animationId = setTimeout(animate, 16); // ~60 FPS
+            // Use requestAnimationFrame when available, fallback to setTimeout
+            if (typeof requestAnimationFrame !== 'undefined') {
+                this.animationId = requestAnimationFrame(animate) as any;
+            } else {
+                this.animationId = setTimeout(animate, Math.max(8, targetFrameTime)) as any;
+            }
         };
 
+        this.lastUpdateTime = Date.now();
         animate();
     }
 
@@ -706,6 +855,34 @@ export class PIXEffect_fog {
     }
 
     /**
+     * Gets the number of particles in this fog instance
+     */
+    public getParticleCount(): number {
+        return this.particles.length;
+    }
+
+    /**
+     * Gets the current LOD level
+     */
+    public getLODLevel(): number {
+        return this.lodLevel;
+    }
+
+    /**
+     * Gets the current performance level
+     */
+    public getPerformanceLevel(): number {
+        return this.performanceLevel;
+    }
+
+    /**
+     * Gets the average frame time
+     */
+    public getAverageFrameTime(): number {
+        return this.avgFrameTime;
+    }
+
+    /**
      * Destroys the fog effect
      */
     public destroy(): void {
@@ -726,9 +903,18 @@ export class PIXEffect_fog {
             this.timerInstance = null;
         }
 
-        // Clear animation loop
+        // Clear animation loop (handle both setTimeout and requestAnimationFrame)
         if (this.animationId) {
-            clearTimeout(this.animationId);
+            if (typeof cancelAnimationFrame !== 'undefined') {
+                try {
+                    cancelAnimationFrame(this.animationId as number);
+                } catch (e) {
+                    // Fallback to clearTimeout if cancelAnimationFrame fails
+                    clearTimeout(this.animationId as number);
+                }
+            } else {
+                clearTimeout(this.animationId as number);
+            }
             this.animationId = null;
         }
 
@@ -742,6 +928,9 @@ export class PIXEffect_fog {
             this.htmlElement = null;
         }
 
+        // Clear particles array
+        this.particles = [];
+
         // Remove from instances map
         PIXEffect_fog.instances.delete(this.id);
 
@@ -750,7 +939,7 @@ export class PIXEffect_fog {
             PIXEffect_fog.currentEditingFog = null;
         }
 
-        console.log(`Fog effect ${this.id} destroyed`);
+        console.log(`Fog effect ${this.id} destroyed (particles cleared, performance optimized)`);
     }
 
     /**
@@ -765,10 +954,155 @@ export class PIXEffect_fog {
     }
 
     /**
-     * Gets the current fade-out duration
+     * Shows fade duration
      */
     public static GetFadeOutDuration(): number {
         return PIXEffect_fog.FADE_OUT_DURATION;
+    }
+
+    /**
+     * Sets global performance mode
+     * @param enabled Enable performance mode (reduces particle count by 50%)
+     */
+    public static SetPerformanceMode(enabled: boolean): void {
+        PIXEffect_fog.PERFORMANCE_MODE = enabled;
+        console.log(`Performance mode ${enabled ? 'enabled' : 'disabled'}`);
+        
+        // Reinitialize all existing fog particles
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                fog.initParticles();
+            }
+        });
+    }
+
+    /**
+     * Sets maximum particles per fog instance
+     * @param maxParticles Maximum particles per fog
+     */
+    public static SetMaxParticlesPerFog(maxParticles: number): void {
+        PIXEffect_fog.MAX_PARTICLES_PER_FOG = Math.max(10, maxParticles);
+        console.log(`Max particles per fog set to: ${PIXEffect_fog.MAX_PARTICLES_PER_FOG}`);
+        
+        // Reinitialize all existing fog particles
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                fog.initParticles();
+            }
+        });
+    }
+
+    /**
+     * Sets global maximum particles
+     * @param maxParticles Global maximum particles
+     */
+    public static SetMaxParticlesGlobal(maxParticles: number): void {
+        PIXEffect_fog.MAX_PARTICLES_GLOBAL = Math.max(50, maxParticles);
+        console.log(`Global max particles set to: ${PIXEffect_fog.MAX_PARTICLES_GLOBAL}`);
+        
+        // Reinitialize all existing fog particles
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                fog.initParticles();
+            }
+        });
+    }
+
+    /**
+     * Enables or disables LOD (Level of Detail) system
+     * @param enabled Enable LOD system
+     */
+    public static SetLODEnabled(enabled: boolean): void {
+        PIXEffect_fog.LOD_ENABLED = enabled;
+        console.log(`LOD system ${enabled ? 'enabled' : 'disabled'}`);
+        
+        // Reinitialize all existing fog particles
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                fog.initParticles();
+            }
+        });
+    }
+
+    /**
+     * Sets animation update frequency
+     * @param frequency Update frequency in milliseconds (lower = faster)
+     */
+    public static SetUpdateFrequency(frequency: number): void {
+        PIXEffect_fog.UPDATE_FREQUENCY = Math.max(8, frequency);
+        console.log(`Update frequency set to: ${PIXEffect_fog.UPDATE_FREQUENCY}ms`);
+    }
+
+    /**
+     * Gets performance statistics for all fog instances
+     */
+    public static GetPerformanceStats(): any {
+        let totalParticles = 0;
+        let totalFogs = 0;
+        let avgFrameTime = 0;
+        let avgPerformanceLevel = 0;
+        let lodStats = { full: 0, high: 0, medium: 0, low: 0 };
+
+        PIXEffect_fog.instances.forEach(fog => {
+            if (!fog.isDestroyed) {
+                totalFogs++;
+                totalParticles += fog.getParticleCount();
+                avgFrameTime += fog.getAverageFrameTime();
+                avgPerformanceLevel += fog.getPerformanceLevel();
+                
+                // LOD statistics
+                const lodLevel = fog.getLODLevel();
+                if (lodLevel >= 1.0) lodStats.full++;
+                else if (lodLevel >= 0.75) lodStats.high++;
+                else if (lodLevel >= 0.5) lodStats.medium++;
+                else lodStats.low++;
+            }
+        });
+
+        if (totalFogs > 0) {
+            avgFrameTime /= totalFogs;
+            avgPerformanceLevel /= totalFogs;
+        }
+
+        return {
+            totalFogs,
+            totalParticles,
+            maxParticlesGlobal: PIXEffect_fog.MAX_PARTICLES_GLOBAL,
+            maxParticlesPerFog: PIXEffect_fog.MAX_PARTICLES_PER_FOG,
+            performanceMode: PIXEffect_fog.PERFORMANCE_MODE,
+            lodEnabled: PIXEffect_fog.LOD_ENABLED,
+            updateFrequency: PIXEffect_fog.UPDATE_FREQUENCY,
+            avgFrameTime: Math.round(avgFrameTime * 100) / 100,
+            avgPerformanceLevel: Math.round(avgPerformanceLevel * 100) / 100,
+            estimatedFPS: totalFogs > 0 ? Math.round(1000 / avgFrameTime) : 0,
+            lodDistribution: lodStats
+        };
+    }
+
+    /**
+     * Optimizes all fog instances for better performance
+     */
+    public static OptimizeAllFog(): void {
+        console.log("Optimizing all fog instances...");
+        
+        const stats = PIXEffect_fog.GetPerformanceStats();
+        
+        // Auto-enable performance mode if too many particles
+        if (stats.totalParticles > PIXEffect_fog.MAX_PARTICLES_GLOBAL * 0.8) {
+            PIXEffect_fog.SetPerformanceMode(true);
+        }
+        
+        // Reduce update frequency if performance is poor
+        if (stats.avgFrameTime > 20) {
+            PIXEffect_fog.SetUpdateFrequency(Math.max(PIXEffect_fog.UPDATE_FREQUENCY * 1.5, 32));
+        }
+        
+        // Enable LOD if not already enabled
+        if (!PIXEffect_fog.LOD_ENABLED) {
+            PIXEffect_fog.SetLODEnabled(true);
+        }
+        
+        console.log("Optimization complete. New stats:", PIXEffect_fog.GetPerformanceStats());
     }
 
     /**
@@ -964,6 +1298,27 @@ export class PIXEffect_fog {
                 Imgui_chunchun.CloseWindow(windowId);
                 PIXEffect_fog.currentEditingFog = null;
             }
+
+            // Performance section
+            if (ImGui.CollapsingHeader("Performance")) {
+                ImGui.Text(`Particles: ${fog.getParticleCount()}`);
+                ImGui.Text(`LOD Level: ${(fog.getLODLevel() * 100).toFixed(0)}%`);
+                ImGui.Text(`Performance Level: ${(fog.getPerformanceLevel() * 100).toFixed(0)}%`);
+                ImGui.Text(`Avg Frame Time: ${fog.getAverageFrameTime().toFixed(1)}ms`);
+                
+                ImGui.Separator();
+                
+                if (ImGui.Button("Optimize This Fog")) {
+                    // Force reinitialize particles with current settings
+                    fog.initParticles();
+                }
+                
+                ImGui.SameLine();
+                if (ImGui.Button("Show Global Stats")) {
+                    const stats = PIXEffect_fog.GetPerformanceStats();
+                    console.log("Global Performance Stats:", stats);
+                }
+            }
         };
 
         // Create the window using Imgui_chunchun
@@ -977,6 +1332,70 @@ export class PIXEffect_fog {
 
         // Manually add to windows map (accessing private member)
         (Imgui_chunchun as any).windows.set(windowId, windowConfig);
+    }
+
+    /**
+     * Creates an optimized large-scale fog effect for full-screen or map-wide coverage
+     * @param type Fog type
+     * @param style Fog style
+     * @param duration Duration in seconds
+     * @param width Width of the fog area
+     * @param height Height of the fog area
+     * @param id Optional ID
+     */
+    public static GenerateLargeScaleFog(
+        type: FogType,
+        style: FogStyle = FogStyle.MEDIUM,
+        duration: number = 0,
+        width: number = 1920,
+        height: number = 1080,
+        id?: string
+    ): PIXEffect_fog {
+        // Auto-enable performance optimizations for large fog
+        const wasPerformanceMode = PIXEffect_fog.PERFORMANCE_MODE;
+        const wasLODEnabled = PIXEffect_fog.LOD_ENABLED;
+        
+        // Temporarily enable optimizations
+        PIXEffect_fog.PERFORMANCE_MODE = true;
+        PIXEffect_fog.LOD_ENABLED = true;
+        
+        // Generate ID if not provided
+        if (!id) {
+            id = `large_scale_${type}_${style}_${Date.now()}`;
+        }
+
+        // Create the fog instance
+        const fog = PIXEffect_fog.GenerateFog(type, style, duration, id);
+        
+        // Set size and optimize for large scale
+        fog.setSize(width, height)
+           .setPosition(0, 0);
+        
+        // Apply large-scale optimizations
+        if (width * height > 1000000) { // Very large (1M+ pixels)
+            fog.setDensity(0.3)  // Reduce density significantly
+               .setLayers(2)     // Fewer layers
+               .setScale(3.0)    // Larger particles to compensate
+               .setBlur(25);     // More blur for smoother look
+        } else if (width * height > 500000) { // Large (500K+ pixels)
+            fog.setDensity(0.5)
+               .setLayers(3)
+               .setScale(2.5)
+               .setBlur(20);
+        } else { // Medium large
+            fog.setDensity(0.7)
+               .setLayers(3)
+               .setScale(2.0)
+               .setBlur(15);
+        }
+        
+        // Restore original settings
+        PIXEffect_fog.PERFORMANCE_MODE = wasPerformanceMode;
+        PIXEffect_fog.LOD_ENABLED = wasLODEnabled;
+        
+        console.log(`Created optimized large-scale fog: ${width}x${height}, particles: ${fog.particles.length}`);
+        
+        return fog;
     }
 }
 
@@ -1012,15 +1431,39 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 50,"whole_level_fog")
             .setPosition(0, 0)
-            .setSize(1920, 1080)
+            .setSize(6000, 3000)
             .setScale(1.2)
             .setSpeed(0.8)
-            .setOpacity(0.4).setLayer("HtmlUI_fix")
+            .setOpacity(0.4)
 
         PIXEffect_fog.OpenFogEditor("whole_level_fog")
 
     })
 
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Generate OPTIMIZED Large Fog", () => {
+        // Use the new optimized method for large-scale fog
+        const optimizedFog = PIXEffect_fog.GenerateLargeScaleFog(
+            FogType.TEMPORARY, 
+            FogStyle.MYSTICAL, 
+            60, 
+            1920, 
+            1080, 
+            "optimized_large_fog"
+        ).setLayer("HtmlUI_fix")
+         .setOpacity(0.4)
+         .setSpeed(0.6);
+
+        PIXEffect_fog.OpenFogEditor("optimized_large_fog");
+        
+        // Show performance comparison
+        setTimeout(() => {
+            const stats = PIXEffect_fog.GetPerformanceStats();
+            console.log("=== Optimized Large Fog Performance ===");
+            console.log(`Particles created: ${optimizedFog.getParticleCount()}`);
+            console.log(`LOD Level: ${optimizedFog.getLODLevel()}`);
+            console.log("Global stats:", stats);
+        }, 500);
+    });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Generate Light Fog", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
@@ -1209,6 +1652,122 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .setSize(400, 300)
             .setOpacity(0.5)
             .setColor("#cccccc");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Color Variations", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff"];
+        const positions = [
+            [-300, -200], [-100, -200], [100, -200],
+            [-300, 0], [-100, 0], [100, 0]
+        ];
+
+        colors.forEach((color, index) => {
+            if (!PlayerInstance) return;
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 10, `color_test_${index}`)
+                .setPosition(PlayerInstance.x + positions[index][0], PlayerInstance.y + positions[index][1])
+                .setSize(200, 150)
+                .setScale(1.0)
+                .setOpacity(0.6)
+                .setColor(color)
+                .setSpeed(0.8);
+        });
+    });
+
+    // Performance optimization buttons
+    var performance_category = IMGUIDebugButton.AddCategory("fog_performance");
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Show Performance Stats", () => {
+        const stats = PIXEffect_fog.GetPerformanceStats();
+        console.log("=== Fog Performance Statistics ===");
+        console.log(`Total Fogs: ${stats.totalFogs}`);
+        console.log(`Total Particles: ${stats.totalParticles}/${stats.maxParticlesGlobal}`);
+        console.log(`Max Particles Per Fog: ${stats.maxParticlesPerFog}`);
+        console.log(`Performance Mode: ${stats.performanceMode ? 'ON' : 'OFF'}`);
+        console.log(`LOD System: ${stats.lodEnabled ? 'ON' : 'OFF'}`);
+        console.log(`Update Frequency: ${stats.updateFrequency}ms`);
+        console.log(`Average Frame Time: ${stats.avgFrameTime}ms`);
+        console.log(`Estimated FPS: ${stats.estimatedFPS}`);
+        console.log(`Performance Level: ${(stats.avgPerformanceLevel * 100).toFixed(1)}%`);
+        console.log(`LOD Distribution:`, stats.lodDistribution);
+        console.log("================================");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Enable Performance Mode", () => {
+        PIXEffect_fog.SetPerformanceMode(true);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Disable Performance Mode", () => {
+        PIXEffect_fog.SetPerformanceMode(false);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set Low Particle Limit (50)", () => {
+        PIXEffect_fog.SetMaxParticlesPerFog(50);
+        PIXEffect_fog.SetMaxParticlesGlobal(200);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set Medium Particle Limit (100)", () => {
+        PIXEffect_fog.SetMaxParticlesPerFog(100);
+        PIXEffect_fog.SetMaxParticlesGlobal(400);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set High Particle Limit (200)", () => {
+        PIXEffect_fog.SetMaxParticlesPerFog(200);
+        PIXEffect_fog.SetMaxParticlesGlobal(800);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Enable LOD System", () => {
+        PIXEffect_fog.SetLODEnabled(true);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Disable LOD System", () => {
+        PIXEffect_fog.SetLODEnabled(false);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set Fast Updates (8ms)", () => {
+        PIXEffect_fog.SetUpdateFrequency(8);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set Normal Updates (16ms)", () => {
+        PIXEffect_fog.SetUpdateFrequency(16);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Set Slow Updates (32ms)", () => {
+        PIXEffect_fog.SetUpdateFrequency(32);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Auto Optimize All Fog", () => {
+        PIXEffect_fog.OptimizeAllFog();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Test Large Fog Performance", () => {
+        // Create multiple large fog instances to test performance
+        console.log("Creating large fog instances for performance testing...");
+        
+        for (let i = 0; i < 3; i++) {
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 30, `perf_test_${i}`)
+                .setPosition(i * 640, 0)
+                .setSize(1920, 1080)
+                .setOpacity(0.3)
+                .setDensity(1.0);
+        }
+        
+        // Show stats after creation
+        setTimeout(() => {
+            const stats = PIXEffect_fog.GetPerformanceStats();
+            console.log("Performance test results:", stats);
+        }, 1000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Reset Performance Settings", () => {
+        PIXEffect_fog.SetPerformanceMode(false);
+        PIXEffect_fog.SetMaxParticlesPerFog(150);
+        PIXEffect_fog.SetMaxParticlesGlobal(500);
+        PIXEffect_fog.SetLODEnabled(true);
+        PIXEffect_fog.SetUpdateFrequency(16);
+        console.log("Performance settings reset to defaults");
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Color Variations", () => {
