@@ -1335,6 +1335,193 @@ export class PIXEffect_fog {
     }
 
     /**
+     * Opens real-time performance monitoring window
+     */
+    public static OpenPerformanceMonitor(): void {
+        const windowId = "fog_performance_monitor";
+        
+        // Close existing window if open
+        if (Imgui_chunchun.IsWindowOpen(windowId)) {
+            Imgui_chunchun.DestroyWindow(windowId);
+        }
+
+        // Create performance monitoring window
+        PIXEffect_fog.createPerformanceMonitorWindow(windowId);
+    }
+
+    /**
+     * Creates the real-time performance monitoring window
+     */
+    private static createPerformanceMonitorWindow(windowId: string): void {
+        let updateInterval = 500; // Update every 500ms
+        let lastUpdateTime = 0;
+        let autoOptimize = false;
+        let showDetailedStats = true;
+        let showIndividualFogs = false;
+
+        const renderCallback = () => {
+            const currentTime = Date.now();
+            
+            // Update stats at specified interval
+            if (currentTime - lastUpdateTime >= updateInterval) {
+                lastUpdateTime = currentTime;
+            }
+
+            const stats = PIXEffect_fog.GetPerformanceStats();
+
+            // Header with refresh controls
+            ImGui.Text("Fog Performance Monitor");
+            ImGui.Separator();
+
+            // Update frequency control
+            ImGui.Text("Update Frequency:");
+            ImGui.SameLine();
+            let intervalMs = updateInterval;
+            if (ImGui.SliderInt("##interval", (value = intervalMs) => intervalMs = value, 100, 2000)) {
+                updateInterval = intervalMs;
+            }
+            ImGui.SameLine();
+            ImGui.Text("ms");
+
+            // Auto-optimize toggle
+            if (ImGui.Checkbox("Auto Optimize", (value = autoOptimize) => autoOptimize = value)) {
+                if (autoOptimize && (stats.avgFrameTime > 20 || stats.totalParticles > stats.maxParticlesGlobal * 0.8)) {
+                    PIXEffect_fog.OptimizeAllFog();
+                }
+            }
+
+            ImGui.Separator();
+
+            // Main performance stats
+            if (ImGui.CollapsingHeader("System Overview", ImGui.TreeNodeFlags.DefaultOpen)) {
+                // Performance indicators with color coding
+                const fps = stats.estimatedFPS;
+                const fpsColor = fps >= 50 ? new ImGui.ImVec4(0, 1, 0, 1) : fps >= 30 ? new ImGui.ImVec4(1, 1, 0, 1) : new ImGui.ImVec4(1, 0, 0, 1);
+                ImGui.TextColored(fpsColor, `Estimated FPS: ${fps}`);
+                
+                const frameTimeColor = stats.avgFrameTime <= 16 ? new ImGui.ImVec4(0, 1, 0, 1) : stats.avgFrameTime <= 25 ? new ImGui.ImVec4(1, 1, 0, 1) : new ImGui.ImVec4(1, 0, 0, 1);
+                ImGui.TextColored(frameTimeColor, `Avg Frame Time: ${stats.avgFrameTime}ms`);
+                
+                ImGui.Text(`Performance Level: ${(stats.avgPerformanceLevel * 100).toFixed(1)}%`);
+                
+                // Particle usage with progress bar
+                const particleUsage = stats.totalParticles / stats.maxParticlesGlobal;
+                const usageColor = particleUsage <= 0.6 ? new ImGui.ImVec4(0, 1, 0, 1) : particleUsage <= 0.8 ? new ImGui.ImVec4(1, 1, 0, 1) : new ImGui.ImVec4(1, 0, 0, 1);
+                ImGui.TextColored(usageColor, `Particles: ${stats.totalParticles}/${stats.maxParticlesGlobal}`);
+                ImGui.ProgressBar(particleUsage, new ImGui.ImVec2(-1, 0), `${(particleUsage * 100).toFixed(1)}%`);
+            }
+
+            // System settings
+            if (ImGui.CollapsingHeader("System Settings")) {
+                ImGui.Text(`Performance Mode: ${stats.performanceMode ? 'ON' : 'OFF'}`);
+                ImGui.Text(`LOD System: ${stats.lodEnabled ? 'ON' : 'OFF'}`);
+                ImGui.Text(`Update Frequency: ${stats.updateFrequency}ms`);
+                ImGui.Text(`Max Particles Per Fog: ${stats.maxParticlesPerFog}`);
+                
+                ImGui.Separator();
+                
+                // Quick optimization buttons
+                if (ImGui.Button("Enable Performance Mode")) {
+                    PIXEffect_fog.SetPerformanceMode(true);
+                }
+                ImGui.SameLine();
+                if (ImGui.Button("Optimize All")) {
+                    PIXEffect_fog.OptimizeAllFog();
+                }
+            }
+
+            // LOD distribution
+            if (ImGui.CollapsingHeader("LOD Distribution")) {
+                const lodStats = stats.lodDistribution;
+                ImGui.Text(`Full Detail: ${lodStats.full} fogs`);
+                ImGui.Text(`High Detail: ${lodStats.high} fogs`);
+                ImGui.Text(`Medium Detail: ${lodStats.medium} fogs`);
+                ImGui.Text(`Low Detail: ${lodStats.low} fogs`);
+                
+                // LOD pie chart representation using progress bars
+                const totalLOD = lodStats.full + lodStats.high + lodStats.medium + lodStats.low;
+                if (totalLOD > 0) {
+                    ImGui.Separator();
+                    ImGui.ProgressBar(lodStats.full / totalLOD, new ImGui.ImVec2(-1, 0), `Full: ${lodStats.full}`);
+                    ImGui.ProgressBar(lodStats.high / totalLOD, new ImGui.ImVec2(-1, 0), `High: ${lodStats.high}`);
+                    ImGui.ProgressBar(lodStats.medium / totalLOD, new ImGui.ImVec2(-1, 0), `Med: ${lodStats.medium}`);
+                    ImGui.ProgressBar(lodStats.low / totalLOD, new ImGui.ImVec2(-1, 0), `Low: ${lodStats.low}`);
+                }
+            }
+
+            // Individual fog instances
+            if (ImGui.Checkbox("Show Individual Fogs", (value = showIndividualFogs) => showIndividualFogs = value)) {
+                // Checkbox state changed
+            }
+
+            if (showIndividualFogs && ImGui.CollapsingHeader("Individual Fog Instances")) {
+                PIXEffect_fog.instances.forEach((fog, id) => {
+                    if (!fog.isDestroyed) {
+                        const debugInfo = fog.getDebugInfo();
+                        const particleCount = fog.getParticleCount();
+                        const lodLevel = fog.getLODLevel();
+                        const perfLevel = fog.getPerformanceLevel();
+                        
+                        if (ImGui.TreeNode(`${id} (${particleCount} particles)`)) {
+                            ImGui.Text(`Type: ${debugInfo.type}`);
+                            ImGui.Text(`Style: ${debugInfo.style}`);
+                            ImGui.Text(`Size: ${debugInfo.size.width}x${debugInfo.size.height}`);
+                            ImGui.Text(`LOD: ${(lodLevel * 100).toFixed(0)}%`);
+                            ImGui.Text(`Performance: ${(perfLevel * 100).toFixed(0)}%`);
+                            ImGui.Text(`Frame Time: ${fog.getAverageFrameTime().toFixed(1)}ms`);
+                            
+                            if (ImGui.Button(`Edit##${id}`)) {
+                                PIXEffect_fog.OpenFogEditor(id);
+                            }
+                            ImGui.SameLine();
+                            if (ImGui.Button(`Destroy##${id}`)) {
+                                fog.destroy();
+                            }
+                            
+                            ImGui.TreePop();
+                        }
+                    }
+                });
+            }
+
+            // Performance warnings
+            if (stats.avgFrameTime > 25 || stats.totalParticles > stats.maxParticlesGlobal * 0.9) {
+                ImGui.Separator();
+                ImGui.TextColored(new ImGui.ImVec4(1, 0.5, 0, 1), "⚠ Performance Warning");
+                
+                if (stats.avgFrameTime > 25) {
+                    ImGui.TextColored(new ImGui.ImVec4(1, 0, 0, 1), "• Frame time too high");
+                }
+                if (stats.totalParticles > stats.maxParticlesGlobal * 0.9) {
+                    ImGui.TextColored(new ImGui.ImVec4(1, 0, 0, 1), "• Particle limit nearly reached");
+                }
+                
+                if (ImGui.Button("Auto Fix Performance Issues")) {
+                    PIXEffect_fog.OptimizeAllFog();
+                }
+            }
+
+            // Close button
+            ImGui.Separator();
+            if (ImGui.Button("Close Monitor")) {
+                Imgui_chunchun.CloseWindow(windowId);
+            }
+        };
+
+        // Create the window using Imgui_chunchun
+        const windowConfig = {
+            title: "Fog Performance Monitor",
+            isOpen: true,
+            size: { width: 450, height: 700 },
+            position: { x: 50, y: 50 },
+            renderCallback: renderCallback
+        };
+
+        // Manually add to windows map (accessing private member)
+        (Imgui_chunchun as any).windows.set(windowId, windowConfig);
+    }
+
+    /**
      * Creates an optimized large-scale fog effect for full-screen or map-wide coverage
      * @param type Fog type
      * @param style Fog style
@@ -1423,6 +1610,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             
             PIXEffect_fog.OpenFogEditor("editor_test_fog");
         }
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Performance Monitor", () => {
+        PIXEffect_fog.OpenPerformanceMonitor();
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Generate bIG Fog FOR WHOLE GAME", () => {
@@ -1678,6 +1869,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     // Performance optimization buttons
     var performance_category = IMGUIDebugButton.AddCategory("fog_performance");
+
+    IMGUIDebugButton.AddButtonToCategory(performance_category, "Open Performance Monitor", () => {
+        PIXEffect_fog.OpenPerformanceMonitor();
+    });
 
     IMGUIDebugButton.AddButtonToCategory(performance_category, "Show Performance Stats", () => {
         const stats = PIXEffect_fog.GetPerformanceStats();
