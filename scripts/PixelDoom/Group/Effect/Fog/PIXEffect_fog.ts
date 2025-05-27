@@ -1720,8 +1720,13 @@ export class PIXEffect_fog {
 
 
 // For test
+var isBindButtonIntoDebugPanel=false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
     // Test category for fog system
     var fog_system = IMGUIDebugButton.AddCategory("fog_system");
 

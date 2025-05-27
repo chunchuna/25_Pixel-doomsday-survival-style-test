@@ -1,7 +1,15 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 
+
+
+var isBindButtonIntoDebugPanel =false
+
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
     // Test category for bubble system
     var bubble_system = IMGUIDebugButton.AddCategory("bubble_system");
 
@@ -224,14 +232,14 @@ export class UIBubble {
         try {
             const delayTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
             const delayTag = `typewriter_delay_${this.id}_${Date.now()}`;
-            
+
             delayTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === delayTag) {
                     this.startTypewriterEffect();
                     delayTimer.destroy();
                 }
             });
-            
+
             const delaySeconds = (UIBubble.FADE_IN_DURATION + 100) / 1000;
             delayTimer.behaviors.Timer.startTimer(delaySeconds, delayTag, "once");
         } catch (error: any) {
@@ -567,7 +575,7 @@ export class UIBubble {
         try {
             // Create C3 Timer for typewriter effect
             this.typewriterTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
-            
+
             this.typewriterTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.typewriterTimerTag) {
                     if (this.typewriterCurrentIndex < this.content.length) {
@@ -672,14 +680,14 @@ export class UIBubble {
         try {
             const exitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
             const exitTag = `exit_${this.id}_${Date.now()}`;
-            
+
             exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === exitTag) {
                     this.destroy();
                     exitTimer.destroy();
                 }
             });
-            
+
             const exitSeconds = UIBubble.FADE_OUT_DURATION / 1000;
             exitTimer.behaviors.Timer.startTimer(exitSeconds, exitTag, "once");
         } catch (error: any) {
@@ -771,17 +779,17 @@ export class UIBubble {
         try {
             // Create C3 Timer for auto-destroy
             this.destroyTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
-            
+
             this.destroyTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.destroyTimerTag) {
                     this.playExitAnimation();
                     // Timer will be cleaned up in destroy method
                 }
             });
-            
+
             const totalSeconds = totalDuration / 1000;
             this.destroyTimer.behaviors.Timer.startTimer(totalSeconds, this.destroyTimerTag, "once");
-            
+
         } catch (error: any) {
             console.error(`Failed to create auto-destroy timer: ${error.message}`);
             // No fallback needed - bubble will persist until manually destroyed
@@ -876,7 +884,7 @@ export class UIBubble {
                 this.destroyTimer.behaviors.Timer.stopTimer(this.destroyTimerTag);
                 this.destroyTimer.destroy();
                 this.destroyTimer = null;
-                
+
                 // Update duration and restart timer
                 this.duration += additionalTime;
                 this.startAutoDestroy();

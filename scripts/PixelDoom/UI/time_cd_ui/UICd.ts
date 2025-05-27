@@ -21,10 +21,14 @@ import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 // })
 
-
+var isBindButtonIntoDebugPanel=false
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // for Test
+
+    
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
 
     var cd_system = IMGUIDebugButton.AddCategory("cd_system")
 
