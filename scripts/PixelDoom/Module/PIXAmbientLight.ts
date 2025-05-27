@@ -6,13 +6,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     AmbientLight.light_layer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer(AmbientLight.light_layer_name);
     if (AmbientLight.light_layer == null) return
 
-    // 测试昼夜循环：从当前颜色开始
+    // Test day-night cycle: start from current color
     AmbientLight.simulat_day_night_cycle(
-        50,                    // 白天到夜晚过渡10秒
-        300,                    // 夜晚到白天过渡10秒
-        AmbientLight.dya_light_rgb,          // 白天颜色（略带黄色）
-        AmbientLight.night_light_rgb,      // 夜晚颜色（深蓝色）
-        "current"              // 从当前颜色开始，自动判断接近白天还是夜晚
+        150,                    // Day to night transition 10 seconds
+        300,                    // Night to day transition 10 seconds
+        AmbientLight.dya_light_rgb,          // Day color (slightly yellow)
+        AmbientLight.night_light_rgb,      // Night color (deep blue)
+        "current"              // Start from current color, automatically determine if closer to day or night
     );
 
 })
@@ -25,14 +25,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 export class AmbientLight {
 
     public static dya_light_rgb: [number, number, number] = [225/ 255, 225 / 255, 225 / 255]
-    public static night_light_rgb: [number, number, number] = [28 / 255, 24 / 255, 57 / 255]  // 深蓝色，更容易看出效果
+    public static night_light_rgb: [number, number, number] = [28 / 255, 24 / 255, 57 / 255]  // Deep blue, easier to see the effect
 
     private static Layout_allow_name = "Level"
     public static light_layer_name = "Vignette"
 
     public static light_layer: IAnyProjectLayer | null = null;
 
-    // 昼夜循环状态
+    // Day-night cycle state
     private static dayNightCycle = {
         isRunning: false,
         currentPhase: "day" as "day" | "night",
@@ -61,12 +61,12 @@ export class AmbientLight {
 
 
         this.transition.isActive = true;
-        this.transition.startTime = performance.now() / 1000; // 转换为秒
+        this.transition.startTime = performance.now() / 1000; // Convert to seconds
         this.transition.duration = duration;
         this.transition.startColor = [...currentBgColor] as [number, number, number];
         this.transition.targetColor = [...target_rgb] as [number, number, number];
 
-        console.log("开始颜色过渡", {
+        console.log("Starting color transition", {
             startColor: this.transition.startColor,
             targetColor: this.transition.targetColor,
             duration: duration
@@ -77,7 +77,7 @@ export class AmbientLight {
     static updateColorTransition() {
         if (!this.transition.isActive || !this.light_layer) return;
 
-        const currentTime = performance.now() / 1000; // 转换为秒
+        const currentTime = performance.now() / 1000; // Convert to seconds
         const elapsed = currentTime - this.transition.startTime;
         const progress = Math.min(elapsed / this.transition.duration, 1);
 
@@ -93,7 +93,7 @@ export class AmbientLight {
 
         if (progress >= 1) {
             this.transition.isActive = false;
-            console.log("颜色过渡完成", this.transition.currentColor);
+            console.log("Color transition completed", this.transition.currentColor);
         }
     }
 
@@ -104,61 +104,61 @@ export class AmbientLight {
     static Simulat_edsunshine_cycle(Time: number, target_rgb: [number, number, number]) {
         if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != this.Layout_allow_name) return
         if (!this.light_layer) return
-        console.log("开始颜色过渡")
+        console.log("Starting color transition")
 
         this.startColorTransition(Time, target_rgb);
     }
 
-    //日照日落循环
+    // Day-night cycle simulation
     static simulat_day_night_cycle(day_time: number, night_time: number, day_light: [number, number, number], night_light: [number, number, number], defaul_t: string) {
         if (!this.light_layer) return;
 
-        // 停止之前的循环
+        // Stop previous cycle
         this.stopDayNightCycle();
 
-        // 设置循环参数
+        // Set cycle parameters
         this.dayNightCycle.isRunning = true;
         this.dayNightCycle.dayDuration = day_time;
         this.dayNightCycle.nightDuration = night_time;
         this.dayNightCycle.dayColor = [...day_light] as [number, number, number];
         this.dayNightCycle.nightColor = [...night_light] as [number, number, number];
 
-        // 处理默认状态
+        // Handle default state
         if (defaul_t === "current") {
-            // 获取当前颜色并判断更接近白天还是夜晚
+            // Get current color and determine if closer to day or night
             const currentColor = this.light_layer.backgroundColor;
             const dayDistance = this.colorDistance(currentColor, day_light);
             const nightDistance = this.colorDistance(currentColor, night_light);
 
-            // 设置为距离更近的状态
+            // Set to the closer state
             this.dayNightCycle.currentPhase = dayDistance <= nightDistance ? "day" : "night";
 
-            console.log("从当前颜色开始", {
-                当前颜色: currentColor,
-                判定为: this.dayNightCycle.currentPhase,
-                白天色差: dayDistance.toFixed(3),
-                夜晚色差: nightDistance.toFixed(3)
+            console.log("Starting from current color", {
+                currentColor: currentColor,
+                determinedAs: this.dayNightCycle.currentPhase,
+                dayColorDifference: dayDistance.toFixed(3),
+                nightColorDifference: nightDistance.toFixed(3)
             });
         } else {
-            // 使用指定的默认状态
+            // Use specified default state
             this.dayNightCycle.currentPhase = defaul_t === "day" ? "day" : "night";
 
-            // 设置初始颜色（立即切换到默认状态）
+            // Set initial color (immediately switch to default state)
             const initialColor = this.dayNightCycle.currentPhase === "day" ? day_light : night_light;
             this.light_layer.backgroundColor = initialColor;
         }
 
-        console.log("开始昼夜循环", {
-            初始状态: this.dayNightCycle.currentPhase,
-            白天时长: day_time + "秒",
-            夜晚时长: night_time + "秒"
+        console.log("Starting day-night cycle", {
+            initialState: this.dayNightCycle.currentPhase,
+            dayDuration: day_time + " seconds",
+            nightDuration: night_time + " seconds"
         });
 
-        // 开始循环
+        // Start cycle
         this.runDayNightCycle();
     }
 
-    // 计算两个颜色之间的欧几里得距离
+    // Calculate Euclidean distance between two colors
     private static colorDistance(color1: number[], color2: [number, number, number]): number {
         let sum = 0;
         for (let i = 0; i < 3; i++) {
@@ -168,7 +168,7 @@ export class AmbientLight {
         return Math.sqrt(sum);
     }
 
-    // 执行昼夜循环
+    // Execute day-night cycle
     private static runDayNightCycle() {
         if (!this.dayNightCycle.isRunning) return;
 
@@ -178,26 +178,26 @@ export class AmbientLight {
             ? this.dayNightCycle.dayDuration
             : this.dayNightCycle.nightDuration;
 
-        console.log(`从${this.dayNightCycle.currentPhase}过渡到${nextPhase}，耗时${transitionDuration}秒`);
+        console.log(`Transitioning from ${this.dayNightCycle.currentPhase} to ${nextPhase}, duration: ${transitionDuration} seconds`);
 
-        // 开始颜色过渡
+        // Start color transition
         this.startColorTransition(transitionDuration, targetColor);
 
-        // 设置下一次切换
+        // Set next switch
         this.dayNightCycle.cycleTimer = window.setTimeout(() => {
             this.dayNightCycle.currentPhase = nextPhase;
-            this.runDayNightCycle(); // 递归调用，继续循环
+            this.runDayNightCycle(); // Recursive call to continue cycle
         }, transitionDuration * 1000);
     }
 
-    // 停止昼夜循环
+    // Stop day-night cycle
     static stopDayNightCycle() {
         this.dayNightCycle.isRunning = false;
         if (this.dayNightCycle.cycleTimer !== null) {
             clearTimeout(this.dayNightCycle.cycleTimer);
             this.dayNightCycle.cycleTimer = null;
         }
-        console.log("停止昼夜循环");
+        console.log("Day-night cycle stopped");
     }
 
 }

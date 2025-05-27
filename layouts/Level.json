@@ -323,6 +323,40 @@
 					"overriden": 0,
 					"subLayers": [
 						{
+							"name": "Bus",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [],
+							"sid": 313659484017005,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
 							"name": "ChangJingBaiJian",
 							"overriden": 0,
 							"subLayers": [],
@@ -61559,8 +61593,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1320.085931491825,
-										"y": 866.9974791268776,
+										"x": 610,
+										"y": 2187,
 										"width": 75.1802114521298,
 										"height": 180.9023838066874,
 										"originX": 0.5104166666666666,
@@ -66773,8 +66807,8 @@
 							"showing": true,
 							"locked": false,
 							"world": {
-								"x": 1239.1813010987814,
-								"y": 579.6306657534664,
+								"x": 1229,
+								"y": 581,
 								"width": 553.6248926604926,
 								"height": 594.8226696892515,
 								"originX": 0.5,
@@ -67452,9 +67486,9 @@
 								1
 							],
 							"backgroundColor": [
-								0.10980392156862745,
-								0.09411764705882353,
-								0.2235294117647059,
+								0.6745098039215687,
+								0.6549019607843137,
+								0.8274509803921568,
 								1
 							],
 							"isTransparent": false,
