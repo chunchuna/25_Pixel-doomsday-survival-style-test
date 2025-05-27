@@ -505,6 +505,26 @@
 									],
 									"subfolders": [],
 									"name": "GouHuo"
+								},
+								{
+									"items": [],
+									"subfolders": [
+										{
+											"items": [
+												{
+													"name": "PIXEffect_fog.ts",
+													"type": "application/typescript",
+													"sid": 833037920840155,
+													"script-info": {
+														"purpose": "none"
+													}
+												}
+											],
+											"subfolders": [],
+											"name": "Fog"
+										}
+									],
+									"name": "Effect"
 								}
 							],
 							"name": "Group"

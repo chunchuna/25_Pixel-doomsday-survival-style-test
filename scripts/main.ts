@@ -61,6 +61,7 @@ import "./PixelDoom/UI/time_cd_ui/UICd.js"
 
 import "./PixelDoom/Group/GouHuo/PIXGouHuo.js"
 import "./PixelDoom/UI/bubble_ui/UIBubble.js"
+import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.
