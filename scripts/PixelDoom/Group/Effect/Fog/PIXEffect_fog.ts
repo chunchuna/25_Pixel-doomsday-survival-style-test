@@ -58,8 +58,15 @@ export class PIXEffect_fog {
     private time: number = 0;
     protected isDestroyed: boolean = false;
 
-    // Auto-destroy timer
-    private destroyTimer: number | null = null;
+    // C3 Timer properties (replacing JavaScript timers)
+    private timerInstance: any = null;
+    private timerTag: string = "";
+
+    // Fade-out animation properties
+    private static FADE_OUT_DURATION: number = 2000; // 2 seconds fade-out
+    private isFadingOut: boolean = false;
+    private fadeStartTime: number = 0;
+    private initialOpacity: number = 1.0;
 
     private constructor(type: FogType, style: FogStyle = FogStyle.MEDIUM, duration: number = 0, layer: string = "html_c3") {
         this.id = `fog_${++PIXEffect_fog.idCounter}_${Date.now()}`;
@@ -212,15 +219,101 @@ export class PIXEffect_fog {
             this.renderHTML();
             this.startAnimation();
 
-            // Start auto-destroy timer for temporary fog
+            // Start auto-destroy timer for temporary fog using C3 timer
             if (this.type === FogType.TEMPORARY && this.duration > 0) {
-                this.startAutoDestroy();
+                this.startC3Timer();
             }
 
         } catch (error: any) {
             console.error(`Failed to create fog HTML element: ${error.message}`);
             this.htmlElement = null;
         }
+    }
+
+    /**
+     * Starts C3 timer for temporary fog destruction
+     */
+    private startC3Timer(): void {
+        try {
+            // Create C3 Timer instance
+            this.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.timerTag = `fog_${this.id}_${Date.now()}`;
+
+            // Listen for timer events
+            this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === this.timerTag) {
+                    console.log(`Fog ${this.id} timer completed, starting fade-out`);
+                    this.startFadeOut();
+                }
+            });
+
+            // Start the timer
+            this.timerInstance.behaviors.Timer.startTimer(this.duration, this.timerTag, "once");
+            console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
+
+        } catch (error: any) {
+            console.error(`Failed to create C3 timer for fog: ${error.message}`);
+            // Fallback to JavaScript timer if C3 timer fails
+            setTimeout(() => {
+                this.startFadeOut();
+            }, this.duration * 1000);
+        }
+    }
+
+    /**
+     * Starts fade-out animation
+     */
+    private startFadeOut(): void {
+        if (this.isFadingOut || this.isDestroyed) return;
+
+        this.isFadingOut = true;
+        this.fadeStartTime = Date.now();
+        this.initialOpacity = this.fogParams.opacity;
+
+        console.log(`Starting fade-out for fog ${this.id}`);
+
+        // Start fade-out animation loop
+        this.fadeOutStep();
+    }
+
+    /**
+     * Performs one step of fade-out animation
+     */
+    private fadeOutStep(): void {
+        if (!this.isFadingOut || this.isDestroyed) return;
+
+        const elapsed = Date.now() - this.fadeStartTime;
+        const progress = Math.min(elapsed / PIXEffect_fog.FADE_OUT_DURATION, 1.0);
+        
+        // Calculate current opacity (fade from initial to 0)
+        const currentOpacity = this.initialOpacity * (1 - progress);
+        
+        // Update fog opacity
+        this.fogParams.opacity = currentOpacity;
+
+        // Re-render with new opacity
+        if (this.htmlElement) {
+            this.renderHTML();
+        }
+
+        // Continue fade-out or destroy when complete
+        if (progress < 1.0) {
+            // Continue fade-out animation
+            setTimeout(() => this.fadeOutStep(), 16); // ~60 FPS
+        } else {
+            // Fade-out complete, destroy fog
+            console.log(`Fade-out complete for fog ${this.id}, destroying`);
+            this.destroy();
+        }
+    }
+
+    /**
+     * Starts auto-destroy timer for temporary fog
+     */
+    private startAutoDestroy(): void {
+        // This method is now replaced by startC3Timer
+        // Keeping it for compatibility but it does nothing
+        console.warn("startAutoDestroy is deprecated, use startC3Timer instead");
     }
 
     /**
@@ -371,17 +464,6 @@ export class PIXEffect_fog {
         };
 
         animate();
-    }
-
-    /**
-     * Starts auto-destroy timer for temporary fog
-     */
-    private startAutoDestroy(): void {
-        if (this.duration <= 0) return;
-
-        this.destroyTimer = setTimeout(() => {
-            this.destroy();
-        }, this.duration * 1000);
     }
 
     /**
@@ -629,12 +711,22 @@ export class PIXEffect_fog {
     public destroy(): void {
         this.isDestroyed = true;
 
-        // Clear timers
-        if (this.destroyTimer) {
-            clearTimeout(this.destroyTimer);
-            this.destroyTimer = null;
+        // Clear C3 timer
+        if (this.timerInstance) {
+            try {
+                // Stop the timer if it's running
+                if (this.timerTag && this.timerInstance.behaviors.Timer.isTimerRunning(this.timerTag)) {
+                    this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
+                }
+                // Destroy the timer instance
+                this.timerInstance.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying C3 timer: ${error.message}`);
+            }
+            this.timerInstance = null;
         }
 
+        // Clear animation loop
         if (this.animationId) {
             clearTimeout(this.animationId);
             this.animationId = null;
@@ -659,6 +751,24 @@ export class PIXEffect_fog {
         }
 
         console.log(`Fog effect ${this.id} destroyed`);
+    }
+
+    /**
+     * Sets the fade-out duration for all fog effects
+     * @param duration Duration in milliseconds
+     */
+    public static SetFadeOutDuration(duration: number): void {
+        if (duration > 0) {
+            PIXEffect_fog.FADE_OUT_DURATION = duration;
+            console.log(`Set fog fade-out duration to ${duration}ms`);
+        }
+    }
+
+    /**
+     * Gets the current fade-out duration
+     */
+    public static GetFadeOutDuration(): number {
+        return PIXEffect_fog.FADE_OUT_DURATION;
     }
 
     /**
@@ -1044,6 +1154,37 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         } else {
             console.log("Whole level fog not found. Available fogs:", PIXEffect_fog.GetFogInfo().fogs);
         }
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Fade-out (3s fog)", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 3, "fade_test")
+            .setPosition(x - 150, y - 150)
+            .setSize(300, 300)
+            .setOpacity(0.8)
+            .setColor("#4fc3f7");
+
+        console.log("Created 3-second fog to test fade-out effect");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Fast Fade (500ms)", () => {
+        PIXEffect_fog.SetFadeOutDuration(500);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Normal Fade (2000ms)", () => {
+        PIXEffect_fog.SetFadeOutDuration(2000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Set Slow Fade (5000ms)", () => {
+        PIXEffect_fog.SetFadeOutDuration(5000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Show Fade Duration", () => {
+        const duration = PIXEffect_fog.GetFadeOutDuration();
+        console.log(`Current fade-out duration: ${duration}ms`);
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Fog Layers", () => {
