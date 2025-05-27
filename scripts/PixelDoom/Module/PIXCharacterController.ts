@@ -80,9 +80,12 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     }
 })
 
-// 互动的时候禁止玩家移动
+// Disable player movement when interaction is active
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
+        // First stop the player completely, then disable movement
+        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
+        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0, 0);
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
     })
 
