@@ -30,30 +30,24 @@ export class DialogueSystem {
     private choicesContainer!: HTMLElement;
     private closeButton!: HTMLElement;
     private isTyping: boolean = false;
-    private typewriterSpeed: number = 30; // 打字机效果速度 (ms)
-    private mainDialogueLines: DialogueLine[] = []; // 存储主对话流程
-    private currentMainIndex: number = 0; // 当前主对话索引
+    private typewriterSpeed: number = 30; // Typewriter effect speed (ms)
+    private mainDialogueLines: DialogueLine[] = []; // Store main dialogue flow
+    private currentMainIndex: number = 0; // Current main dialogue index
+    private isInitialized: boolean = false; // Track if DOM elements are created
 
     constructor() {
-        // 创建对话UI元素
-        this.createDialogueUI();
-        
-        // 添加关闭按钮事件
-        this.closeButton.addEventListener('click', () => {
-            this.CloseDialogue();
-        });
-
-        // 添加键盘事件监听器
+        // Don't create UI elements immediately - only create when needed
+        // Add keyboard event listener for space key
         document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space' && this.isTyping) {
+            if (event.code === 'Space' && this.isTyping && this.isDialogueVisible()) {
                 this.completeCurrentTyping();
             }
         });
 
-        // 测试用的按钮
+        // Test buttons - only if they exist
         document.getElementById('test-dialogue')?.addEventListener('click', () => {
             const testContent = ``;
-            console.log("开始解析对话:\n" + testContent);
+            console.log("Starting dialogue parsing:\n" + testContent);
             this.ShowDialogue(testContent);
         });
 
@@ -66,77 +60,90 @@ export class DialogueSystem {
         });
     }
 
-    // 创建对话UI元素
+    // Check if dialogue is currently visible
+    private isDialogueVisible(): boolean {
+        return this.isInitialized && this.dialoguePanel && this.dialoguePanel.classList.contains('active');
+    }
+
+    // Create dialogue UI elements only when needed
     private createDialogueUI(): void {
-        // 创建对话面板
+        if (this.isInitialized) {
+            return; // Already created
+        }
+
+        // Create dialogue panel
         this.dialoguePanel = document.createElement('div');
         this.dialoguePanel.id = 'dialogue-panel';
         
-        // 创建对话头部
+        // Initially hide the panel completely
+        this.dialoguePanel.style.display = 'none';
+        this.dialoguePanel.style.pointerEvents = 'none'; // Prevent blocking other elements
+        
+        // Create dialogue header
         const dialogueHeader = document.createElement('div');
         dialogueHeader.id = 'dialogue-header';
         
-        // 创建标题
+        // Create title
         const title = document.createElement('div');
         title.className = 'title';
         title.textContent = 'Dialogue';
         dialogueHeader.appendChild(title);
         
-        // 创建控制按钮容器
+        // Create control buttons container
         const controlsElement = document.createElement('div');
         controlsElement.className = 'dialogue-controls';
         
-        // 创建最小化按钮
+        // Create minimize button
         const minimizeButton = document.createElement('div');
         minimizeButton.id = 'minimize-button';
         minimizeButton.textContent = '_';
         controlsElement.appendChild(minimizeButton);
         
-        // 创建关闭按钮
+        // Create close button
         this.closeButton = document.createElement('div');
         this.closeButton.id = 'close-button';
         this.closeButton.textContent = '×';
         controlsElement.appendChild(this.closeButton);
         
-        // 添加控制按钮容器到头部
+        // Add control buttons container to header
         dialogueHeader.appendChild(controlsElement);
         
-        // 创建对话内容区域
+        // Create dialogue content area
         this.dialogueContent = document.createElement('div');
         this.dialogueContent.id = 'dialogue-content';
         
-        // 创建选择容器
+        // Create choices container
         this.choicesContainer = document.createElement('div');
         this.choicesContainer.id = 'choices-container';
         
-        // 创建调整大小角标
+        // Create resize corner
         const resizerElement = document.createElement('div');
         resizerElement.className = 'dialogue-resizer';
         
-        // 调整大小角标图标
+        // Resize corner icon
         const resizerIcon = document.createElement('div');
         resizerIcon.className = 'resizer-icon';
         resizerElement.appendChild(resizerIcon);
         
-        // 组装对话面板
+        // Assemble dialogue panel
         this.dialoguePanel.appendChild(dialogueHeader);
         this.dialoguePanel.appendChild(this.dialogueContent);
         this.dialoguePanel.appendChild(this.choicesContainer);
         this.dialoguePanel.appendChild(resizerElement);
         
-        // 添加到文档
+        // Add to document
         document.body.appendChild(this.dialoguePanel);
         
-        // 添加样式
+        // Add styles
         this.addDialogueStyles();
         
-        // 添加拖拽功能
+        // Add drag functionality
         this.enableWindowDrag(this.dialoguePanel, dialogueHeader);
         
-        // 添加调整大小功能
+        // Add resize functionality
         this.enableWindowResize(this.dialoguePanel, resizerElement);
         
-        // 绑定最小化按钮点击事件
+        // Bind minimize button click event
         let isMinimized = false;
         const originalHeight = this.dialoguePanel.offsetHeight;
         
@@ -144,13 +151,13 @@ export class DialogueSystem {
             e.stopPropagation();
             
             if (isMinimized) {
-                // 展开窗口
+                // Expand window
                 this.dialoguePanel.style.height = `${originalHeight}px`;
                 this.dialogueContent.style.display = 'block';
                 this.choicesContainer.style.display = 'flex';
                 resizerElement.style.display = 'block';
             } else {
-                // 收起窗口
+                // Collapse window
                 this.dialoguePanel.style.height = `${dialogueHeader.offsetHeight}px`;
                 this.dialogueContent.style.display = 'none';
                 this.choicesContainer.style.display = 'none';
@@ -159,10 +166,17 @@ export class DialogueSystem {
             isMinimized = !isMinimized;
         });
         
-        // 点击窗口时将其置于前台
+        // Bring window to front when clicked
         this.dialoguePanel.addEventListener('mousedown', () => {
             this.bringToFront();
         });
+
+        // Add close button event
+        this.closeButton.addEventListener('click', () => {
+            this.CloseDialogue();
+        });
+
+        this.isInitialized = true;
     }
     
     // 添加对话系统的样式
@@ -172,8 +186,8 @@ export class DialogueSystem {
         style.textContent = `
 #dialogue-panel {
     position: fixed;
-    bottom: 20px;
-    left: 10%;
+    bottom: 50%;
+    left: 50%;
     width: 380px;
     max-width: 600px;
     min-width: 280px;
@@ -182,7 +196,7 @@ export class DialogueSystem {
     background-color: rgba(0, 0, 0, 0.92);
     border: 1px solid #333333;
     border-radius: 2px;
-    display: flex;
+    display: none;
     flex-direction: column;
     opacity: 0;
     transform: translateY(20px) scale(0.95);
@@ -190,9 +204,12 @@ export class DialogueSystem {
     z-index: 1001;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     font-family: Arial, sans-serif;
+    pointer-events: none;
 }
 
 #dialogue-panel.active {
+    display: flex;
+    pointer-events: auto;
     opacity: 1;
     transform: translateY(0) scale(1);
 }
@@ -256,6 +273,7 @@ export class DialogueSystem {
     scrollbar-width: thin;
     scrollbar-color: #666 #222;
     font-size: 13px;
+    z-index:1001;
 }
 
 #dialogue-content::-webkit-scrollbar {
@@ -396,39 +414,54 @@ export class DialogueSystem {
         document.head.appendChild(style);
     }
 
-    // 解析对话文本并显示对话面板
+    // Parse dialogue text and show dialogue panel
     public ShowDialogue(content: string): void {
         
-        // 先彻底清理当前状态
+        // Create DOM elements if not already created
+        if (!this.isInitialized) {
+            this.createDialogueUI();
+        }
+        
+        // Thoroughly clean current state
         this.cleanupAllState();
         
-        // 解析对话内容
+        // Parse dialogue content
         this.mainDialogueLines = this.parseDialogueContent(content);
         this.currentMainIndex = 0;
 
-        // 显示对话面板
+        // Show dialogue panel - enable interaction and visibility
+        this.dialoguePanel.style.display = 'flex';
+        this.dialoguePanel.style.pointerEvents = 'auto'; // Enable interaction
         this.dialoguePanel.classList.add('active');
         
-        // 添加打开动画效果 - 使用requestAnimationFrame确保DOM已更新
+        // Add opening animation effect - use requestAnimationFrame to ensure DOM is updated
         requestAnimationFrame(() => {
-            // 短暂延迟以确保变换生效
+            // Brief delay to ensure transformation takes effect
             setTimeout(() => {
                 this.dialoguePanel.style.opacity = '1';
                 this.dialoguePanel.style.transform = 'scale(1)';
             }, 30);
         });
 
-        // 显示主对话内容
+        // Show main dialogue content
         this.displayMainDialogue();
     }
 
-    // 清理所有状态和事件监听器
+    // Clean up all state and event listeners
     private cleanupAllState(): void {
-        // 清空所有内容
-        this.dialogueContent.innerHTML = '';
-        this.choicesContainer.innerHTML = '';
+        if (!this.isInitialized) {
+            return; // Nothing to clean up
+        }
+
+        // Clear all content
+        if (this.dialogueContent) {
+            this.dialogueContent.innerHTML = '';
+        }
+        if (this.choicesContainer) {
+            this.choicesContainer.innerHTML = '';
+        }
         
-        // 取消所有打字效果计时器
+        // Cancel all typing effect timers
         const typingIntervals = document.querySelectorAll('[data-typing-interval]');
         typingIntervals.forEach(element => {
             const intervalId = (element as HTMLElement).dataset.typingInterval;
@@ -438,12 +471,12 @@ export class DialogueSystem {
             }
         });
         
-        // 重置状态变量
+        // Reset state variables
         this.isTyping = false;
         this.currentMainIndex = 0;
         this.mainDialogueLines = [];
         
-        // 移除所有选择按钮的事件监听器
+        // Remove all choice button event listeners
         const buttons = document.querySelectorAll('.choice-button');
         buttons.forEach(button => {
             const newButton = button.cloneNode(true);
@@ -452,17 +485,17 @@ export class DialogueSystem {
             }
         });
         
-        // 移除全局空格事件监听器
+        // Remove global space event listener
         if (this.handleGlobalKeydown) {
             document.removeEventListener('keydown', this.handleGlobalKeydown);
         }
         
-        // 移除对话点击事件监听器
-        if (this.handleDialogueClick) {
+        // Remove dialogue click event listener
+        if (this.handleDialogueClick && this.dialogueContent) {
             this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
         }
         
-        // 移除可能存在的继续提示
+        // Remove any existing continue prompts
         const continuePrompts = document.querySelectorAll('.continue-prompt');
         continuePrompts.forEach(prompt => prompt.remove());
     }
@@ -1050,51 +1083,78 @@ export class DialogueSystem {
         }, 10); // 增加延迟确保DOM完全更新
     }
 
-    // 清空对话内容
+    // Clear dialogue content
     public ClearDialogue(): void {
-        this.dialogueContent.innerHTML = '';
-        this.choicesContainer.innerHTML = '';
+        if (!this.isInitialized) {
+            return; // Nothing to clear
+        }
+        
+        if (this.dialogueContent) {
+            this.dialogueContent.innerHTML = '';
+        }
+        if (this.choicesContainer) {
+            this.choicesContainer.innerHTML = '';
+        }
     }
 
-    // 关闭对话面板
+    // Close dialogue panel
     public CloseDialogue(): void {
-        // 添加关闭动画
+        if (!this.isInitialized || !this.dialoguePanel) {
+            return; // Nothing to close
+        }
+
+        // Add closing animation
         this.dialoguePanel.style.opacity = '0';
         this.dialoguePanel.style.transform = 'scale(0.95)';
         
-        // 等待动画完成后清理状态
+        // Wait for animation to complete then clean up state
         setTimeout(() => {
-            // 清理所有状态
+            // Clean up all state
             this.cleanupAllState();
             
-            // 关闭对话面板
+            // Close dialogue panel and disable interaction
             this.dialoguePanel.classList.remove('active');
+            this.dialoguePanel.style.display = 'none';
+            this.dialoguePanel.style.pointerEvents = 'none'; // Disable interaction to prevent blocking
             
-            // 重置面板状态
+            // Reset panel state
             this.dialoguePanel.style.transform = '';
         }, 200);
     }
 
-    // 完全销毁对话面板
+    // Completely destroy dialogue panel
     public DestroyDialogue(): void {
-        // 先关闭对话面板并清理状态
+        if (!this.isInitialized) {
+            return; // Nothing to destroy
+        }
+
+        // First close dialogue panel and clean up state
         this.CloseDialogue();
         
-        // 移除事件监听器
-        this.closeButton.removeEventListener('click', this.CloseDialogue.bind(this));
-        document.removeEventListener('keydown', this.handleGlobalKeydown);
-        this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
+        // Remove event listeners
+        if (this.closeButton) {
+            this.closeButton.removeEventListener('click', this.CloseDialogue.bind(this));
+        }
+        if (this.handleGlobalKeydown) {
+            document.removeEventListener('keydown', this.handleGlobalKeydown);
+        }
+        if (this.handleDialogueClick) {
+            this.dialogueContent.removeEventListener('click', this.handleDialogueClick);
+        }
         
-        // 从DOM中移除整个对话面板
+        // Remove entire dialogue panel from DOM
         if (this.dialoguePanel && this.dialoguePanel.parentNode) {
             this.dialoguePanel.parentNode.removeChild(this.dialoguePanel);
         }
         
-        // 移除添加的样式
+        // Remove added styles
         const dialogueStyle = document.head.querySelector('style[data-dialogue-style]');
         if (dialogueStyle) {
             dialogueStyle.remove();
         }
+
+        // Reset initialization state
+        this.isInitialized = false;
     }
 
     /**

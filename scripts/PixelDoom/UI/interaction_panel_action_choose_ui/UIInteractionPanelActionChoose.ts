@@ -548,7 +548,7 @@ export class UIInteractionPanelActionChooseMain {
         console.log('Window is at default position, not saving');
       }
     } else {
-      console.log('No window element to save position from');
+      //console.log('No window element to save position from');
     }
     
     // Remove window resize listener
@@ -776,7 +776,7 @@ export class UIInteractionPanelActionChooseMain {
       saveWindowPosition(InteractionUIState.windowElement);
       console.log('Position manually saved:', InteractionUIState.savedPosition);
     } else {
-      console.log('No window to save position from');
+      //console.log('No window to save position from');
     }
   }
 }
