@@ -1,9 +1,10 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { FogStyle, FogType, PIXEffect_fog } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { _Audio } from "./PIXAudio.js";
 
 export enum WEATHER_TYPE {
     RAIN = "Rain",
-    NORMAL = "Normal"
+    NORMAL = "Normal",
 }
 
 // 创建可以在外部直接修改的天气状态对象
@@ -25,6 +26,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 async function handleWeather() {
+    Fog();
     Normal();
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
@@ -74,6 +76,28 @@ async function Normal() {
         WeatherC3Timer.behaviors.Timer.stopTimer("rain")
     }
     _Audio.AudioStop("Rain");
+}
+
+
+async function Fog() {
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    var FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+
+
+    FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(5, 30), "fogtimer", "regular")
+
+
+    FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
+        if (e.tag === "fogtimer") {
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 15, "whole_level_fog")
+                .setPosition(0, 0)
+                .setSize(6000, 3000)
+        }
+    })
+
+
+
 }
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
