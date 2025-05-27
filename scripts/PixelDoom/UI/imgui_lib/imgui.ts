@@ -622,7 +622,7 @@ export class Imgui_chunchun {
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () => {
     try {
         await Imgui_chunchun.Initialize();
-        Imgui_chunchun.CreateExampleWindow();
+        //Imgui_chunchun.CreateExampleWindow();
         
     } catch (error) {
         console.error("ImGui initialization failed:", error);

@@ -20,8 +20,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
     // 初始化时设置初始值
-    CameraZoomValue = 1;
-    CameraZoomTarget = 0.5; // 确保两个值初始一致
+    CameraZoomValue = 0.8;
+    CameraZoomTarget = 0.35; // 确保两个值初始一致
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.scale = CameraZoomValue;
 
     // 添加键盘事件监听，用于调整缩放
@@ -29,7 +29,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (e.key === '+' || e.key === '=') {
             CameraZoomTarget = Math.min(CameraZoomTarget + 0.1, 2.0);
         } else if (e.key === '-' || e.key === '_') {
-            CameraZoomTarget = Math.max(CameraZoomTarget - 0.1, 0.2);
+            CameraZoomTarget = Math.max(CameraZoomTarget - 0.1, 0.35);
         }
     });
 

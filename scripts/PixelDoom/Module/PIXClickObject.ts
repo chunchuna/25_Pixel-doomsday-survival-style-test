@@ -105,9 +105,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
             for (const child of GetChooseObject.children()) {
                   if (child && child.objectType.name === "hudongtishi_ui") {
-                        GetChooseObject.removeChild(child)
+                        //GetChooseObject.removeChild(child)
                         //@ts-ignore
-                        child.setContent("", "html", "#HuDongTiShi");
+                        //child.setContent("", "html", "#HuDongTiShi");
                   }
             }
 
