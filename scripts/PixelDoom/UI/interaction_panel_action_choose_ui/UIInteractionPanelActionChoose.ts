@@ -29,6 +29,13 @@ class InteractionUIState {
   static isInitialized: boolean = false;
   static isWindowDestroyed: boolean = false;
   static resizeHandler: (() => void) | null = null;
+  
+  // Position storage for remembering user-dragged position
+  static savedPosition: { x: number; y: number } | null = null;
+  static hasUserDragged: boolean = false;
+  static dragStartPosition: { x: number; y: number } | null = null;
+  static positionCheckInterval: number | null = null;
+  static dragCleanup: (() => void) | null = null;
 }
 
 // Interface for button data
@@ -141,18 +148,159 @@ function ensureClickHandling() {
   }
 }
 
-// Helper function: Position window to bottom right
+// Helper function: Position window with saved position or default to center
 function positionWindowToBottomRight(windowElement: HTMLElement) {
+  // Load saved position from localStorage if not already loaded
+  if (!InteractionUIState.savedPosition && !InteractionUIState.hasUserDragged) {
+    loadSavedPosition();
+  }
+  
   const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = parseInt(windowElement.style.width);
   const windowHeight = parseInt(windowElement.style.height);
   
-  // Set window position to bottom right with margin
-  const rightPosition = viewportWidth - windowWidth - 20; // 20px right margin
-  const bottomPosition = viewportHeight - windowHeight - 20; // 20px bottom margin
+  let targetX: number;
+  let targetY: number;
   
-  UIWindowLib.setPosition(windowElement, rightPosition, bottomPosition);
+  console.log('Positioning window - saved position:', InteractionUIState.savedPosition, 'hasUserDragged:', InteractionUIState.hasUserDragged);
+  console.log('Viewport size:', { width: viewportWidth, height: viewportHeight });
+  console.log('Window size:', { width: windowWidth, height: windowHeight });
+  
+  // Use saved position if user has dragged the window before
+  if (InteractionUIState.savedPosition && InteractionUIState.hasUserDragged) {
+    targetX = InteractionUIState.savedPosition.x;
+    targetY = InteractionUIState.savedPosition.y;
+    
+    // Ensure the window stays within viewport bounds
+    targetX = Math.max(0, Math.min(targetX, viewportWidth - windowWidth));
+    targetY = Math.max(0, Math.min(targetY, viewportHeight - windowHeight));
+    
+    console.log('Using saved position - original:', InteractionUIState.savedPosition, 'adjusted:', { x: targetX, y: targetY });
+  } else {
+    // Default to center position
+    targetX = (viewportWidth - windowWidth) / 2;
+    targetY = (viewportHeight - windowHeight) / 2;
+    
+    console.log('Using default center position:', { x: targetX, y: targetY });
+  }
+  
+  console.log('About to call UIWindowLib.setPosition with:', { x: targetX, y: targetY });
+  UIWindowLib.setPosition(windowElement, targetX, targetY);
+  
+  // Verify the position was actually set
+  setTimeout(() => {
+    const rect = windowElement.getBoundingClientRect();
+    console.log('Window actual position after setPosition:', { x: rect.left, y: rect.top });
+  }, 100);
+}
+
+// Function to save current window position
+function saveWindowPosition(windowElement: HTMLElement) {
+  const rect = windowElement.getBoundingClientRect();
+  const position = {
+    x: rect.left,
+    y: rect.top
+  };
+  
+  // Save to static variable
+  InteractionUIState.savedPosition = position;
+  
+  // Save to localStorage for persistence
+  try {
+    localStorage.setItem('pixelDoom_interactionWindow_position', JSON.stringify(position));
+    localStorage.setItem('pixelDoom_interactionWindow_hasUserDragged', 'true');
+    console.log('Window position saved to localStorage:', position);
+  } catch (e) {
+    console.warn('Failed to save position to localStorage:', e);
+  }
+}
+
+// Function to load saved position from localStorage
+function loadSavedPosition(): { x: number; y: number } | null {
+  try {
+    const savedPos = localStorage.getItem('pixelDoom_interactionWindow_position');
+    const hasUserDragged = localStorage.getItem('pixelDoom_interactionWindow_hasUserDragged');
+    
+    console.log('Loading from localStorage - savedPos:', savedPos, 'hasUserDragged:', hasUserDragged);
+    
+    if (savedPos && hasUserDragged === 'true') {
+      const position = JSON.parse(savedPos);
+      InteractionUIState.savedPosition = position;
+      InteractionUIState.hasUserDragged = true;
+      console.log('Position loaded from localStorage:', position);
+      return position;
+    } else {
+      console.log('No valid saved position found in localStorage');
+    }
+  } catch (e) {
+    console.warn('Failed to load position from localStorage:', e);
+  }
+  
+  return null;
+}
+
+// Function to setup drag tracking for the window
+function setupDragTracking(windowElement: HTMLElement) {
+  const titleBar = windowElement.querySelector('.pd-window-header') as HTMLElement;
+  if (!titleBar) {
+    console.log('Title bar not found');
+    return;
+  }
+  
+  let isDragging = false;
+  let initialPosition: { x: number; y: number } | null = null;
+  
+  // Hook into the window library's drag system
+  const originalMouseDown = titleBar.onmousedown;
+  
+  // Override the mousedown event to track drag start
+  titleBar.addEventListener('mousedown', (e) => {
+    // Record initial position
+    const rect = windowElement.getBoundingClientRect();
+    initialPosition = {
+      x: rect.left,
+      y: rect.top
+    };
+    isDragging = true;
+    console.log('Drag started, initial position:', initialPosition);
+  }, true);
+  
+  // Monitor for drag end by watching for mouseup events on document
+  const handleMouseUp = () => {
+    if (isDragging && initialPosition) {
+      // Small delay to ensure the window library has finished positioning
+      setTimeout(() => {
+        const currentRect = windowElement.getBoundingClientRect();
+        const deltaX = Math.abs(currentRect.left - initialPosition!.x);
+        const deltaY = Math.abs(currentRect.top - initialPosition!.y);
+        
+        console.log('Drag ended, checking position change:', {
+          initial: initialPosition,
+          current: { x: currentRect.left, y: currentRect.top },
+          delta: { x: deltaX, y: deltaY }
+        });
+        
+        // If position changed significantly, save the new position
+        if (deltaX > 5 || deltaY > 5) {
+          InteractionUIState.hasUserDragged = true;
+          saveWindowPosition(windowElement);
+          console.log('Position saved after drag');
+        }
+        
+        isDragging = false;
+        initialPosition = null;
+      }, 50); // Small delay to ensure window library drag is complete
+    }
+  };
+  
+  // Add mouseup listener to document to catch drag end
+  document.addEventListener('mouseup', handleMouseUp, true);
+  
+  // Store the cleanup function
+  InteractionUIState.dragCleanup = () => {
+    document.removeEventListener('mouseup', handleMouseUp, true);
+  };
 }
 
 export class UIInteractionPanelActionChooseMain {
@@ -242,8 +390,14 @@ export class UIInteractionPanelActionChooseMain {
     
     // Modify close function to ensure our close method is called correctly
     const ourCloseFunction = () => {
-      close(); // Call original close function first
-      UIInteractionPanelActionChooseMain.CloseChoosePanle(); // Then call our close method to reset state
+      console.log('ourCloseFunction called - about to save position and close');
+      
+      // Save position and cleanup BEFORE calling the original close function
+      // Pass false to not remove the window element (let the original close() handle that)
+      UIInteractionPanelActionChooseMain.CloseChoosePanle(false); 
+      
+      // Then call original close function
+      close(); 
     };
     
     // Save our modified close function
@@ -277,6 +431,9 @@ export class UIInteractionPanelActionChooseMain {
         
         // Reposition after forced size change
         positionWindowToBottomRight(windowElement);
+        
+        // Setup drag tracking to remember user-moved positions
+        setupDragTracking(windowElement);
       }
     }, 10);
     
@@ -327,13 +484,16 @@ export class UIInteractionPanelActionChooseMain {
     // Save buttons container reference
     InteractionUIState.buttonsContainer = buttonsContainer;
     
-    // Immediately position window to bottom right
-    positionWindowToBottomRight(windowElement);
+    // Setup drag tracking to remember user-moved positions (but don't position yet)
+    setupDragTracking(windowElement);
     
-    // Add window resize event listener to keep window at bottom right
+    // Add window resize event listener to keep window at saved position
     const resizeHandler = () => {
       if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
-        positionWindowToBottomRight(InteractionUIState.windowElement);
+        // Only reposition if user hasn't dragged the window
+        if (!InteractionUIState.hasUserDragged) {
+          positionWindowToBottomRight(InteractionUIState.windowElement);
+        }
       }
     };
     
@@ -352,11 +512,61 @@ export class UIInteractionPanelActionChooseMain {
   }
 
   // Close UI panel
-  static CloseChoosePanle() {
+  static CloseChoosePanle(removeWindow: boolean = true) {
+    //console.log('CloseChoosePanle called');
+    
+    // Save current position before closing if window exists and user has interacted with it
+    if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
+      // Check if the window has been moved from its default position
+      const rect = InteractionUIState.windowElement.getBoundingClientRect();
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const windowWidth = parseInt(InteractionUIState.windowElement.style.width);
+      const windowHeight = parseInt(InteractionUIState.windowElement.style.height);
+      
+      console.log('Window current position:', { x: rect.left, y: rect.top });
+      console.log('Window size:', { width: windowWidth, height: windowHeight });
+      console.log('Viewport size:', { width: viewportWidth, height: viewportHeight });
+      
+      // Calculate what the default center position would be
+      const defaultCenterX = (viewportWidth - windowWidth) / 2;
+      const defaultCenterY = (viewportHeight - windowHeight) / 2;
+      
+      console.log('Default center position would be:', { x: defaultCenterX, y: defaultCenterY });
+      
+      // If window is not at default center position, save current position
+      const deltaX = Math.abs(rect.left - defaultCenterX);
+      const deltaY = Math.abs(rect.top - defaultCenterY);
+      
+      console.log('Position delta from center:', { x: deltaX, y: deltaY });
+      
+      if (deltaX > 10 || deltaY > 10) { // Allow some tolerance for positioning differences
+        InteractionUIState.hasUserDragged = true;
+        saveWindowPosition(InteractionUIState.windowElement);
+        console.log('Position saved before closing window');
+      } else {
+        console.log('Window is at default position, not saving');
+      }
+    } else {
+      console.log('No window element to save position from');
+    }
+    
     // Remove window resize listener
     if (InteractionUIState.resizeHandler) {
       window.removeEventListener('resize', InteractionUIState.resizeHandler);
       InteractionUIState.resizeHandler = null;
+    }
+    
+    // Clear position monitoring interval
+    if (InteractionUIState.positionCheckInterval) {
+      clearInterval(InteractionUIState.positionCheckInterval);
+      InteractionUIState.positionCheckInterval = null;
+    }
+    
+    // Clean up drag tracking
+    if (InteractionUIState.dragCleanup) {
+      InteractionUIState.dragCleanup();
+      InteractionUIState.dragCleanup = null;
     }
     
     // Trigger all close event callbacks
@@ -369,12 +579,8 @@ export class UIInteractionPanelActionChooseMain {
     });
     
     // Try to remove window
-    try {
-      if (InteractionUIState.windowElement && InteractionUIState.windowElement.parentNode) {
-        InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
-      }
-    } catch (error) {
-      console.error('Error closing window:', error);
+    if (removeWindow && InteractionUIState.windowElement && InteractionUIState.windowElement.parentNode) {
+      InteractionUIState.windowElement.parentNode.removeChild(InteractionUIState.windowElement);
     }
     
     // Completely reset all states - regardless of success
@@ -493,8 +699,10 @@ export class UIInteractionPanelActionChooseMain {
       InteractionUIState.windowElement.style.width = width + 'px';
       InteractionUIState.windowElement.style.height = height + 'px';
       
-      // Reposition to bottom right after resizing
-      positionWindowToBottomRight(InteractionUIState.windowElement);
+      // Only reposition if user hasn't dragged the window to a custom position
+      if (!InteractionUIState.hasUserDragged) {
+        positionWindowToBottomRight(InteractionUIState.windowElement);
+      }
     }
   }
 
@@ -533,6 +741,42 @@ export class UIInteractionPanelActionChooseMain {
     // If window element exists, set window title
     if (InteractionUIState.windowElement) {
       UIWindowLib.setTitle(InteractionUIState.windowElement, windowName);
+    }
+  }
+
+  // Reset saved position to use default positioning again
+  static ResetWindowPosition() {
+    InteractionUIState.savedPosition = null;
+    InteractionUIState.hasUserDragged = false;
+    
+    // Clear localStorage
+    try {
+      localStorage.removeItem('pixelDoom_interactionWindow_position');
+      localStorage.removeItem('pixelDoom_interactionWindow_hasUserDragged');
+      console.log('Window position reset to default and localStorage cleared');
+    } catch (e) {
+      console.warn('Failed to clear localStorage:', e);
+    }
+    
+    // If window is currently open, reposition it
+    if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
+      positionWindowToBottomRight(InteractionUIState.windowElement);
+    }
+  }
+
+  // Get current saved position (for debugging or external use)
+  static GetSavedPosition(): { x: number; y: number } | null {
+    return InteractionUIState.savedPosition;
+  }
+
+  // Manually save current window position (for testing)
+  static SaveCurrentPosition() {
+    if (InteractionUIState.windowElement && !InteractionUIState.isWindowDestroyed) {
+      InteractionUIState.hasUserDragged = true;
+      saveWindowPosition(InteractionUIState.windowElement);
+      console.log('Position manually saved:', InteractionUIState.savedPosition);
+    } else {
+      console.log('No window to save position from');
     }
   }
 }
