@@ -1,7 +1,9 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+
 interface SubtitleItem {
     element: HTMLElement;
-    timer?: number;
+    timer?: any; // C3Timer instance
+    timerTag?: string; // Timer tag for C3Timer
 }
 
 var MAX_SUBTITLES = 5;
@@ -96,11 +98,30 @@ export class UISubtitleMain {
 
         var newItem: SubtitleItem = { element: subtitleElement };
 
-        // 如果有设置时间，设置定时器
+        // 如果有设置时间，设置C3Timer
         if (time && time > 0) {
-            newItem.timer = window.setTimeout(() => {
-                UISubtitleMain.hideAndRemoveSubtitle(newItem);
-            }, time * 1000);
+            try {
+                const timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const timerTag = `subtitle_${Date.now()}_${Math.random()}`;
+                
+                timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
+                    if (e.tag === timerTag) {
+                        UISubtitleMain.hideAndRemoveSubtitle(newItem);
+                        timerInstance.destroy();
+                    }
+                });
+                
+                timerInstance.behaviors.Timer.startTimer(time, timerTag, "once");
+                
+                newItem.timer = timerInstance;
+                newItem.timerTag = timerTag;
+            } catch (error: any) {
+                console.error(`Failed to create subtitle timer: ${error.message}`);
+                // Fallback to JavaScript timer
+                newItem.timer = window.setTimeout(() => {
+                    UISubtitleMain.hideAndRemoveSubtitle(newItem);
+                }, time * 1000);
+            }
         }
 
         subtitleItems.push(newItem);
@@ -124,7 +145,18 @@ export class UISubtitleMain {
      */
     static hideAndRemoveSubtitle(item: SubtitleItem): void {
         if (item.timer) {
-            clearTimeout(item.timer);
+            if (item.timerTag && item.timer.behaviors && item.timer.behaviors.Timer) {
+                // C3Timer cleanup
+                try {
+                    item.timer.behaviors.Timer.stopTimer(item.timerTag);
+                    item.timer.destroy();
+                } catch (error: any) {
+                    console.warn(`Error stopping subtitle C3Timer: ${error.message}`);
+                }
+            } else if (typeof item.timer === 'number') {
+                // JavaScript timer fallback cleanup
+                clearTimeout(item.timer);
+            }
         }
 
         var index = subtitleItems.indexOf(item);
@@ -148,7 +180,18 @@ export class UISubtitleMain {
         subtitleItems.forEach(item => {
             // 如果有定时器，清除它（非持久字幕会被移除）
             if (item.timer) {
-                clearTimeout(item.timer);
+                if (item.timerTag && item.timer.behaviors && item.timer.behaviors.Timer) {
+                    // C3Timer cleanup
+                    try {
+                        item.timer.behaviors.Timer.stopTimer(item.timerTag);
+                        item.timer.destroy();
+                    } catch (error: any) {
+                        console.warn(`Error stopping subtitle C3Timer in moveUp: ${error.message}`);
+                    }
+                } else if (typeof item.timer === 'number') {
+                    // JavaScript timer fallback cleanup
+                    clearTimeout(item.timer);
+                }
                 UISubtitleMain.hideAndRemoveSubtitle(item);
             }
         });

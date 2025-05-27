@@ -1,4 +1,3 @@
-
 // gAME Enegine
 // fcuk
 
@@ -32,13 +31,55 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     //The parameter 'ms' represents the delay time (in milliseconds).
     public static WAIT_TIME_FORM_PROMISE = (ms: number) => new Promise(res => setTimeout(res, ms * 1000)); // 秒
 
-    public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): number { //使用秒
-        const intervalMilliseconds = intervalSeconds * 1000  // 将秒转换为毫秒
-        const intervalId = setInterval(callback, intervalMilliseconds); // 启动计时器
-        return intervalId; // 返回计时器 ID
+    public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): any { // Return C3Timer instance
+        try {
+            // Create C3 Timer instance for interval timing
+            const timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const timerTag = `interval_${Date.now()}_${Math.random()}`;
+            
+            // Set up timer event listener
+            timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === timerTag) {
+                    callback();
+                    // Restart timer for next interval (regular timer behavior)
+                    timerInstance.behaviors.Timer.startTimer(intervalSeconds, timerTag, "regular");
+                }
+            });
+            
+            // Start the timer
+            timerInstance.behaviors.Timer.startTimer(intervalSeconds, timerTag, "regular");
+            
+            console.log(`Started C3Timer interval with ${intervalSeconds}s interval`);
+            return timerInstance; // Return timer instance for manual cleanup if needed
+        } catch (error: any) {
+            console.error(`Failed to create C3Timer interval: ${error.message}`);
+            // Fallback to JavaScript setInterval
+            const intervalMilliseconds = intervalSeconds * 1000;
+            const intervalId = setInterval(callback, intervalMilliseconds);
+            return intervalId;
+        }
     }
 
-
+    /**
+     * Stops a C3Timer interval created by WAIT_TIME_FROM_PROMIS_ERVYSECOND
+     * @param timerInstance The timer instance returned by WAIT_TIME_FROM_PROMIS_ERVYSECOND
+     */
+    public static STOP_C3TIMER_INTERVAL(timerInstance: any): void {
+        try {
+            if (timerInstance && timerInstance.behaviors && timerInstance.behaviors.Timer) {
+                // Stop all timers on this instance and destroy it
+                timerInstance.behaviors.Timer.stopAllTimers();
+                timerInstance.destroy();
+                console.log("Stopped C3Timer interval");
+            } else if (typeof timerInstance === 'number') {
+                // Fallback for JavaScript intervals
+                clearInterval(timerInstance);
+                console.log("Stopped JavaScript interval (fallback)");
+            }
+        } catch (error: any) {
+            console.error(`Failed to stop timer: ${error.message}`);
+        }
+    }
 
     public static gl$_ubu_init = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {

@@ -126,11 +126,13 @@ export class UIBubble {
     private typewriterEnabled: boolean = false;
     private typewriterSpeed: number = 50; // milliseconds per character
     private typewriterCurrentIndex: number = 0;
-    private typewriterTimer: number | null = null;
+    private typewriterTimer: any | null = null; // C3 Timer instance for typewriter
+    private typewriterTimerTag: string = "";
     private displayedContent: string = "";
 
     // Auto-destroy timer
-    private destroyTimer: number | null = null;
+    private destroyTimer: any | null = null; // C3 Timer instance for auto-destroy
+    private destroyTimerTag: string = "";
 
     // Animation state
     private isAnimatingIn: boolean = false;
@@ -149,6 +151,10 @@ export class UIBubble {
         this.duration = duration;
         this.type = type;
         this.layer = layer;
+
+        // Initialize timer tags
+        this.typewriterTimerTag = `typewriter_${this.id}_${Date.now()}`;
+        this.destroyTimerTag = `destroy_${this.id}_${Date.now()}`;
 
         // Initialize displayed content (will be empty for typewriter effect)
         this.displayedContent = "";
@@ -214,10 +220,25 @@ export class UIBubble {
             this.renderHTML(); // Re-render with empty content
         }
 
-        // Start typewriter effect after entrance animation
-        setTimeout(() => {
+        // Start typewriter effect after entrance animation using C3Timer
+        try {
+            const delayTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const delayTag = `typewriter_delay_${this.id}_${Date.now()}`;
+            
+            delayTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === delayTag) {
+                    this.startTypewriterEffect();
+                    delayTimer.destroy();
+                }
+            });
+            
+            const delaySeconds = (UIBubble.FADE_IN_DURATION + 100) / 1000;
+            delayTimer.behaviors.Timer.startTimer(delaySeconds, delayTag, "once");
+        } catch (error: any) {
+            console.error(`Failed to create typewriter delay timer: ${error.message}`);
+            // Fallback to immediate start
             this.startTypewriterEffect();
-        }, UIBubble.FADE_IN_DURATION + 100);
+        }
 
         return this;
     }
@@ -543,26 +564,48 @@ export class UIBubble {
     private startTypewriterEffect(): void {
         if (!this.typewriterEnabled || this.typewriterCurrentIndex >= this.content.length) return;
 
-        const typeNextCharacter = () => {
-            if (this.typewriterCurrentIndex < this.content.length) {
-                this.displayedContent = this.content.substring(0, this.typewriterCurrentIndex + 1);
-                this.typewriterCurrentIndex++;
+        try {
+            // Create C3 Timer for typewriter effect
+            this.typewriterTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            
+            this.typewriterTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === this.typewriterTimerTag) {
+                    if (this.typewriterCurrentIndex < this.content.length) {
+                        this.displayedContent = this.content.substring(0, this.typewriterCurrentIndex + 1);
+                        this.typewriterCurrentIndex++;
 
-                // Update bubble size if needed
-                this.updateSizeForTypewriter();
+                        // Update bubble size if needed
+                        this.updateSizeForTypewriter();
 
-                // Update content
-                this.updateTypewriterContent();
+                        // Update content
+                        this.updateTypewriterContent();
 
-                // Schedule next character
-                this.typewriterTimer = setTimeout(typeNextCharacter, this.typewriterSpeed);
-            } else {
-                // Typewriter effect complete, remove cursor
-                this.updateTypewriterContent(false);
-            }
-        };
+                        // Continue to next character if not finished
+                        if (this.typewriterCurrentIndex < this.content.length) {
+                            const speedSeconds = this.typewriterSpeed / 1000;
+                            this.typewriterTimer.behaviors.Timer.startTimer(speedSeconds, this.typewriterTimerTag, "once");
+                        } else {
+                            // Typewriter effect complete, remove cursor and cleanup
+                            this.updateTypewriterContent(false);
+                            this.typewriterTimer.destroy();
+                            this.typewriterTimer = null;
+                        }
+                    }
+                }
+            });
 
-        typeNextCharacter();
+            // Start the first character
+            const speedSeconds = this.typewriterSpeed / 1000;
+            this.typewriterTimer.behaviors.Timer.startTimer(speedSeconds, this.typewriterTimerTag, "once");
+
+        } catch (error: any) {
+            console.error(`Failed to create typewriter timer: ${error.message}`);
+            // Fallback: show all content immediately
+            this.displayedContent = this.content;
+            this.typewriterCurrentIndex = this.content.length;
+            this.updateSizeForTypewriter();
+            this.updateTypewriterContent(false);
+        }
     }
 
     /**
@@ -610,7 +653,12 @@ export class UIBubble {
 
         // Stop typewriter effect if running
         if (this.typewriterTimer) {
-            clearTimeout(this.typewriterTimer);
+            try {
+                this.typewriterTimer.behaviors.Timer.stopTimer(this.typewriterTimerTag);
+                this.typewriterTimer.destroy();
+            } catch (error: any) {
+                console.warn(`Error stopping typewriter timer: ${error.message}`);
+            }
             this.typewriterTimer = null;
         }
 
@@ -620,10 +668,25 @@ export class UIBubble {
             this.htmlElement.setContent(exitHtml, "html");
         }
 
-        // Destroy after animation completes
-        setTimeout(() => {
+        // Destroy after animation completes using C3Timer
+        try {
+            const exitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const exitTag = `exit_${this.id}_${Date.now()}`;
+            
+            exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === exitTag) {
+                    this.destroy();
+                    exitTimer.destroy();
+                }
+            });
+            
+            const exitSeconds = UIBubble.FADE_OUT_DURATION / 1000;
+            exitTimer.behaviors.Timer.startTimer(exitSeconds, exitTag, "once");
+        } catch (error: any) {
+            console.error(`Failed to create exit timer: ${error.message}`);
+            // Fallback to immediate destruction
             this.destroy();
-        }, UIBubble.FADE_OUT_DURATION);
+        }
     }
 
     /**
@@ -705,9 +768,24 @@ export class UIBubble {
             totalDuration += this.content.length * this.typewriterSpeed;
         }
 
-        this.destroyTimer = setTimeout(() => {
-            this.playExitAnimation();
-        }, totalDuration);
+        try {
+            // Create C3 Timer for auto-destroy
+            this.destroyTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            
+            this.destroyTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === this.destroyTimerTag) {
+                    this.playExitAnimation();
+                    // Timer will be cleaned up in destroy method
+                }
+            });
+            
+            const totalSeconds = totalDuration / 1000;
+            this.destroyTimer.behaviors.Timer.startTimer(totalSeconds, this.destroyTimerTag, "once");
+            
+        } catch (error: any) {
+            console.error(`Failed to create auto-destroy timer: ${error.message}`);
+            // No fallback needed - bubble will persist until manually destroyed
+        }
     }
 
     /**
@@ -793,9 +871,18 @@ export class UIBubble {
      */
     public extendDuration(additionalTime: number): UIBubble {
         if (this.destroyTimer) {
-            clearTimeout(this.destroyTimer);
-            this.duration += additionalTime;
-            this.startAutoDestroy();
+            try {
+                // Stop current timer
+                this.destroyTimer.behaviors.Timer.stopTimer(this.destroyTimerTag);
+                this.destroyTimer.destroy();
+                this.destroyTimer = null;
+                
+                // Update duration and restart timer
+                this.duration += additionalTime;
+                this.startAutoDestroy();
+            } catch (error: any) {
+                console.error(`Failed to extend duration: ${error.message}`);
+            }
         }
 
         return this;
@@ -805,14 +892,24 @@ export class UIBubble {
      * Destroys the bubble immediately
      */
     public destroy(): void {
-        // Clear timers
+        // Clear C3 timers
         if (this.destroyTimer) {
-            clearTimeout(this.destroyTimer);
+            try {
+                this.destroyTimer.behaviors.Timer.stopTimer(this.destroyTimerTag);
+                this.destroyTimer.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying auto-destroy timer: ${error.message}`);
+            }
             this.destroyTimer = null;
         }
 
         if (this.typewriterTimer) {
-            clearTimeout(this.typewriterTimer);
+            try {
+                this.typewriterTimer.behaviors.Timer.stopTimer(this.typewriterTimerTag);
+                this.typewriterTimer.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying typewriter timer: ${error.message}`);
+            }
             this.typewriterTimer = null;
         }
 

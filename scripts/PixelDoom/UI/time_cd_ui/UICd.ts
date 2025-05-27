@@ -167,7 +167,24 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 autoVariable.value = 0;
             }
 
-            setTimeout(autoUpdate, 50); // Update every 50ms
+            // Use C3Timer instead of setTimeout for better integration
+            try {
+                const updateTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const updateTag = `auto_update_${Date.now()}_${Math.random()}`;
+                
+                updateTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                    if (e.tag === updateTag) {
+                        autoUpdate();
+                        updateTimer.destroy();
+                    }
+                });
+                
+                updateTimer.behaviors.Timer.startTimer(0.05, updateTag, "once"); // 50ms = 0.05s
+            } catch (error: any) {
+                console.error(`Failed to create auto-update timer: ${error.message}`);
+                // Fallback to setTimeout
+                setTimeout(autoUpdate, 50); // Update every 50ms
+            }
         };
 
         autoUpdate();
