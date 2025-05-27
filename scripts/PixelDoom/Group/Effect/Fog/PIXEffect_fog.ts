@@ -1,6 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../../engine.js";
 import { IMGUIDebugButton } from "../../../UI/debug_ui/UIDbugButton.js";
 import { PLAYER_INVENTORY_ITEMS } from "../../Player/PIXPlayerInventory.js";
+import { Imgui_chunchun } from "../../../UI/imgui_lib/imgui.js";
 
 // Enum for different fog types
 export enum FogType {
@@ -20,6 +21,7 @@ export enum FogStyle {
 export class PIXEffect_fog {
     private static instances: Map<string, PIXEffect_fog> = new Map();
     private static idCounter: number = 0;
+    private static currentEditingFog: PIXEffect_fog | null = null;
 
     private id: string;
     private htmlElement: any; // HTML element instance
@@ -41,7 +43,13 @@ export class PIXEffect_fog {
         scale: 1.5,      // Fog particle scale
         opacity: 0.6,
         color: '#ffffff',
-        layers: 3
+        layers: 3,
+        // New parameters for better fog effect
+        blur: 15,        // Blur amount for softer edges
+        noiseScale: 0.5, // Noise pattern scale
+        fadeEdges: 0.8,  // Edge fade amount
+        mixBlendMode: 'screen', // Blend mode
+        particleVariation: 0.3  // Size variation between particles
     };
 
     // Animation properties
@@ -112,7 +120,12 @@ export class PIXEffect_fog {
                     scale: 1.0,
                     opacity: 0.3,
                     color: '#ffffff',
-                    layers: 2
+                    layers: 2,
+                    blur: 20,
+                    noiseScale: 0.3,
+                    fadeEdges: 0.9,
+                    mixBlendMode: 'screen',
+                    particleVariation: 0.4
                 };
                 break;
             case FogStyle.MEDIUM:
@@ -122,7 +135,12 @@ export class PIXEffect_fog {
                     scale: 1.5,
                     opacity: 0.6,
                     color: '#ffffff',
-                    layers: 3
+                    layers: 3,
+                    blur: 15,
+                    noiseScale: 0.5,
+                    fadeEdges: 0.8,
+                    mixBlendMode: 'screen',
+                    particleVariation: 0.3
                 };
                 break;
             case FogStyle.HEAVY:
@@ -132,7 +150,12 @@ export class PIXEffect_fog {
                     scale: 2.0,
                     opacity: 0.8,
                     color: '#e0e0e0',
-                    layers: 4
+                    layers: 4,
+                    blur: 10,
+                    noiseScale: 0.7,
+                    fadeEdges: 0.7,
+                    mixBlendMode: 'multiply',
+                    particleVariation: 0.2
                 };
                 break;
             case FogStyle.MYSTICAL:
@@ -142,7 +165,12 @@ export class PIXEffect_fog {
                     scale: 1.8,
                     opacity: 0.7,
                     color: '#9c27b0',
-                    layers: 4
+                    layers: 4,
+                    blur: 25,
+                    noiseScale: 0.4,
+                    fadeEdges: 0.9,
+                    mixBlendMode: 'screen',
+                    particleVariation: 0.5
                 };
                 break;
             case FogStyle.TOXIC:
@@ -152,7 +180,12 @@ export class PIXEffect_fog {
                     scale: 1.6,
                     opacity: 0.8,
                     color: '#4caf50',
-                    layers: 3
+                    layers: 3,
+                    blur: 12,
+                    noiseScale: 0.6,
+                    fadeEdges: 0.75,
+                    mixBlendMode: 'multiply',
+                    particleVariation: 0.25
                 };
                 break;
         }
@@ -196,18 +229,23 @@ export class PIXEffect_fog {
     private initParticles(): void {
         this.particles = [];
         const particleCount = Math.floor(this._width * this._height * 0.0001 * this.fogParams.density);
-
+        
         for (let i = 0; i < particleCount; i++) {
+            const baseSize = Math.random() * 100 + 50;
+            const sizeVariation = 1 + (Math.random() - 0.5) * this.fogParams.particleVariation;
+            
             this.particles.push({
                 x: Math.random() * this._width,
                 y: Math.random() * this._height,
-                size: Math.random() * 100 + 50,
+                size: baseSize * sizeVariation,
                 baseSpeedX: (Math.random() - 0.5) * 0.3 + 0.2,
                 baseSpeedY: (Math.random() - 0.5) * 0.2 - 0.1,
                 opacity: Math.random() * 0.3 + 0.1,
                 layer: Math.floor(Math.random() * this.fogParams.layers),
                 flowOffset: Math.random() * Math.PI * 2,
-                flowAmplitude: Math.random() * 0.3 + 0.1
+                flowAmplitude: Math.random() * 0.3 + 0.1,
+                noiseOffset: Math.random() * 1000, // For noise pattern
+                rotationSpeed: (Math.random() - 0.5) * 0.02 // Slow rotation
             });
         }
     }
@@ -220,9 +258,12 @@ export class PIXEffect_fog {
             const flowTime = this.time * 0.0005;
             const flowX = Math.sin(flowTime + particle.flowOffset) * particle.flowAmplitude * 0.5;
             const flowY = Math.cos(flowTime * 0.7 + particle.flowOffset) * particle.flowAmplitude * 0.3;
-
+            
             particle.x += (particle.baseSpeedX + flowX) * this.fogParams.speed;
             particle.y += (particle.baseSpeedY + flowY) * this.fogParams.speed;
+
+            // Update noise offset for organic movement
+            particle.noiseOffset += 0.01;
 
             // Wrap around screen
             if (particle.x > this._width + particle.size) {
@@ -255,12 +296,19 @@ export class PIXEffect_fog {
      */
     private generateFogHTML(): string {
         const particlesHtml = this.particles.map((particle, index) => {
-            const layerOpacity = this.fogParams.opacity * particle.opacity * (1 - particle.layer * 0.2);
-            const layerScale = this.fogParams.scale * (1 - particle.layer * 0.1);
+            const layerOpacity = this.fogParams.opacity * particle.opacity * (1 - particle.layer * 0.15);
+            const layerScale = this.fogParams.scale * (1 - particle.layer * 0.05);
             const size = particle.size * layerScale;
-
+            
             const fogColor = this.hexToRgb(this.fogParams.color);
-
+            
+            // Create more natural gradient with noise-like effect
+            const noiseValue = Math.sin(particle.noiseOffset) * 0.1 + 0.9;
+            const finalOpacity = layerOpacity * noiseValue;
+            
+            // Calculate blur based on layer and settings
+            const blurAmount = this.fogParams.blur + particle.layer * 2;
+            
             return `
             <div class="fog-particle" style="
                 position: absolute;
@@ -270,12 +318,16 @@ export class PIXEffect_fog {
                 height: ${size * 2}px;
                 border-radius: 50%;
                 background: radial-gradient(circle, 
-                    rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, ${layerOpacity * 0.8}) 0%, 
-                    rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, ${layerOpacity * 0.3}) 50%, 
+                    rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, ${finalOpacity * 0.6}) 0%, 
+                    rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, ${finalOpacity * 0.3}) 30%, 
+                    rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, ${finalOpacity * 0.1}) 60%, 
                     rgba(${fogColor.r}, ${fogColor.g}, ${fogColor.b}, 0) 100%);
-                mix-blend-mode: screen;
+                mix-blend-mode: ${this.fogParams.mixBlendMode};
+                filter: blur(${blurAmount}px);
                 pointer-events: none;
                 z-index: ${particle.layer};
+                transform: rotate(${particle.noiseOffset * 10}deg);
+                transition: all 0.1s ease-out;
             "></div>`;
         }).join('');
 
@@ -286,6 +338,7 @@ export class PIXEffect_fog {
             height: 100%;
             overflow: hidden;
             pointer-events: none;
+            filter: contrast(1.1) brightness(0.95);
         ">
             ${particlesHtml}
         </div>`;
@@ -438,6 +491,74 @@ export class PIXEffect_fog {
     }
 
     /**
+     * Sets blur amount
+     * @param blur Blur amount in pixels
+     */
+    public setBlur(blur: number): PIXEffect_fog {
+        this.fogParams.blur = Math.max(0, blur);
+        return this;
+    }
+
+    /**
+     * Sets noise scale
+     * @param noiseScale Noise scale multiplier
+     */
+    public setNoiseScale(noiseScale: number): PIXEffect_fog {
+        this.fogParams.noiseScale = Math.max(0, noiseScale);
+        return this;
+    }
+
+    /**
+     * Sets edge fade amount
+     * @param fadeEdges Edge fade amount (0-1)
+     */
+    public setFadeEdges(fadeEdges: number): PIXEffect_fog {
+        this.fogParams.fadeEdges = Math.max(0, Math.min(1, fadeEdges));
+        return this;
+    }
+
+    /**
+     * Sets mix blend mode
+     * @param mode CSS mix-blend-mode value
+     */
+    public setMixBlendMode(mode: string): PIXEffect_fog {
+        this.fogParams.mixBlendMode = mode;
+        return this;
+    }
+
+    /**
+     * Sets particle size variation
+     * @param variation Variation amount (0-1)
+     */
+    public setParticleVariation(variation: number): PIXEffect_fog {
+        this.fogParams.particleVariation = Math.max(0, Math.min(1, variation));
+        this.initParticles(); // Reinitialize particles
+        return this;
+    }
+
+    /**
+     * Gets fog parameters for editing
+     */
+    public getFogParams(): any {
+        return { ...this.fogParams };
+    }
+
+    /**
+     * Updates fog parameters from editor
+     */
+    public updateFogParams(params: any): void {
+        this.fogParams = { ...this.fogParams, ...params };
+        this.initParticles(); // Reinitialize particles with new params
+    }
+
+    /**
+     * Gets fog ID
+     */
+    public getId(): string {
+        return this.id;
+    }
+
+    /**
      * Destroys the fog effect
      */
     public destroy(): void {
@@ -466,6 +587,11 @@ export class PIXEffect_fog {
 
         // Remove from instances map
         PIXEffect_fog.instances.delete(this.id);
+
+        // Clear from editor if this was being edited
+        if (PIXEffect_fog.currentEditingFog === this) {
+            PIXEffect_fog.currentEditingFog = null;
+        }
 
         console.log(`Fog effect ${this.id} destroyed`);
     }
@@ -497,6 +623,186 @@ export class PIXEffect_fog {
             fogs: fogIds
         };
     }
+
+    /**
+     * Opens fog property editor for a specific fog instance
+     */
+    public static OpenFogEditor(fogId: string): void {
+        const fog = PIXEffect_fog.instances.get(fogId);
+        if (!fog) {
+            console.warn(`Fog with ID ${fogId} not found`);
+            return;
+        }
+
+        PIXEffect_fog.currentEditingFog = fog;
+        
+        // Create ImGui property editor window
+        const windowId = "fog_property_editor";
+        
+        // Close existing window if open
+        if (Imgui_chunchun.IsWindowOpen(windowId)) {
+            Imgui_chunchun.DestroyWindow(windowId);
+        }
+
+        // Create new property editor window
+        PIXEffect_fog.createFogPropertyWindow(windowId, fog);
+    }
+
+    /**
+     * Creates the fog property editor window
+     */
+    private static createFogPropertyWindow(windowId: string, fog: PIXEffect_fog): void {
+        const params = fog.getFogParams();
+        
+        // Create a copy of parameters for editing
+        let editParams = { ...params };
+
+        const renderCallback = () => {
+            // Fog info section
+            if (ImGui.CollapsingHeader("Fog Information")) {
+                ImGui.Text(`ID: ${fog.getId()}`);
+                ImGui.Text(`Type: ${fog.type}`);
+                ImGui.Text(`Style: ${fog.style}`);
+                ImGui.Separator();
+            }
+
+            // Basic properties
+            if (ImGui.CollapsingHeader("Basic Properties", ImGui.TreeNodeFlags.DefaultOpen)) {
+                // Density
+                let density = editParams.density;
+                if (ImGui.SliderFloat("Density", (value = density) => density = value, 0.1, 3.0)) {
+                    editParams.density = density;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Speed
+                let speed = editParams.speed;
+                if (ImGui.SliderFloat("Speed", (value = speed) => speed = value, 0.1, 5.0)) {
+                    editParams.speed = speed;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Scale
+                let scale = editParams.scale;
+                if (ImGui.SliderFloat("Scale", (value = scale) => scale = value, 0.5, 5.0)) {
+                    editParams.scale = scale;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Opacity
+                let opacity = editParams.opacity;
+                if (ImGui.SliderFloat("Opacity", (value = opacity) => opacity = value, 0.0, 1.0)) {
+                    editParams.opacity = opacity;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Layers
+                let layers = editParams.layers;
+                if (ImGui.SliderInt("Layers", (value = layers) => layers = value, 1, 5)) {
+                    editParams.layers = layers;
+                    fog.updateFogParams(editParams);
+                }
+            }
+
+            // Advanced properties
+            if (ImGui.CollapsingHeader("Advanced Properties")) {
+                // Blur
+                let blur = editParams.blur;
+                if (ImGui.SliderFloat("Blur", (value = blur) => blur = value, 0, 50)) {
+                    editParams.blur = blur;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Noise Scale
+                let noiseScale = editParams.noiseScale;
+                if (ImGui.SliderFloat("Noise Scale", (value = noiseScale) => noiseScale = value, 0.0, 2.0)) {
+                    editParams.noiseScale = noiseScale;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Fade Edges
+                let fadeEdges = editParams.fadeEdges;
+                if (ImGui.SliderFloat("Fade Edges", (value = fadeEdges) => fadeEdges = value, 0.0, 1.0)) {
+                    editParams.fadeEdges = fadeEdges;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Particle Variation
+                let particleVariation = editParams.particleVariation;
+                if (ImGui.SliderFloat("Particle Variation", (value = particleVariation) => particleVariation = value, 0.0, 1.0)) {
+                    editParams.particleVariation = particleVariation;
+                    fog.updateFogParams(editParams);
+                }
+
+                // Mix Blend Mode
+                ImGui.Text("Mix Blend Mode:");
+                const blendModes = ["screen", "multiply", "overlay", "soft-light", "hard-light", "color-dodge", "color-burn"];
+                blendModes.forEach(mode => {
+                    if (ImGui.RadioButton(mode, editParams.mixBlendMode === mode)) {
+                        editParams.mixBlendMode = mode;
+                        fog.updateFogParams(editParams);
+                    }
+                });
+            }
+
+            // Color section
+            if (ImGui.CollapsingHeader("Color")) {
+                ImGui.Text("Color (Hex):");
+                let colorText = editParams.color;
+                if (ImGui.InputText("##color", (value = colorText) => colorText = value)) {
+                    if (/^#[0-9A-F]{6}$/i.test(colorText)) {
+                        editParams.color = colorText;
+                        fog.updateFogParams(editParams);
+                    }
+                }
+
+                // Preset colors
+                ImGui.Text("Presets:");
+                const presetColors = [
+                    { name: "White", color: "#ffffff" },
+                    { name: "Gray", color: "#808080" },
+                    { name: "Blue", color: "#4fc3f7" },
+                    { name: "Purple", color: "#9c27b0" },
+                    { name: "Green", color: "#4caf50" },
+                    { name: "Red", color: "#f44336" },
+                    { name: "Yellow", color: "#ffeb3b" }
+                ];
+
+                presetColors.forEach(preset => {
+                    if (ImGui.Button(preset.name)) {
+                        editParams.color = preset.color;
+                        fog.updateFogParams(editParams);
+                    }
+                    ImGui.SameLine();
+                });
+                ImGui.NewLine();
+            }
+
+            // Actions
+            ImGui.Separator();
+            if (ImGui.Button("Reset to Default")) {
+                fog.setDefaultParameters();
+                editParams = fog.getFogParams();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Close Editor")) {
+                Imgui_chunchun.CloseWindow(windowId);
+                PIXEffect_fog.currentEditingFog = null;
+            }
+        };
+
+        // Create the window using Imgui_chunchun
+        const windowConfig = {
+            title: `Fog Editor - ${fog.getId()}`,
+            isOpen: true,
+            size: { width: 400, height: 600 },
+            position: { x: 100, y: 100 },
+            renderCallback: renderCallback
+        };
+
+        // Manually add to windows map (accessing private member)
+        (Imgui_chunchun as any).windows.set(windowId, windowConfig);
+    }
 }
 
 
@@ -506,17 +812,37 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // Test category for fog system
     var fog_system = IMGUIDebugButton.AddCategory("fog_system");
 
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Fog Property Editor", () => {
+        // Get the first active fog for editing, or create one if none exists
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        if (fogInfo.count > 0) {
+            PIXEffect_fog.OpenFogEditor(fogInfo.fogs[0]);
+        } else {
+            // Create a test fog for editing
+            var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+            const x = PlayerInstance ? PlayerInstance.x : 400;
+            const y = PlayerInstance ? PlayerInstance.y : 300;
+            
+            const testFog = PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MEDIUM, 0, "editor_test_fog")
+                .setPosition(x - 200, y - 200)
+                .setSize(400, 300);
+            
+            PIXEffect_fog.OpenFogEditor("editor_test_fog");
+        }
+    });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Generate bIG Fog FOR WHOLE GAME", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MYSTICAL, 10)
-            .setPosition(0, 0)
-            .setSize(6000, 3000)
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MYSTICAL, 10,"whole level fog")
+            .setPosition(-1920, -1080)
+            .setSize(1920, 1080)
             .setScale(1.2)
             .setSpeed(0.8)
-            .setOpacity(0.4);
+            .setOpacity(0.4).setLayer("HtmlUI_fix")
+
+        PIXEffect_fog.OpenFogEditor("whole level fog")
 
     })
 
