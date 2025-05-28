@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 43600,
+	"savedWithRelease": 44100,
 	"name": "25_ThePark_h5",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -233,6 +233,7 @@
 			}
 		]
 	},
+	"functionsName": "Functions",
 	"autosaveData": null,
 	"containers": [],
 	"families": {
