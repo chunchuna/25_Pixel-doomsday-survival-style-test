@@ -889,6 +889,28 @@
 								}
 							],
 							"name": "UI"
+						},
+						{
+							"items": [
+								{
+									"name": "DebugObjectRenderer.ts",
+									"type": "application/typescript",
+									"sid": 520124233563152,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "RenderExample.ts",
+									"type": "application/typescript",
+									"sid": 176201030781136,
+									"script-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "Renderer"
 						}
 					],
 					"name": "PixelDoom"

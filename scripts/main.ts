@@ -1,4 +1,3 @@
-
 // Import any other script files here, e.g.:
 // import * as myModule from "./mymodule.js";
 
@@ -30,7 +29,10 @@ import "./PixelDoom/Group/PIXGroupAmbientSoundEffect.js"
 import "./PixelDoom/Group/Debug/PIXDebugMode.js"
 
 
-
+//Renderer
+import "./PixelDoom/Renderer/DebugObjectRenderer.js"
+import "./PixelDoom/Renderer/DebugObjectRendererIMGUI.js"
+import "./PixelDoom/Renderer/QuickDebugExample.js"
 
 
 
