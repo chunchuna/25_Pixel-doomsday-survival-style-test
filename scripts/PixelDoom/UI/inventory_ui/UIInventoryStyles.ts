@@ -334,12 +334,160 @@ export class UIInventoryStyles {
             
             /* Item quality glow effects */
             .inventory-slot.quality-top {
-                border: 2px solid #e6c000;
+                border: 2px solid #e6c000 !important;
                 box-shadow: 
                     inset 0 0 8px rgba(230, 192, 0, 0.4),
                     0 0 12px rgba(230, 192, 0, 0.6),
-                    0 0 20px rgba(230, 192, 0, 0.3);
-                background: radial-gradient(circle at center, rgba(230, 192, 0, 0.15) 0%, rgba(230, 192, 0, 0.05) 50%, transparent 100%);
+                    0 0 20px rgba(230, 192, 0, 0.3),
+                    0 0 30px rgba(255, 215, 0, 0.4),
+                    0 0 40px rgba(255, 140, 0, 0.2) !important;
+                background: radial-gradient(circle at center, rgba(230, 192, 0, 0.15) 0%, rgba(230, 192, 0, 0.05) 50%, transparent 100%) !important;
+                position: relative;
+                overflow: visible !important;
+                animation: 
+                    topQualityShimmer 2s ease-in-out infinite,
+                    topQualityBorderPulse 1.5s ease-in-out infinite alternate;
+            }
+            
+            /* TOP品质物品的彩虹光环效果 */
+            .inventory-slot.quality-top::before {
+                content: '';
+                position: absolute;
+                top: -4px;
+                left: -4px;
+                right: -4px;
+                bottom: -4px;
+                background: conic-gradient(
+                    from 0deg,
+                    #ff0000 0deg,
+                    #ff8000 60deg,
+                    #ffff00 120deg,
+                    #80ff00 180deg,
+                    #00ff80 240deg,
+                    #0080ff 300deg,
+                    #8000ff 360deg,
+                    #ff0000 360deg
+                );
+                border-radius: 4px;
+                z-index: -1;
+                opacity: 0.6;
+                animation: topQualityRainbow 3s linear infinite;
+                filter: blur(2px);
+            }
+            
+            /* TOP品质物品的内部光效 */
+            .inventory-slot.quality-top::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 8px;
+                height: 8px;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                animation: topQualitySparkle 2s ease-in-out infinite;
+                pointer-events: none;
+            }
+            
+            @keyframes topQualityRainbow {
+                0% {
+                    transform: rotate(0deg) scale(1);
+                    opacity: 0.6;
+                }
+                50% {
+                    transform: rotate(180deg) scale(1.05);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: rotate(360deg) scale(1);
+                    opacity: 0.6;
+                }
+            }
+            
+            @keyframes topQualitySparkle {
+                0%, 100% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.5);
+                }
+                50% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1.2);
+                }
+            }
+            
+            /* TOP品质物品的粒子效果 */
+            .inventory-slot.quality-top .inventory-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: 
+                    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 1px, transparent 2px),
+                    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.4) 1px, transparent 2px),
+                    radial-gradient(circle at 60% 80%, rgba(255, 255, 255, 0.2) 1px, transparent 2px),
+                    radial-gradient(circle at 30% 70%, rgba(255, 140, 0, 0.3) 1px, transparent 2px),
+                    radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.25) 1px, transparent 2px);
+                background-size: 40px 40px, 35px 35px, 45px 45px, 38px 38px, 42px 42px;
+                animation: topQualityParticles 4s ease-in-out infinite;
+                pointer-events: none;
+                border-radius: 2px;
+            }
+            
+            @keyframes topQualityParticles {
+                0%, 100% {
+                    opacity: 0;
+                    transform: scale(0.8) rotate(0deg);
+                    background-position: 
+                        0px 0px,
+                        10px 5px,
+                        -5px 10px,
+                        15px -5px,
+                        -10px 15px;
+                }
+                25% {
+                    opacity: 0.6;
+                    transform: scale(1) rotate(90deg);
+                    background-position: 
+                        5px 5px,
+                        15px 10px,
+                        0px 15px,
+                        20px 0px,
+                        -5px 20px;
+                }
+                50% {
+                    opacity: 0.8;
+                    transform: scale(1.1) rotate(180deg);
+                    background-position: 
+                        10px 10px,
+                        20px 15px,
+                        5px 20px,
+                        25px 5px,
+                        0px 25px;
+                }
+                75% {
+                    opacity: 0.6;
+                    transform: scale(1) rotate(270deg);
+                    background-position: 
+                        15px 15px,
+                        25px 20px,
+                        10px 25px,
+                        30px 10px,
+                        5px 30px;
+                }
+            }
+            
+            @keyframes topQualityBorderPulse {
+                0% {
+                    border-width: 2px;
+                    filter: brightness(1) saturate(1);
+                }
+                100% {
+                    border-width: 3px;
+                    filter: brightness(1.2) saturate(1.3);
+                }
             }
             
             .inventory-slot.quality-s {
@@ -416,9 +564,36 @@ export class UIInventoryStyles {
                 background: radial-gradient(circle at center, rgba(96, 96, 96, 0.08) 0%, rgba(96, 96, 96, 0.02) 50%, transparent 100%);
             }
             
-            /* Shimmer animation for TOP quality items */
-            .inventory-slot.quality-top {
-                animation: topQualityShimmer 2s ease-in-out infinite;
+            /* TOP品质物品的光晕扩散效果 */
+            .inventory-slot.quality-top .inventory-item::after {
+                content: '';
+                position: absolute;
+                top: -10px;
+                left: -10px;
+                right: -10px;
+                bottom: -10px;
+                background: radial-gradient(
+                    circle at center,
+                    rgba(230, 192, 0, 0.3) 0%,
+                    rgba(255, 215, 0, 0.2) 30%,
+                    rgba(255, 140, 0, 0.1) 60%,
+                    transparent 100%
+                );
+                border-radius: 50%;
+                animation: topQualityAura 3s ease-in-out infinite;
+                pointer-events: none;
+                z-index: -1;
+            }
+            
+            @keyframes topQualityAura {
+                0%, 100% {
+                    opacity: 0.4;
+                    transform: scale(0.8);
+                }
+                50% {
+                    opacity: 0.8;
+                    transform: scale(1.2);
+                }
             }
             
             @keyframes topQualityShimmer {
@@ -426,13 +601,37 @@ export class UIInventoryStyles {
                     box-shadow: 
                         inset 0 0 8px rgba(230, 192, 0, 0.4),
                         0 0 12px rgba(230, 192, 0, 0.6),
-                        0 0 20px rgba(230, 192, 0, 0.3);
+                        0 0 20px rgba(230, 192, 0, 0.3),
+                        0 0 30px rgba(255, 215, 0, 0.4),
+                        0 0 40px rgba(255, 140, 0, 0.2);
+                    transform: scale(1);
                 }
-                50% {
+                25% {
                     box-shadow: 
                         inset 0 0 12px rgba(230, 192, 0, 0.6),
                         0 0 18px rgba(230, 192, 0, 0.8),
-                        0 0 30px rgba(230, 192, 0, 0.5);
+                        0 0 30px rgba(230, 192, 0, 0.5),
+                        0 0 45px rgba(255, 215, 0, 0.6),
+                        0 0 60px rgba(255, 140, 0, 0.3);
+                    transform: scale(1.02);
+                }
+                50% {
+                    box-shadow: 
+                        inset 0 0 15px rgba(230, 192, 0, 0.7),
+                        0 0 25px rgba(230, 192, 0, 0.9),
+                        0 0 40px rgba(230, 192, 0, 0.6),
+                        0 0 60px rgba(255, 215, 0, 0.7),
+                        0 0 80px rgba(255, 140, 0, 0.4);
+                    transform: scale(1.05);
+                }
+                75% {
+                    box-shadow: 
+                        inset 0 0 12px rgba(230, 192, 0, 0.6),
+                        0 0 18px rgba(230, 192, 0, 0.8),
+                        0 0 30px rgba(230, 192, 0, 0.5),
+                        0 0 45px rgba(255, 215, 0, 0.6),
+                        0 0 60px rgba(255, 140, 0, 0.3);
+                    transform: scale(1.02);
                 }
             }
             
