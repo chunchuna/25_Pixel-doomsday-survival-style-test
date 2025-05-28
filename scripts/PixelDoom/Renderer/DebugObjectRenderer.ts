@@ -96,12 +96,12 @@ export class DebugObjectRenderer {
 
         // Debug: Log first few successful renders
         if (this.renderCount <= 3 && renderedOnThisLayer > 0) {
-           
+
         }
 
         // Log rendering activity every 60 frames (about once per second at 60fps)
         if (this.renderCount % 60 === 0 && renderedOnThisLayer > 0) {
-           
+
         }
     }
 
@@ -207,25 +207,25 @@ export class DebugObjectRenderer {
 
         this.debugBoxes.set(key, config);
         console.log(`[DebugObjectRenderer] Added debug box for instance: ${key} at (${instance.x}, ${instance.y}) size: ${instance.width}x${instance.height}`);
-        
+
         // Determine which layer to render on
         const targetLayer = customLayer || instance.layer;
-        
+
         if (customLayer) {
             console.log(`[DebugObjectRenderer] Debug box will render on custom layer: ${customLayer.name || 'unnamed'}`);
         } else {
             console.log(`[DebugObjectRenderer] Debug box will render on instance's own layer: ${instance.layer.name || 'unnamed'}`);
         }
-        
+
         // Automatically bind afterdraw event to the target layer
         this.ensureLayerEventBinding(targetLayer);
-        
+
         // Reset current layer after use
         this.currentLayer = null;
-        
+
         // Reset current offset after use
         this.currentOffset = { x: 0, y: 0 };
-        
+
         return key; // Return the key for later reference
     }
 
@@ -464,18 +464,11 @@ export class DebugObjectRenderer {
 // Auto-initialize when module is loaded
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     console.log("[DebugObjectRenderer] 🔧 Starting initialization...");
-    
+
     DebugObjectRenderer.initialize();
-    
+
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
-        var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0,-70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
-        console.log(`[DebugObjectRenderer] 🎯 Debug box created with key: ${playerBox}`);
-        
-        // Example: Close the debug box after 5 seconds
-        setTimeout(() => {
-            DebugObjectRenderer.Close(playerBox);
-            console.log(`[DebugObjectRenderer] 🔒 Closed debug box: ${playerBox}`);
-        }, 5000);
+        var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
     }
 });

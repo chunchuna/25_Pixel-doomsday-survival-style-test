@@ -74,11 +74,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                     if (!currentGouHuo.instVars.ZhengZaiRanShao) return
                     if (currentGouHuo.instVars.ChaiHuoLiang >= 0) {
                         currentGouHuo.instVars.ChaiHuoLiang -= 1;
-                        
-                        // Update the monitoring panel with the new value
 
-                        
-                        //console.log(`GouHuo ${currentGouHuo.uid} burning: ChaiHuoLiang = ${currentGouHuo.instVars.ChaiHuoLiang}`);
+
                     } else if (currentGouHuo.instVars.ChaiHuoLiang <= 0) {
                         GouHuo.ExtinguishedGouHuo(currentGouHuo)
                     }
@@ -99,7 +96,7 @@ export class GouHuo {
 
         // Get layout and light layer first
         const layout = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.getLayout("Level");
-        const lightLayer = layout.getLayer("Light");
+        const lightLayer = layout.getLayer("LightAddtive");
         if (!lightLayer) return;
 
         // Process all children (fire light sources)
