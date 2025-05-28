@@ -332,6 +332,130 @@ export class UIInventoryStyles {
                 background-color: #0a0a0a;
             }
             
+            /* Item quality glow effects */
+            .inventory-slot.quality-top {
+                border: 2px solid #e6c000;
+                box-shadow: 
+                    inset 0 0 8px rgba(230, 192, 0, 0.4),
+                    0 0 12px rgba(230, 192, 0, 0.6),
+                    0 0 20px rgba(230, 192, 0, 0.3);
+                background: radial-gradient(circle at center, rgba(230, 192, 0, 0.15) 0%, rgba(230, 192, 0, 0.05) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-s {
+                border: 2px solid #e65000;
+                box-shadow: 
+                    inset 0 0 6px rgba(230, 80, 0, 0.4),
+                    0 0 10px rgba(230, 80, 0, 0.5),
+                    0 0 16px rgba(230, 80, 0, 0.25);
+                background: radial-gradient(circle at center, rgba(230, 80, 0, 0.12) 0%, rgba(230, 80, 0, 0.04) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-aplus {
+                border: 2px solid #e60000;
+                box-shadow: 
+                    inset 0 0 6px rgba(230, 0, 0, 0.4),
+                    0 0 8px rgba(230, 0, 0, 0.4),
+                    0 0 14px rgba(230, 0, 0, 0.2);
+                background: radial-gradient(circle at center, rgba(230, 0, 0, 0.1) 0%, rgba(230, 0, 0, 0.03) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-a {
+                border: 2px solid #e63060;
+                box-shadow: 
+                    inset 0 0 5px rgba(230, 48, 96, 0.3),
+                    0 0 8px rgba(230, 48, 96, 0.35),
+                    0 0 12px rgba(230, 48, 96, 0.15);
+                background: radial-gradient(circle at center, rgba(230, 48, 96, 0.08) 0%, rgba(230, 48, 96, 0.02) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-b {
+                border: 2px solid #8030e0;
+                box-shadow: 
+                    inset 0 0 4px rgba(128, 48, 224, 0.3),
+                    0 0 6px rgba(128, 48, 224, 0.3),
+                    0 0 10px rgba(128, 48, 224, 0.12);
+                background: radial-gradient(circle at center, rgba(128, 48, 224, 0.06) 0%, rgba(128, 48, 224, 0.02) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-c {
+                border: 2px solid #3090e0;
+                box-shadow: 
+                    inset 0 0 4px rgba(48, 144, 224, 0.25),
+                    0 0 6px rgba(48, 144, 224, 0.25),
+                    0 0 8px rgba(48, 144, 224, 0.1);
+                background: radial-gradient(circle at center, rgba(48, 144, 224, 0.05) 0%, rgba(48, 144, 224, 0.015) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-d {
+                border: 2px solid #30c030;
+                box-shadow: 
+                    inset 0 0 3px rgba(48, 192, 48, 0.2),
+                    0 0 5px rgba(48, 192, 48, 0.2);
+                background: radial-gradient(circle at center, rgba(48, 192, 48, 0.04) 0%, rgba(48, 192, 48, 0.01) 50%, transparent 100%);
+            }
+            
+            .inventory-slot.quality-e {
+                border: 2px solid #c0c0c0;
+                box-shadow: 
+                    inset 0 0 2px rgba(192, 192, 192, 0.15),
+                    0 0 4px rgba(192, 192, 192, 0.15);
+            }
+            
+            .inventory-slot.quality-low {
+                border: 2px solid #909090;
+                box-shadow: inset 0 0 2px rgba(144, 144, 144, 0.1);
+            }
+            
+            .inventory-slot.quality-break {
+                border: 2px solid #606060;
+                box-shadow: 
+                    inset 0 0 4px rgba(96, 96, 96, 0.3),
+                    0 0 6px rgba(96, 96, 96, 0.3),
+                    0 0 8px rgba(96, 96, 96, 0.15);
+                background: radial-gradient(circle at center, rgba(96, 96, 96, 0.08) 0%, rgba(96, 96, 96, 0.02) 50%, transparent 100%);
+            }
+            
+            /* Shimmer animation for TOP quality items */
+            .inventory-slot.quality-top {
+                animation: topQualityShimmer 2s ease-in-out infinite;
+            }
+            
+            @keyframes topQualityShimmer {
+                0%, 100% {
+                    box-shadow: 
+                        inset 0 0 8px rgba(230, 192, 0, 0.4),
+                        0 0 12px rgba(230, 192, 0, 0.6),
+                        0 0 20px rgba(230, 192, 0, 0.3);
+                }
+                50% {
+                    box-shadow: 
+                        inset 0 0 12px rgba(230, 192, 0, 0.6),
+                        0 0 18px rgba(230, 192, 0, 0.8),
+                        0 0 30px rgba(230, 192, 0, 0.5);
+                }
+            }
+            
+            /* Pulse animation for S quality items */
+            .inventory-slot.quality-s {
+                animation: sQualityPulse 3s ease-in-out infinite;
+            }
+            
+            @keyframes sQualityPulse {
+                0%, 100% {
+                    box-shadow: 
+                        inset 0 0 6px rgba(230, 80, 0, 0.4),
+                        0 0 10px rgba(230, 80, 0, 0.5),
+                        0 0 16px rgba(230, 80, 0, 0.25);
+                }
+                50% {
+                    box-shadow: 
+                        inset 0 0 8px rgba(230, 80, 0, 0.5),
+                        0 0 14px rgba(230, 80, 0, 0.7),
+                        0 0 22px rgba(230, 80, 0, 0.35);
+                }
+            }
+            
             /* 格子高亮效果 */
             .slot-highlight {
                 border-color: #444444;

@@ -127,6 +127,9 @@ export class UIInventoryRender {
             }
         }
 
+        // Update quality effects for all slots after rendering
+        UIInventoryUtils.updateAllSlotQualityEffects(container);
+
         return resultSlotPositions;
     }
 
@@ -144,7 +147,7 @@ export class UIInventoryRender {
             // 添加R键整理背包的提示文本
             const promptSpan = document.createElement('span');
             promptSpan.className = 'inventory-prompt';
-            promptSpan.textContent = '[R]整理背包';
+            promptSpan.textContent = '[R]整理 [T]堆叠';
 
             headerDiv.appendChild(titleSpan);
             headerDiv.appendChild(promptSpan);
@@ -250,8 +253,11 @@ export class UIInventoryRender {
         // 填充物品到槽位
         let slotIndex = 0;
         for (const [itemName, itemList] of groupedItems) {
-            // 根据数量分组（每组最多64个）
-            const itemGroups = UIInventoryUtils.splitIntoGroups(itemList, 64);
+            // 获取物品的最大堆叠数量
+            const maxStack = itemList[0].maxStack || 64;
+            
+            // 根据最大堆叠数量分组
+            const itemGroups = UIInventoryUtils.splitIntoGroups(itemList, maxStack);
 
             for (const group of itemGroups) {
                 if (slotIndex < totalSlots) {
@@ -294,6 +300,9 @@ export class UIInventoryRender {
         
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
+
+        // Apply quality effect to slot based on item level
+        UIInventoryUtils.applyQualityEffect(slot, item.itemLevel);
 
         // 创建物品元素
         const itemElement = document.createElement('div');

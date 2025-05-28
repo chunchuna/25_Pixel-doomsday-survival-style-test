@@ -240,4 +240,78 @@ export class UIInventoryUtils {
             element.parentNode?.removeChild(element);
         });
     }
+
+    // 获取物品品质对应的CSS类名
+    public static getQualityClassName(itemLevel: string): string {
+        switch (itemLevel.toUpperCase()) {
+            case 'TOP':
+                return 'quality-top';
+            case 'S':
+                return 'quality-s';
+            case 'A+':
+                return 'quality-aplus';
+            case 'A':
+                return 'quality-a';
+            case 'B':
+                return 'quality-b';
+            case 'C':
+                return 'quality-c';
+            case 'D':
+                return 'quality-d';
+            case 'E':
+                return 'quality-e';
+            case 'LOW':
+                return 'quality-low';
+            case 'BREAK':
+                return 'quality-break';
+            default:
+                return '';
+        }
+    }
+
+    // 应用品质效果到格子
+    public static applyQualityEffect(slotElement: HTMLElement, itemLevel: string): void {
+        // 先移除所有品质类
+        this.removeQualityEffect(slotElement);
+        
+        // 添加新的品质类
+        const qualityClass = this.getQualityClassName(itemLevel);
+        if (qualityClass) {
+            slotElement.classList.add(qualityClass);
+        }
+    }
+
+    // 移除格子的品质效果
+    public static removeQualityEffect(slotElement: HTMLElement): void {
+        const qualityClasses = [
+            'quality-top', 'quality-s', 'quality-aplus', 'quality-a', 
+            'quality-b', 'quality-c', 'quality-d', 'quality-e', 
+            'quality-low', 'quality-break'
+        ];
+        
+        qualityClasses.forEach(className => {
+            slotElement.classList.remove(className);
+        });
+    }
+
+    // 更新所有格子的品质效果
+    public static updateAllSlotQualityEffects(container: HTMLElement): void {
+        const slots = container.querySelectorAll('.inventory-slot');
+        
+        slots.forEach(slot => {
+            const slotElement = slot as HTMLElement;
+            const itemElement = slotElement.querySelector('.inventory-item');
+            
+            if (itemElement) {
+                // 有物品的格子，应用品质效果
+                const itemLevel = itemElement.getAttribute('data-item-level');
+                if (itemLevel) {
+                    this.applyQualityEffect(slotElement, itemLevel);
+                }
+            } else {
+                // 空格子，移除品质效果
+                this.removeQualityEffect(slotElement);
+            }
+        });
+    }
 } 

@@ -17,6 +17,7 @@ export interface Item {
     itemName: string;
     itemDescribe: string;
     itemLevel: ItemLevel;
+    maxStack?: number; // 最大堆叠数量，可选属性，默认为64
 }
 
 // 格子位置接口

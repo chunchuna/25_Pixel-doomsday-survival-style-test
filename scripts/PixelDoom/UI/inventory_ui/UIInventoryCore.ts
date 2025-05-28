@@ -94,6 +94,9 @@ export class UIInventoryCore implements IUIInventory {
         } else if (event.key.toLowerCase() === 'r' && this.isMainInventoryVisible) {
             // 按R键自动整理物品
             this.sortInventoryByQuality();
+        } else if (event.key.toLowerCase() === 't' && this.isMainInventoryVisible) {
+            // 按T键主动堆叠物品
+            this.stackItems();
         } else if (event.key.toLowerCase() === 'escape') {
             // 按ESC键关闭库存
             this.handleEscapeKey();
@@ -302,6 +305,63 @@ export class UIInventoryCore implements IUIInventory {
         UIInventoryRender.showNotification(this.mainInventoryContainer, '整理完成');
     }
 
+    // 主动堆叠物品
+    private stackItems(): void {
+        let hasChanges = false;
+        
+        // 遍历所有格子，寻找可以堆叠的物品
+        for (let i = 0; i < this.slotPositions.length; i++) {
+            const sourceSlot = this.slotPositions[i];
+            if (!sourceSlot.item || sourceSlot.count <= 0) continue;
+            
+            const maxStack = sourceSlot.item.maxStack || 64;
+            if (sourceSlot.count >= maxStack) continue; // 已经满堆叠，跳过
+            
+            // 寻找相同物品的其他格子进行合并
+            for (let j = i + 1; j < this.slotPositions.length; j++) {
+                const targetSlot = this.slotPositions[j];
+                if (!targetSlot.item || targetSlot.count <= 0) continue;
+                
+                // 如果是相同物品，尝试合并
+                if (sourceSlot.item.itemName === targetSlot.item.itemName) {
+                    const canAdd = maxStack - sourceSlot.count;
+                    if (canAdd > 0) {
+                        const addCount = Math.min(canAdd, targetSlot.count);
+                        sourceSlot.count += addCount;
+                        targetSlot.count -= addCount;
+                        
+                        // 如果目标格子空了，清空它
+                        if (targetSlot.count <= 0) {
+                            targetSlot.item = null;
+                            targetSlot.count = 0;
+                        }
+                        
+                        hasChanges = true;
+                        
+                        // 如果源格子已满，停止合并
+                        if (sourceSlot.count >= maxStack) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (hasChanges) {
+            // 重新渲染库存
+            this.renderMainInventory();
+            
+            // 触发主库存更新回调
+            this.triggerMainInventoryCallback();
+            
+            // 添加堆叠完成的提示效果
+            UIInventoryRender.showNotification(this.mainInventoryContainer, '堆叠完成');
+        } else {
+            // 没有可堆叠的物品
+            UIInventoryRender.showNotification(this.mainInventoryContainer, '没有可堆叠的物品');
+        }
+    }
+
     // 渲染主库存的包装方法
     private renderMainInventory(): void {
         // 保存是否处于拖拽状态的标志
@@ -375,8 +435,14 @@ export class UIInventoryCore implements IUIInventory {
                 console.log("Item returned to original position");
                 if (sourceInventoryType === 'main') {
                     this.renderMainInventory();
+                    // Update quality effects after returning to original position
+                    UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
                 } else {
                     this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                    // Update quality effects after returning to original position
+                    if (this.otherInventoryInstance) {
+                        UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+                    }
                 }
 
                 // 添加回弹动画效果
@@ -414,9 +480,15 @@ export class UIInventoryCore implements IUIInventory {
             if (sourceInventoryType === 'main') {
                 // 主库存不需要做任何事情，物品已经在原位置
                 this.renderMainInventory(); // 重新渲染确保显示正确
+                // Update quality effects after returning to original position
+                UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
             } else if (sourceInventoryType === 'other') {
                 // 其他库存不需要做任何事情，物品已经在原位置
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
+                // Update quality effects after returning to original position
+                if (this.otherInventoryInstance) {
+                    UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+                }
             }
 
             // 添加回弹动画效果
@@ -452,7 +524,7 @@ export class UIInventoryCore implements IUIInventory {
         // 如果目标格子有相同物品，尝试合并
         else if (targetSlot.item.itemName === sourceSlot.item?.itemName) {
             const totalCount = targetSlot.count + sourceSlot.count;
-            const maxStack = (targetSlot.item as any).maxStack || 1;
+            const maxStack = targetSlot.item.maxStack || 64; // 默认最大堆叠数量为64
             
             if (totalCount <= maxStack) {
                 // 可以完全合并
@@ -478,6 +550,9 @@ export class UIInventoryCore implements IUIInventory {
 
         this.renderMainInventory();
         this.triggerMainInventoryCallback();
+        
+        // Update quality effects after item movement
+        UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
     }
 
     // 处理其他库存内的物品拖拽
@@ -503,7 +578,7 @@ export class UIInventoryCore implements IUIInventory {
         // 如果目标格子有相同物品，尝试合并
         else if (targetSlot.item.itemName === sourceSlot.item?.itemName) {
             const totalCount = targetSlot.count + sourceSlot.count;
-            const maxStack = (targetSlot.item as any).maxStack || 1;
+            const maxStack = targetSlot.item.maxStack || 64; // 默认最大堆叠数量为64
             
             if (totalCount <= maxStack) {
                 // 可以完全合并
@@ -529,6 +604,11 @@ export class UIInventoryCore implements IUIInventory {
 
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
         this.updateOriginalInventoryArray();
+        
+        // Update quality effects after item movement
+        if (this.otherInventoryInstance) {
+            UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+        }
     }
 
     // 处理物品在不同库存间的传输
@@ -563,7 +643,7 @@ export class UIInventoryCore implements IUIInventory {
         // 如果目标格子有相同物品，尝试合并
         else if (targetSlot.item.itemName === sourceSlot.item.itemName) {
             const totalCount = targetSlot.count + sourceSlot.count;
-            const maxStack = (targetSlot.item as any).maxStack || 1;
+            const maxStack = targetSlot.item.maxStack || 64; // 默认最大堆叠数量为64
             
             if (totalCount <= maxStack) {
                 // 可以完全合并
@@ -591,6 +671,12 @@ export class UIInventoryCore implements IUIInventory {
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
         this.triggerMainInventoryCallback();
         this.updateOriginalInventoryArray();
+        
+        // Update quality effects after item transfer
+        UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
+        if (this.otherInventoryInstance) {
+            UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+        }
     }
 
     // 从其他库存转移到主库存
@@ -613,7 +699,7 @@ export class UIInventoryCore implements IUIInventory {
         // 如果目标格子有相同物品，尝试合并
         else if (targetSlot.item.itemName === sourceSlot.item.itemName) {
             const totalCount = targetSlot.count + sourceSlot.count;
-            const maxStack = (targetSlot.item as any).maxStack || 1;
+            const maxStack = targetSlot.item.maxStack || 64; // 默认最大堆叠数量为64
             
             if (totalCount <= maxStack) {
                 // 可以完全合并
@@ -641,6 +727,12 @@ export class UIInventoryCore implements IUIInventory {
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
         this.triggerMainInventoryCallback();
         this.updateOriginalInventoryArray();
+        
+        // Update quality effects after item transfer
+        UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
+        if (this.otherInventoryInstance) {
+            UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+        }
     }
 
     // 获取其他库存的格子位置数据
@@ -742,6 +834,12 @@ export class UIInventoryCore implements IUIInventory {
             this.triggerMainInventoryCallback();
             this.updateOriginalInventoryArray();
 
+            // Update quality effects after quick pickup
+            UIInventoryUtils.updateAllSlotQualityEffects(this.mainInventoryContainer);
+            if (this.otherInventoryInstance) {
+                UIInventoryUtils.updateAllSlotQualityEffects(this.otherInventoryInstance);
+            }
+
             // 显示拾取提示
             UIInventoryRender.showNotification(this.mainInventoryContainer, `Picked up ${actualItem.itemName} x${actualCount}`);
         } else {
@@ -757,7 +855,7 @@ export class UIInventoryCore implements IUIInventory {
         // 首先尝试合并到现有的相同物品格子
         for (const slot of this.slotPositions) {
             if (slot.item && slot.item.itemName === item.itemName) {
-                const maxStack = (slot.item as any).maxStack || 1;
+                const maxStack = slot.item.maxStack || 64; // 默认最大堆叠数量为64
                 const canAdd = maxStack - slot.count;
                 
                 if (canAdd > 0) {
@@ -775,7 +873,7 @@ export class UIInventoryCore implements IUIInventory {
         // 然后尝试放入空格子
         for (const slot of this.slotPositions) {
             if (!slot.item && remainingCount > 0) {
-                const maxStack = (item as any).maxStack || 1;
+                const maxStack = item.maxStack || 64; // 默认最大堆叠数量为64
                 const addCount = Math.min(maxStack, remainingCount);
                 
                 slot.item = { ...item };
@@ -866,19 +964,33 @@ export class UIInventoryCore implements IUIInventory {
             });
         }
         
-        // 填充物品数据
-        let currentSlot = 0;
+        // 分组物品，同名物品放在一起
         const itemGroups = UIInventoryUtils.groupItems(items);
         
+        // 填充物品数据
+        let currentSlot = 0;
         for (const [itemName, itemList] of itemGroups) {
             if (currentSlot >= totalSlots) break;
             
-            positions[currentSlot] = {
-                index: currentSlot,
-                item: itemList[0],
-                count: itemList.length
-            };
-            currentSlot++;
+            // 获取物品的最大堆叠数量
+            const maxStack = itemList[0].maxStack || 64;
+            
+            // 根据最大堆叠数量分组
+            const stackGroups = UIInventoryUtils.splitIntoGroups(itemList, maxStack);
+            
+            for (const group of stackGroups) {
+                if (currentSlot < totalSlots) {
+                    positions[currentSlot] = {
+                        index: currentSlot,
+                        item: group[0],
+                        count: group.length
+                    };
+                    currentSlot++;
+                } else {
+                    console.warn('库存格子不足以显示所有物品');
+                    break;
+                }
+            }
         }
         
         return positions;
