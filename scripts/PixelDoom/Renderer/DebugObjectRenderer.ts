@@ -96,12 +96,12 @@ export class DebugObjectRenderer {
 
         // Debug: Log first few successful renders
         if (this.renderCount <= 3 && renderedOnThisLayer > 0) {
-            console.log(`[DebugObjectRenderer] ✅ Successfully rendered ${renderedOnThisLayer} debug boxes on layer: ${layer.name || 'unnamed'}`);
+           
         }
 
         // Log rendering activity every 60 frames (about once per second at 60fps)
         if (this.renderCount % 60 === 0 && renderedOnThisLayer > 0) {
-            console.log(`[DebugObjectRenderer] Rendered ${renderedOnThisLayer} debug boxes on layer: ${layer.name || 'unnamed'}`);
+           
         }
     }
 
@@ -178,7 +178,7 @@ export class DebugObjectRenderer {
     }
 
     // Main function to render box around instance
-    public static RenderBoxtoInstance(instance: IWorldInstance): typeof DebugObjectRenderer {
+    public static RenderBoxtoInstance(instance: IWorldInstance): string {
         const key = this.generateInstanceKey(instance);
 
         // Get custom layer if specified
@@ -226,7 +226,7 @@ export class DebugObjectRenderer {
         // Reset current offset after use
         this.currentOffset = { x: 0, y: 0 };
         
-        return this;
+        return key; // Return the key for later reference
     }
 
     // Set color for the next debug box
@@ -286,17 +286,21 @@ export class DebugObjectRenderer {
         return this;
     }
 
-    // Update/enable continuous rendering for a specific instance
-    public static update(instance: IWorldInstance, enable: boolean = true): typeof DebugObjectRenderer {
-        const key = this.generateInstanceKey(instance);
-        const config = this.debugBoxes.get(key);
-
+    // Update/enable continuous rendering for a specific debug box by key
+    public static update(debugBoxKey: string, enable: boolean = true): void {
+        const config = this.debugBoxes.get(debugBoxKey);
         if (config) {
             config.enabled = enable;
-            console.log(`[DebugObjectRenderer] ${enable ? 'Enabled' : 'Disabled'} debug box for instance: ${key}`);
+            console.log(`[DebugObjectRenderer] ${enable ? 'Enabled' : 'Disabled'} debug box: ${debugBoxKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug box not found for update: ${debugBoxKey}`);
         }
+    }
 
-        return this;
+    // Legacy update method for instances (for backward compatibility)
+    public static updateByInstance(instance: IWorldInstance, enable: boolean = true): void {
+        const key = this.generateInstanceKey(instance);
+        this.update(key, enable);
     }
 
     // Remove debug box for specific instance
@@ -424,6 +428,37 @@ export class DebugObjectRenderer {
             console.error(`[DebugObjectRenderer] ❌ Failed to bind to layer ${layer.name}: ${error.message}`);
         }
     }
+
+    // Close/disable a specific debug box by its key
+    public static Close(debugBoxKey: string): void {
+        const config = this.debugBoxes.get(debugBoxKey);
+        if (config) {
+            config.enabled = false;
+            console.log(`[DebugObjectRenderer] ✅ Closed debug box: ${debugBoxKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug box not found: ${debugBoxKey}`);
+        }
+    }
+
+    // Permanently remove a debug box by its key
+    public static Remove(debugBoxKey: string): void {
+        if (this.debugBoxes.delete(debugBoxKey)) {
+            console.log(`[DebugObjectRenderer] ✅ Removed debug box: ${debugBoxKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug box not found: ${debugBoxKey}`);
+        }
+    }
+
+    // Reopen/enable a specific debug box by its key
+    public static Open(debugBoxKey: string): void {
+        const config = this.debugBoxes.get(debugBoxKey);
+        if (config) {
+            config.enabled = true;
+            console.log(`[DebugObjectRenderer] ✅ Opened debug box: ${debugBoxKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug box not found: ${debugBoxKey}`);
+        }
+    }
 }
 
 // Auto-initialize when module is loaded
@@ -434,7 +469,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
-        DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0,-70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance)
-        console.log("[DebugObjectRenderer] 🎯 Debug box added for player instance with BRIGHT MAGENTA color and HOLLOW mode");
+        var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0,-70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
+        console.log(`[DebugObjectRenderer] 🎯 Debug box created with key: ${playerBox}`);
+        
+        // Example: Close the debug box after 5 seconds
+        setTimeout(() => {
+            DebugObjectRenderer.Close(playerBox);
+            console.log(`[DebugObjectRenderer] 🔒 Closed debug box: ${playerBox}`);
+        }, 5000);
     }
 });
