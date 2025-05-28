@@ -2,7 +2,7 @@
 // This file provides the public API and maintains compatibility with existing code
 
 // Import all necessary types and classes
-import type { Item, ItemLevel, InventoryUpdateCallback, SlotPosition, SerializedInventory, SerializedItem } from './UIInventoryTypes';
+import type { Item, ItemLevel, InventoryUpdateCallback, SlotPosition, SerializedInventory, SerializedItem } from './UIInventoryTypes.js';
 import { UIInventoryCore } from './UIInventoryCore.js';
 import { UIInventoryStyles } from './UIInventoryStyles.js';
 import { UIInventoryUtils } from './UIInventoryUtils.js';

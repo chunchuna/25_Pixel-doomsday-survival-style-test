@@ -31,9 +31,6 @@ import "./PixelDoom/Group/Debug/PIXDebugMode.js"
 
 //Renderer
 import "./PixelDoom/Renderer/DebugObjectRenderer.js"
-import "./PixelDoom/Renderer/DebugObjectRendererIMGUI.js"
-import "./PixelDoom/Renderer/QuickDebugExample.js"
-
 
 
 //UI
