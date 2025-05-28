@@ -6,6 +6,7 @@ import "./engine.js"
 import "./PixelDoom/UI/font/font.js"
 
 import "./PixelDoom/Global/PIXGlobal.js"
+import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
 
 import "./PixelDoom/Module/PIXCommandAddon.js"
 import "./PixelDoom/Group/Save/PIXSave.js"
@@ -43,7 +44,7 @@ import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js"
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"
-import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
+
 
 
 import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"

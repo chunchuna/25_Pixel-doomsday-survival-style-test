@@ -6,6 +6,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     // 任何初始化的时候 都注册一下
     // if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     (window as any).DialogueMainController = new DialogueSystem();
+    DialogueMainController = (window as any).DialogueMainController;
+    
+    // Add global wrapper functions for event callbacks
+    (window as any).OnDialogueOpen = (callback: () => void) => {
+        DialogueMainController.OnDialogueOpen(callback);
+    };
+    
+    (window as any).OnDialogueClose = (callback: () => void) => {
+        DialogueMainController.OnDialogueClose(callback);
+    };
 })
 
 
@@ -34,6 +44,10 @@ export class DialogueSystem {
     private mainDialogueLines: DialogueLine[] = []; // Store main dialogue flow
     private currentMainIndex: number = 0; // Current main dialogue index
     private isInitialized: boolean = false; // Track if DOM elements are created
+    
+    // Event callback arrays
+    private onDialogueOpenCallbacks: (() => void)[] = [];
+    private onDialogueCloseCallbacks: (() => void)[] = [];
 
     constructor() {
         // Don't create UI elements immediately - only create when needed
@@ -445,6 +459,9 @@ export class DialogueSystem {
 
         // Show main dialogue content
         this.displayMainDialogue();
+
+        // Trigger dialogue open callbacks
+        this.triggerDialogueOpenCallbacks();
     }
 
     // Clean up all state and event listeners
@@ -1120,6 +1137,9 @@ export class DialogueSystem {
             // Reset panel state
             this.dialoguePanel.style.transform = '';
         }, 200);
+
+        // Trigger dialogue close callbacks
+        this.triggerDialogueCloseCallbacks();
     }
 
     // Completely destroy dialogue panel
@@ -1325,6 +1345,38 @@ export class DialogueSystem {
         
         // 设置当前对话框的z-index为最高+1
         this.dialoguePanel.style.zIndex = (maxZIndex + 1).toString();
+    }
+
+    // Add callback for dialogue open event
+    public OnDialogueOpen(callback: () => void): void {
+        this.onDialogueOpenCallbacks.push(callback);
+    }
+
+    // Add callback for dialogue close event
+    public OnDialogueClose(callback: () => void): void {
+        this.onDialogueCloseCallbacks.push(callback);
+    }
+
+    // Trigger all dialogue open callbacks
+    private triggerDialogueOpenCallbacks(): void {
+        this.onDialogueOpenCallbacks.forEach(callback => {
+            try {
+                callback();
+            } catch (error) {
+                console.error('Error executing dialogue open callback:', error);
+            }
+        });
+    }
+
+    // Trigger all dialogue close callbacks
+    private triggerDialogueCloseCallbacks(): void {
+        this.onDialogueCloseCallbacks.forEach(callback => {
+            try {
+                callback();
+            } catch (error) {
+                console.error('Error executing dialogue close callback:', error);
+            }
+        });
     }
 }
 

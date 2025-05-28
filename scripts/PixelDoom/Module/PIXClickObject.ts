@@ -18,6 +18,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 var MainInventoryOpen = false
 var OtherInventoryOpen = false
+var DialogueOpen = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       OnMainInventoryOpen(() => {
@@ -36,6 +37,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       })
       OnOtherInventoryClose(() => {
             OtherInventoryOpen = false;
+
+      })
+      //@ts-ignore
+      DialogueMainController.OnDialogueOpen(() => {
+            DialogueOpen = true;
+
+      })
+      //@ts-ignore
+      DialogueMainController.OnDialogueClose(() => {
+            DialogueOpen = false;
 
       })
 })
@@ -135,8 +146,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                   }
             }
 
-            if(MainInventoryOpen) return
-            if(OtherInventoryOpen)return
+            if (MainInventoryOpen) return
+            if (OtherInventoryOpen) return
+
+            if (DialogueOpen) return
 
 
             ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions, "正在交互:" + GetChooseObject.instVars.ObjectName)
