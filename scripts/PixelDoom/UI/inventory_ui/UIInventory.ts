@@ -201,6 +201,28 @@ export { UIInventoryCore };
 // Export utility classes for advanced usage
 export { UIInventoryStyles, UIInventoryUtils, UIInventoryDrag, UIInventoryRender };
 
+// Create inventoryManager object for backward compatibility
+export const inventoryManager = {
+    BindPlayerMainInventory,
+    ShowOtherInventory,
+    SerializeInventory,
+    DeserializeInventory,
+    SerializeItemsOnly,
+    DeserializeItemsOnly,
+    CleanupInventorySystem,
+    HideAllInventories,
+    EnableQuickPickup,
+    IsQuickPickupEnabled,
+    OnMainInventoryOpen,
+    OnMainInventoryClose,
+    OnOtherInventoryOpen,
+    OnOtherInventoryClose,
+    SetMainInventoryUpdateCallback,
+    ToggleMainInventory,
+    IsMainInventoryVisible,
+    GetOtherInventoryInstance
+};
+
 // Default export for backward compatibility
 export default {
     BindPlayerMainInventory,

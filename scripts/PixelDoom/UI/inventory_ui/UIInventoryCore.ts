@@ -20,6 +20,7 @@ export class UIInventoryCore implements IUIInventory {
     private isMainInventoryVisible: boolean = false;
     private otherInventoryInstance: HTMLDivElement | null = null;
     private slotPositions: SlotPosition[] = []; // 存储每个格子的位置和物品信息
+    private otherSlotPositions: SlotPosition[] = []; // 存储其他库存的格子位置和物品信息
     
     // 添加一个变量来存储原始库存数组的引用
     private originalInventoryArray: Item[] | null = null;
@@ -93,6 +94,23 @@ export class UIInventoryCore implements IUIInventory {
         } else if (event.key.toLowerCase() === 'r' && this.isMainInventoryVisible) {
             // 按R键自动整理物品
             this.sortInventoryByQuality();
+        } else if (event.key.toLowerCase() === 'escape') {
+            // 按ESC键关闭库存
+            this.handleEscapeKey();
+        }
+    }
+
+    // 处理ESC键
+    private handleEscapeKey(): void {
+        // 优先关闭其他库存
+        if (this.closeOtherInventoryFunc) {
+            this.closeOtherInventoryFunc();
+            return;
+        }
+        
+        // 如果没有其他库存打开，关闭主库存
+        if (this.isMainInventoryVisible) {
+            this.toggleMainInventory();
         }
     }
 
@@ -627,33 +645,8 @@ export class UIInventoryCore implements IUIInventory {
 
     // 获取其他库存的格子位置数据
     private getOtherInventorySlotPositions(): SlotPosition[] | null {
-        // 这里需要从其他库存容器中获取格子位置数据
-        // 由于其他库存的数据存储方式可能不同，这里提供一个基础实现
-        const gridContainer = this.otherInventoryContainer.querySelector('.inventory-grid') as HTMLElement;
-        if (!gridContainer) return null;
-
-        const slots = gridContainer.querySelectorAll('.inventory-slot');
-        const slotPositions: SlotPosition[] = [];
-
-        slots.forEach((slot, index) => {
-            const itemElement = slot.querySelector('.inventory-item') as HTMLElement;
-            if (itemElement && itemElement.dataset.itemData) {
-                try {
-                    const itemData = JSON.parse(itemElement.dataset.itemData);
-                    slotPositions[index] = {
-                        index: index,
-                        item: itemData.item,
-                        count: itemData.count || 1
-                    };
-                } catch (e) {
-                    slotPositions[index] = { index: index, item: null, count: 0 };
-                }
-            } else {
-                slotPositions[index] = { index: index, item: null, count: 0 };
-            }
-        });
-
-        return slotPositions;
+        // 直接返回存储的其他库存槽位数据
+        return this.otherSlotPositions.length > 0 ? this.otherSlotPositions : null;
     }
 
     // 更新原始库存数组
@@ -663,19 +656,24 @@ export class UIInventoryCore implements IUIInventory {
             this.originalInventoryArray.length = 0;
             
             // 重新填充数组
-            for (const slot of this.getOtherInventorySlotPositions() || []) {
+            for (const slot of this.otherSlotPositions) {
                 if (slot.item) {
                     for (let i = 0; i < slot.count; i++) {
-                        this.originalInventoryArray.push(slot.item);
+                        this.originalInventoryArray.push({ ...slot.item });
                     }
                 }
             }
         }
 
         // 触发更新回调
-        if (this.updateCallback && this.updateCallback.updateMethod && this.originalInventoryArray) {
-            if (this.updateCallback.instance) {
+        if (this.updateCallback && this.originalInventoryArray) {
+            if (this.updateCallback.updateMethod) {
+                // 如果有自定义更新方法，使用它
                 this.updateCallback.updateMethod(this.updateCallback.instance, this.originalInventoryArray);
+            } else if (this.updateCallback.instance && this.updateCallback.varName) {
+                // 否则使用默认的序列化更新方式
+                const serializedData = UIInventoryUtils.serializeItemsOnly(this.originalInventoryArray);
+                this.updateCallback.instance.instVars[this.updateCallback.varName] = serializedData;
             }
         }
     }
@@ -689,14 +687,14 @@ export class UIInventoryCore implements IUIInventory {
         }
 
         // 使用渲染类进行渲染
-        UIInventoryRender.renderInventory(
+        this.otherSlotPositions = UIInventoryRender.renderInventory(
             this.otherInventoryContainer,
             this.otherInventoryData,
             rows,
             columns,
             true, // 是其他库存
             undefined, // 库存名称
-            undefined, // 不传入槽位数据，让渲染类自己处理
+            this.otherSlotPositions.length > 0 ? this.otherSlotPositions : undefined, // 传入现有槽位数据
             this.handleSlotClick.bind(this), // 槽位点击处理
             this.IsQuickPickUpItem ? this.handleQuickPickup.bind(this) : undefined // 快速拾取处理
         );
@@ -712,16 +710,29 @@ export class UIInventoryCore implements IUIInventory {
 
     // 处理快速拾取
     private handleQuickPickup(item: Item, count: number, slotIndex: number): void {
+        // 检查槽位索引是否有效
+        if (slotIndex < 0 || slotIndex >= this.otherSlotPositions.length) {
+            console.warn('Invalid slot index for quick pickup:', slotIndex);
+            return;
+        }
+
+        const sourceSlot = this.otherSlotPositions[slotIndex];
+        if (!sourceSlot.item || sourceSlot.count <= 0) {
+            console.warn('No item in slot for quick pickup:', slotIndex);
+            return;
+        }
+
+        // 使用槽位中的实际数量，而不是传入的count参数
+        const actualCount = sourceSlot.count;
+        const actualItem = sourceSlot.item;
+
         // 尝试将物品添加到主库存
-        const success = this.addItemToMainInventory(item, count);
+        const success = this.addItemToMainInventory(actualItem, actualCount);
         
         if (success) {
             // 从其他库存中移除物品
-            const otherSlotPositions = this.getOtherInventorySlotPositions();
-            if (otherSlotPositions && otherSlotPositions[slotIndex]) {
-                otherSlotPositions[slotIndex].item = null;
-                otherSlotPositions[slotIndex].count = 0;
-            }
+            sourceSlot.item = null;
+            sourceSlot.count = 0;
 
             // 重新渲染两个库存
             this.renderMainInventory();
@@ -732,7 +743,7 @@ export class UIInventoryCore implements IUIInventory {
             this.updateOriginalInventoryArray();
 
             // 显示拾取提示
-            UIInventoryRender.showNotification(this.mainInventoryContainer, `Picked up ${item.itemName} x${count}`);
+            UIInventoryRender.showNotification(this.mainInventoryContainer, `Picked up ${actualItem.itemName} x${actualCount}`);
         } else {
             // 显示库存已满提示
             UIInventoryRender.showNotification(this.mainInventoryContainer, 'Inventory full');
@@ -787,6 +798,12 @@ export class UIInventoryCore implements IUIInventory {
         
         if (this.isMainInventoryVisible) {
             this.mainInventoryContainer.style.display = 'block';
+            this.mainInventoryContainer.style.opacity = '1';
+            this.mainInventoryContainer.classList.add('inventory-open');
+            this.mainInventoryContainer.classList.remove('inventory-close');
+            
+            // 渲染主库存内容
+            this.renderMainInventory();
             
             // 恢复窗口位置和大小
             if (this.MainInventoryWindowPosition[0] !== 0 || this.MainInventoryWindowPosition[1] !== 0) {
@@ -804,7 +821,14 @@ export class UIInventoryCore implements IUIInventory {
                 this.onMainInventoryOpenCallback();
             }
         } else {
-            this.mainInventoryContainer.style.display = 'none';
+            this.mainInventoryContainer.classList.add('inventory-close');
+            this.mainInventoryContainer.classList.remove('inventory-open');
+            
+            // 等待动画完成后隐藏
+            setTimeout(() => {
+                this.mainInventoryContainer.style.display = 'none';
+                this.mainInventoryContainer.style.opacity = '0';
+            }, 200);
             
             // 触发关闭回调
             if (this.onMainInventoryCloseCallback) {
@@ -868,8 +892,14 @@ export class UIInventoryCore implements IUIInventory {
         this.originalInventoryArray = inventoryArray;
         this.updateCallback = updateCallback || null;
 
+        // 初始化其他库存的槽位数据
+        this.otherSlotPositions = this.createSlotPositions(inventoryArray, rows * columns);
+
         // 设置容器显示
         this.otherInventoryContainer.style.display = 'block';
+        this.otherInventoryContainer.style.opacity = '1';
+        this.otherInventoryContainer.classList.add('inventory-open');
+        this.otherInventoryContainer.classList.remove('inventory-close');
         document.body.appendChild(this.otherInventoryContainer);
 
         // 恢复窗口位置和大小
@@ -888,10 +918,20 @@ export class UIInventoryCore implements IUIInventory {
 
         // 设置关闭函数
         this.closeOtherInventoryFunc = () => {
-            this.otherInventoryContainer.style.display = 'none';
-            if (this.otherInventoryContainer.parentNode) {
-                this.otherInventoryContainer.parentNode.removeChild(this.otherInventoryContainer);
-            }
+            this.otherInventoryContainer.classList.add('inventory-close');
+            this.otherInventoryContainer.classList.remove('inventory-open');
+            
+            // 等待动画完成后隐藏
+            setTimeout(() => {
+                this.otherInventoryContainer.style.display = 'none';
+                this.otherInventoryContainer.style.opacity = '0';
+                if (this.otherInventoryContainer.parentNode) {
+                    this.otherInventoryContainer.parentNode.removeChild(this.otherInventoryContainer);
+                }
+            }, 200);
+            
+            // 清空其他库存的槽位数据
+            this.otherSlotPositions = [];
             this.closeOtherInventoryFunc = null;
             
             // 触发关闭回调

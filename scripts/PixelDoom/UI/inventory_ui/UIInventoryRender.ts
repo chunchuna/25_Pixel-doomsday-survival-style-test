@@ -199,11 +199,11 @@ export class UIInventoryRender {
         const totalSlots = rows * columns;
         let resultSlotPositions: SlotPosition[];
 
-        if (!isOtherInventory && slotPositions) {
-            // 主库存使用传入的槽位数据
+        if (slotPositions && slotPositions.length > 0) {
+            // 如果传入了槽位数据，直接使用
             resultSlotPositions = slotPositions;
         } else {
-            // 其他库存或没有槽位数据时，创建新的槽位数据
+            // 没有槽位数据时，创建新的槽位数据
             resultSlotPositions = this.createSlotPositions(items, totalSlots);
         }
 
