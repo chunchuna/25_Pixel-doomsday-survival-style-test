@@ -1,6 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { UIInteractionPanelActionChooseMain_imgui } from "../UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
+import { OnMainInventoryClose, OnMainInventoryOpen, OnOtherInventoryClose, OnOtherInventoryOpen } from "../UI/inventory_ui/UIInventory.js";
 import { UISubtitleMain } from "../UI/subtitle_ui/UISubtitle.js";
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
@@ -15,6 +16,29 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
+var MainInventoryOpen = false
+var OtherInventoryOpen = false
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+      OnMainInventoryOpen(() => {
+            MainInventoryOpen = true;
+
+      })
+
+      OnMainInventoryClose(() => {
+            MainInventoryOpen = false;
+
+      })
+
+      OnOtherInventoryOpen(() => {
+            OtherInventoryOpen = true;
+
+      })
+      OnOtherInventoryClose(() => {
+            OtherInventoryOpen = false;
+
+      })
+})
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
@@ -110,6 +134,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                         //child.setContent("", "html", "#HuDongTiShi");
                   }
             }
+
+            if(MainInventoryOpen) return
+            if(OtherInventoryOpen)return
 
 
             ClickObject.GenerateInstructionsBy_interactionpanelactionchoose(LastestChooseObject.instVars.Actions, "正在交互:" + GetChooseObject.instVars.ObjectName)

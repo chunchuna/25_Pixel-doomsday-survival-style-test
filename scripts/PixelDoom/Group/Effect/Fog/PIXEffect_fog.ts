@@ -721,7 +721,7 @@ export class PIXEffect_fog {
      */
     public setOpacity(opacity: number): PIXEffect_fog {
         const newOpacity = Math.max(0, Math.min(1, opacity));
-        
+
         // If currently fading in, update target opacity
         if (this.isFadingIn) {
             this.targetOpacity = newOpacity;
@@ -729,7 +729,7 @@ export class PIXEffect_fog {
             this.fogParams.opacity = newOpacity;
             this.targetOpacity = newOpacity;
         }
-        
+
         return this;
     }
 
@@ -1038,7 +1038,7 @@ export class PIXEffect_fog {
      */
     public destroyWithFadeOut(): void {
         if (this.isDestroyed || this.isFadingOut) return;
-        
+
         console.log(`Starting graceful destruction of fog ${this.id} with fade-out`);
         this.startFadeOut();
     }
@@ -1234,6 +1234,58 @@ export class PIXEffect_fog {
         const fogs = Array.from(PIXEffect_fog.instances.values());
         fogs.forEach(fog => fog.destroy());
         console.log(`Destroyed ${fogs.length} fog effects`);
+    }
+
+    /**
+     * Emergency cleanup that destroys all fog instances and orphaned HTML elements
+     */
+    public static EmergencyDestroyAllFog(): void {
+        console.log("=== EMERGENCY FOG CLEANUP ===");
+        
+        // First, destroy all tracked instances
+        const fogs = Array.from(PIXEffect_fog.instances.values());
+        fogs.forEach(fog => {
+            try {
+                fog.destroy();
+            } catch (error) {
+                console.warn(`Error destroying fog ${fog.id}:`, error);
+            }
+        });
+        
+        // Clear the instances map completely
+        PIXEffect_fog.instances.clear();
+        
+        // Find and destroy orphaned HTML elements that might contain fog
+        try {
+            const htmlElements = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.getAllInstances();
+            let destroyedOrphans = 0;
+            
+            htmlElements.forEach((htmlElement: any) => {
+                try {
+                    // Check if this HTML element contains fog-related content
+                    if (htmlElement.getContent && typeof htmlElement.getContent === 'function') {
+                        const content = htmlElement.getContent();
+                        if (content && (content.includes('fog-particle') || content.includes('fog-'))) {
+                            console.log(`Destroying orphaned fog HTML element`);
+                            htmlElement.destroy();
+                            destroyedOrphans++;
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Error checking/destroying HTML element:`, error);
+                }
+            });
+            
+            console.log(`Destroyed ${destroyedOrphans} orphaned fog HTML elements`);
+        } catch (error) {
+            console.warn(`Error during orphaned HTML cleanup:`, error);
+        }
+        
+        // Reset static counters
+        PIXEffect_fog.idCounter = 0;
+        PIXEffect_fog.currentEditingFog = null;
+        
+        console.log(`Emergency cleanup completed: destroyed ${fogs.length} tracked fogs`);
     }
 
     /**
@@ -1720,7 +1772,7 @@ export class PIXEffect_fog {
 
 
 // For test
-var isBindButtonIntoDebugPanel=false;
+var isBindButtonIntoDebugPanel = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
@@ -1900,6 +1952,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Destroy All Fog", () => {
         PIXEffect_fog.DestroyAllFog();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "EMERGENCY FOG CLEANUP", () => {
+        PIXEffect_fog.EmergencyDestroyAllFog();
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Show Fog Info", () => {
@@ -2193,7 +2249,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Destroy All Fog Gracefully", () => {
         const fogInfo = PIXEffect_fog.GetFogInfo();
         console.log(`Gracefully destroying ${fogInfo.count} fog effects...`);
-        
+
         fogInfo.fogs.forEach(fogId => {
             PIXEffect_fog.DestroyFogWithFadeOut(fogId);
         });
