@@ -104,13 +104,13 @@ function cleanupFog(): void {
 
     // Use emergency cleanup to ensure all fog is destroyed
     PIXEffect_fog.EmergencyDestroyAllFog();
-    
+
     // Reset fog timer event listener flag
     FogTimerEventListenerAdded = false;
-    
+
     // Update fog state
     WeatherState.FogEnabled = false;
-    
+
     console.log("Fog cleanup completed");
 }
 
@@ -121,7 +121,7 @@ export function EnableFog(): void {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
     console.log("Enabling fog effect...");
-    
+
     // Set fog state
     WeatherState.FogEnabled = true;
 
@@ -130,61 +130,61 @@ export function EnableFog(): void {
     WeatherState.FogEnabled = true; // Reset after cleanup
 
     // Wait 2 seconds before starting fog
-    setTimeout(async () => {
-        // Check if fog is still enabled after waiting
-        if (!WeatherState.FogEnabled) {
-            console.log("Fog was disabled during initialization, aborting fog creation");
-            return;
-        }
 
-        // Create initial fog
-        console.log("Creating initial level fog...");
-        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 60, "whole_level_fog")
-            .setPosition(0, 0)
-            .setSize(6000, 3000)
-            .setScale(1.2);
-            
-        // Create or reuse timer for fog cycling
-        if (!FogTimer) {
-            FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
-        }
+    // Check if fog is still enabled after waiting
+    if (!WeatherState.FogEnabled) {
+        console.log("Fog was disabled during initialization, aborting fog creation");
+        return;
+    }
 
-        // Only add event listener once to prevent duplicates
-        if (FogTimer && !FogTimerEventListenerAdded) {
-            FogTimerEventListenerAdded = true;
-            
-            FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
-                if (e.tag === "fogtimer") {
-                    // Check if we're still in the Level layout and fog is enabled
-                    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level" || 
-                        !WeatherState.FogEnabled) {
-                        // Stop timer and clean up if not in Level or fog disabled
-                        console.log("Stopping fog due to layout change or fog disabled");
-                        cleanupFog();
-                        return;
-                    }
+    // Create initial fog
+    console.log("Creating initial level fog...");
+    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 60, "whole_level_fog")
+        .setPosition(0, 0)
+        .setSize(6000, 3000)
+        .setScale(1.2);
 
-                    console.log("Replacing level fog with new fog...");
-                    // Generate new fog with same ID - this will automatically fade out the old one
-                    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 70, "whole_level_fog")
-                        .setPosition(0, 0)
-                        .setSize(6000, 3000)
-                        .setScale(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(2, 2.5)); // Random scale for variety
+    // Create or reuse timer for fog cycling
+    if (!FogTimer) {
+        FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+    }
 
-                    // Set next timer with random interval
-                    if (FogTimer && WeatherState.FogEnabled) {
-                        FogTimer.behaviors.Timer.stopTimer("fogtimer");
-                        FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(30, 60), "fogtimer", "regular");
-                    }
+    // Only add event listener once to prevent duplicates
+    if (FogTimer && !FogTimerEventListenerAdded) {
+        FogTimerEventListenerAdded = true;
+
+        FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
+            if (e.tag === "fogtimer") {
+                // Check if we're still in the Level layout and fog is enabled
+                if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level" ||
+                    !WeatherState.FogEnabled) {
+                    // Stop timer and clean up if not in Level or fog disabled
+                    console.log("Stopping fog due to layout change or fog disabled");
+                    cleanupFog();
+                    return;
                 }
-            });
-        }
 
-        // Start repeating timer for fog replacement
-        if (FogTimer && WeatherState.FogEnabled) {
-            FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(25, 60), "fogtimer", "regular");
-        }
-    }, 2000);
+                console.log("Replacing level fog with new fog...");
+                // Generate new fog with same ID - this will automatically fade out the old one
+                PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 70, "whole_level_fog")
+                    .setPosition(0, 0)
+                    .setSize(6000, 3000)
+                    .setScale(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(2, 2.5)); // Random scale for variety
+
+                // Set next timer with random interval
+                if (FogTimer && WeatherState.FogEnabled) {
+                    FogTimer.behaviors.Timer.stopTimer("fogtimer");
+                    FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(30, 60), "fogtimer", "regular");
+                }
+            }
+        });
+    }
+
+    // Start repeating timer for fog replacement
+    if (FogTimer && WeatherState.FogEnabled) {
+        FogTimer.behaviors.Timer.startTimer(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(25, 60), "fogtimer", "regular");
+    }
+
 }
 
 /**
@@ -237,11 +237,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
  */
 export function EmergencyWeatherCleanup(): void {
     console.log("=== EMERGENCY WEATHER CLEANUP ===");
-    
+
     // Reset weather state
     WeatherState.CurrentWeather = WEATHER_TYPE.NORMAL;
     WeatherState.FogEnabled = false;
-    
+
     // Stop all timers
     if (WeatherC3Timer) {
         try {
@@ -252,7 +252,7 @@ export function EmergencyWeatherCleanup(): void {
             console.warn("Error stopping rain timer:", error);
         }
     }
-    
+
     if (FogTimer) {
         try {
             if (FogTimer.behaviors.Timer.isTimerRunning("fogtimer")) {
@@ -262,24 +262,24 @@ export function EmergencyWeatherCleanup(): void {
             console.warn("Error stopping fog timer:", error);
         }
     }
-    
+
     // Force destroy all fog using emergency method
     try {
         PIXEffect_fog.EmergencyDestroyAllFog();
     } catch (error) {
         console.warn("Error during emergency fog cleanup:", error);
     }
-    
+
     // Stop all audio
     try {
         _Audio.AudioStop("Rain");
     } catch (error) {
         console.warn("Error stopping rain audio:", error);
     }
-    
+
     // Reset flags
     FogTimerEventListenerAdded = false;
-    
+
     console.log("Emergency cleanup completed");
 }
 
@@ -310,10 +310,10 @@ export function GetWeatherDebugInfo(): any {
  */
 export function ForceSetWeather(weatherType: WEATHER_TYPE): void {
     console.log(`Force setting weather to: ${weatherType}`);
-    
+
     // Emergency cleanup first
     EmergencyWeatherCleanup();
-    
+
     // Wait a bit then set new weather
     setTimeout(() => {
         switch (weatherType) {
@@ -329,6 +329,7 @@ export function ForceSetWeather(weatherType: WEATHER_TYPE): void {
 
 // Weather system debug buttons
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
+import { Imgui_chunchun } from "../UI/imgui_lib/imgui.js";
 
 var isWeatherDebugButtonsAdded = false;
 
@@ -361,6 +362,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     IMGUIDebugButton.AddButtonToCategory(weather_system, "Emergency Weather Cleanup", () => {
         EmergencyWeatherCleanup();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(weather_system, "Open ImGui Debug Window", () => {
+        CreateWeatherDebugWindow();
     });
 
     IMGUIDebugButton.AddButtonToCategory(weather_system, "Show Weather Debug Info", () => {
@@ -401,4 +406,218 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         }, 1000);
     });
 });
+
+/**
+ * Create ImGui weather debug window
+ */
+export function CreateWeatherDebugWindow(): void {
+    const windowId = "weather_debug_window";
+    
+    // Close existing window if open
+    if (Imgui_chunchun.IsWindowOpen(windowId)) {
+        Imgui_chunchun.DestroyWindow(windowId);
+    }
+    
+    // Create weather debug window
+    const renderCallback = () => {
+        const debugInfo = GetWeatherDebugInfo();
+        
+        // Weather Status Section
+        if (ImGui.CollapsingHeader("Weather Status", ImGui.TreeNodeFlags.DefaultOpen)) {
+            // Current weather display with color coding
+            ImGui.Text("Current Weather:");
+            ImGui.SameLine();
+            const weatherColor = debugInfo.currentWeather === "Rain" ? 
+                new ImGui.ImVec4(0.3, 0.7, 1.0, 1.0) : // Blue for rain
+                new ImGui.ImVec4(1.0, 1.0, 0.3, 1.0);   // Yellow for normal
+            ImGui.TextColored(weatherColor, debugInfo.currentWeather || "None");
+            
+            // Layout info
+            ImGui.Text(`Layout: ${debugInfo.layout}`);
+            
+            ImGui.Separator();
+            
+            // Weather control buttons
+            if (ImGui.Button("Set Rain Weather", new ImGui.ImVec2(120, 25))) {
+                ForceSetWeather(WEATHER_TYPE.RAIN);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Set Normal Weather", new ImGui.ImVec2(120, 25))) {
+                ForceSetWeather(WEATHER_TYPE.NORMAL);
+            }
+        }
+        
+        // Fog Status Section
+        if (ImGui.CollapsingHeader("Fog Status", ImGui.TreeNodeFlags.DefaultOpen)) {
+            // Fog enabled status with checkbox
+            let fogEnabled = debugInfo.fogEnabled;
+            if (ImGui.Checkbox("Fog Enabled", (value = fogEnabled) => fogEnabled = value)) {
+                // Only trigger when checkbox is actually clicked, not just rendered
+                if (fogEnabled !== debugInfo.fogEnabled) {
+                    if (fogEnabled) {
+                        EnableFog();
+                    } else {
+                        DisableFog();
+                    }
+                }
+            }
+            
+            // Fog count with progress bar
+            ImGui.Text(`Active Fog Count: ${debugInfo.fogCount}`);
+            if (debugInfo.fogCount > 0) {
+                const fogProgress = Math.min(debugInfo.fogCount / 5.0, 1.0); // Max 5 for full bar
+                const progressColor = fogProgress > 0.8 ? 
+                    new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0) : // Red if too many
+                    new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0);   // Green if normal
+                ImGui.PushStyleColor(ImGui.Col.PlotHistogram, progressColor);
+                ImGui.ProgressBar(fogProgress, new ImGui.ImVec2(-1, 0), `${debugInfo.fogCount} fogs`);
+                ImGui.PopStyleColor();
+            }
+            
+            // Fog IDs list
+            if (debugInfo.fogIds && debugInfo.fogIds.length > 0) {
+                ImGui.Text("Fog IDs:");
+                ImGui.Indent();
+                debugInfo.fogIds.forEach((id: string, index: number) => {
+                    ImGui.BulletText(id);
+                });
+                ImGui.Unindent();
+            }
+            
+            ImGui.Separator();
+            
+            // Fog control buttons
+            if (ImGui.Button("Enable Fog", new ImGui.ImVec2(80, 25))) {
+                EnableFog();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Disable Fog", new ImGui.ImVec2(80, 25))) {
+                DisableFog();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Toggle Fog", new ImGui.ImVec2(80, 25))) {
+                ToggleFog();
+            }
+        }
+        
+        // Timer Status Section
+        if (ImGui.CollapsingHeader("Timer Status")) {
+            const timers = debugInfo.timers;
+            
+            // Rain timer status
+            ImGui.Text("Rain Timer:");
+            ImGui.SameLine();
+            const rainColor = timers.rainTimerRunning ? 
+                new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : // Green if running
+                new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0);   // Gray if stopped
+            ImGui.TextColored(rainColor, timers.rainTimerRunning ? "Running" : "Stopped");
+            
+            // Fog timer status
+            ImGui.Text("Fog Timer:");
+            ImGui.SameLine();
+            const fogTimerColor = timers.fogTimerRunning ? 
+                new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : // Green if running
+                new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0);   // Gray if stopped
+            ImGui.TextColored(fogTimerColor, timers.fogTimerRunning ? "Running" : "Stopped");
+            
+            // Event listener status
+            ImGui.Text("Fog Event Listener:");
+            ImGui.SameLine();
+            const listenerColor = timers.fogEventListenerAdded ? 
+                new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : // Green if added
+                new ImGui.ImVec4(1.0, 0.7, 0.3, 1.0);   // Orange if not added
+            ImGui.TextColored(listenerColor, timers.fogEventListenerAdded ? "Added" : "Not Added");
+        }
+        
+        // Performance Section
+        if (ImGui.CollapsingHeader("Fog Performance")) {
+            const perf = debugInfo.fogPerformance;
+            
+            if (perf) {
+                // Total particles with slider-like display
+                ImGui.Text(`Total Particles: ${perf.totalParticles}/${perf.maxParticlesGlobal}`);
+                const particleRatio = perf.maxParticlesGlobal > 0 ? perf.totalParticles / perf.maxParticlesGlobal : 0;
+                ImGui.ProgressBar(particleRatio, new ImGui.ImVec2(-1, 0), 
+                    `${(particleRatio * 100).toFixed(1)}% used`);
+                
+                // FPS display with color coding
+                ImGui.Text("Estimated FPS:");
+                ImGui.SameLine();
+                const fpsColor = perf.estimatedFPS >= 50 ? 
+                    new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : // Green for good FPS
+                    perf.estimatedFPS >= 30 ? 
+                    new ImGui.ImVec4(1.0, 1.0, 0.3, 1.0) : // Yellow for medium FPS
+                    new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0);   // Red for low FPS
+                ImGui.TextColored(fpsColor, `${perf.estimatedFPS}`);
+                
+                // Frame time
+                ImGui.Text(`Avg Frame Time: ${perf.avgFrameTime.toFixed(2)}ms`);
+                
+                // Performance mode indicators
+                ImGui.Text("Performance Mode:");
+                ImGui.SameLine();
+                ImGui.TextColored(
+                    perf.performanceMode ? new ImGui.ImVec4(1.0, 1.0, 0.3, 1.0) : new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
+                    perf.performanceMode ? "ON" : "OFF"
+                );
+                
+                ImGui.Text("LOD System:");
+                ImGui.SameLine();
+                ImGui.TextColored(
+                    perf.lodEnabled ? new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
+                    perf.lodEnabled ? "ON" : "OFF"
+                );
+            }
+        }
+        
+        // Quick Actions Section
+        if (ImGui.CollapsingHeader("Quick Actions")) {
+            // Test combinations
+            if (ImGui.Button("Test: Rain + Fog", new ImGui.ImVec2(120, 25))) {
+                ForceSetWeather(WEATHER_TYPE.RAIN);
+                setTimeout(() => EnableFog(), 1000);
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Test: Normal + Fog", new ImGui.ImVec2(120, 25))) {
+                ForceSetWeather(WEATHER_TYPE.NORMAL);
+                setTimeout(() => EnableFog(), 1000);
+            }
+            
+            ImGui.Separator();
+            
+            // Emergency actions
+            if (ImGui.Button("Emergency Cleanup", new ImGui.ImVec2(120, 25))) {
+                EmergencyWeatherCleanup();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Restart Weather", new ImGui.ImVec2(120, 25))) {
+                EmergencyWeatherCleanup();
+                setTimeout(() => handleWeather(), 2000);
+            }
+        }
+        
+        // Auto-refresh toggle
+        ImGui.Separator();
+        ImGui.Text("Window will auto-refresh every frame");
+        
+        // Close button
+        if (ImGui.Button("Close Debug Window", new ImGui.ImVec2(-1, 30))) {
+            Imgui_chunchun.CloseWindow(windowId);
+        }
+    };
+    
+    // Create the window
+    const windowConfig = {
+        title: "Weather System Debug",
+        isOpen: true,
+        size: { width: 400, height: 600 },
+        position: { x: 50, y: 50 },
+        renderCallback: renderCallback
+    };
+    
+    // Manually add to windows map
+    (Imgui_chunchun as any).windows.set(windowId, windowConfig);
+    
+    console.log("Weather debug window created");
+}
 
