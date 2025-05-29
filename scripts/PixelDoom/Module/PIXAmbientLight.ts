@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
+import { Imgui_chunchun } from "../UI/imgui_lib/imgui.js";
 
 var isAmbientLightDebugButtonsBound = false;
 
@@ -26,6 +27,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     AmbientLight.updateColorTransition()
+    AmbientLight.updateInfoWindow()
 })
 
 export class AmbientLight {
@@ -58,6 +60,9 @@ export class AmbientLight {
         currentColor: [0, 0, 0] as [number, number, number]
     }
 
+    // Info window state
+    private static readonly INFO_WINDOW_ID: string = "ambient_light_info_window";
+    private static showInfoWindow: boolean = false;
 
     static startColorTransition(duration: number, target_rgb: [number, number, number]) {
         if (!this.light_layer) return;
@@ -274,19 +279,7 @@ export class AmbientLight {
 
         // Utility functions
         IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Show Current Light Info", () => {
-            if (AmbientLight.light_layer) {
-                const currentColor = AmbientLight.light_layer.backgroundColor;
-                console.log("Current light information:", {
-                    currentColor: currentColor,
-                    isRunning: AmbientLight.dayNightCycle.isRunning,
-                    currentPhase: AmbientLight.dayNightCycle.currentPhase,
-                    dayDuration: AmbientLight.dayNightCycle.dayDuration + "s",
-                    nightDuration: AmbientLight.dayNightCycle.nightDuration + "s",
-                    transitionActive: AmbientLight.transition.isActive
-                });
-            } else {
-                console.warn("Light layer not found");
-            }
+            AmbientLight.toggleInfoWindow();
         });
 
         IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Reset to Default Day", () => {
@@ -340,6 +333,156 @@ export class AmbientLight {
         });
 
         console.log("Ambient light debug buttons initialized");
+    }
+
+    static updateInfoWindow() {
+        if (AmbientLight.showInfoWindow) {
+            AmbientLight.renderInfoWindow();
+        }
+    }
+
+    /**
+     * Toggle the info window visibility
+     */
+    static toggleInfoWindow(): void {
+        AmbientLight.showInfoWindow = !AmbientLight.showInfoWindow;
+        
+        if (AmbientLight.showInfoWindow) {
+            AmbientLight.createInfoWindow();
+            console.log("Ambient light info window opened");
+        } else {
+            AmbientLight.closeInfoWindow();
+            console.log("Ambient light info window closed");
+        }
+    }
+
+    /**
+     * Create the info window
+     */
+    private static createInfoWindow(): void {
+        if (!Imgui_chunchun) return;
+
+        // Create info window
+        const windowConfig = {
+            title: "Ambient Light Info",
+            isOpen: true,
+            size: { width: 350, height: 300 },
+            position: { x: 400, y: 50 },
+            renderCallback: () => {
+                AmbientLight.renderInfoWindowContent();
+            }
+        };
+
+        // Add window to imgui system
+        if ((Imgui_chunchun as any).windows) {
+            (Imgui_chunchun as any).windows.set(AmbientLight.INFO_WINDOW_ID, windowConfig);
+        }
+    }
+
+    /**
+     * Close the info window
+     */
+    private static closeInfoWindow(): void {
+        if (!Imgui_chunchun || !(Imgui_chunchun as any).windows) return;
+
+        const windowConfig = (Imgui_chunchun as any).windows.get(AmbientLight.INFO_WINDOW_ID);
+        if (windowConfig) {
+            windowConfig.isOpen = false;
+        }
+    }
+
+    /**
+     * Render info window content
+     */
+    private static renderInfoWindow(): void {
+        if (!Imgui_chunchun || !(Imgui_chunchun as any).windows) return;
+
+        const windowConfig = (Imgui_chunchun as any).windows.get(AmbientLight.INFO_WINDOW_ID);
+        if (!windowConfig) {
+            AmbientLight.createInfoWindow();
+            return;
+        }
+
+        // Update window state
+        if (!windowConfig.isOpen && AmbientLight.showInfoWindow) {
+            AmbientLight.showInfoWindow = false;
+        }
+    }
+
+    /**
+     * Render the content inside the info window
+     */
+    private static renderInfoWindowContent(): void {
+        const ImGui = (globalThis as any).ImGui;
+        if (!ImGui) return;
+
+        try {
+            // Current light layer info
+            ImGui.Text("=== Light Layer Info ===");
+            if (AmbientLight.light_layer) {
+                const currentColor = AmbientLight.light_layer.backgroundColor;
+                ImGui.Text(`Layer: ${AmbientLight.light_layer_name}`);
+                ImGui.Text(`Current RGB: [${currentColor[0].toFixed(3)}, ${currentColor[1].toFixed(3)}, ${currentColor[2].toFixed(3)}]`);
+            } else {
+                ImGui.TextColored(new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0), "Light layer not found!");
+            }
+
+            ImGui.Separator();
+
+            // Day-night cycle info
+            ImGui.Text("=== Day-Night Cycle ===");
+            ImGui.Text(`Status: ${AmbientLight.dayNightCycle.isRunning ? "RUNNING" : "STOPPED"}`);
+            
+            if (AmbientLight.dayNightCycle.isRunning) {
+                ImGui.TextColored(new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0), `Current Phase: ${AmbientLight.dayNightCycle.currentPhase.toUpperCase()}`);
+                ImGui.Text(`Day Duration: ${AmbientLight.dayNightCycle.dayDuration}s`);
+                ImGui.Text(`Night Duration: ${AmbientLight.dayNightCycle.nightDuration}s`);
+                
+                const dayColor = AmbientLight.dayNightCycle.dayColor;
+                const nightColor = AmbientLight.dayNightCycle.nightColor;
+                ImGui.Text(`Day Color: [${dayColor[0].toFixed(3)}, ${dayColor[1].toFixed(3)}, ${dayColor[2].toFixed(3)}]`);
+                ImGui.Text(`Night Color: [${nightColor[0].toFixed(3)}, ${nightColor[1].toFixed(3)}, ${nightColor[2].toFixed(3)}]`);
+            }
+
+            ImGui.Separator();
+
+            // Transition info
+            ImGui.Text("=== Color Transition ===");
+            ImGui.Text(`Status: ${AmbientLight.transition.isActive ? "ACTIVE" : "INACTIVE"}`);
+            
+            if (AmbientLight.transition.isActive) {
+                const elapsed = (performance.now() / 1000) - AmbientLight.transition.startTime;
+                const progress = Math.min(elapsed / AmbientLight.transition.duration, 1);
+                const progressPercent = (progress * 100).toFixed(1);
+                
+                ImGui.TextColored(new ImGui.ImVec4(0.3, 0.7, 1.0, 1.0), `Progress: ${progressPercent}%`);
+                ImGui.Text(`Duration: ${AmbientLight.transition.duration.toFixed(1)}s`);
+                ImGui.Text(`Elapsed: ${elapsed.toFixed(1)}s`);
+                
+                const startColor = AmbientLight.transition.startColor;
+                const targetColor = AmbientLight.transition.targetColor;
+                const currentColor = AmbientLight.transition.currentColor;
+                
+                ImGui.Text(`From: [${startColor[0].toFixed(3)}, ${startColor[1].toFixed(3)}, ${startColor[2].toFixed(3)}]`);
+                ImGui.Text(`To: [${targetColor[0].toFixed(3)}, ${targetColor[1].toFixed(3)}, ${targetColor[2].toFixed(3)}]`);
+                ImGui.Text(`Current: [${currentColor[0].toFixed(3)}, ${currentColor[1].toFixed(3)}, ${currentColor[2].toFixed(3)}]`);
+
+                // Progress bar
+                ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0), `${progressPercent}%`);
+            }
+
+            ImGui.Separator();
+
+            // Default colors reference
+            ImGui.Text("=== Default Colors ===");
+            const dayRgb = AmbientLight.dya_light_rgb;
+            const nightRgb = AmbientLight.night_light_rgb;
+            ImGui.Text(`Default Day: [${dayRgb[0].toFixed(3)}, ${dayRgb[1].toFixed(3)}, ${dayRgb[2].toFixed(3)}]`);
+            ImGui.Text(`Default Night: [${nightRgb[0].toFixed(3)}, ${nightRgb[1].toFixed(3)}, ${nightRgb[2].toFixed(3)}]`);
+
+        } catch (error: any) {
+            ImGui.Text(`Error rendering info: ${error.message}`);
+        }
     }
 
 }
