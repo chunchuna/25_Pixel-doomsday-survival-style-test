@@ -21,6 +21,7 @@ interface DebugLineConfig {
     thickness: number;
     enabled: boolean;
     customLayer?: ILayer; // Optional custom layer for rendering
+    updateCallback?: () => { startX: number; startY: number; endX: number; endY: number }; // Optional update callback for dynamic positioning
 }
 
 export class DebugObjectRenderer {
@@ -32,6 +33,7 @@ export class DebugObjectRenderer {
     private static currentLayer: string | null = null; // Custom layer for next debug box
     private static currentHollowMode: boolean = true; // Default to hollow mode
     private static currentOffset: { x: number; y: number } = { x: 0, y: 0 }; // Offset for debug box position
+    private static currentUpdateCallback: (() => { startX: number; startY: number; endX: number; endY: number }) | null = null; // Update callback for next line
     private static boundLayers: Set<ILayer> = new Set(); // Track which layers have event listeners
     public static renderCount: number = 0; // Track render calls - made public for external access
     private static lastRenderTime: number = 0;
@@ -211,11 +213,20 @@ export class DebugObjectRenderer {
 
     // Render a single debug line
     private static renderDebugLine(renderer: IRenderer, config: DebugLineConfig): void {
-        const { startX, startY, endX, endY } = config;
+        let { startX, startY, endX, endY } = config;
         const { r, g, b, a } = config.color;
         const thickness = config.thickness;
 
         try {
+            // Call update callback if it exists to get dynamic position
+            if (config.updateCallback) {
+                const newPosition = config.updateCallback();
+                startX = newPosition.startX;
+                startY = newPosition.startY;
+                endX = newPosition.endX;
+                endY = newPosition.endY;
+            }
+
             // Set color fill mode for drawing lines
             renderer.setColorFillMode();
             renderer.setColorRgba(r, g, b, a);
@@ -329,11 +340,16 @@ export class DebugObjectRenderer {
             color: { ...this.currentColor },
             thickness: this.currentThickness,
             enabled: true,
-            customLayer: customLayer
+            customLayer: customLayer,
+            updateCallback: this.currentUpdateCallback || undefined
         };
 
         this.debugLines.set(key, config);
         console.log(`[DebugObjectRenderer] Added debug line: ${key} from (${startX}, ${startY}) to (${endX}, ${endY})`);
+        
+        if (this.currentUpdateCallback) {
+            console.log(`[DebugObjectRenderer] Line ${key} will update dynamically using callback`);
+        }
 
         // Automatically bind afterdraw event to the target layer
         if (customLayer) {
@@ -343,6 +359,9 @@ export class DebugObjectRenderer {
 
         // Reset current layer after use
         this.currentLayer = null;
+
+        // Reset current update callback after use
+        this.currentUpdateCallback = null;
 
         return key; // Return the key for later reference
     }
@@ -402,6 +421,49 @@ export class DebugObjectRenderer {
         this.currentOffset = { x, y };
         console.log(`[DebugObjectRenderer] Set offset to (${x}, ${y})`);
         return this;
+    }
+
+    // Set update callback for the next debug line (for dynamic positioning)
+    public static setUpdateCallback(callback: () => { startX: number; startY: number; endX: number; endY: number }): typeof DebugObjectRenderer {
+        this.currentUpdateCallback = callback;
+        console.log(`[DebugObjectRenderer] Set update callback for dynamic line positioning`);
+        return this;
+    }
+
+    // Update specific line position directly
+    public static updateLinePosition(lineKey: string, startX: number, startY: number, endX: number, endY: number): void {
+        const config = this.debugLines.get(lineKey);
+        if (config) {
+            config.startX = startX;
+            config.startY = startY;
+            config.endX = endX;
+            config.endY = endY;
+            console.log(`[DebugObjectRenderer] Updated line position: ${lineKey} from (${startX}, ${startY}) to (${endX}, ${endY})`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug line not found for position update: ${lineKey}`);
+        }
+    }
+
+    // Set update callback for existing line
+    public static setLineUpdateCallback(lineKey: string, callback: () => { startX: number; startY: number; endX: number; endY: number }): void {
+        const config = this.debugLines.get(lineKey);
+        if (config) {
+            config.updateCallback = callback;
+            console.log(`[DebugObjectRenderer] Set update callback for existing line: ${lineKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug line not found for callback update: ${lineKey}`);
+        }
+    }
+
+    // Remove update callback from existing line (make it static)
+    public static removeLineUpdateCallback(lineKey: string): void {
+        const config = this.debugLines.get(lineKey);
+        if (config) {
+            config.updateCallback = undefined;
+            console.log(`[DebugObjectRenderer] Removed update callback from line: ${lineKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug line not found for callback removal: ${lineKey}`);
+        }
     }
 
     // Update/enable continuous rendering for a specific debug box by key
@@ -642,7 +704,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
-        var playerLine =DebugObjectRenderer.setLayer("GameContent").setBoxThickness(5).RenderLine(playerInstance.x,playerInstance.y,playerInstance.x+100,playerInstance.y+200)
-
+        var playerLine = DebugObjectRenderer.setLayer("GameContent").setBoxThickness(5).setUpdateCallback(() => {
+            if (playerInstance) {
+                return {
+                    startX: playerInstance.x,
+                    startY: playerInstance.y,
+                    endX: playerInstance.x + 100,
+                    endY: playerInstance.y + 200
+                };
+            } else {
+                return { startX: 0, startY: 0, endX: 100, endY: 200 };
+            }
+        }).RenderLine(playerInstance.x, playerInstance.y, playerInstance.x + 100, playerInstance.y + 200);
     }
 });
