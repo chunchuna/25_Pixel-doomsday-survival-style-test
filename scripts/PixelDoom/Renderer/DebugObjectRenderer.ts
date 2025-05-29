@@ -855,3 +855,25 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         console.log(`[DebugObjectRenderer] Created ${gouhuoInstances.length} lines connecting GouHuo instances to player`);
     }
 });
+// // 示例1: 给所有GouHuo实例绘制调试框
+// // 方法A: 传入单个GouHuo实例，函数自动检测类型并遍历所有同类实例
+// const gouhuoInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.getFirstInstance();
+// const boxKeys = DebugObjectRenderer.setColor(1, 0, 0, 1).DrawBoxesForAllInstances(gouhuoInstance);
+
+// // 方法B: 直接传入对象类型
+// const boxKeys2 = DebugObjectRenderer.setColor(0, 1, 0, 1).DrawBoxesForAllInstances(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
+
+// // 示例2: 连接所有GouHuo实例到玩家
+// const playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+// const lineKeys = DebugObjectRenderer.setColor(0, 0, 1, 1).DrawLineConenctPlayerForAllInstacne(playerInstance, pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
+// 1. DrawBoxesForAllInstances(instanceOrObjectType)
+// 此函数可以接受两种类型的参数：
+// 单个实例 (IWorldInstance): 函数会自动获取该实例的对象类型，然后遍历所有同类型的实例
+// 对象类型 (ObjectType): 直接传入对象类型，函数会遍历该类型的所有实例
+// 函数会自动为每个实例绘制调试框，并返回所有调试框的键值数组。
+// 2. DrawLineConenctPlayerForAllInstacne(playerInstance, otherInstanceOrObjectType)
+// 此函数需要两个参数：
+// playerInstance: 玩家实例 (IWorldInstance)
+// otherInstanceOrObjectType: 可以是单个实例或对象类型
+// 函数会自动遍历指定类型的所有实例，并绘制从每个实例到玩家的连线。
+// 使用示例
