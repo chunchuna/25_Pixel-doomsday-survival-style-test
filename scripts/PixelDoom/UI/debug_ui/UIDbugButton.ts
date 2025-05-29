@@ -4,17 +4,23 @@ import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
 
 /**
- * IMGUI version of Debug Button Menu
- * Provides in-game debug button functionality
+ * IMGUI version of Debug Button Menu with Tab-based Layout
+ * Provides in-game debug button functionality with tab pages for better organization
+ * 
+ * Features:
+ * - Tab-based interface: Each category becomes a separate tab
+ * - Uncategorized buttons appear in "General" tab
+ * - Only tabs with buttons are displayed
+ * - Maintains backward compatibility with existing button addition APIs
  * 
  * Usage examples:
  * 
- * // Basic usage - add normal button
+ * // Basic usage - add normal button (appears in "General" tab)
  * IMGUIDebugButton.AddButton("Test Button", () => {
  *     console.log("Test button clicked");
  * });
  * 
- * // Add category button
+ * // Add category button (creates new tab)
  * const categoryId = IMGUIDebugButton.AddCategory("System");
  * IMGUIDebugButton.AddButtonToCategory(categoryId, "Reload", () => {
  *     console.log("Reload system");
@@ -53,10 +59,7 @@ export class IMGUIDebugButton {
     private static windowPosition: { x: number, y: number } = { x: 20, y: 50 };
 
     // Window size
-    private static windowSize: { width: number, height: number } = { width: 300, height: 400 };
-
-    // Folded categories
-    private static foldedCategories: Set<string> = new Set();
+    private static windowSize: { width: number, height: number } = { width: 350, height: 450 };
 
     // 在类定义中添加一个静态变量来标记按钮是否已添加
     private static _buttonsAdded: boolean = false;
@@ -148,22 +151,47 @@ export class IMGUIDebugButton {
         // Set window content area
         const contentAvail = ImGui.GetContentRegionAvail();
 
-        // Root buttons (not belonging to any category)
-        this.renderUncategorizedButtons();
+        // Get uncategorized buttons
+        const uncategorizedButtons = this.buttons.filter(btn => !btn.categoryId);
 
-        ImGui.Separator();
-
-        // Render categories and buttons under them
-        this.categories.forEach((category, categoryId) => {
-            this.renderCategory(category, categoryId);
-        });
-
-        // If no buttons, show hint
+        // If no buttons and categories, show hint
         if (this.buttons.length === 0 && this.categories.size === 0) {
             ImGui.TextColored(
                 new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
                 "Use IMGUIDebugButton.AddButton() to add debug buttons"
             );
+            return;
+        }
+
+        // Start tab bar with scrolling support
+        if (ImGui.BeginTabBar("DebugButtonTabs", ImGui.TabBarFlags.FittingPolicyScroll)) {
+            
+            // First tab: Uncategorized buttons (only show if there are uncategorized buttons)
+            if (uncategorizedButtons.length > 0) {
+                if (ImGui.BeginTabItem("General")) {
+                    this.renderUncategorizedButtons();
+                    ImGui.EndTabItem();
+                }
+            }
+
+            // Render each category as a separate tab
+            this.categories.forEach((category, categoryId) => {
+                // Get buttons under this category
+                const categoryButtons = this.buttons.filter(btn => btn.categoryId === categoryId);
+                
+                // Only show tab if there are buttons in this category
+                if (categoryButtons.length > 0) {
+                    if (ImGui.BeginTabItem(category.name)) {
+                        // Render buttons under this category
+                        categoryButtons.forEach(button => {
+                            this.renderButton(button);
+                        });
+                        ImGui.EndTabItem();
+                    }
+                }
+            });
+
+            ImGui.EndTabBar();
         }
     }
 
@@ -181,45 +209,6 @@ export class IMGUIDebugButton {
         uncategorizedButtons.forEach(button => {
             this.renderButton(button);
         });
-    }
-
-    /**
-     * Render category
-     * @param category Category
-     * @param categoryId Category ID
-     * @private
-     */
-    private static renderCategory(category: Category, categoryId: string): void {
-        const ImGui = globalThis.ImGui;
-
-        // Get buttons under category
-        const categoryButtons = this.buttons.filter(btn => btn.categoryId === categoryId);
-
-        // If no buttons under category, don't show
-        if (categoryButtons.length === 0) return;
-
-        // Check if category is folded
-        const isFolded = this.foldedCategories.has(categoryId);
-
-        // Category title (can be clicked to fold/unfold)
-        if (ImGui.CollapsingHeader(category.name, !isFolded ? ImGui.TreeNodeFlags.DefaultOpen : 0)) {
-            // Expanded state, remove fold mark
-            this.foldedCategories.delete(categoryId);
-
-            // Add indent
-            ImGui.Indent(10);
-
-            // Render buttons under category
-            categoryButtons.forEach(button => {
-                this.renderButton(button);
-            });
-
-            // Restore indent
-            ImGui.Unindent(10);
-        } else {
-            // Folded state, add fold mark
-            this.foldedCategories.add(categoryId);
-        }
     }
 
     /**
