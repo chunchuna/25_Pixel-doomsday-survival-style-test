@@ -346,7 +346,7 @@ export class DebugObjectRenderer {
 
         this.debugLines.set(key, config);
         console.log(`[DebugObjectRenderer] Added debug line: ${key} from (${startX}, ${startY}) to (${endX}, ${endY})`);
-
+        
         if (this.currentUpdateCallback) {
             console.log(`[DebugObjectRenderer] Line ${key} will update dynamically using callback`);
         }
@@ -362,6 +362,64 @@ export class DebugObjectRenderer {
 
         // Reset current update callback after use
         this.currentUpdateCallback = null;
+
+        return key; // Return the key for later reference
+    }
+
+    // Simplified function to render line between two instances with auto-update
+    public static RenderLineBetweenInstances(fromInstance: IWorldInstance, toInstance: IWorldInstance): string {
+        this.lineIdCounter++;
+        const key = `line_${this.lineIdCounter}`;
+
+        // Get custom layer if specified, otherwise use fromInstance's layer
+        let customLayer: ILayer | undefined = undefined;
+        if (this.currentLayer) {
+            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            if (runtime && runtime.layout) {
+                customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
+                if (customLayer) {
+                    console.log(`[DebugObjectRenderer] Using custom layer: ${this.currentLayer}`);
+                } else {
+                    console.warn(`[DebugObjectRenderer] Custom layer "${this.currentLayer}" not found, using fromInstance's layer`);
+                }
+            }
+        }
+
+        // If no custom layer specified, use fromInstance's layer
+        if (!customLayer) {
+            customLayer = fromInstance.layer;
+        }
+
+        const config: DebugLineConfig = {
+            startX: fromInstance.x,
+            startY: fromInstance.y,
+            endX: toInstance.x,
+            endY: toInstance.y,
+            color: { ...this.currentColor },
+            thickness: this.currentThickness,
+            enabled: true,
+            customLayer: customLayer,
+            updateCallback: () => {
+                if (fromInstance && toInstance) {
+                    return {
+                        startX: fromInstance.x,
+                        startY: fromInstance.y,
+                        endX: toInstance.x,
+                        endY: toInstance.y
+                    };
+                }
+                return { startX: 0, startY: 0, endX: 0, endY: 0 };
+            }
+        };
+
+        this.debugLines.set(key, config);
+        console.log(`[DebugObjectRenderer] Added auto-updating line: ${key} between ${this.generateInstanceKey(fromInstance)} and ${this.generateInstanceKey(toInstance)}`);
+
+        // Automatically bind afterdraw event to the target layer
+        this.ensureLayerEventBinding(customLayer);
+
+        // Reset current layer after use
+        this.currentLayer = null;
 
         return key; // Return the key for later reference
     }
@@ -705,28 +763,21 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
     }
 
-    // Create lines for each GouHuo connecting to player
-    const gouhuoInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances());
-    gouhuoInstances.forEach((gouhuoInstance: any, index: number) => {
-        const lineKey = DebugObjectRenderer
-            .setColor(0, 1, 0, 1) // Green color
-            .setBoxThickness(2)
-            .setLayer("GameContent")
-            .setUpdateCallback(() => {
-                if (playerInstance && gouhuoInstance) {
-                    return {
-                        startX: playerInstance.x,
-                        startY: playerInstance.y,
-                        endX: gouhuoInstance.x,
-                        endY: gouhuoInstance.y
-                    };
-                }
-                return { startX: 0, startY: 0, endX: 0, endY: 0 };
-            })
-            .RenderLine(0, 0, 0, 0); // Initial position (will be overridden by callback)
-            
-        console.log(`[DebugObjectRenderer] Created line ${lineKey} for GouHuo ${index + 1}`);
-    });
-    
-    console.log(`[DebugObjectRenderer] Created ${gouhuoInstances.length} lines connecting GouHuo instances to player`);
+    // Create lines for each GouHuo connecting to player using simplified function
+    if (playerInstance) {
+        const gouhuoInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances());
+        gouhuoInstances.forEach((gouhuoInstance: any, index: number) => {
+            if (playerInstance) { // Additional null check for type safety
+                const lineKey = DebugObjectRenderer
+                    .setColor(0, 1, 0, 1) // Green color
+                    .setBoxThickness(2)
+                    .setLayer("GameContent")
+                    .RenderLineBetweenInstances(playerInstance, gouhuoInstance);
+                    
+                console.log(`[DebugObjectRenderer] Created line ${lineKey} for GouHuo ${index + 1}`);
+            }
+        });
+        
+        console.log(`[DebugObjectRenderer] Created ${gouhuoInstances.length} lines connecting GouHuo instances to player`);
+    }
 });
