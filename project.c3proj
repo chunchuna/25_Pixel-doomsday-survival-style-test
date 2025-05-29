@@ -914,6 +914,67 @@
 						}
 					],
 					"name": "PixelDoom"
+				},
+				{
+					"items": [],
+					"subfolders": [
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [],
+									"name": "emscripten"
+								}
+							],
+							"name": "@types"
+						},
+						{
+							"items": [],
+							"subfolders": [
+								{
+									"items": [],
+									"subfolders": [
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "embind"
+												}
+											],
+											"name": "imgui"
+										},
+										{
+											"items": [],
+											"subfolders": [],
+											"name": "src"
+										},
+										{
+											"items": [],
+											"subfolders": [
+												{
+													"items": [],
+													"subfolders": [],
+													"name": "js"
+												}
+											],
+											"name": "www"
+										}
+									],
+									"name": "imgui-ts"
+								}
+							],
+							"name": "@zhobo63"
+						}
+					],
+					"name": "node_modules"
+				},
+				{
+					"items": [],
+					"subfolders": [],
+					"name": "resource"
 				}
 			],
 			"autoReloadOnPreview": true

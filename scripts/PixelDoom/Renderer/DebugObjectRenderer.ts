@@ -24,6 +24,20 @@ interface DebugLineConfig {
     updateCallback?: () => { startX: number; startY: number; endX: number; endY: number }; // Optional update callback for dynamic positioning
 }
 
+// Common color presets for debug rendering
+export enum DebugColors {
+    RED = "RED",
+    GREEN = "GREEN",
+    BLUE = "BLUE",
+    YELLOW = "YELLOW",
+    MAGENTA = "MAGENTA",
+    CYAN = "CYAN",
+    ORANGE = "ORANGE",
+    PURPLE = "PURPLE",
+    WHITE = "WHITE",
+    GRAY = "GRAY"
+}
+
 export class DebugObjectRenderer {
     public static debugBoxes: Map<string, DebugBoxConfig> = new Map();
     public static debugLines: Map<string, DebugLineConfig> = new Map();
@@ -38,6 +52,20 @@ export class DebugObjectRenderer {
     public static renderCount: number = 0; // Track render calls - made public for external access
     private static lastRenderTime: number = 0;
     private static lineIdCounter: number = 0; // Counter for generating unique line IDs
+
+    // Color preset mapping
+    private static colorPresets: Map<DebugColors, { r: number; g: number; b: number }> = new Map([
+        [DebugColors.RED, { r: 1, g: 0, b: 0 }],
+        [DebugColors.GREEN, { r: 0, g: 1, b: 0 }],
+        [DebugColors.BLUE, { r: 0, g: 0, b: 1 }],
+        [DebugColors.YELLOW, { r: 1, g: 1, b: 0 }],
+        [DebugColors.MAGENTA, { r: 1, g: 0, b: 1 }],
+        [DebugColors.CYAN, { r: 0, g: 1, b: 1 }],
+        [DebugColors.ORANGE, { r: 1, g: 0.5, b: 0 }],
+        [DebugColors.PURPLE, { r: 0.5, g: 0, b: 1 }],
+        [DebugColors.WHITE, { r: 1, g: 1, b: 1 }],
+        [DebugColors.GRAY, { r: 0.5, g: 0.5, b: 0.5 }]
+    ]);
 
     // Initialize the renderer system
     public static initialize(): void {
@@ -346,7 +374,7 @@ export class DebugObjectRenderer {
 
         this.debugLines.set(key, config);
         console.log(`[DebugObjectRenderer] Added debug line: ${key} from (${startX}, ${startY}) to (${endX}, ${endY})`);
-        
+
         if (this.currentUpdateCallback) {
             console.log(`[DebugObjectRenderer] Line ${key} will update dynamically using callback`);
         }
@@ -442,6 +470,23 @@ export class DebugObjectRenderer {
                 a: a
             };
             console.log(`[DebugObjectRenderer] Set color from hex ${hex} to RGBA(${this.currentColor.r}, ${this.currentColor.g}, ${this.currentColor.b}, ${this.currentColor.a})`);
+        }
+        return this;
+    }
+
+    // Set color using preset enumeration
+    public static setColorPreset(colorPreset: DebugColors, a: number = 1): typeof DebugObjectRenderer {
+        const preset = this.colorPresets.get(colorPreset);
+        if (preset) {
+            this.currentColor = {
+                r: preset.r,
+                g: preset.g,
+                b: preset.b,
+                a: a
+            };
+            console.log(`[DebugObjectRenderer] Set color to ${colorPreset} preset: RGBA(${this.currentColor.r}, ${this.currentColor.g}, ${this.currentColor.b}, ${this.currentColor.a})`);
+        } else {
+            console.warn(`[DebugObjectRenderer] Unknown color preset: ${colorPreset}, using current color`);
         }
         return this;
     }
@@ -755,8 +800,15 @@ export class DebugObjectRenderer {
     // Draw debug boxes for all instances of a given object type or from a single instance
     public static DrawBoxesForAllInstances(instanceOrObjectType: IWorldInstance | any): string[] {
         const keys: string[] = [];
-        
+
         try {
+            // Preserve current settings before the loop
+            const savedColor = { ...this.currentColor };
+            const savedThickness = this.currentThickness;
+            const savedLayer = this.currentLayer;
+            const savedHollowMode = this.currentHollowMode;
+            const savedOffset = { ...this.currentOffset };
+
             let objectType: any;
             let instances: IWorldInstance[];
 
@@ -775,13 +827,20 @@ export class DebugObjectRenderer {
 
             // Draw box for each instance
             instances.forEach((instance: IWorldInstance, index: number) => {
+                // Restore settings before each call since RenderBoxtoInstance resets them
+                this.currentColor = { ...savedColor };
+                this.currentThickness = savedThickness;
+                this.currentLayer = savedLayer;
+                this.currentHollowMode = savedHollowMode;
+                this.currentOffset = { ...savedOffset };
+
                 const key = this.RenderBoxtoInstance(instance);
                 keys.push(key);
                 console.log(`[DebugObjectRenderer] Drew box ${index + 1}/${instances.length} for ${objectType.name} instance at (${instance.x.toFixed(1)}, ${instance.y.toFixed(1)})`);
             });
 
             console.log(`[DebugObjectRenderer] ✅ Successfully drew ${instances.length} debug boxes for ${objectType.name}`);
-            
+
         } catch (error: any) {
             console.error(`[DebugObjectRenderer] ❌ Error in DrawBoxesForAllInstances: ${error.message}`);
         }
@@ -792,8 +851,14 @@ export class DebugObjectRenderer {
     // Draw lines connecting all instances of a given type to the player instance
     public static DrawLineConenctPlayerForAllInstacne(playerInstance: IWorldInstance, otherInstanceOrObjectType: IWorldInstance | any): string[] {
         const keys: string[] = [];
-        
+
         try {
+            // Preserve current settings before the loop
+            const savedColor = { ...this.currentColor };
+            const savedThickness = this.currentThickness;
+            const savedLayer = this.currentLayer;
+            const savedUpdateCallback = this.currentUpdateCallback;
+
             let objectType: any;
             let instances: IWorldInstance[];
 
@@ -812,13 +877,19 @@ export class DebugObjectRenderer {
 
             // Draw line from each instance to player
             instances.forEach((instance: IWorldInstance, index: number) => {
+                // Restore settings before each call since RenderLineBetweenInstances resets them
+                this.currentColor = { ...savedColor };
+                this.currentThickness = savedThickness;
+                this.currentLayer = savedLayer;
+                this.currentUpdateCallback = savedUpdateCallback;
+
                 const key = this.RenderLineBetweenInstances(playerInstance, instance);
                 keys.push(key);
                 console.log(`[DebugObjectRenderer] Drew line ${index + 1}/${instances.length} from ${objectType.name} instance at (${instance.x.toFixed(1)}, ${instance.y.toFixed(1)}) to player at (${playerInstance.x.toFixed(1)}, ${playerInstance.y.toFixed(1)})`);
             });
 
             console.log(`[DebugObjectRenderer] ✅ Successfully drew ${instances.length} lines connecting ${objectType.name} instances to player`);
-            
+
         } catch (error: any) {
             console.error(`[DebugObjectRenderer] ❌ Error in DrawLineConenctPlayerForAllInstacne: ${error.message}`);
         }
@@ -837,43 +908,36 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
     }
 
-    // Create lines for each GouHuo connecting to player using simplified function
+    var ClickObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity;
+    ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
     if (playerInstance) {
-        const gouhuoInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances());
-        gouhuoInstances.forEach((gouhuoInstance: any, index: number) => {
-            if (playerInstance) { // Additional null check for type safety
-                const lineKey = DebugObjectRenderer
-                    .setColor(0, 1, 0, 1) // Green color
-                    .setBoxThickness(2)
-                    .setLayer("GameContent")
-                    .RenderLineBetweenInstances(playerInstance, gouhuoInstance);
-                    
-                console.log(`[DebugObjectRenderer] Created line ${lineKey} for GouHuo ${index + 1}`);
-            }
-        });
-        
-        console.log(`[DebugObjectRenderer] Created ${gouhuoInstances.length} lines connecting GouHuo instances to player`);
+        var GouHuoLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
     }
+
+
+
+
 });
-// // 示例1: 给所有GouHuo实例绘制调试框
-// // 方法A: 传入单个GouHuo实例，函数自动检测类型并遍历所有同类实例
+
+// Usage Examples:
+
+// Example 1: Using color presets for all GouHuo instances
+// Method A: Pass a single GouHuo instance, function auto-detects type and iterates all instances of same type
 // const gouhuoInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.getFirstInstance();
-// const boxKeys = DebugObjectRenderer.setColor(1, 0, 0, 1).DrawBoxesForAllInstances(gouhuoInstance);
+// const boxKeys = DebugObjectRenderer.setColorPreset(DebugColors.RED).DrawBoxesForAllInstances(gouhuoInstance);
 
-// // 方法B: 直接传入对象类型
-// const boxKeys2 = DebugObjectRenderer.setColor(0, 1, 0, 1).DrawBoxesForAllInstances(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
+// Method B: Pass object type directly
+// const boxKeys2 = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).DrawBoxesForAllInstances(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
 
-// // 示例2: 连接所有GouHuo实例到玩家
+// Example 2: Connect all GouHuo instances to player with different colors
 // const playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-// const lineKeys = DebugObjectRenderer.setColor(0, 0, 1, 1).DrawLineConenctPlayerForAllInstacne(playerInstance, pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
-// 1. DrawBoxesForAllInstances(instanceOrObjectType)
-// 此函数可以接受两种类型的参数：
-// 单个实例 (IWorldInstance): 函数会自动获取该实例的对象类型，然后遍历所有同类型的实例
-// 对象类型 (ObjectType): 直接传入对象类型，函数会遍历该类型的所有实例
-// 函数会自动为每个实例绘制调试框，并返回所有调试框的键值数组。
-// 2. DrawLineConenctPlayerForAllInstacne(playerInstance, otherInstanceOrObjectType)
-// 此函数需要两个参数：
-// playerInstance: 玩家实例 (IWorldInstance)
-// otherInstanceOrObjectType: 可以是单个实例或对象类型
-// 函数会自动遍历指定类型的所有实例，并绘制从每个实例到玩家的连线。
-// 使用示例
+// const lineKeys = DebugObjectRenderer.setColorPreset(DebugColors.BLUE).DrawLineConenctPlayerForAllInstacne(playerInstance, pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo);
+
+// Example 3: Mix different color methods
+// DebugObjectRenderer.setColorPreset(DebugColors.YELLOW, 0.8).setBoxThickness(3).setLayer("GameContent").RenderBoxtoInstance(someInstance);
+// DebugObjectRenderer.setColor(1, 0, 0, 1).RenderBoxtoInstance(anotherInstance); // Custom RGB
+// DebugObjectRenderer.setColorHex("#FF5500", 0.9).RenderBoxtoInstance(thirdInstance); // Hex color
+
+// Available color presets:
+// DebugColors.RED, DebugColors.GREEN, DebugColors.BLUE, DebugColors.YELLOW, DebugColors.MAGENTA
+// DebugColors.CYAN, DebugColors.ORANGE, DebugColors.PURPLE, DebugColors.WHITE, DebugColors.GRAY
