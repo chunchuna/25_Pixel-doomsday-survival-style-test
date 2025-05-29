@@ -346,7 +346,7 @@ export class DebugObjectRenderer {
 
         this.debugLines.set(key, config);
         console.log(`[DebugObjectRenderer] Added debug line: ${key} from (${startX}, ${startY}) to (${endX}, ${endY})`);
-        
+
         if (this.currentUpdateCallback) {
             console.log(`[DebugObjectRenderer] Line ${key} will update dynamically using callback`);
         }
@@ -697,24 +697,36 @@ export class DebugObjectRenderer {
 
 // Auto-initialize when module is loaded
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    console.log("[DebugObjectRenderer] 🔧 Starting initialization...");
 
     DebugObjectRenderer.initialize();
 
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
-        var playerLine = DebugObjectRenderer.setLayer("GameContent").setBoxThickness(5).setUpdateCallback(() => {
-            if (playerInstance) {
-                return {
-                    startX: playerInstance.x,
-                    startY: playerInstance.y,
-                    endX: playerInstance.x + 100,
-                    endY: playerInstance.y + 200
-                };
-            } else {
-                return { startX: 0, startY: 0, endX: 100, endY: 200 };
-            }
-        }).RenderLine(playerInstance.x, playerInstance.y, playerInstance.x + 100, playerInstance.y + 200);
     }
+
+    // Create lines for each GouHuo connecting to player
+    const gouhuoInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances());
+    gouhuoInstances.forEach((gouhuoInstance: any, index: number) => {
+        const lineKey = DebugObjectRenderer
+            .setColor(0, 1, 0, 1) // Green color
+            .setBoxThickness(2)
+            .setLayer("GameContent")
+            .setUpdateCallback(() => {
+                if (playerInstance && gouhuoInstance) {
+                    return {
+                        startX: playerInstance.x,
+                        startY: playerInstance.y,
+                        endX: gouhuoInstance.x,
+                        endY: gouhuoInstance.y
+                    };
+                }
+                return { startX: 0, startY: 0, endX: 0, endY: 0 };
+            })
+            .RenderLine(0, 0, 0, 0); // Initial position (will be overridden by callback)
+            
+        console.log(`[DebugObjectRenderer] Created line ${lineKey} for GouHuo ${index + 1}`);
+    });
+    
+    console.log(`[DebugObjectRenderer] Created ${gouhuoInstances.length} lines connecting GouHuo instances to player`);
 });
