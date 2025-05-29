@@ -751,6 +751,80 @@ export class DebugObjectRenderer {
         this.debugLines.clear();
         console.log("[DebugObjectRenderer] Cleared all debug lines");
     }
+
+    // Draw debug boxes for all instances of a given object type or from a single instance
+    public static DrawBoxesForAllInstances(instanceOrObjectType: IWorldInstance | any): string[] {
+        const keys: string[] = [];
+        
+        try {
+            let objectType: any;
+            let instances: IWorldInstance[];
+
+            // Check if input is an instance or object type
+            if (instanceOrObjectType && 'objectType' in instanceOrObjectType) {
+                // It's an instance, get its object type
+                objectType = instanceOrObjectType.objectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing boxes for all instances of ${objectType.name} (detected from instance)`);
+            } else {
+                // It's an object type
+                objectType = instanceOrObjectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing boxes for all instances of ${objectType.name} (direct object type)`);
+            }
+
+            // Draw box for each instance
+            instances.forEach((instance: IWorldInstance, index: number) => {
+                const key = this.RenderBoxtoInstance(instance);
+                keys.push(key);
+                console.log(`[DebugObjectRenderer] Drew box ${index + 1}/${instances.length} for ${objectType.name} instance at (${instance.x.toFixed(1)}, ${instance.y.toFixed(1)})`);
+            });
+
+            console.log(`[DebugObjectRenderer] ✅ Successfully drew ${instances.length} debug boxes for ${objectType.name}`);
+            
+        } catch (error: any) {
+            console.error(`[DebugObjectRenderer] ❌ Error in DrawBoxesForAllInstances: ${error.message}`);
+        }
+
+        return keys; // Return all keys for later reference
+    }
+
+    // Draw lines connecting all instances of a given type to the player instance
+    public static DrawLineConenctPlayerForAllInstacne(playerInstance: IWorldInstance, otherInstanceOrObjectType: IWorldInstance | any): string[] {
+        const keys: string[] = [];
+        
+        try {
+            let objectType: any;
+            let instances: IWorldInstance[];
+
+            // Check if input is an instance or object type
+            if (otherInstanceOrObjectType && 'objectType' in otherInstanceOrObjectType) {
+                // It's an instance, get its object type
+                objectType = otherInstanceOrObjectType.objectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (detected from instance)`);
+            } else {
+                // It's an object type
+                objectType = otherInstanceOrObjectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (direct object type)`);
+            }
+
+            // Draw line from each instance to player
+            instances.forEach((instance: IWorldInstance, index: number) => {
+                const key = this.RenderLineBetweenInstances(playerInstance, instance);
+                keys.push(key);
+                console.log(`[DebugObjectRenderer] Drew line ${index + 1}/${instances.length} from ${objectType.name} instance at (${instance.x.toFixed(1)}, ${instance.y.toFixed(1)}) to player at (${playerInstance.x.toFixed(1)}, ${playerInstance.y.toFixed(1)})`);
+            });
+
+            console.log(`[DebugObjectRenderer] ✅ Successfully drew ${instances.length} lines connecting ${objectType.name} instances to player`);
+            
+        } catch (error: any) {
+            console.error(`[DebugObjectRenderer] ❌ Error in DrawLineConenctPlayerForAllInstacne: ${error.message}`);
+        }
+
+        return keys; // Return all keys for later reference
+    }
 }
 
 // Auto-initialize when module is loaded
