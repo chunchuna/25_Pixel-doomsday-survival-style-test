@@ -11,8 +11,21 @@ interface DebugBoxConfig {
     offset: { x: number; y: number }; // Offset for debug box position
 }
 
+// Debug line render configuration interface
+interface DebugLineConfig {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    color: { r: number; g: number; b: number; a: number };
+    thickness: number;
+    enabled: boolean;
+    customLayer?: ILayer; // Optional custom layer for rendering
+}
+
 export class DebugObjectRenderer {
     public static debugBoxes: Map<string, DebugBoxConfig> = new Map();
+    public static debugLines: Map<string, DebugLineConfig> = new Map();
     private static isInitialized: boolean = false;
     private static currentColor: { r: number; g: number; b: number; a: number } = { r: 1, g: 0, b: 0, a: 1 }; // Default red
     private static currentThickness: number = 2; // Default thickness
@@ -22,6 +35,7 @@ export class DebugObjectRenderer {
     private static boundLayers: Set<ILayer> = new Set(); // Track which layers have event listeners
     public static renderCount: number = 0; // Track render calls - made public for external access
     private static lastRenderTime: number = 0;
+    private static lineIdCounter: number = 0; // Counter for generating unique line IDs
 
     // Initialize the renderer system
     public static initialize(): void {
@@ -75,6 +89,7 @@ export class DebugObjectRenderer {
         if (this.renderCount <= 3) {
             console.log(`[DebugObjectRenderer] 🎨 Render call #${this.renderCount} on layer: ${layer.name || 'unnamed'}`);
             console.log(`[DebugObjectRenderer] Total debug boxes to check: ${this.debugBoxes.size}`);
+            console.log(`[DebugObjectRenderer] Total debug lines to check: ${this.debugLines.size}`);
         }
 
         // Render debug boxes that belong to this specific layer (either custom layer or instance layer)
@@ -89,6 +104,23 @@ export class DebugObjectRenderer {
                         renderedOnThisLayer++;
                     } catch (error: any) {
                         console.error(`[DebugObjectRenderer] Error rendering debug box for ${key}: ${error.message}`);
+                    }
+                }
+            }
+        });
+
+        // Render debug lines that belong to this specific layer
+        this.debugLines.forEach((config, key) => {
+            if (config.enabled) {
+                // Use custom layer if specified, otherwise use default layer (first available)
+                const targetLayer = config.customLayer || layer;
+
+                if (targetLayer === layer) {
+                    try {
+                        this.renderDebugLine(renderer, config);
+                        renderedOnThisLayer++;
+                    } catch (error: any) {
+                        console.error(`[DebugObjectRenderer] Error rendering debug line for ${key}: ${error.message}`);
                     }
                 }
             }
@@ -177,6 +209,37 @@ export class DebugObjectRenderer {
         }
     }
 
+    // Render a single debug line
+    private static renderDebugLine(renderer: IRenderer, config: DebugLineConfig): void {
+        const { startX, startY, endX, endY } = config;
+        const { r, g, b, a } = config.color;
+        const thickness = config.thickness;
+
+        try {
+            // Set color fill mode for drawing lines
+            renderer.setColorFillMode();
+            renderer.setColorRgba(r, g, b, a);
+
+            // Debug: Log first few renders to verify coordinates
+            if (this.renderCount <= 3) {
+                console.log(`[DebugObjectRenderer] 🖌️ Drawing line: (${startX.toFixed(1)}, ${startY.toFixed(1)}) to (${endX.toFixed(1)}, ${endY.toFixed(1)})`);
+                console.log(`[DebugObjectRenderer] Color: RGBA(${r}, ${g}, ${b}, ${a}), Thickness: ${thickness}`);
+            }
+
+            // Set line width
+            renderer.pushLineWidth(thickness);
+
+            // Draw the line
+            renderer.line(startX, startY, endX, endY);
+
+            // Restore line width
+            renderer.popLineWidth();
+
+        } catch (error: any) {
+            console.error(`[DebugObjectRenderer] Error in renderDebugLine: ${error.message}`);
+        }
+    }
+
     // Main function to render box around instance
     public static RenderBoxtoInstance(instance: IWorldInstance): string {
         const key = this.generateInstanceKey(instance);
@@ -225,6 +288,61 @@ export class DebugObjectRenderer {
 
         // Reset current offset after use
         this.currentOffset = { x: 0, y: 0 };
+
+        return key; // Return the key for later reference
+    }
+
+    // Main function to render a custom line
+    public static RenderLine(startX: number, startY: number, endX: number, endY: number): string {
+        this.lineIdCounter++;
+        const key = `line_${this.lineIdCounter}`;
+
+        // Get custom layer if specified
+        let customLayer: ILayer | undefined = undefined;
+        if (this.currentLayer) {
+            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            if (runtime && runtime.layout) {
+                customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
+                if (customLayer) {
+                    console.log(`[DebugObjectRenderer] Using custom layer: ${this.currentLayer}`);
+                } else {
+                    console.warn(`[DebugObjectRenderer] Custom layer "${this.currentLayer}" not found, using default layer`);
+                }
+            }
+        }
+
+        // If no custom layer specified, try to get a default layer
+        if (!customLayer) {
+            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            if (runtime && runtime.layout) {
+                const gameContentLayer = runtime.layout.getLayer("GameContent");
+                const layer0 = runtime.layout.getLayer(0);
+                customLayer = (gameContentLayer || layer0) as ILayer | undefined;
+            }
+        }
+
+        const config: DebugLineConfig = {
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY,
+            color: { ...this.currentColor },
+            thickness: this.currentThickness,
+            enabled: true,
+            customLayer: customLayer
+        };
+
+        this.debugLines.set(key, config);
+        console.log(`[DebugObjectRenderer] Added debug line: ${key} from (${startX}, ${startY}) to (${endX}, ${endY})`);
+
+        // Automatically bind afterdraw event to the target layer
+        if (customLayer) {
+            console.log(`[DebugObjectRenderer] Debug line will render on layer: ${customLayer.name || 'unnamed'}`);
+            this.ensureLayerEventBinding(customLayer);
+        }
+
+        // Reset current layer after use
+        this.currentLayer = null;
 
         return key; // Return the key for later reference
     }
@@ -314,7 +432,8 @@ export class DebugObjectRenderer {
     // Clear all debug boxes
     public static clearAll(): void {
         this.debugBoxes.clear();
-        console.log("[DebugObjectRenderer] Cleared all debug boxes");
+        this.debugLines.clear();
+        console.log("[DebugObjectRenderer] Cleared all debug boxes and lines");
     }
 
     // Generate unique key for instance
@@ -327,6 +446,16 @@ export class DebugObjectRenderer {
         return this.debugBoxes.size;
     }
 
+    // Get current debug line count
+    public static getDebugLineCount(): number {
+        return this.debugLines.size;
+    }
+
+    // Get total debug object count (boxes + lines)
+    public static getTotalDebugObjectCount(): number {
+        return this.debugBoxes.size + this.debugLines.size;
+    }
+
     // Check if instance has debug box
     public static hasDebugBox(instance: IWorldInstance): boolean {
         const key = this.generateInstanceKey(instance);
@@ -337,7 +466,9 @@ export class DebugObjectRenderer {
     public static getDebugInfo(): any {
         const info = {
             totalDebugBoxes: this.debugBoxes.size,
+            totalDebugLines: this.debugLines.size,
             enabledDebugBoxes: Array.from(this.debugBoxes.values()).filter(config => config.enabled).length,
+            enabledDebugLines: Array.from(this.debugLines.values()).filter(config => config.enabled).length,
             renderCount: this.renderCount,
             lastRenderTime: this.lastRenderTime,
             timeSinceLastRender: Date.now() - this.lastRenderTime,
@@ -345,7 +476,8 @@ export class DebugObjectRenderer {
             currentColor: this.currentColor,
             currentThickness: this.currentThickness,
             currentOffset: this.currentOffset,
-            debugBoxesByLayer: new Map()
+            debugBoxesByLayer: new Map(),
+            debugLinesByLayer: new Map()
         };
 
         // Group debug boxes by layer
@@ -361,6 +493,22 @@ export class DebugObjectRenderer {
                 size: { width: config.instance.width, height: config.instance.height },
                 offset: config.offset,
                 hollowMode: config.hollowMode
+            });
+        });
+
+        // Group debug lines by layer
+        this.debugLines.forEach((config, key) => {
+            const layerName = config.customLayer?.name || 'default';
+            if (!info.debugLinesByLayer.has(layerName)) {
+                info.debugLinesByLayer.set(layerName, []);
+            }
+            info.debugLinesByLayer.get(layerName).push({
+                key,
+                enabled: config.enabled,
+                startPoint: { x: config.startX, y: config.startY },
+                endPoint: { x: config.endX, y: config.endY },
+                color: config.color,
+                thickness: config.thickness
             });
         });
 
@@ -459,6 +607,30 @@ export class DebugObjectRenderer {
             console.warn(`[DebugObjectRenderer] ⚠️ Debug box not found: ${debugBoxKey}`);
         }
     }
+
+    // Remove debug line by key
+    public static removeDebugLine(lineKey: string): void {
+        if (this.debugLines.delete(lineKey)) {
+            console.log(`[DebugObjectRenderer] Removed debug line: ${lineKey}`);
+        }
+    }
+
+    // Update debug line enable/disable state
+    public static updateLine(lineKey: string, enable: boolean = true): void {
+        const config = this.debugLines.get(lineKey);
+        if (config) {
+            config.enabled = enable;
+            console.log(`[DebugObjectRenderer] ${enable ? 'Enabled' : 'Disabled'} debug line: ${lineKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug line not found for update: ${lineKey}`);
+        }
+    }
+
+    // Clear all debug lines only
+    public static clearAllLines(): void {
+        this.debugLines.clear();
+        console.log("[DebugObjectRenderer] Cleared all debug lines");
+    }
 }
 
 // Auto-initialize when module is loaded
@@ -470,5 +642,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
+        var playerLine =DebugObjectRenderer.setLayer("GameContent").setBoxThickness(5).RenderLine(playerInstance.x,playerInstance.y,playerInstance.x+100,playerInstance.y+200)
+
     }
 });
