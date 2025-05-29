@@ -1,4 +1,7 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
+
+var isAmbientLightDebugButtonsBound = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
@@ -14,6 +17,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         AmbientLight.night_light_rgb,      // Night color (deep blue)
         "current"              // Start from current color, automatically determine if closer to day or night
     );
+
+    // Initialize debug buttons
+    AmbientLight.initializeDebugButtons();
 
 })
 
@@ -33,7 +39,7 @@ export class AmbientLight {
     public static light_layer: IAnyProjectLayer | null = null;
 
     // Day-night cycle state
-    private static dayNightCycle = {
+    public static dayNightCycle = {
         isRunning: false,
         currentPhase: "day" as "day" | "night",
         dayDuration: 0,
@@ -43,7 +49,7 @@ export class AmbientLight {
         cycleTimer: null as number | null
     }
 
-    private static transition = {
+    public static transition = {
         isActive: false,
         startTime: 0,
         duration: 0,
@@ -198,6 +204,142 @@ export class AmbientLight {
             this.dayNightCycle.cycleTimer = null;
         }
         console.log("Day-night cycle stopped");
+    }
+
+    static initializeDebugButtons() {
+        if (isAmbientLightDebugButtonsBound) return;
+        isAmbientLightDebugButtonsBound = true;
+
+        // Create ambient light category
+        var ambientLightCategory = IMGUIDebugButton.AddCategory("Ambient Light System");
+
+        // Day-night cycle controls
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Start Day-Night Cycle", () => {
+            AmbientLight.simulat_day_night_cycle(
+                150,  // Day to night: 2.5 minutes
+                300,  // Night to day: 5 minutes  
+                AmbientLight.dya_light_rgb,
+                AmbientLight.night_light_rgb,
+                "current"
+            );
+            console.log("Started day-night cycle with default settings");
+        });
+
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Stop Day-Night Cycle", () => {
+            AmbientLight.stopDayNightCycle();
+            console.log("Stopped day-night cycle");
+        });
+
+        // Quick transitions
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Switch to Day", () => {
+            AmbientLight.Simulat_edsunshine_cycle(10, AmbientLight.dya_light_rgb);
+            console.log("Transitioning to day light");
+        });
+
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Switch to Night", () => {
+            AmbientLight.Simulat_edsunshine_cycle(10, AmbientLight.night_light_rgb);
+            console.log("Transitioning to night light");
+        });
+
+        // Fast cycle tests
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Fast Day-Night Cycle (Test)", () => {
+            AmbientLight.simulat_day_night_cycle(
+                5,   // 5 seconds day to night
+                5,   // 5 seconds night to day
+                AmbientLight.dya_light_rgb,
+                AmbientLight.night_light_rgb,
+                "day"
+            );
+            console.log("Started fast day-night cycle for testing");
+        });
+
+        // Custom color tests
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Sunrise Effect", [1.0, 0.7, 0.4, 1.0], () => {
+            const sunriseColor: [number, number, number] = [1.0, 0.7, 0.4];
+            AmbientLight.Simulat_edsunshine_cycle(8, sunriseColor);
+            console.log("Transitioning to sunrise color");
+        });
+
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Sunset Effect", [0.9, 0.4, 0.2, 1.0], () => {
+            const sunsetColor: [number, number, number] = [0.9, 0.4, 0.2];
+            AmbientLight.Simulat_edsunshine_cycle(8, sunsetColor);
+            console.log("Transitioning to sunset color");
+        });
+
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Blood Moon Effect", [0.8, 0.1, 0.1, 1.0], () => {
+            const bloodMoonColor: [number, number, number] = [0.8, 0.1, 0.1];
+            AmbientLight.Simulat_edsunshine_cycle(5, bloodMoonColor);
+            console.log("Transitioning to blood moon color");
+        });
+
+        // Utility functions
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Show Current Light Info", () => {
+            if (AmbientLight.light_layer) {
+                const currentColor = AmbientLight.light_layer.backgroundColor;
+                console.log("Current light information:", {
+                    currentColor: currentColor,
+                    isRunning: AmbientLight.dayNightCycle.isRunning,
+                    currentPhase: AmbientLight.dayNightCycle.currentPhase,
+                    dayDuration: AmbientLight.dayNightCycle.dayDuration + "s",
+                    nightDuration: AmbientLight.dayNightCycle.nightDuration + "s",
+                    transitionActive: AmbientLight.transition.isActive
+                });
+            } else {
+                console.warn("Light layer not found");
+            }
+        });
+
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Reset to Default Day", () => {
+            AmbientLight.stopDayNightCycle();
+            if (AmbientLight.light_layer) {
+                AmbientLight.light_layer.backgroundColor = [...AmbientLight.dya_light_rgb];
+                console.log("Reset to default day light");
+            }
+        });
+
+        // Advanced settings
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Very Slow Day-Night Cycle (Demo)", () => {
+            AmbientLight.simulat_day_night_cycle(
+                600,  // 10 minutes day to night
+                600,  // 10 minutes night to day
+                AmbientLight.dya_light_rgb,
+                AmbientLight.night_light_rgb,
+                "current"
+            );
+            console.log("Started very slow day-night cycle for demonstration");
+        });
+
+        IMGUIDebugButton.AddButtonToCategory(ambientLightCategory, "Extreme Fast Day-Night Cycle (Stress Test)", () => {
+            AmbientLight.simulat_day_night_cycle(
+                1,   // 1 second day to night
+                1,   // 1 second night to day
+                AmbientLight.dya_light_rgb,
+                AmbientLight.night_light_rgb,
+                "day"
+            );
+            console.log("Started extreme fast day-night cycle for stress testing");
+        });
+
+        // Color customization tests
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Deep Sea Effect", [0.1, 0.3, 0.6, 1.0], () => {
+            const deepSeaColor: [number, number, number] = [0.1, 0.3, 0.6];
+            AmbientLight.Simulat_edsunshine_cycle(6, deepSeaColor);
+            console.log("Transitioning to deep sea color");
+        });
+
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Forest Effect", [0.2, 0.6, 0.3, 1.0], () => {
+            const forestColor: [number, number, number] = [0.2, 0.6, 0.3];
+            AmbientLight.Simulat_edsunshine_cycle(6, forestColor);
+            console.log("Transitioning to forest color");
+        });
+
+        IMGUIDebugButton.AddColorButtonToCategory(ambientLightCategory, "Storm Effect", [0.4, 0.4, 0.5, 1.0], () => {
+            const stormColor: [number, number, number] = [0.4, 0.4, 0.5];
+            AmbientLight.Simulat_edsunshine_cycle(3, stormColor);
+            console.log("Transitioning to storm color");
+        });
+
+        console.log("Ambient light debug buttons initialized");
     }
 
 }
