@@ -3,6 +3,7 @@ import { UIInventoryStyles } from './UIInventoryStyles.js';
 import { UIInventoryUtils } from './UIInventoryUtils.js';
 import { UIInventoryDrag } from './UIInventoryDrag.js';
 import { UIInventoryRender } from './UIInventoryRender.js';
+import { UIInventoryCoreExtensions } from './UIInventoryCore2.js';
 
 // 库存UI管理类
 export class UIInventoryCore implements IUIInventory {
@@ -892,47 +893,7 @@ export class UIInventoryCore implements IUIInventory {
 
     // 切换主库存显示状态
     public toggleMainInventory(): void {
-        this.isMainInventoryVisible = !this.isMainInventoryVisible;
-        
-        if (this.isMainInventoryVisible) {
-            this.mainInventoryContainer.style.display = 'block';
-            this.mainInventoryContainer.style.opacity = '1';
-            this.mainInventoryContainer.classList.add('inventory-open');
-            this.mainInventoryContainer.classList.remove('inventory-close');
-            
-            // 渲染主库存内容
-            this.renderMainInventory();
-            
-            // 恢复窗口位置和大小
-            if (this.MainInventoryWindowPosition[0] !== 0 || this.MainInventoryWindowPosition[1] !== 0) {
-                this.mainInventoryContainer.style.left = `${this.MainInventoryWindowPosition[0]}px`;
-                this.mainInventoryContainer.style.top = `${this.MainInventoryWindowPosition[1]}px`;
-            }
-            
-            if (this.MainInventoryWindowSize[0] !== 0 || this.MainInventoryWindowSize[1] !== 0) {
-                this.mainInventoryContainer.style.width = `${this.MainInventoryWindowSize[0]}px`;
-                this.mainInventoryContainer.style.height = `${this.MainInventoryWindowSize[1]}px`;
-            }
-
-            // 触发打开回调
-            if (this.onMainInventoryOpenCallback) {
-                this.onMainInventoryOpenCallback();
-            }
-        } else {
-            this.mainInventoryContainer.classList.add('inventory-close');
-            this.mainInventoryContainer.classList.remove('inventory-open');
-            
-            // 等待动画完成后隐藏
-            setTimeout(() => {
-                this.mainInventoryContainer.style.display = 'none';
-                this.mainInventoryContainer.style.opacity = '0';
-            }, 200);
-            
-            // 触发关闭回调
-            if (this.onMainInventoryCloseCallback) {
-                this.onMainInventoryCloseCallback();
-            }
-        }
+        UIInventoryCoreExtensions.toggleMainInventory(this);
     }
 
     // 设置主库存
@@ -1074,42 +1035,11 @@ export class UIInventoryCore implements IUIInventory {
 
     // 实现IUIInventory接口的方法
     public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void } {
-        this.SetMainInventory(inventoryArray, rows, columns, key);
-        
-        return {
-            unbind: () => {
-                // 解绑主库存
-                this.mainInventoryData = [];
-                this.slotPositions = [];
-                if (this.isMainInventoryVisible) {
-                    this.toggleMainInventory();
-                }
-            },
-            oneline: () => {
-                // 切换单列模式
-                this.isMainInventoryOnelineMode = !this.isMainInventoryOnelineMode;
-                if (this.isMainInventoryVisible) {
-                    this.renderMainInventory();
-                }
-            }
-        };
+        return UIInventoryCoreExtensions.bindPlayerMainInventory(this, inventoryArray, rows, columns, key);
     }
 
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void, oneline: () => void } {
-        const container = this.showOtherInventoryInternal(inventoryArray, rows, columns, InventoryName, updateInfo);
-        
-        return {
-            close: () => {
-                if (this.closeOtherInventoryFunc) {
-                    this.closeOtherInventoryFunc();
-                }
-            },
-            oneline: () => {
-                // 切换单列模式
-                this.isOtherInventoryOnelineMode = !this.isOtherInventoryOnelineMode;
-                this.renderOtherInventory(rows, columns);
-            }
-        };
+        return UIInventoryCoreExtensions.showOtherInventory(this, inventoryArray, rows, columns, updateInfo, InventoryName);
     }
 
     // 清理资源

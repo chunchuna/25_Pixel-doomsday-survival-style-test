@@ -194,8 +194,8 @@ export class DebugObjectRenderer {
 
             // Debug: Log first few renders to verify coordinates
             if (this.renderCount <= 3) {
-                console.log(`[DebugObjectRenderer] 🖌️ Drawing ${hollowMode ? 'HOLLOW' : 'FILLED'} box: (${left.toFixed(1)}, ${top.toFixed(1)}) to (${right.toFixed(1)}, ${bottom.toFixed(1)})`);
-                console.log(`[DebugObjectRenderer] Color: RGBA(${r}, ${g}, ${b}, ${a}), Thickness: ${thickness}, Offset: (${offset.x}, ${offset.y})`);
+                // console.log(`[DebugObjectRenderer] 🖌️ Drawing ${hollowMode ? 'HOLLOW' : 'FILLED'} box: (${left.toFixed(1)}, ${top.toFixed(1)}) to (${right.toFixed(1)}, ${bottom.toFixed(1)})`);
+                // console.log(`[DebugObjectRenderer] Color: RGBA(${r}, ${g}, ${b}, ${a}), Thickness: ${thickness}, Offset: (${offset.x}, ${offset.y})`);
             }
 
             // Set line width
@@ -261,8 +261,8 @@ export class DebugObjectRenderer {
 
             // Debug: Log first few renders to verify coordinates
             if (this.renderCount <= 3) {
-                console.log(`[DebugObjectRenderer] 🖌️ Drawing line: (${startX.toFixed(1)}, ${startY.toFixed(1)}) to (${endX.toFixed(1)}, ${endY.toFixed(1)})`);
-                console.log(`[DebugObjectRenderer] Color: RGBA(${r}, ${g}, ${b}, ${a}), Thickness: ${thickness}`);
+                // console.log(`[DebugObjectRenderer] 🖌️ Drawing line: (${startX.toFixed(1)}, ${startY.toFixed(1)}) to (${endX.toFixed(1)}, ${endY.toFixed(1)})`);
+                // console.log(`[DebugObjectRenderer] Color: RGBA(${r}, ${g}, ${b}, ${a}), Thickness: ${thickness}`);
             }
 
             // Set line width
@@ -867,12 +867,12 @@ export class DebugObjectRenderer {
                 // It's an instance, get its object type
                 objectType = otherInstanceOrObjectType.objectType;
                 instances = Array.from(objectType.instances());
-                console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (detected from instance)`);
+                //console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (detected from instance)`);
             } else {
                 // It's an object type
                 objectType = otherInstanceOrObjectType;
                 instances = Array.from(objectType.instances());
-                console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (direct object type)`);
+                //console.log(`[DebugObjectRenderer] Drawing lines from all instances of ${objectType.name} to player (direct object type)`);
             }
 
             // Draw line from each instance to player

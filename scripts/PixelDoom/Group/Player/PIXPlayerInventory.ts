@@ -35,39 +35,46 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
 
-    // 获取初始库存数据
+    // Get initial inventory data
     const initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
-    // 创建更新函数，用于在库存操作后更新全局变量
+    // Create update function to update global variables after inventory operations
     const updatePlayerInventory = (items: Item[]) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
     
-    // 绑定主库存，获取返回的控制对象
+    // Bind main inventory and get the returned control object
     const inventoryControl = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
     
-    // 保存引用，确保解绑功能可用
+    // Save reference to ensure unbind function is available
     PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryControl;
     
-    // 切换到单列模式
+    // Verify that the control object has the unbind method
+    if (!inventoryControl || typeof inventoryControl.unbind !== 'function') {
+        console.error("Failed to properly initialize inventory control object");
+    } else {
+        console.log("Inventory control object initialized successfully");
+    }
     
-    // 为主库存添加自定义更新回调
+    // Switch to single column mode
+    
+    // Add custom update callback for main inventory
     inventoryManager.SetMainInventoryUpdateCallback({
         updateMethod: updatePlayerInventory
     });
 })
 
-// 处理数据保存 
+// Handle data saving 
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     //@ts-ignore
     var initialItems
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load", (e) => {
         initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
-        // 重新绑定库存UI，确保UI与数据同步
+        // Re-bind inventory UI to ensure UI is synchronized with data
         if (inventoryManager) {
-            // 给一个短暂延迟，确保UI系统已经准备好
+            // Give a short delay to ensure UI system is ready
             setTimeout(() => {
-                // 重置并重新绑定库存
+                // Reset and re-bind inventory
                 //@ts-ignore
                 const control = inventoryManager.BindPlayerMainInventory(
                     DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory), 
@@ -76,14 +83,19 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                     "I"
                 );
                 
-                // 保存引用，确保解绑功能可用
+                // Save reference to ensure unbind function is available
                 PLAYER_MAIN_INVENTORY_LEVEL.MAIN = control;
                 
-                // 应用单列模式
+                // Verify that the control object has the unbind method
+                if (!control || typeof control.unbind !== 'function') {
+                    console.error("Failed to properly re-initialize inventory control object on load");
+                } else {
+                    console.log("Inventory control object re-initialized successfully on load");
+                }
+                
+                // Apply single column mode
                 //control.oneline();
             }, 100);
         }
-
-
     });
 })

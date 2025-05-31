@@ -45,7 +45,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!isCreatDebugPanel) {
 
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
-        //DEBUG.DebugMainUI.DoNotUseButtonPanel();
+        DEBUG.DebugMainUI.DoNotUseButtonPanel();
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
         //    } else {

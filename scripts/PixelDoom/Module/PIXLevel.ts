@@ -80,39 +80,44 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 export class GAMEPLAY_LEVEL {
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
 
-
-        //关闭环境音效
-        //_Audio.AudioStop("NiaoJiao")
-
-        //下雨需要关闭雨粒子 关闭雨声音乐
-        if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
-            _Audio.AudioStopAll()
-        }
-
-        // 销毁dialogue 面板相关元素 因为他老是再阻挡其他面板 
-        //@ts-ignore
-        var DialogueWhole: DialogueSystem = DialogueMainController;
-        DialogueWhole.DestroyDialogue();
-
-        // 关闭 库存面板相关元素
-        inventoryManager.HideAllInventories();
-        PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); //解绑主库存 
-
-        await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
-
-        // 关闭互动面板 
-        UIInteractionPanelActionChooseMain.CloseChoosePanle();
-        // 清理变量监听
-        VariableMonitoring.CleanupDestroyed();
-
-        //清理雾气 
-        
         UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
-
         })
 
-        
     }
 }
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
+
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
+    // Close environment sound effects
+    //_Audio.AudioStop("NiaoJiao")
+
+    // Rain needs to close rain particles and rain sound music
+    if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
+        _Audio.AudioStopAll()
+    }
+
+    // Destroy dialogue panel related elements because it always blocks other panels 
+    //@ts-ignore
+    var DialogueWhole: DialogueSystem = DialogueMainController;
+    DialogueWhole.DestroyDialogue();
+
+    // Close inventory panel related elements
+    inventoryManager.HideAllInventories();
+
+    // Check if PLAYER_MAIN_INVENTORY_LEVEL.MAIN exists before calling unbind
+    if (PLAYER_MAIN_INVENTORY_LEVEL.MAIN && typeof PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind === 'function') {
+        PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); // Unbind main inventory
+    }
+
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
+
+    // Close interaction panel 
+    UIInteractionPanelActionChooseMain.CloseChoosePanle();
+    // Clean up variable monitoring
+    VariableMonitoring.CleanupDestroyed();
+})
 
