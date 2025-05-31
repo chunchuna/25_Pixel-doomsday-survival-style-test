@@ -55,7 +55,7 @@ interface IUIInventory {
     // 公共属性
     IsQuickPickUpItem: boolean;
     closeOtherInventoryFunc: (() => any) | null;
-    
+
     // 公共方法
     BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void };
     ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void, oneline: () => void };
@@ -114,7 +114,7 @@ class UIInventory implements IUIInventory {
     private windowResizeStartPos: { x: number, y: number, windowWidth: number, windowHeight: number } | null = null
     // 首先添加一个新的状态变量，用于标记是否正在处理物品拖拽
     private isHandlingItemDrag: boolean = false;
-    
+
     // 添加单列模式标志
     private isMainInventoryOnelineMode: boolean = false;
     private isOtherInventoryOnelineMode: boolean = false;
@@ -124,7 +124,7 @@ class UIInventory implements IUIInventory {
     private otherInventoryTypeOnelineModes: Map<string, boolean> = new Map();
     private mainInventoryScrollPosition: number = 0;
     private otherInventoryScrollPosition: number = 0;
-    
+
     // 添加快速拾取功能开关
     public IsQuickPickUpItem: boolean = true;
 
@@ -172,7 +172,7 @@ class UIInventory implements IUIInventory {
     // 绑定主库存
     public BindPlayerMainInventory(inventoryArray: Item[], rows: number, columns: number, key: string): { unbind: () => void, oneline: () => void } {
         console.log("绑定主库存，当前单列模式记忆状态:", this.shouldMainInventoryUseOnelineMode);
-        
+
         // 重置主库存数据，避免叠加
         this.mainInventoryData = [];
         this.slotPositions = [];
@@ -182,7 +182,7 @@ class UIInventory implements IUIInventory {
         this.mainInventoryRows = rows;
         this.mainInventoryColumns = columns;
         this.mainInventoryKey = key;
-        
+
         // 检查并恢复上次的单列模式状态 - 保存临时变量
         const wasOneLineMode = this.shouldMainInventoryUseOnelineMode;
         // 确保isMainInventoryOnelineMode正确设置 - 这是渲染时会参考的变量
@@ -204,32 +204,32 @@ class UIInventory implements IUIInventory {
             } else {
                 // 如果已经是单列模式，仍然确保样式正确应用
                 console.log("主库存已经是单列模式，强制应用单列样式");
-                
+
                 // 立即修改标志和记忆状态，确保状态一致
                 this.isMainInventoryOnelineMode = true;
                 this.shouldMainInventoryUseOnelineMode = true;
-                
+
                 setTimeout(() => {
                     if (this.mainInventoryContainer) {
                         // 在单列模式下调整窗口宽度
                         const newWidth = 300; // 更宽的窗口
                         const newHeight = Math.max(this.MainInventoryWindowSize[1], 500); // 保持高度或增加
-                        
+
                         // 设置窗口尺寸
                         this.mainInventoryContainer.style.width = `${newWidth}px`;
                         this.mainInventoryContainer.style.height = `${newHeight}px`;
                         this.MainInventoryWindowSize = [newWidth, newHeight];
-                        
+
                         // 调整网格适应窗口
                         this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
-                        
+
                         // 额外强制应用单列模式样式到所有格子
                         const slots = this.mainInventoryContainer.querySelectorAll('.inventory-slot');
                         slots.forEach(slot => {
                             const slotElement = slot as HTMLElement;
                             slotElement.classList.add('oneline-slot');
                             slotElement.style.height = '30px';
-                            
+
                             // 找到物品元素并添加单列样式
                             const itemElement = slotElement.querySelector('.inventory-item');
                             if (itemElement) {
@@ -241,12 +241,12 @@ class UIInventory implements IUIInventory {
                                 }
                             }
                         });
-                        
+
                         console.log("主库存单列模式样式强制应用完成");
                     }
                 }, 400); // 使用更长的延迟确保DOM已完全渲染
             }
-            
+
             return {
                 unbind: unbindFunc,
                 oneline: onelineFunc
@@ -260,26 +260,26 @@ class UIInventory implements IUIInventory {
             setTimeout(() => {
                 if (this.mainInventoryContainer) {
                     console.log("开始应用单列模式样式");
-                    
+
                     // 设置内部标志为单列模式
                     this.isMainInventoryOnelineMode = true;
                     this.shouldMainInventoryUseOnelineMode = true;
-                    
+
                     // 在单列模式下调整窗口宽度
                     const newWidth = 300; // 更宽的窗口
                     const newHeight = Math.max(this.MainInventoryWindowSize[1], 500); // 保持高度或增加
-                    
+
                     // 设置窗口尺寸
                     this.mainInventoryContainer.style.width = `${newWidth}px`;
                     this.mainInventoryContainer.style.height = `${newHeight}px`;
                     this.MainInventoryWindowSize = [newWidth, newHeight];
-                    
+
                     // 调整网格以适应窗口
                     this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
-                    
+
                     // 强制重新渲染一次
                     this.renderMainInventory();
-                    
+
                     // 额外的延迟确保渲染完成后再应用样式
                     setTimeout(() => {
                         if (this.mainInventoryContainer) {
@@ -289,7 +289,7 @@ class UIInventory implements IUIInventory {
                                 const slotElement = slot as HTMLElement;
                                 slotElement.classList.add('oneline-slot');
                                 slotElement.style.height = '30px';
-                                
+
                                 // 找到物品元素并添加单列样式
                                 const itemElement = slotElement.querySelector('.inventory-item');
                                 if (itemElement) {
@@ -301,7 +301,7 @@ class UIInventory implements IUIInventory {
                                     }
                                 }
                             });
-                            
+
                             console.log("单列模式样式应用完成");
                         }
                     }, 100);
@@ -321,7 +321,7 @@ class UIInventory implements IUIInventory {
         // 在解绑前记录当前单列模式状态
         // 注意：我们不修改 shouldMainInventoryUseOnelineMode，这确保状态被记忆
         const currentOnelineState = this.shouldMainInventoryUseOnelineMode;
-        
+
         // 如果主库存当前显示，先隐藏它
         if (this.isMainInventoryVisible) {
             this.toggleMainInventory();
@@ -341,7 +341,7 @@ class UIInventory implements IUIInventory {
         this.mainInventoryCallback = null;
 
         // 重置内部单列模式状态标志，但保留记忆状态
-        this.isMainInventoryOnelineMode = false; 
+        this.isMainInventoryOnelineMode = false;
         // 确保记忆变量不变
         this.shouldMainInventoryUseOnelineMode = currentOnelineState;
 
@@ -352,7 +352,7 @@ class UIInventory implements IUIInventory {
     public ShowOtherInventory(inventoryArray: Item[], rows: number, columns: number, updateInfo?: InventoryUpdateCallback, InventoryName?: string): { close: () => void, oneline: () => void } {
         // 确保库存名称有效且唯一
         const inventoryKey = InventoryName && InventoryName.trim() !== '' ? InventoryName.trim() : 'default';
-        
+
         // 如果已有打开的其他库存，先关闭它
         if (this.closeOtherInventoryFunc) {
             this.closeOtherInventoryFunc();
@@ -378,12 +378,12 @@ class UIInventory implements IUIInventory {
 
         // 创建新的其他库存
         this.otherInventoryInstance = this.createInventoryContainer('other-inventory');
-        
+
         // 修改：先设置为不可见，防止闪烁
         this.otherInventoryInstance.style.opacity = '0';
-        
+
         document.body.appendChild(this.otherInventoryInstance);
-        
+
         // 将库存名称保存到实例元素属性中(关键步骤)
         this.otherInventoryInstance.setAttribute('data-inventory-name', inventoryKey);
 
@@ -463,10 +463,10 @@ class UIInventory implements IUIInventory {
                 // 添加开启动画类，同时设置为可见
                 this.otherInventoryInstance.classList.add('inventory-open');
                 this.otherInventoryInstance.style.opacity = '1';
-                
+
                 // 调整网格以适应窗口大小
                 this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
-                
+
                 // 如果需要应用单列模式，额外确认样式正确应用
                 if (this.isOtherInventoryOnelineMode) {
                     setTimeout(() => {
@@ -474,11 +474,11 @@ class UIInventory implements IUIInventory {
                             // 在单列模式下调整窗口宽度
                             const newWidth = 300; // 更宽的窗口
                             const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500); // 保持高度或增加
-                            
+
                             this.otherInventoryInstance.style.width = `${newWidth}px`;
                             this.otherInventoryInstance.style.height = `${newHeight}px`;
                             this.OtherInventoryWindowSize = [newWidth, newHeight];
-                            
+
                             // 额外强制再次应用单列模式样式
                             this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
                         }
@@ -540,48 +540,48 @@ class UIInventory implements IUIInventory {
 
         // 保存关闭函数的引用
         this.closeOtherInventoryFunc = closeOtherInventory;
-        
+
         // 创建更强大的oneline函数，支持记忆和强制应用
         const onelineFunc = () => {
             const inventoryName = this.otherInventoryInstance?.getAttribute('data-inventory-name') || 'default';
-            
+
             // 如果当前不是单列模式，则切换到单列模式
             if (!this.isOtherInventoryOnelineMode) {
-                this.toggleOtherInventoryOnelineMode(); 
+                this.toggleOtherInventoryOnelineMode();
             } else {
                 // 如果已经是单列模式，仍然确保样式正确应用
                 console.log(`其他库存(${inventoryName})已经是单列模式，强制应用单列样式`);
-                
+
                 // 设置状态变量
                 this.isOtherInventoryOnelineMode = true;
                 this.otherInventoryTypeOnelineModes.set(inventoryName, true);
-                
+
                 setTimeout(() => {
                     if (this.otherInventoryInstance) {
                         // 在单列模式下调整窗口宽度
                         const newWidth = 300; // 更宽的窗口
                         const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500); // 保持高度或增加
-                        
+
                         // 设置窗口尺寸
                         this.otherInventoryInstance.style.width = `${newWidth}px`;
                         this.otherInventoryInstance.style.height = `${newHeight}px`;
                         this.OtherInventoryWindowSize = [newWidth, newHeight];
-                        
+
                         // 调整网格适应窗口
                         this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
-                        
+
                         // 额外强制应用单列模式样式到所有格子
                         const slots = this.otherInventoryInstance.querySelectorAll('.inventory-slot');
                         slots.forEach(slot => {
                             const slotElement = slot as HTMLElement;
                             slotElement.classList.add('oneline-slot');
                             slotElement.style.height = '30px';
-                            
+
                             // 找到物品元素并添加单列样式
                             const itemElement = slotElement.querySelector('.inventory-item');
                             if (itemElement) {
                                 itemElement.classList.add('oneline-item');
-                                
+
                                 // 找到数量标签并添加单列样式
                                 const countLabel = itemElement.querySelector('.item-count');
                                 if (countLabel) {
@@ -589,7 +589,7 @@ class UIInventory implements IUIInventory {
                                 }
                             }
                         });
-                        
+
                         console.log(`其他库存(${inventoryName})单列模式样式强制应用完成`);
                     }
                 }, 200); // 使用更长的延迟确保DOM已完全渲染
@@ -648,11 +648,11 @@ class UIInventory implements IUIInventory {
             requestAnimationFrame(() => {
                 // 移除关闭动画类
                 this.mainInventoryContainer.classList.remove('inventory-close');
-                
+
                 // 添加打开动画类并设置为可见
                 this.mainInventoryContainer.classList.add('inventory-open');
                 this.mainInventoryContainer.style.opacity = '1';
-                
+
                 // 调整网格以适应窗口大小
                 setTimeout(() => {
                     this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
@@ -771,10 +771,10 @@ class UIInventory implements IUIInventory {
         }
 
         // 判断是否是单列模式
-        const isOnelineMode = this.forceOnelineMode || 
-                             (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
-                             (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
-        
+        const isOnelineMode = this.forceOnelineMode ||
+            (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) ||
+            (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
+
         // 获取当前的列数
         let columns: number;
         if (container.id === 'main-inventory') {
@@ -813,12 +813,12 @@ class UIInventory implements IUIInventory {
                 slotElement.style.width = `${availableWidth}px`; // 使用计算出的可用宽度
                 slotElement.style.height = `30px`; // 降低高度为固定值
                 slotElement.classList.add('oneline-slot');
-                
+
                 // 找到物品元素并添加单列样式
                 const itemElement = slotElement.querySelector('.inventory-item');
                 if (itemElement) {
                     itemElement.classList.add('oneline-item');
-                    
+
                     // 找到数量标签并添加单列样式
                     const countLabel = itemElement.querySelector('.item-count');
                     if (countLabel) {
@@ -830,12 +830,12 @@ class UIInventory implements IUIInventory {
                 slotElement.style.width = `${slotSize}px`;
                 slotElement.style.height = `${slotSize}px`;
                 slotElement.classList.remove('oneline-slot');
-                
+
                 // 找到物品元素并移除单列样式
                 const itemElement = slotElement.querySelector('.inventory-item');
                 if (itemElement) {
                     itemElement.classList.remove('oneline-item');
-                    
+
                     // 找到数量标签并移除单列样式
                     const countLabel = itemElement.querySelector('.item-count');
                     if (countLabel) {
@@ -844,11 +844,11 @@ class UIInventory implements IUIInventory {
                 }
             }
         });
-        
+
         // 如果是单列模式，额外强制设置容器样式，防止样式失效
         if (isOnelineMode) {
             container.setAttribute('data-oneline-mode', 'true');
-            
+
             // 如果是主库存，更新记忆变量
             if (container.id === 'main-inventory') {
                 this.isMainInventoryOnelineMode = true;
@@ -962,13 +962,13 @@ class UIInventory implements IUIInventory {
 
         // 设置标记表示正在处理物品拖拽
         this.isHandlingItemDrag = true;
-        
+
         // 重新渲染主库存
         this.renderMainInventory();
 
         // 触发主库存更新回调
         this.triggerMainInventoryCallback();
-        
+
         // 处理完毕后清除标记
         this.isHandlingItemDrag = false;
     }
@@ -1383,21 +1383,21 @@ class UIInventory implements IUIInventory {
     private renderMainInventory(): void {
         // 保存是否处于拖拽状态的标志
         const wasHandlingDrag = this.isHandlingItemDrag;
-        
+
         // 保存当前滚动位置
         let mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
         if (mainScrollContainer) {
             this.mainInventoryScrollPosition = mainScrollContainer.scrollTop;
         }
-        
+
         // 创建一个克隆的HTML结构用于渲染，避免直接操作可见DOM
         let currentGrid = null;
         let mainGridClone = null;
-        
+
         if (wasHandlingDrag && mainScrollContainer) {
             // 禁用滚动条过渡动画
             mainScrollContainer.style.scrollBehavior = 'auto';
-            
+
             // 仅在拖拽操作时保留滚动容器，只更新网格内容
             currentGrid = mainScrollContainer.querySelector('.inventory-grid');
             if (currentGrid) {
@@ -1405,7 +1405,7 @@ class UIInventory implements IUIInventory {
                 mainGridClone = currentGrid.cloneNode(false);
             }
         }
-        
+
         this.renderInventory(
             this.mainInventoryContainer,
             this.mainInventoryData,
@@ -1414,10 +1414,10 @@ class UIInventory implements IUIInventory {
             // 传递一个标识，表示这是主库存
             false
         );
-        
+
         // 恢复拖拽状态标志
         this.isHandlingItemDrag = wasHandlingDrag;
-        
+
         // 在拖拽操作中，立即恢复滚动位置，不使用延时
         if (wasHandlingDrag) {
             mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
@@ -1425,7 +1425,7 @@ class UIInventory implements IUIInventory {
                 // 立即恢复滚动位置，不使用动画
                 mainScrollContainer.style.scrollBehavior = 'auto';
                 mainScrollContainer.scrollTop = this.mainInventoryScrollPosition;
-                
+
                 // 确保网格容器渲染正确，使用requestAnimationFrame
                 requestAnimationFrame(() => {
                     this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
@@ -1438,7 +1438,7 @@ class UIInventory implements IUIInventory {
     private renderOtherInventory(rows: number, columns: number, InventoryName?: string): void {
         // 保存是否处于拖拽状态的标志
         const wasHandlingDrag = this.isHandlingItemDrag;
-        
+
         if (this.otherInventoryInstance) {
             this.renderInventory(
                 this.otherInventoryInstance,
@@ -1450,7 +1450,7 @@ class UIInventory implements IUIInventory {
                 InventoryName,
             );
         }
-        
+
         // 恢复拖拽状态标志
         this.isHandlingItemDrag = wasHandlingDrag;
     }
@@ -1460,12 +1460,12 @@ class UIInventory implements IUIInventory {
         // 保存原有的滚动容器，以便稍后重用
         const existingScrollContainer = container.querySelector('.inventory-scroll-container') as HTMLElement;
         let savedScrollTop = 0;
-        
+
         // 如果是主库存且在拖拽状态，保存滚动位置
         if (!isOtherInventory && this.isHandlingItemDrag && existingScrollContainer) {
             savedScrollTop = existingScrollContainer.scrollTop;
         }
-        
+
         // 清空容器，但保留拖拽句柄
         const dragHandle = container.querySelector('.inventory-drag-handle');
         container.innerHTML = '';
@@ -1531,10 +1531,10 @@ class UIInventory implements IUIInventory {
         gridContainer.className = 'inventory-grid';
 
         // 判断是否是单列模式
-        const isOnelineMode = this.forceOnelineMode || 
-                             (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
-                             (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
-                            
+        const isOnelineMode = this.forceOnelineMode ||
+            (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) ||
+            (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
+
         // 明确设置固定的列数和间隔
         if (isOnelineMode) {
             gridContainer.style.gridTemplateColumns = `1fr`; // 单列模式
@@ -1649,22 +1649,22 @@ class UIInventory implements IUIInventory {
         // 添加滚动条容器 - 对主库存特殊处理
         const scrollContainer = document.createElement('div');
         scrollContainer.className = 'inventory-scroll-container';
-        
+
         // 如果是主库存且在拖拽操作中，设置滚动行为为自动(避免平滑滚动动画)
         if (!isOtherInventory && this.isHandlingItemDrag) {
             scrollContainer.style.scrollBehavior = 'auto';
         }
-        
+
         scrollContainer.appendChild(gridContainer);
         container.appendChild(scrollContainer);
-        
+
         // 如果是主库存且在拖拽状态，立即恢复滚动位置
         if (!isOtherInventory && this.isHandlingItemDrag) {
             if (savedScrollTop > 0 || this.mainInventoryScrollPosition > 0) {
                 scrollContainer.scrollTop = savedScrollTop || this.mainInventoryScrollPosition;
             }
         }
-        
+
         // 在非拖拽状态下调整格子大小
         if (!this.isHandlingItemDrag) {
             setTimeout(() => {
@@ -1674,26 +1674,26 @@ class UIInventory implements IUIInventory {
             // 即使在拖拽状态下，也要保持单列模式的样式
             setTimeout(() => {
                 // 保持单列模式的布局
-                if ((container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+                if ((container.id === 'main-inventory' && this.isMainInventoryOnelineMode) ||
                     (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode)) {
                     this.applyOnelineModeStyles(container);
                 }
             }, 0);
         }
     }
-    
+
     // 新增方法：为容器应用单列模式样式，即使在拖拽状态
     private applyOnelineModeStyles(container: HTMLDivElement): void {
         // 获取窗口的宽度
         const containerWidth = container.clientWidth;
         const availableWidth = containerWidth - 40; // 内边距
-        
+
         // 获取网格容器并设置为1fr
         const gridContainer = container.querySelector('.inventory-grid') as HTMLDivElement;
         if (gridContainer) {
             gridContainer.style.gridTemplateColumns = `1fr`;
         }
-        
+
         // 应用单列样式到所有格子
         const slots = container.querySelectorAll('.inventory-slot');
         slots.forEach(slot => {
@@ -1701,12 +1701,12 @@ class UIInventory implements IUIInventory {
             slotElement.style.width = `${availableWidth}px`;
             slotElement.style.height = `30px`;
             slotElement.classList.add('oneline-slot');
-            
+
             // 查找物品元素并添加单列样式
             const itemElement = slotElement.querySelector('.inventory-item');
             if (itemElement) {
                 itemElement.classList.add('oneline-item');
-                
+
                 // 查找数量标签并添加单列样式
                 const countLabel = itemElement.querySelector('.item-count');
                 if (countLabel) {
@@ -1751,24 +1751,24 @@ class UIInventory implements IUIInventory {
 
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
-        
+
         // 检查是否为单列模式，添加相应的类
-        const isOnelineMode = this.forceOnelineMode || 
-                             (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
-                             (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
+        const isOnelineMode = this.forceOnelineMode ||
+            (inventoryType === 'main' && this.isMainInventoryOnelineMode) ||
+            (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
         if (isOnelineMode) {
             slot.classList.add('oneline-slot');
         }
-        
+
         // Add quality-based slot styling
         slot.classList.add(`slot-quality-${item.itemLevel.toLowerCase().replace('+', 'plus')}`);
-        
+
         // Add special effects for TOP tier items
         if (item.itemLevel === ItemLevel.Top) {
             slot.classList.add('slot-top-tier');
             this.addTopTierEffects(slot);
         }
-        
+
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
 
@@ -1844,7 +1844,7 @@ class UIInventory implements IUIInventory {
         // Create particle container
         const particleContainer = document.createElement('div');
         particleContainer.className = 'top-tier-particles';
-        
+
         // Create multiple particles
         for (let i = 0; i < 6; i++) {
             const particle = document.createElement('div');
@@ -1852,9 +1852,9 @@ class UIInventory implements IUIInventory {
             particle.style.animationDelay = `${i * 0.3}s`;
             particleContainer.appendChild(particle);
         }
-        
+
         slot.appendChild(particleContainer);
-        
+
         // Create glow effect overlay
         const glowOverlay = document.createElement('div');
         glowOverlay.className = 'top-tier-glow';
@@ -1865,15 +1865,15 @@ class UIInventory implements IUIInventory {
     private createEmptySlot(slotIndex: number, inventoryType: 'main' | 'other'): HTMLDivElement {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot empty';
-        
+
         // 检查是否为单列模式，添加相应的类
-        const isOnelineMode = this.forceOnelineMode || 
-                             (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
-                             (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
+        const isOnelineMode = this.forceOnelineMode ||
+            (inventoryType === 'main' && this.isMainInventoryOnelineMode) ||
+            (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
         if (isOnelineMode) {
             slot.classList.add('oneline-slot');
         }
-        
+
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
 
@@ -3001,7 +3001,7 @@ class UIInventory implements IUIInventory {
                 this.triggerMainInventoryCallback();
             }
         }
-        
+
         // 处理完毕后清除标记
         this.isHandlingItemDrag = false;
     }
@@ -3116,7 +3116,7 @@ class UIInventory implements IUIInventory {
 
         // 重新渲染其他库存，保持行列不变
         this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
-        
+
         // 处理完毕后清除标记
         this.isHandlingItemDrag = false;
     }
@@ -3377,31 +3377,31 @@ class UIInventory implements IUIInventory {
 
     // 在UIInventory类中添加新方法
     public HideAllInventories(): void {
-      // 隐藏主库存
-      if (this.isMainInventoryVisible) {
-        this.toggleMainInventory();
-      }
-      
-      // 关闭其他库存(如果存在)
-      if (this.closeOtherInventoryFunc) {
-        this.closeOtherInventoryFunc();
-        // 确保引用被清除
-        this.closeOtherInventoryFunc = null;
-      }
-      
-      // 隐藏物品描述面板
-      this.hideItemDescription();
-      
-      // 清理任何拖拽中的物品
-      if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
-        this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
-      }
-      
-      // 重置拖拽状态
-      this.draggedItem = null;
-      this.draggedItemGhost = null;
-      this.clickStartPos = null;
-      this.isDragging = false;
+        // 隐藏主库存
+        if (this.isMainInventoryVisible) {
+            this.toggleMainInventory();
+        }
+
+        // 关闭其他库存(如果存在)
+        if (this.closeOtherInventoryFunc) {
+            this.closeOtherInventoryFunc();
+            // 确保引用被清除
+            this.closeOtherInventoryFunc = null;
+        }
+
+        // 隐藏物品描述面板
+        this.hideItemDescription();
+
+        // 清理任何拖拽中的物品
+        if (this.draggedItemGhost && this.draggedItemGhost.parentNode) {
+            this.draggedItemGhost.parentNode.removeChild(this.draggedItemGhost);
+        }
+
+        // 重置拖拽状态
+        this.draggedItem = null;
+        this.draggedItemGhost = null;
+        this.clickStartPos = null;
+        this.isDragging = false;
     }
 
     // 添加主库存单列模式切换方法
@@ -3409,20 +3409,20 @@ class UIInventory implements IUIInventory {
         this.isMainInventoryOnelineMode = !this.isMainInventoryOnelineMode;
         // 记录当前状态，以便下次绑定时恢复
         this.shouldMainInventoryUseOnelineMode = this.isMainInventoryOnelineMode;
-        
-        console.log("切换主库存单列模式状态为:", this.isMainInventoryOnelineMode, 
+
+        console.log("切换主库存单列模式状态为:", this.isMainInventoryOnelineMode,
             "记忆状态为:", this.shouldMainInventoryUseOnelineMode);
-        
+
         if (this.isMainInventoryVisible) {
             // 先重新渲染库存内容
             this.renderMainInventory();
-            
+
             // 调整窗口大小以适应单列模式
             if (this.isMainInventoryOnelineMode) {
                 // 在单列模式下调整窗口宽度
                 const newWidth = 300; // 更宽的窗口
                 const newHeight = Math.max(this.MainInventoryWindowSize[1], 500); // 保持高度或增加
-                
+
                 this.mainInventoryContainer.style.width = `${newWidth}px`;
                 this.mainInventoryContainer.style.height = `${newHeight}px`;
                 this.MainInventoryWindowSize = [newWidth, newHeight];
@@ -3430,15 +3430,15 @@ class UIInventory implements IUIInventory {
                 // 恢复原来的窗口尺寸比例
                 const newWidth = Math.max(225, this.MainInventoryWindowSize[0]);
                 const newHeight = Math.max(380, this.MainInventoryWindowSize[1]);
-                
+
                 this.mainInventoryContainer.style.width = `${newWidth}px`;
                 this.mainInventoryContainer.style.height = `${newHeight}px`;
             }
-            
+
             // 调整网格以适应窗口大小
             setTimeout(() => {
                 this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
-                
+
                 // 如果是单列模式，额外应用样式以确保正确显示
                 if (this.isMainInventoryOnelineMode) {
                     // 额外强制应用单列模式样式到所有格子
@@ -3447,7 +3447,7 @@ class UIInventory implements IUIInventory {
                         const slotElement = slot as HTMLElement;
                         slotElement.classList.add('oneline-slot');
                         slotElement.style.height = '30px';
-                        
+
                         // 找到物品元素并添加单列样式
                         const itemElement = slotElement.querySelector('.inventory-item');
                         if (itemElement) {
@@ -3459,39 +3459,39 @@ class UIInventory implements IUIInventory {
                             }
                         }
                     });
-                    
+
                     console.log("主库存单列模式样式应用完成");
                 }
             }, 200);
         }
     }
-    
+
     // 添加其他库存单列模式切换方法
     private toggleOtherInventoryOnelineMode(): void {
         // 获取当前库存名称
-        const inventoryName = this.otherInventoryInstance ? 
+        const inventoryName = this.otherInventoryInstance ?
             this.otherInventoryInstance.getAttribute('data-inventory-name') || 'default' : 'default';
-            
+
         // 切换状态
         this.isOtherInventoryOnelineMode = !this.isOtherInventoryOnelineMode;
-        
+
         // 保存当前单列模式状态到Map中（这是重要的记忆部分）
         this.otherInventoryTypeOnelineModes.set(inventoryName, this.isOtherInventoryOnelineMode);
-        
-        console.log(`切换其他库存(${inventoryName})单列模式状态为:`, this.isOtherInventoryOnelineMode, 
+
+        console.log(`切换其他库存(${inventoryName})单列模式状态为:`, this.isOtherInventoryOnelineMode,
             "记忆状态为:", this.otherInventoryTypeOnelineModes.get(inventoryName));
-        
+
         // 如果实例可用，更新UI
         if (this.otherInventoryInstance) {
             // 先渲染库存内容
             this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns, inventoryName);
-            
+
             // 调整窗口大小以适应单列模式
             if (this.isOtherInventoryOnelineMode) {
                 // 在单列模式下调整窗口宽度
                 const newWidth = 300; // 更宽的窗口
                 const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500); // 保持高度或增加
-                
+
                 this.otherInventoryInstance.style.width = `${newWidth}px`;
                 this.otherInventoryInstance.style.height = `${newHeight}px`;
                 this.OtherInventoryWindowSize = [newWidth, newHeight];
@@ -3499,16 +3499,16 @@ class UIInventory implements IUIInventory {
                 // 恢复原来的窗口尺寸比例
                 const newWidth = Math.max(225, this.OtherInventoryWindowSize[0]);
                 const newHeight = Math.max(380, this.OtherInventoryWindowSize[1]);
-                
+
                 this.otherInventoryInstance.style.width = `${newWidth}px`;
                 this.otherInventoryInstance.style.height = `${newHeight}px`;
             }
-            
+
             // 调整网格以适应窗口大小 - 使用更长的延迟并强制应用样式
             setTimeout(() => {
                 if (this.otherInventoryInstance) {
                     this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
-                    
+
                     // 如果是单列模式，额外应用样式以确保正确显示
                     if (this.isOtherInventoryOnelineMode) {
                         // 额外强制应用单列模式样式到所有格子
@@ -3517,12 +3517,12 @@ class UIInventory implements IUIInventory {
                             const slotElement = slot as HTMLElement;
                             slotElement.classList.add('oneline-slot');
                             slotElement.style.height = '30px';
-                            
+
                             // 找到物品元素并添加单列样式
                             const itemElement = slotElement.querySelector('.inventory-item');
                             if (itemElement) {
                                 itemElement.classList.add('oneline-item');
-                                
+
                                 // 找到数量标签并添加单列样式
                                 const countLabel = itemElement.querySelector('.item-count');
                                 if (countLabel) {
@@ -3530,7 +3530,7 @@ class UIInventory implements IUIInventory {
                                 }
                             }
                         });
-                        
+
                         console.log("其他库存单列模式样式应用完成");
                     }
                 }
@@ -3544,16 +3544,16 @@ class UIInventory implements IUIInventory {
         if (!this.IsQuickPickUpItem || !this.isMainInventoryVisible) {
             return;
         }
-        
+
         // 获取其他库存中的源物品信息
         const otherInventorySlots = this.getOtherInventorySlots();
         const sourceItemInfo = otherInventorySlots[sourceSlot];
-        
+
         if (!sourceItemInfo.item) return;
-        
+
         // 查找主库存中合适的位置放置物品
         let targetSlot = -1;
-        
+
         // 首先尝试找到相同物品的格子并合并
         for (let i = 0; i < this.slotPositions.length; i++) {
             const slotItem = this.slotPositions[i].item;
@@ -3563,7 +3563,7 @@ class UIInventory implements IUIInventory {
                 break;
             }
         }
-        
+
         // 如果没有找到相同物品的格子，尝试找一个空格子
         if (targetSlot === -1) {
             for (let i = 0; i < this.slotPositions.length; i++) {
@@ -3574,15 +3574,15 @@ class UIInventory implements IUIInventory {
                 }
             }
         }
-        
+
         // 如果找到了合适的格子
         if (targetSlot !== -1) {
             // 设置标记表示正在处理物品拖拽，避免自动调整格子大小
             this.isHandlingItemDrag = true;
-            
+
             // 创建飞行动画效果
             this.createFlyingItemAnimation(item, sourceItemInfo.item, count, sourceSlot, targetSlot);
-            
+
             // 处理物品转移
             const targetItem = this.slotPositions[targetSlot].item;
             if (targetItem && targetItem.itemName === item.itemName) {
@@ -3591,7 +3591,7 @@ class UIInventory implements IUIInventory {
                 if (totalCount <= 64) {
                     // 可以完全合并
                     this.slotPositions[targetSlot].count = totalCount;
-                    
+
                     // 清空其他库存中的对应项
                     sourceItemInfo.item = null;
                     sourceItemInfo.count = 0;
@@ -3604,18 +3604,18 @@ class UIInventory implements IUIInventory {
                 // 放入空格子
                 this.slotPositions[targetSlot].item = { ...item }; // 深拷贝
                 this.slotPositions[targetSlot].count = count;
-                
+
                 // 清空其他库存中的对应项
                 sourceItemInfo.item = null;
                 sourceItemInfo.count = 0;
             }
-            
+
             // 更新其他库存数组数据
             this.updateOtherInventoryData(item, count, 'remove');
-            
+
             // 同步更新原始库存数组
             this.syncOriginalInventoryArray();
-            
+
             // 保存主库存的滚动位置
             const mainScrollContainer = this.mainInventoryContainer.querySelector('.inventory-scroll-container') as HTMLElement;
             if (mainScrollContainer) {
@@ -3623,26 +3623,26 @@ class UIInventory implements IUIInventory {
                 // 禁用滚动动画
                 mainScrollContainer.style.scrollBehavior = 'auto';
             }
-            
+
             // 重新渲染库存，但延迟等待动画完成
             setTimeout(() => {
                 // 在渲染前确保仍然保持拖拽状态，避免格子大小调整
                 const wasHandlingDrag = this.isHandlingItemDrag;
-                
+
                 // 渲染主库存
                 this.renderMainInventory();
-                
+
                 // 恢复主库存滚动位置
                 if (mainScrollContainer && this.mainInventoryScrollPosition > 0) {
                     mainScrollContainer.scrollTop = this.mainInventoryScrollPosition;
                 }
-                
+
                 // 渲染其他库存
                 this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns);
-                
+
                 // 触发主库存更新回调
                 this.triggerMainInventoryCallback();
-                
+
                 // 再延迟一点时间后再清除拖拽标记，确保UI稳定
                 setTimeout(() => {
                     this.isHandlingItemDrag = false;
@@ -3653,30 +3653,30 @@ class UIInventory implements IUIInventory {
             this.showInventoryFullNotification();
         }
     }
-    
+
     // 创建物品飞行动画
     private createFlyingItemAnimation(item: Item, originalItem: Item | null, count: number, sourceSlot: number, targetSlot: number): void {
         // 如果其他库存实例不存在，则无法创建动画
         if (!this.otherInventoryInstance) return;
-        
+
         // 获取源格子和目标格子的元素
         const sourceSlotEl = this.otherInventoryInstance.querySelector(`.inventory-slot[data-slot-index="${sourceSlot}"]`) as HTMLElement;
         const targetSlotEl = this.mainInventoryContainer.querySelector(`.inventory-slot[data-slot-index="${targetSlot}"]`) as HTMLElement;
-        
+
         if (!sourceSlotEl || !targetSlotEl) return;
-        
+
         // 获取源格子和目标格子的位置
         const sourceRect = sourceSlotEl.getBoundingClientRect();
         const targetRect = targetSlotEl.getBoundingClientRect();
-        
+
         // 创建飞行物品元素
         const flyingItem = document.createElement('div');
         flyingItem.className = 'flying-item';
-        
+
         // 应用物品的样式
         flyingItem.textContent = item.itemName;
         flyingItem.setAttribute('data-item-level', item.itemLevel);
-        
+
         // 如果数量大于1，添加数量标签
         if (count > 1) {
             const countLabel = document.createElement('div');
@@ -3684,7 +3684,7 @@ class UIInventory implements IUIInventory {
             countLabel.textContent = count.toString();
             flyingItem.appendChild(countLabel);
         }
-        
+
         // 设置初始位置和尺寸
         flyingItem.style.position = 'fixed';
         flyingItem.style.left = `${sourceRect.left}px`;
@@ -3701,13 +3701,13 @@ class UIInventory implements IUIInventory {
         flyingItem.style.fontSize = '12px';
         flyingItem.style.boxShadow = '0 0 15px rgba(100, 200, 255, 0.7)';
         flyingItem.style.transition = 'all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
-        
+
         // 添加到文档中
         document.body.appendChild(flyingItem);
-        
+
         // 强制回流，准备开始动画
         void flyingItem.offsetWidth;
-        
+
         // 应用动画
         flyingItem.style.left = `${targetRect.left}px`;
         flyingItem.style.top = `${targetRect.top}px`;
@@ -3715,13 +3715,13 @@ class UIInventory implements IUIInventory {
         flyingItem.style.height = `${targetRect.height}px`;
         flyingItem.style.opacity = '0.8';
         flyingItem.style.transform = 'scale(0.8)';
-        
+
         // 动画结束后移除元素
         flyingItem.addEventListener('transitionend', () => {
             if (flyingItem.parentNode) {
                 flyingItem.parentNode.removeChild(flyingItem);
             }
-            
+
             // 在目标格子添加高亮效果，但不触发格子大小调整
             targetSlotEl.classList.add('slot-highlight');
             setTimeout(() => {
@@ -3729,7 +3729,7 @@ class UIInventory implements IUIInventory {
             }, 300);
         });
     }
-    
+
     // 显示库存已满提示
     private showInventoryFullNotification(): void {
         const notification = document.createElement('div');
@@ -3784,7 +3784,7 @@ class UIInventory implements IUIInventory {
             if (event.key.toLowerCase() === this.quickCloseKey) {
                 // 防止默认行为
                 event.preventDefault();
-                
+
                 // 执行快速关闭逻辑：先关闭其他库存，再关闭主库存
                 this.executeQuickClose();
             }
@@ -3838,18 +3838,18 @@ class UIInventory implements IUIInventory {
             // 强制设置主库存为单列模式
             this.isMainInventoryOnelineMode = true;
             this.shouldMainInventoryUseOnelineMode = true;
-            
+
             // 重新渲染主库存
             this.renderMainInventory();
-            
+
             // 调整窗口大小以适应单列模式
             const newWidth = 300;
             const newHeight = Math.max(this.MainInventoryWindowSize[1], 500);
-            
+
             this.mainInventoryContainer.style.width = `${newWidth}px`;
             this.mainInventoryContainer.style.height = `${newHeight}px`;
             this.MainInventoryWindowSize = [newWidth, newHeight];
-            
+
             // 调整网格以适应窗口大小
             setTimeout(() => {
                 this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
@@ -3860,22 +3860,22 @@ class UIInventory implements IUIInventory {
         if (this.otherInventoryInstance) {
             // 强制设置其他库存为单列模式
             this.isOtherInventoryOnelineMode = true;
-            
+
             // 获取库存名称并更新记忆状态
             const inventoryName = this.otherInventoryInstance.getAttribute('data-inventory-name') || 'default';
             this.otherInventoryTypeOnelineModes.set(inventoryName, true);
-            
+
             // 重新渲染其他库存
             this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns, inventoryName);
-            
+
             // 调整窗口大小以适应单列模式
             const newWidth = 300;
             const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500);
-            
+
             this.otherInventoryInstance.style.width = `${newWidth}px`;
             this.otherInventoryInstance.style.height = `${newHeight}px`;
             this.OtherInventoryWindowSize = [newWidth, newHeight];
-            
+
             // 调整网格以适应窗口大小
             setTimeout(() => {
                 if (this.otherInventoryInstance) {
@@ -3955,63 +3955,63 @@ export type { InventoryUpdateCallback };
 
 // 在导出部分添加此方法
 export function HideAllInventories(): void {
-  inventoryManager.HideAllInventories();
+    inventoryManager.HideAllInventories();
 }
 
 // 添加快速拾取功能开关控制方法
 export function EnableQuickPickup(enable: boolean): void {
-  if (inventoryManager) {
-    inventoryManager.IsQuickPickUpItem = enable;
-  }
+    if (inventoryManager) {
+        inventoryManager.IsQuickPickUpItem = enable;
+    }
 }
 
 // 获取快速拾取功能状态
 export function IsQuickPickupEnabled(): boolean {
-  if (inventoryManager) {
-    return inventoryManager.IsQuickPickUpItem;
-  }
-  return true; // 默认启用
+    if (inventoryManager) {
+        return inventoryManager.IsQuickPickUpItem;
+    }
+    return true; // 默认启用
 }
 
 // 导出四个事件监听方法
 export function OnMainInventoryOpen(callback: () => void): void {
-  if (inventoryManager) {
-    inventoryManager.OnMainInventoryOpen(callback);
-  }
+    if (inventoryManager) {
+        inventoryManager.OnMainInventoryOpen(callback);
+    }
 }
 
 export function OnMainInventoryClose(callback: () => void): void {
-  if (inventoryManager) {
-    inventoryManager.OnMainInventoryClose(callback);
-  }
+    if (inventoryManager) {
+        inventoryManager.OnMainInventoryClose(callback);
+    }
 }
 
 export function OnOtherInventoryOpen(callback: () => void): void {
-  if (inventoryManager) {
-    inventoryManager.OnOtherInventoryOpen(callback);
-  }
+    if (inventoryManager) {
+        inventoryManager.OnOtherInventoryOpen(callback);
+    }
 }
 
 export function OnOtherInventoryClose(callback: () => void): void {
-  if (inventoryManager) {
-    inventoryManager.OnOtherInventoryClose(callback);
-  }
+    if (inventoryManager) {
+        inventoryManager.OnOtherInventoryClose(callback);
+    }
 }
 
 // 导出快速关闭库存窗口的按键绑定方法
 export function bind_QuickCloseInventoryWindow(key: string): { unbind: () => void } {
-  if (inventoryManager) {
-    return inventoryManager.bind_QuickCloseInventoryWindow(key);
-  }
-  // 如果inventoryManager不存在，返回一个空的解绑函数
-  return {
-    unbind: () => {}
-  };
+    if (inventoryManager) {
+        return inventoryManager.bind_QuickCloseInventoryWindow(key);
+    }
+    // 如果inventoryManager不存在，返回一个空的解绑函数
+    return {
+        unbind: () => { }
+    };
 }
 
 // 导出强制单列模式方法
 export function ForceOnelineMode(): void {
-  if (inventoryManager) {
-    inventoryManager.ForceOnelineMode();
-  }
+    if (inventoryManager) {
+        inventoryManager.ForceOnelineMode();
+    }
 }
