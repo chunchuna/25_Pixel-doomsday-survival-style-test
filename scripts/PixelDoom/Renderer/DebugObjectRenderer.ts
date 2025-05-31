@@ -911,7 +911,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var ClickObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity;
     ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
     if (playerInstance) {
-        var GouHuoLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
+        var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
     }
 
 

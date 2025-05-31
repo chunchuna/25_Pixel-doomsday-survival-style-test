@@ -345,7 +345,7 @@ export class PIXEffect_fog {
         // Update fog opacity
         this.fogParams.opacity = currentOpacity;
 
-        // Re-render with new opacity
+        // Re-render with new opacity only if HTML element is valid
         if (this.htmlElement) {
             this.renderHTML();
         }
@@ -391,7 +391,7 @@ export class PIXEffect_fog {
         // Update fog opacity
         this.fogParams.opacity = currentOpacity;
 
-        // Re-render with new opacity
+        // Re-render with new opacity only if HTML element is valid
         if (this.htmlElement) {
             this.renderHTML();
         }
@@ -585,10 +585,64 @@ export class PIXEffect_fog {
      * Renders the fog HTML content
      */
     private renderHTML(): void {
-        if (!this.htmlElement || !this.htmlElement.setContent) return;
+        // Add comprehensive null checks and error handling
+        if (!this.htmlElement) {
+            console.warn(`Fog ${this.id}: HTML element is null, stopping render`);
+            return;
+        }
 
-        const fogHtml = this.generateFogHTML();
-        this.htmlElement.setContent(fogHtml, "html");
+        // Check if the HTML element is still valid (not destroyed)
+        try {
+            // Test if the element is still accessible
+            if (!this.htmlElement.setContent || typeof this.htmlElement.setContent !== 'function') {
+                console.warn(`Fog ${this.id}: HTML element setContent method is not available`);
+                this.handleInvalidElement();
+                return;
+            }
+
+            // Additional check for element validity
+            if (this.htmlElement.isDestroyed === true) {
+                console.warn(`Fog ${this.id}: HTML element is marked as destroyed`);
+                this.handleInvalidElement();
+                return;
+            }
+
+            const fogHtml = this.generateFogHTML();
+            this.htmlElement.setContent(fogHtml, "html");
+
+        } catch (error: any) {
+            console.warn(`Fog ${this.id}: Error rendering HTML - ${error.message}`);
+            // If we get an error, the element is likely invalid
+            this.handleInvalidElement();
+        }
+    }
+
+    /**
+     * Handles invalid HTML element (likely due to scene change)
+     */
+    private handleInvalidElement(): void {
+        console.log(`Fog ${this.id}: Handling invalid HTML element, likely due to scene change`);
+        
+        // Mark element as null to prevent further render attempts
+        this.htmlElement = null;
+        
+        // Stop animation to prevent further errors
+        if (this.animationId) {
+            if (typeof cancelAnimationFrame !== 'undefined') {
+                try {
+                    cancelAnimationFrame(this.animationId as number);
+                } catch (e) {
+                    clearTimeout(this.animationId as number);
+                }
+            } else {
+                clearTimeout(this.animationId as number);
+            }
+            this.animationId = null;
+        }
+        
+        // Optionally auto-destroy the fog instance
+        // Uncomment the next line if you want fog to auto-destroy on scene change
+        // this.destroy();
     }
 
     /**
@@ -663,6 +717,12 @@ export class PIXEffect_fog {
         const animate = () => {
             if (this.isDestroyed) return;
 
+            // Add check for valid HTML element before continuing animation
+            if (!this.htmlElement) {
+                console.warn(`Fog ${this.id}: Animation stopped due to null HTML element`);
+                return;
+            }
+
             const currentTime = Date.now();
             const deltaTime = currentTime - this.lastUpdateTime;
 
@@ -677,19 +737,22 @@ export class PIXEffect_fog {
                 this.time += deltaTime;
                 this.updateParticles();
 
-                // Only re-render if particles were actually updated
-                if (this.skipFrames === 0 || this.frameCount % (this.skipFrames + 1) === 0) {
+                // Only re-render if particles were actually updated and HTML element is valid
+                if ((this.skipFrames === 0 || this.frameCount % (this.skipFrames + 1) === 0) && this.htmlElement) {
                     this.renderHTML();
                 }
 
                 this.lastUpdateTime = currentTime;
             }
 
-            // Use requestAnimationFrame when available, fallback to setTimeout
-            if (typeof requestAnimationFrame !== 'undefined') {
-                this.animationId = requestAnimationFrame(animate) as any;
-            } else {
-                this.animationId = setTimeout(animate, Math.max(8, targetFrameTime)) as any;
+            // Continue animation only if not destroyed and HTML element is valid
+            if (!this.isDestroyed && this.htmlElement) {
+                // Use requestAnimationFrame when available, fallback to setTimeout
+                if (typeof requestAnimationFrame !== 'undefined') {
+                    this.animationId = requestAnimationFrame(animate) as any;
+                } else {
+                    this.animationId = setTimeout(animate, Math.max(8, targetFrameTime)) as any;
+                }
             }
         };
 
@@ -1009,10 +1072,13 @@ export class PIXEffect_fog {
             this.animationId = null;
         }
 
-        // Destroy HTML element
+        // Destroy HTML element with better error handling
         if (this.htmlElement) {
             try {
-                this.htmlElement.destroy();
+                // Check if destroy method exists and element is not already destroyed
+                if (this.htmlElement.destroy && typeof this.htmlElement.destroy === 'function') {
+                    this.htmlElement.destroy();
+                }
             } catch (error: any) {
                 console.warn(`Error destroying fog HTML element: ${error.message}`);
             }
@@ -1267,8 +1333,10 @@ export class PIXEffect_fog {
                         const content = htmlElement.getContent();
                         if (content && (content.includes('fog-particle') || content.includes('fog-'))) {
                             console.log(`Destroying orphaned fog HTML element`);
-                            htmlElement.destroy();
-                            destroyedOrphans++;
+                            if (htmlElement.destroy && typeof htmlElement.destroy === 'function') {
+                                htmlElement.destroy();
+                                destroyedOrphans++;
+                            }
                         }
                     }
                 } catch (error) {
@@ -1991,14 +2059,208 @@ export class PIXEffect_fog {
         
         console.log("Fog debug window created");
     }
+
+    /**
+     * Adds scene change detection and cleanup using runtime events
+     */
+    public static AddSceneChangeCleanup(): void {
+        try {
+            // Listen for layout end events (scene changes in C3)
+            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", (event: any) => {
+                console.log("Scene ending detected, starting graceful fog cleanup...");
+                
+                const fogInfo = PIXEffect_fog.GetFogInfo();
+                if (fogInfo.count > 0) {
+                    console.log(`Gracefully destroying ${fogInfo.count} fog effects before scene change...`);
+                    
+                    // Option 1: Graceful fade-out for all fog (recommended)
+                    fogInfo.fogs.forEach(fogId => {
+                        PIXEffect_fog.DestroyFogWithFadeOut(fogId);
+                    });
+                    
+                    // Wait a bit for fade-out to complete before scene actually ends
+                    // This ensures smooth transition
+                } else {
+                    console.log("No fog effects to clean up before scene change");
+                }
+            });
+            
+            // Listen for layout start events to handle emergency cleanup if needed
+            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", (event: any) => {
+                console.log("New scene starting, checking for orphaned fog effects...");
+                
+                const fogInfo = PIXEffect_fog.GetFogInfo();
+                if (fogInfo.count > 0) {
+                    console.log(`Found ${fogInfo.count} orphaned fog effects, performing emergency cleanup...`);
+                    PIXEffect_fog.EmergencyDestroyAllFog();
+                }
+            });
+            
+            // Optional: Listen for after layout start to recreate persistent fog if needed
+            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("afteranylayoutstart", (event: any) => {
+                console.log("New scene started, fog system ready for new effects");
+                // You can add auto-recreation logic here if needed
+                PIXEffect_fog.RecreateAfterSceneChange();
+            });
+            
+            console.log("Scene change cleanup listeners added successfully");
+        } catch (error: any) {
+            console.warn(`Failed to add scene change listeners: ${error.message}`);
+        }
+    }
+
+    /**
+     * Enhanced method to handle emergency cleanup with better error handling
+     */
+    public static EmergencyCleanupOnSceneChange(): void {
+        console.log("=== EMERGENCY SCENE CHANGE CLEANUP ===");
+        
+        try {
+            // First, try graceful cleanup
+            const fogInfo = PIXEffect_fog.GetFogInfo();
+            if (fogInfo.count > 0) {
+                console.log(`Attempting graceful cleanup of ${fogInfo.count} fog effects...`);
+                
+                // Set very fast fade-out for emergency cleanup
+                const originalFadeDuration = PIXEffect_fog.GetFadeOutDuration();
+                PIXEffect_fog.SetFadeOutDuration(200); // Very fast fade
+                
+                // Start fade-out for all fog
+                fogInfo.fogs.forEach(fogId => {
+                    try {
+                        PIXEffect_fog.DestroyFogWithFadeOut(fogId);
+                    } catch (error: any) {
+                        console.warn(`Error during graceful cleanup of fog ${fogId}: ${error.message}`);
+                    }
+                });
+                
+                // Wait a moment then do emergency cleanup
+                setTimeout(() => {
+                    PIXEffect_fog.EmergencyDestroyAllFog();
+                    // Restore original fade duration
+                    PIXEffect_fog.SetFadeOutDuration(originalFadeDuration);
+                }, 300);
+                
+            } else {
+                console.log("No fog effects found during emergency cleanup");
+            }
+        } catch (error: any) {
+            console.error(`Error during emergency scene change cleanup: ${error.message}`);
+            // Fallback to immediate destruction
+            PIXEffect_fog.EmergencyDestroyAllFog();
+        }
+        
+        console.log("Emergency scene change cleanup completed");
+    }
+
+    /**
+     * Sets up automatic fog cleanup with different strategies
+     * @param strategy Cleanup strategy: 'graceful', 'immediate', or 'smart'
+     */
+    public static SetupAutoCleanup(strategy: 'graceful' | 'immediate' | 'smart' = 'smart'): void {
+        try {
+            // Remove existing listeners first to avoid duplicates
+            // Note: C3 doesn't provide removeEventListener, so we track if already setup
+            if ((PIXEffect_fog as any)._autoCleanupSetup) {
+                console.log("Auto cleanup already setup, skipping...");
+                return;
+            }
+            
+            switch (strategy) {
+                case 'graceful':
+                    // Only use fade-out, slower but prettier
+                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", () => {
+                        const fogInfo = PIXEffect_fog.GetFogInfo();
+                        fogInfo.fogs.forEach(fogId => {
+                            PIXEffect_fog.DestroyFogWithFadeOut(fogId);
+                        });
+                    });
+                    break;
+                    
+                case 'immediate':
+                    // Immediate destruction, fastest
+                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", () => {
+                        PIXEffect_fog.EmergencyDestroyAllFog();
+                    });
+                    break;
+                    
+                case 'smart':
+                default:
+                    // Smart strategy: graceful if time allows, emergency if needed
+                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", () => {
+                        PIXEffect_fog.EmergencyCleanupOnSceneChange();
+                    });
+                    
+                    // Backup cleanup on scene start
+                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", () => {
+                        const fogInfo = PIXEffect_fog.GetFogInfo();
+                        if (fogInfo.count > 0) {
+                            console.log("Backup cleanup: removing orphaned fog effects");
+                            PIXEffect_fog.EmergencyDestroyAllFog();
+                        }
+                    });
+                    break;
+            }
+            
+            // Mark as setup to avoid duplicates
+            (PIXEffect_fog as any)._autoCleanupSetup = true;
+            console.log(`Auto fog cleanup setup with '${strategy}' strategy`);
+            
+        } catch (error: any) {
+            console.error(`Failed to setup auto cleanup: ${error.message}`);
+        }
+    }
+
+    /**
+     * Disables automatic fog cleanup (for testing or special cases)
+     */
+    public static DisableAutoCleanup(): void {
+        (PIXEffect_fog as any)._autoCleanupSetup = false;
+        console.log("Auto fog cleanup disabled (note: existing listeners cannot be removed in C3)");
+    }
+
+    /**
+     * Gets the current auto cleanup status
+     */
+    public static IsAutoCleanupEnabled(): boolean {
+        return !!(PIXEffect_fog as any)._autoCleanupSetup;
+    }
+
+    /**
+     * Recreates fog effects after scene change (if needed)
+     */
+    public static RecreateAfterSceneChange(): void {
+        // This method can be called after scene change to recreate fog effects
+        // You would need to store fog configurations and recreate them
+        console.log("Recreating fog effects after scene change...");
+        
+        // Example: Recreate a basic level fog if needed
+        // This is just an example - you'd implement based on your game's needs
+        try {
+            if (PIXEffect_fog.instances.size === 0) {
+                // No fog exists, you might want to recreate default fog here
+                console.log("No fog effects found after scene change");
+            }
+        } catch (error: any) {
+            console.warn(`Error recreating fog after scene change: ${error.message}`);
+        }
+    }
 }
 
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    PIXEffect_fog.SetupAutoCleanup('smart');
+
+})
 
 // For test
 var isBindButtonIntoDebugPanel = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
+    // Setup automatic fog cleanup with smart strategy (default)
+    
 
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
@@ -2030,6 +2292,43 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Open ImGui Fog Debug", () => {
         PIXEffect_fog.CreateImGuiFogDebugWindow();
+    });
+
+    // Add new auto cleanup control buttons
+    var auto_cleanup_category = IMGUIDebugButton.AddCategory("fog_auto_cleanup");
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Setup Smart Cleanup", () => {
+        PIXEffect_fog.SetupAutoCleanup('smart');
+        console.log("Smart auto cleanup enabled - graceful with emergency fallback");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Setup Graceful Cleanup", () => {
+        PIXEffect_fog.SetupAutoCleanup('graceful');
+        console.log("Graceful auto cleanup enabled - fade-out only");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Setup Immediate Cleanup", () => {
+        PIXEffect_fog.SetupAutoCleanup('immediate');
+        console.log("Immediate auto cleanup enabled - instant destruction");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Check Auto Cleanup Status", () => {
+        const isEnabled = PIXEffect_fog.IsAutoCleanupEnabled();
+        console.log(`Auto cleanup is ${isEnabled ? 'ENABLED' : 'DISABLED'}`);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Disable Auto Cleanup", () => {
+        PIXEffect_fog.DisableAutoCleanup();
+        console.log("Auto cleanup disabled");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Test Emergency Scene Cleanup", () => {
+        PIXEffect_fog.EmergencyCleanupOnSceneChange();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Manual Scene Change Setup", () => {
+        console.log("Setting up manual scene change listener...");
+        PIXEffect_fog.AddSceneChangeCleanup();
     });
 
     IMGUIDebugButton.AddButtonToCategory(fog_system, "Generate bIG Fog FOR WHOLE GAME", () => {
@@ -2480,5 +2779,141 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         fogInfo.fogs.forEach(fogId => {
             PIXEffect_fog.DestroyFogWithFadeOut(fogId);
         });
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Scene Change Cleanup", () => {
+        console.log("Simulating scene change cleanup...");
+        PIXEffect_fog.EmergencyDestroyAllFog();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Manual Scene Change Setup", () => {
+        console.log("Setting up scene change listener...");
+        PIXEffect_fog.AddSceneChangeCleanup();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(fog_system, "Test Invalid Element Handling", () => {
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        if (fogInfo.count > 0) {
+            const fog = PIXEffect_fog.GetFog(fogInfo.fogs[0]);
+            if (fog) {
+                console.log("Testing invalid element handling...");
+                // Manually trigger invalid element handling
+                (fog as any).handleInvalidElement();
+            }
+        } else {
+            console.log("No fog to test with");
+        }
+    });
+
+    // Add scene change testing buttons
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Create Test Fog for Scene Change", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        // Create multiple fog effects to test cleanup
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.HEAVY, 0, "scene_test_1")
+            .setPosition(x - 300, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.7)
+            .setColor("#ff0000");
+
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MYSTICAL, 0, "scene_test_2")
+            .setPosition(x, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.7)
+            .setColor("#00ff00");
+
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.TOXIC, 0, "scene_test_3")
+            .setPosition(x + 300, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.7)
+            .setColor("#0000ff");
+
+        console.log("Created 3 test fog effects for scene change testing");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Simulate Scene End Event", () => {
+        console.log("=== SIMULATING SCENE END EVENT ===");
+        
+        // Directly call the cleanup method since we can't dispatch events manually
+        console.log("Calling emergency cleanup to simulate scene end...");
+        PIXEffect_fog.EmergencyCleanupOnSceneChange();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Simulate Scene Start Event", () => {
+        console.log("=== SIMULATING SCENE START EVENT ===");
+        
+        // Check for orphaned fog effects like the real event handler would
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        if (fogInfo.count > 0) {
+            console.log(`Found ${fogInfo.count} orphaned fog effects, performing emergency cleanup...`);
+            PIXEffect_fog.EmergencyDestroyAllFog();
+        } else {
+            console.log("No orphaned fog effects found");
+        }
+        
+        // Call recreate method
+        PIXEffect_fog.RecreateAfterSceneChange();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Test Full Scene Change Cycle", () => {
+        console.log("=== TESTING FULL SCENE CHANGE CYCLE ===");
+        
+        // Create test fog
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.MEDIUM, 0, "cycle_test")
+            .setPosition(x - 200, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.8)
+            .setColor("#ffff00");
+
+        console.log("Created test fog, will simulate scene change in 3 seconds...");
+
+        // Simulate scene end after 3 seconds
+        setTimeout(() => {
+            console.log("Simulating scene end...");
+            PIXEffect_fog.EmergencyCleanupOnSceneChange();
+
+            // Simulate scene start after another 2 seconds
+            setTimeout(() => {
+                console.log("Simulating scene start...");
+                
+                // Check for orphaned fog and cleanup
+                const fogInfo = PIXEffect_fog.GetFogInfo();
+                if (fogInfo.count > 0) {
+                    console.log("Backup cleanup: removing orphaned fog effects");
+                    PIXEffect_fog.EmergencyDestroyAllFog();
+                }
+                
+                PIXEffect_fog.RecreateAfterSceneChange();
+
+                // Check final state
+                setTimeout(() => {
+                    const finalInfo = PIXEffect_fog.GetFogInfo();
+                    console.log(`Scene change cycle complete. Remaining fog: ${finalInfo.count}`);
+                }, 1000);
+            }, 2000);
+        }, 3000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(auto_cleanup_category, "Show Runtime Event Info", () => {
+        console.log("=== RUNTIME EVENT INFORMATION ===");
+        console.log("Available runtime events for scene changes:");
+        console.log("- beforeanylayoutend: Triggered before any layout/scene ends");
+        console.log("- afteranylayoutend: Triggered after any layout/scene ends");
+        console.log("- beforeanylayoutstart: Triggered before any layout/scene starts");
+        console.log("- afteranylayoutstart: Triggered after any layout/scene starts");
+        console.log("");
+        console.log("Current auto cleanup status:", PIXEffect_fog.IsAutoCleanupEnabled() ? "ENABLED" : "DISABLED");
+        
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        console.log(`Current active fog effects: ${fogInfo.count}`);
+        if (fogInfo.count > 0) {
+            console.log("Active fog IDs:", fogInfo.fogs);
+        }
     });
 }); 

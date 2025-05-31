@@ -1,7 +1,9 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { PIXEffect_fog } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
+import { VariableMonitoring } from "../UI/debug_ui/UIvariableMonitoring.js";
 import type { DialogueSystem } from "../UI/dialogue_ui/UIDialogue.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { inventoryManager } from "../UI/inventory_ui/UIInventory.js";
@@ -100,11 +102,17 @@ export class GAMEPLAY_LEVEL {
 
         // 关闭互动面板 
         UIInteractionPanelActionChooseMain.CloseChoosePanle();
+        // 清理变量监听
+        VariableMonitoring.CleanupDestroyed();
 
+        //清理雾气 
+        
         UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
 
         })
+
+        
     }
 }
 

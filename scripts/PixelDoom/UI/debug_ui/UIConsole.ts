@@ -360,6 +360,8 @@ export class UIConsole {
         const useRandomColorsRef = [this.useRandomColors];
         if (ImGui.Checkbox("Random Colors", useRandomColorsRef)) {
             this.useRandomColors = useRandomColorsRef[0];
+            // Regenerate colors for existing messages when setting changes
+            this.regenerateMessageColors();
         }
 
         ImGui.SameLine();
@@ -382,23 +384,30 @@ export class UIConsole {
             const visibleMessages = this.getVisibleMessages(this.consoleMessages);
 
             for (const message of visibleMessages) {
-                // Display message with color based on type
+                // Display message with color based on type and random color setting
                 let color;
-                switch (message.type) {
-                    case 'error':
-                        color = new ImGui.ImVec4(1.0, 0.4, 0.4, 1.0);
-                        break;
-                    case 'warn':
-                        color = new ImGui.ImVec4(1.0, 0.8, 0.2, 1.0);
-                        break;
-                    case 'info':
-                        color = new ImGui.ImVec4(0.4, 0.8, 1.0, 1.0);
-                        break;
-                    case 'debug':
-                        color = new ImGui.ImVec4(0.5, 1.0, 0.5, 1.0);
-                        break;
-                    default:
-                        color = message.color || new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0);
+                
+                // If random colors are enabled and message has a stored color, use it
+                if (this.useRandomColors && message.color) {
+                    color = message.color;
+                } else {
+                    // Use predefined colors based on message type
+                    switch (message.type) {
+                        case 'error':
+                            color = new ImGui.ImVec4(1.0, 0.4, 0.4, 1.0);
+                            break;
+                        case 'warn':
+                            color = new ImGui.ImVec4(1.0, 0.8, 0.2, 1.0);
+                            break;
+                        case 'info':
+                            color = new ImGui.ImVec4(0.4, 0.8, 1.0, 1.0);
+                            break;
+                        case 'debug':
+                            color = new ImGui.ImVec4(0.5, 1.0, 0.5, 1.0);
+                            break;
+                        default:
+                            color = new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0);
+                    }
                 }
 
                 // Display source if enabled
@@ -579,6 +588,52 @@ export class UIConsole {
     }
 
     /**
+     * Generate a random color for console messages
+     */
+    private static generateRandomColor(): any {
+        const ImGui = globalThis.ImGui;
+        if (!ImGui) {
+            return new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0); // fallback to white
+        }
+
+        // Generate random RGB values with good visibility
+        const r = 0.3 + Math.random() * 0.7; // 0.3-1.0 range for better visibility
+        const g = 0.3 + Math.random() * 0.7;
+        const b = 0.3 + Math.random() * 0.7;
+        
+        return new ImGui.ImVec4(r, g, b, 1.0);
+    }
+
+    /**
+     * Get color for message based on type and settings
+     */
+    private static getMessageColor(type: string, useRandom: boolean = false): any {
+        const ImGui = globalThis.ImGui;
+        if (!ImGui) {
+            return null;
+        }
+
+        // If random colors are enabled and this is a log message, use random color
+        if (useRandom && type === 'log') {
+            return this.generateRandomColor();
+        }
+
+        // Use predefined colors for different message types
+        switch (type) {
+            case 'error':
+                return new ImGui.ImVec4(1.0, 0.4, 0.4, 1.0);
+            case 'warn':
+                return new ImGui.ImVec4(1.0, 0.8, 0.2, 1.0);
+            case 'info':
+                return new ImGui.ImVec4(0.4, 0.8, 1.0, 1.0);
+            case 'debug':
+                return new ImGui.ImVec4(0.5, 1.0, 0.5, 1.0);
+            default:
+                return new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0);
+        }
+    }
+
+    /**
      * Add a console message
      */
     private static addConsoleMessage(type: string, args: any[]): void {
@@ -637,12 +692,16 @@ export class UIConsole {
                 content = `[Error formatting message]`;
             }
 
+            // Generate color for the message
+            const messageColor = this.getMessageColor(type, this.useRandomColors);
+
             // Create the message
             const message = {
                 type,
                 content,
                 timestamp: new Date().toLocaleTimeString(),
-                source: scriptName
+                source: scriptName,
+                color: messageColor // Add color to message object
             };
 
             // Add to messages
@@ -794,10 +853,22 @@ export class UIConsole {
     }
 
     /**
+     * Regenerate colors for existing messages based on current settings
+     */
+    private static regenerateMessageColors(): void {
+        for (const message of this.consoleMessages) {
+            // Regenerate color based on current settings
+            message.color = this.getMessageColor(message.type, this.useRandomColors);
+        }
+    }
+
+    /**
      * Set whether to use random colors for logs
      */
     public static SetUseRandomColors(use: boolean): void {
         this.useRandomColors = use;
+        // Regenerate colors for existing messages
+        this.regenerateMessageColors();
     }
 
     /**
@@ -1153,6 +1224,26 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                                 
                                 // Return diagnostic info
                                 return UIConsole.GetDiagnosticInfo();
+                            };
+
+                            // Add test function for random colors
+                            (window as any).testRandomColors = () => {
+                                console.log("Test log message 1 - should have random color");
+                                console.log("Test log message 2 - should have different random color");
+                                console.log("Test log message 3 - should have another random color");
+                                console.info("Test info message - should be blue");
+                                console.warn("Test warning message - should be yellow");
+                                console.error("Test error message - should be red");
+                                console.log("Test log message 4 - should have random color");
+                                console.log("Test log message 5 - should have random color");
+                                return "Random color test messages sent";
+                            };
+                            
+                            // Add function to toggle random colors
+                            (window as any).toggleRandomColors = () => {
+                                const newState = !UIConsole.IsUsingRandomColors();
+                                UIConsole.SetUseRandomColors(newState);
+                                return `Random colors ${newState ? 'enabled' : 'disabled'}`;
                             };
                         }, 100);
                     } else {

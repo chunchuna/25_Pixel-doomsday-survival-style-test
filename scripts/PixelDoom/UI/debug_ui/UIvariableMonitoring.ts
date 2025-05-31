@@ -6,7 +6,7 @@ import { IMGUIDebugButton } from "./UIDbugButton.js";
 
 
 /**
- * 变量监控器类 - 用于实时监控变量值
+ * Variable monitoring class - used to monitor variable values in real time
  */
 export class VariableMonitoring {
     private static instance: VariableMonitoring;
@@ -14,15 +14,15 @@ export class VariableMonitoring {
     private static isInitialized: boolean = false;
     private static monitoredValues: Map<string, { value: any, source: string }> = new Map();
 
-    // 存储展开状态的Map
+    // Storage map for expanded status
     private static expandedItems: Map<string, boolean> = new Map();
 
-    // 当前详情窗口显示的变量名
+    // Current variable name displayed in detail window
     private static currentDetailItem: string | null = null;
     private static detailWindowId: string = "variable_detail_window";
 
     /**
-     * 获取变量监控器实例
+     * Get variable monitoring instance
      */
     private static getInstance(): VariableMonitoring {
         if (!this.instance) {
@@ -33,12 +33,12 @@ export class VariableMonitoring {
     }
 
     /**
-     * 初始化变量监控器
+     * Initialize variable monitoring
      */
     private static initialize(): void {
         if (this.isInitialized) return;
 
-        // 创建自定义的监控窗口
+        // Create custom monitoring window
         this.createMonitoringWindow();
         this.createDetailWindow();
         this.Hide()
@@ -47,12 +47,12 @@ export class VariableMonitoring {
     }
 
     /**
-     * 创建监控窗口
+     * Create monitoring window
      */
     private static createMonitoringWindow(): void {
         const customWindowId = this.windowId;
 
-        // 使用 CreateTextWindow 方法创建一个初始窗口，然后自定义它的回调
+        // Use CreateTextWindow method to create an initial window, then customize its callback
         Imgui_chunchun.CreateTextWindow(
             customWindowId,
             "variabl_eMonitoring_window",
@@ -60,12 +60,12 @@ export class VariableMonitoring {
             { x: 50, y: 50 }
         );
 
-        // 强制类型转换以访问窗口配置
+        // Force type conversion to access window configuration
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
             const windowConfig = imgui.windows.get(customWindowId);
             if (windowConfig) {
-                // 自定义窗口配置
+                // Customize window configuration
                 windowConfig.size = { width: 500, height: 400 };
                 windowConfig.renderCallback = () => {
                     this.renderMonitoringWindow();
@@ -75,12 +75,12 @@ export class VariableMonitoring {
     }
 
     /**
-     * 创建详情窗口
+     * Create detail window
      */
     private static createDetailWindow(): void {
         const detailWindowId = this.detailWindowId;
 
-        // 创建详情窗口
+        // Create detail window
         Imgui_chunchun.CreateTextWindow(
             detailWindowId,
             "Variable Detail",
@@ -88,13 +88,13 @@ export class VariableMonitoring {
             { x: 150, y: 150 }
         );
 
-        // 配置详情窗口
+        // Configure detail window
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
             const windowConfig = imgui.windows.get(detailWindowId);
             if (windowConfig) {
                 windowConfig.size = { width: 600, height: 500 };
-                windowConfig.isOpen = false; // 默认关闭
+                windowConfig.isOpen = false; // Default closed
                 windowConfig.renderCallback = () => {
                     this.renderDetailWindow();
                 };
@@ -103,7 +103,7 @@ export class VariableMonitoring {
     }
 
     /**
-     * 渲染详情窗口
+     * Render detail window
      */
     private static renderDetailWindow(): void {
         const ImGui = globalThis.ImGui;
@@ -119,23 +119,32 @@ export class VariableMonitoring {
             return;
         }
 
-        // 显示变量信息
+        // Test if the item is still valid before rendering
+        try {
+            this.formatValue(item.value, false);
+        } catch (e: any) {
+            ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0),
+                "Variable has been destroyed or is no longer accessible");
+            return;
+        }
+
+        // Display variable information
         ImGui.Text(`Name: ${this.currentDetailItem}`);
         ImGui.Text(`Source: ${item.source}`);
         ImGui.Separator();
 
-        // 为了安全处理，分批显示内容，避免一次性渲染太多导致内存溢出
+        // To ensure safe handling, display content in batches to avoid memory overflow
         try {
             const fullContent = this.formatValue(item.value, true);
 
-            // 先显示内容类型
+            // First display content type
             ImGui.Text(`Type: ${typeof item.value}`);
             ImGui.Separator();
 
-            // 显示内容
+            // Display content
             ImGui.BeginChild("ValueContent", new ImGui.ImVec2(0, 0), true);
 
-            // 批量显示内容，每行最多显示100个字符
+            // Batch display content, up to 100 characters per line
             const maxCharsPerLine = 100;
             let remainingContent = fullContent;
 
@@ -153,16 +162,41 @@ export class VariableMonitoring {
     }
 
     /**
-     * 渲染监控窗口
+     * Clean up destroyed or invalid objects from monitoring
+     */
+    private static cleanupDestroyedObjects(): void {
+        const keysToRemove: string[] = [];
+        
+        this.monitoredValues.forEach((item, name) => {
+            try {
+                // Test if the value is still valid by attempting to format it
+                this.formatValue(item.value, false);
+            } catch (e: any) {
+                // If formatting fails, mark for removal
+                keysToRemove.push(name);
+            }
+        });
+        
+        // Remove invalid entries
+        keysToRemove.forEach(key => {
+            this.monitoredValues.delete(key);
+        });
+    }
+
+    /**
+     * Render monitoring window
      */
     private static renderMonitoringWindow(): void {
         const ImGui = globalThis.ImGui;
 
-        // 设置标题栏
+        // Clean up destroyed objects before rendering
+        this.cleanupDestroyedObjects();
+
+        // Set title bar
         ImGui.Text("UIvariable");
         ImGui.Separator();
 
-        // 表格标题
+        // Table title
         const tableFlags =
             ImGui.TableFlags.Borders |
             ImGui.TableFlags.RowBg |
@@ -170,49 +204,49 @@ export class VariableMonitoring {
             ImGui.TableFlags.ScrollY;
 
         if (ImGui.BeginTable("VariablesTable", 3, tableFlags)) {
-            // 设置表头
+            // Set table header
             ImGui.TableSetupColumn("name");
             ImGui.TableSetupColumn("value");
             ImGui.TableSetupColumn("from");
             ImGui.TableHeadersRow();
 
-            // 填充表格数据
+            // Fill table data
             let rowIndex = 0;
             this.monitoredValues.forEach((item, name) => {
                 ImGui.TableNextRow();
                 const textId = `value_${rowIndex}`;
                 ImGui.PushID(textId);
 
-                // 检查是否为长内容
+                // Check if it's long content
                 const isLongContent =
                     (typeof item.value === "string" && item.value.length > 100) ||
                     (typeof item.value === "object" && JSON.stringify(item.value).length > 100);
 
-                // 变量名列
+                // Variable name column
                 ImGui.TableSetColumnIndex(0);
                 ImGui.Text(name);
 
-                // 值列
+                // Value column
                 ImGui.TableSetColumnIndex(1);
 
-                // 对于长内容，显示按钮和摘要
+                // For long content, display button and summary
                 if (isLongContent) {
-                    // 显示查看详情按钮
+                    // Display view details button
                     if (ImGui.SmallButton("View")) {
-                        // 显示详情窗口
+                        // Display detail window
                         this.showDetailWindow(name);
                     }
 
-                    // 在按钮后显示摘要
+                    // Display summary after button
                     ImGui.SameLine();
-                    const summaryText = this.formatValue(item.value, false); // 摘要
+                    const summaryText = this.formatValue(item.value, false); // Summary
                     ImGui.Text(summaryText);
                 } else {
-                    // 普通文本显示
+                    // Normal text display
                     ImGui.Text(this.formatValue(item.value, false));
                 }
 
-                // 来源列
+                // Source column
                 ImGui.TableSetColumnIndex(2);
                 ImGui.Text(item.source);
 
@@ -223,7 +257,7 @@ export class VariableMonitoring {
             ImGui.EndTable();
         }
 
-        // 显示提示信息
+        // Display prompt information
         if (this.monitoredValues.size === 0) {
             ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
                 "Use VariableMonitoring.AddValue() to add variables to monitor");
@@ -231,12 +265,12 @@ export class VariableMonitoring {
     }
 
     /**
-     * 显示详情窗口
+     * Display detail window
      */
     private static showDetailWindow(name: string): void {
         this.currentDetailItem = name;
 
-        // 打开详情窗口
+        // Open detail window
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
             const windowConfig = imgui.windows.get(this.detailWindowId);
@@ -247,7 +281,7 @@ export class VariableMonitoring {
     }
 
     /**
-     * 格式化变量值显示
+     * Format variable value for display
      */
     private static formatValue(value: any, isExpanded: boolean = false): string {
         if (value === null) return "null";
@@ -255,73 +289,124 @@ export class VariableMonitoring {
 
         if (typeof value === "object") {
             try {
-                // 对象或数组转为JSON字符串
-                const jsonStr = JSON.stringify(value);
-                // 如果不是展开状态且字符串长度超过100，则截断显示
+                // Check if the object is a C3 instance that might be destroyed
+                if (value && typeof value === "object" && value.constructor && value.constructor.name) {
+                    // Check for common C3 object patterns that might be destroyed
+                    const constructorName = value.constructor.name;
+                    if (constructorName.includes("Instance") || 
+                        constructorName.includes("Behavior") || 
+                        constructorName.includes("Plugin")) {
+                        // Try to access a basic property to test if object is still valid
+                        try {
+                            // Attempt to access a property that should exist on valid C3 objects
+                            if (value.runtime === null || value.runtime === undefined) {
+                                return "[Destroyed C3 Object]";
+                            }
+                        } catch (e: any) {
+                            return "[Destroyed C3 Object]";
+                        }
+                    }
+                }
+
+                // Convert object or array to JSON string
+                const jsonStr = JSON.stringify(value, (key, val) => {
+                    // Custom replacer to handle problematic values
+                    if (val === null || val === undefined) {
+                        return val;
+                    }
+                    
+                    // Handle circular references and problematic objects
+                    if (typeof val === "object") {
+                        try {
+                            // Test if the object can be safely stringified
+                            JSON.stringify(val);
+                            return val;
+                        } catch (e: any) {
+                            return "[Unserializable Object]";
+                        }
+                    }
+                    
+                    return val;
+                });
+                
+                // If not expanded and string length exceeds 100, truncate display
                 if (!isExpanded && jsonStr.length > 100) {
                     return jsonStr.substring(0, 97) + "...";
                 }
                 return jsonStr;
-            } catch (e) {
-                return "[Object]";
+            } catch (e: any) {
+                // If JSON.stringify fails, return a safe fallback
+                return `[Object Error: ${e.message}]`;
             }
         }
 
-        // 处理字符串
+        // Handle strings
         if (typeof value === "string") {
-            // 如果不是展开状态且字符串长度超过100，则截断显示
+            // If not expanded and string length exceeds 100, truncate display
             if (!isExpanded && value.length > 100) {
                 return value.substring(0, 97) + "...";
             }
             return value;
         }
 
-        // 数字、布尔值直接转字符串
-        return String(value);
+        // Numbers, booleans convert directly to string
+        try {
+            return String(value);
+        } catch (e: any) {
+            return "[Value Error]";
+        }
     }
 
     /**
-     * 添加要监控的变量
-     * @param name 变量名称
-     * @param value 变量值
-     * @param source 变量来源（通常是脚本名称）
+     * Add variable to monitor
+     * @param name Variable name
+     * @param value Variable value
+     * @param source Variable source (usually script name)
      */
-    public static AddValue(name: string, value: any, source: string = "未知"): void {
-        // 确保初始化
+    public static AddValue(name: string, value: any, source: string = "Unknown"): void {
+        // Ensure initialization
         this.getInstance();
 
-        // 添加或更新变量
+        // Add or update variable
         this.monitoredValues.set(name, { value, source });
     }
 
     /**
-     * 移除监控的变量
-     * @param name 变量名称
+     * Remove monitored variable
+     * @param name Variable name
      */
     public static RemoveValue(name: string): void {
         this.monitoredValues.delete(name);
     }
 
     /**
-     * 清空所有监控的变量
+     * Clear all monitored variables
      */
     public static ClearAll(): void {
         this.monitoredValues.clear();
     }
 
     /**
-     * 显示监控窗口
+     * Clean up destroyed or invalid objects (public method)
+     * Call this method during scene transitions to prevent crashes
+     */
+    public static CleanupDestroyed(): void {
+        this.cleanupDestroyedObjects();
+    }
+
+    /**
+     * Show monitoring window
      */
     public static Show(): void {
-        // 确保初始化
+        // Ensure initialization
         this.getInstance();
 
-        // 通过公共 API 切换窗口显示状态
+        // Toggle window display state through public API
         if (!this.IsVisible()) {
             Imgui_chunchun.ToggleWindow(this.windowId);
         }
 
-        // 备用方法：通过直接访问窗口配置
+        // Backup method: direct access to window configuration
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
             const windowConfig = imgui.windows.get(this.windowId);
@@ -332,15 +417,15 @@ export class VariableMonitoring {
     }
 
     /**
-     * 隐藏监控窗口
+     * Hide monitoring window
      */
     public static Hide(): void {
-        // 通过公共 API 切换窗口显示状态
+        // Toggle window display state through public API
         if (this.IsVisible()) {
             Imgui_chunchun.ToggleWindow(this.windowId);
         }
 
-        // 备用方法：通过直接访问窗口配置
+        // Backup method: direct access to window configuration
         const imgui = Imgui_chunchun as any;
         if (imgui.windows && imgui.windows.get) {
             const windowConfig = imgui.windows.get(this.windowId);
@@ -351,18 +436,18 @@ export class VariableMonitoring {
     }
 
     /**
-     * 切换监控窗口显示状态
+     * Toggle monitoring window display state
      */
     public static Toggle(): void {
-        // 确保初始化
+        // Ensure initialization
         this.getInstance();
 
-        // 使用公共方法切换窗口显示状态
+        // Use public method to toggle window display state
         Imgui_chunchun.ToggleWindow(this.windowId);
     }
 
     /**
-     * 获取窗口显示状态
+     * Get window display state
      */
     public static IsVisible(): boolean {
         return Imgui_chunchun.IsWindowOpen(this.windowId);
@@ -387,47 +472,57 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-// 导出一个更简洁的别名，方便使用
+// Export a more concise alias for easier use
 export const monitoring = VariableMonitoring;
 
-// 示例：如何使用变量监控类
+// Example: How to use the variable monitoring class
 /*
-// 1. 导入监控类
+// 1. Import monitoring class
 import { monitoring } from "./UI/debug_ui/UIvariableMonitoring";
 
-// 2. 显示监控窗口
+// 2. Show monitoring window
 monitoring.Show();
 
-// 3. 添加变量进行监控
+// 3. Add variables for monitoring
 let playerHealth = 100;
-monitoring.AddValue("玩家生命值", playerHealth, "PlayerController");
+monitoring.AddValue("Player Health", playerHealth, "PlayerController");
 
 let enemyCount = 5;
-monitoring.AddValue("敌人数量", enemyCount, "EnemyManager");
+monitoring.AddValue("Enemy Count", enemyCount, "EnemyManager");
 
-// 4. 当变量值改变时，更新监控
+// 4. Update monitoring when variable values change
 playerHealth -= 10;
-monitoring.AddValue("玩家生命值", playerHealth, "PlayerController");
+monitoring.AddValue("Player Health", playerHealth, "PlayerController");
 
-// 5. 添加更复杂的数据结构
+// 5. Add more complex data structures
 const playerStats = {
     strength: 15,
     agility: 12,
     intelligence: 10
 };
-monitoring.AddValue("玩家属性", playerStats, "PlayerStats");
+monitoring.AddValue("Player Stats", playerStats, "PlayerStats");
 
-// 6. 隐藏/显示窗口
+// 6. Hide/show window
 // monitoring.Hide();
 // monitoring.Show();
 // monitoring.Toggle();
 
-// 7. 检查窗口是否可见
+// 7. Check if window is visible
 // const isVisible = monitoring.IsVisible();
 
-// 8. 移除特定变量
-// monitoring.RemoveValue("敌人数量");
+// 8. Remove specific variable
+// monitoring.RemoveValue("Enemy Count");
 
-// 9. 清空所有监控变量
+// 9. Clear all monitored variables
 // monitoring.ClearAll();
+
+// 10. IMPORTANT: Clean up destroyed objects during scene transitions
+// Call this in your scene transition code to prevent crashes:
+// monitoring.CleanupDestroyed();
+
+// 11. Example scene transition handling:
+// function onSceneChange() {
+//     monitoring.CleanupDestroyed(); // Clean up before scene change
+//     // ... your scene transition code ...
+// }
 */

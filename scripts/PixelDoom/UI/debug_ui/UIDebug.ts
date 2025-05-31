@@ -45,10 +45,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (!isCreatDebugPanel) {
 
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
-        DEBUG.DebugMainUI.DoNotUseButtonPanel();
+        //DEBUG.DebugMainUI.DoNotUseButtonPanel();
         DEBUG.DebugMainUI.InitConsoleCapture()
         isCreatDebugPanel = true
-    } else {
+        //    } else {
         // 场景切换时检查并重新应用样式
         UIDebug.checkAndReapplyStyles();
     }
@@ -79,10 +79,10 @@ export class UIDebug {
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
     private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
-    private static consoleFontSize: number = 12; // 控制台字体大小
+    private static consoleFontSize: number = 24; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '74, 74, 74'; // 底板颜色（RGB）
-    private static consoleBackplateOpacity: number = 0.9; // 底板透明度
+    private static consoleBackplateOpacity: number = 0     // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
     private static mouseY: number = 0; // 记录鼠标Y位置
     private static isButtonPanelEnabled: boolean = true; // 按钮面板启用状态
@@ -248,7 +248,7 @@ export class UIDebug {
             UIDebug.SetConsoleAlwaysShow(false)
         })
 
-       
+
 
         return this.createDebugPanelInstance();
     }
@@ -1197,7 +1197,7 @@ export class UIDebug {
         // 创建消息内容元素
         const contentElement = document.createElement('span');
         contentElement.className = 'console-content';
-        
+
         // 检查是否需要折叠
         if (messageContent.length > this.consoleTextCollapseThreshold) {
             contentElement.textContent = messageContent.substring(0, this.consoleTextCollapseThreshold) + '...';
@@ -2880,7 +2880,7 @@ export class UIDebug {
      */
     public static DoNotUseButtonPanel(): DebugPanelInstance {
         this.isButtonPanelEnabled = false;
-        
+
         // 隐藏菜单面板
         if (this.menuPanel) {
             this.hideMenu();
@@ -2889,11 +2889,11 @@ export class UIDebug {
             // 重新添加一个只处理其他功能的键盘监听
             document.addEventListener('keydown', this.handleKeyDownWithoutMenu);
         }
-        
+
         console.log("Debug button panel has been disabled");
         return this.createDebugPanelInstance();
     }
-    
+
     /**
      * 处理键盘事件的函数（含菜单功能）
      */
@@ -2907,7 +2907,7 @@ export class UIDebug {
             event.preventDefault();
         }
     }
-    
+
     /**
      * 处理键盘事件的函数（不含菜单功能）
      */
