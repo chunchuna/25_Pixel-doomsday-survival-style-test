@@ -24,6 +24,32 @@ export class PIXEffect_fog {
     private static idCounter: number = 0;
     private static currentEditingFog: PIXEffect_fog | null = null;
 
+    // Add pending fog creation system
+    private static pendingFogCreations: Map<string, {
+        type: FogType,
+        style: FogStyle,
+        duration: number,
+        layer: string,
+        callback?: (fog: PIXEffect_fog) => void,
+        // Store additional properties for proper replacement
+        position?: { x: number, y: number },
+        size?: { width: number, height: number },
+        fogParams?: any,
+        customSettings?: {
+            scale?: number,
+            speed?: number,
+            opacity?: number,
+            color?: string,
+            density?: number,
+            layers?: number,
+            blur?: number,
+            noiseScale?: number,
+            fadeEdges?: number,
+            mixBlendMode?: string,
+            particleVariation?: number
+        }
+    }> = new Map();
+
     // Performance optimization settings
     private static MAX_PARTICLES_GLOBAL: number = 500; // Global particle limit
     private static MAX_PARTICLES_PER_FOG: number = 150; // Per fog instance limit
@@ -36,7 +62,7 @@ export class PIXEffect_fog {
     protected type: FogType;
     protected style: FogStyle;
     protected layer: string;
-    protected duration: number; // Duration in seconds (0 = persistent)
+    protected duration: number = 0; // Duration in seconds (0 = persistent)
 
     // Position and size properties
     protected _x: number = 0;
@@ -117,7 +143,7 @@ export class PIXEffect_fog {
         // Start fade-in animation
         this.startFadeIn();
 
-        console.log(`Created ${this.style} fog with ID: ${this.id}, type: ${this.type}, duration: ${this.duration}s`);
+        console.log(`Created ${this.style} fog with ID: ${this.id}, type: ${this.type}, duration: ${this.duration}s, layer: ${this.layer}`);
     }
 
     /**
@@ -126,41 +152,81 @@ export class PIXEffect_fog {
      * @param style Visual style of the fog
      * @param duration Duration in seconds (only for temporary fog, 0 = persistent)
      * @param id Optional unique identifier
+     * @param layer Optional layer name (defaults to "html_c3")
      */
     public static GenerateFog(
         type: FogType,
         style: FogStyle = FogStyle.MEDIUM,
         duration: number = 0,
-        id?: string
+        id?: string,
+        layer: string = "html_c3"
     ): PIXEffect_fog {
         // Generate ID if not provided
         if (!id) {
             id = `auto_${type}_${style}_${Date.now()}`;
         }
 
-        // If instance with this ID already exists, start fade-out for graceful replacement
+        // Check if instance with this ID already exists
         if (PIXEffect_fog.instances.has(id)) {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
-                console.log(`Replacing existing fog ${id} with fade-out transition`);
+                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
+                // Capture existing fog properties for replacement
+                const existingProperties = {
+                    position: { x: existingFog._x, y: existingFog._y },
+                    size: { width: existingFog._width, height: existingFog._height },
+                    fogParams: { ...existingFog.fogParams },
+                    customSettings: {
+                        // We'll apply new settings, but keep existing ones as fallback
+                    }
+                };
+                
+                // If existing fog is already fading out, queue the new fog creation
+                if (existingFog.isFadingOut) {
+                    console.log(`Fog ${id} is already fading out. Queueing new fog creation...`);
+                    PIXEffect_fog.pendingFogCreations.set(id, {
+                        type,
+                        style,
+                        duration,
+                        layer,
+                        position: existingProperties.position,
+                        size: existingProperties.size,
+                        fogParams: existingProperties.fogParams
+                    });
+                    return existingFog; // Return existing fog for now
+                }
+                
+                // If existing fog is not fading out, start fade-out and queue new creation
+                console.log(`Starting fade-out for existing fog ${id} and queueing replacement...`);
+                PIXEffect_fog.pendingFogCreations.set(id, {
+                    type,
+                    style,
+                    duration,
+                    layer,
+                    position: existingProperties.position,
+                    size: existingProperties.size,
+                    fogParams: existingProperties.fogParams
+                });
+                
                 existingFog.startFadeOut();
-                // Remove from instances map immediately to allow new fog creation
-                PIXEffect_fog.instances.delete(id);
+                return existingFog; // Return existing fog for now
             }
         }
 
-        // Create new instance
-        const instance = new PIXEffect_fog(type, style, duration);
+        // No existing fog or existing fog is destroyed, create new one immediately
+        const instance = new PIXEffect_fog(type, style, duration, layer);
         instance.id = id; // Override the auto-generated ID
         PIXEffect_fog.instances.set(id, instance);
 
+        console.log(`Created new fog ${id} immediately`);
         return instance;
     }
 
     /**
      * Sets default parameters based on fog style
      */
-    private setDefaultParameters(): void {
+    public setDefaultParameters(): void {
         switch (this.style) {
             case FogStyle.LEVEL:
                 this.fogParams = {
@@ -1110,6 +1176,61 @@ export class PIXEffect_fog {
             PIXEffect_fog.currentEditingFog = null;
         }
 
+        // Check if there's a pending fog creation for this ID
+        if (PIXEffect_fog.pendingFogCreations.has(this.id)) {
+            const pendingFog = PIXEffect_fog.pendingFogCreations.get(this.id)!;
+            PIXEffect_fog.pendingFogCreations.delete(this.id);
+            
+            console.log(`Fog ${this.id} destroyed, creating pending replacement...`);
+            
+            // Create the pending fog after a short delay to ensure cleanup is complete
+            setTimeout(() => {
+                const newFog = new PIXEffect_fog(pendingFog.type, pendingFog.style, pendingFog.duration, pendingFog.layer);
+                newFog.id = this.id; // Use the same ID
+                PIXEffect_fog.instances.set(this.id, newFog);
+                
+                // Apply saved properties if they exist
+                if (pendingFog.position) {
+                    newFog.setPosition(pendingFog.position.x, pendingFog.position.y);
+                }
+                
+                if (pendingFog.size) {
+                    newFog.setSize(pendingFog.size.width, pendingFog.size.height);
+                }
+                
+                // Apply saved fog parameters (this preserves the visual settings)
+                if (pendingFog.fogParams) {
+                    // First set the new style's default parameters
+                    newFog.setDefaultParameters();
+                    // Then apply the saved parameters to maintain visual consistency
+                    newFog.updateFogParams(pendingFog.fogParams);
+                }
+                
+                // Apply any custom settings if they exist
+                if (pendingFog.customSettings) {
+                    const settings = pendingFog.customSettings;
+                    if (settings.scale !== undefined) newFog.setScale(settings.scale);
+                    if (settings.speed !== undefined) newFog.setSpeed(settings.speed);
+                    if (settings.opacity !== undefined) newFog.setOpacity(settings.opacity);
+                    if (settings.color !== undefined) newFog.setColor(settings.color);
+                    if (settings.density !== undefined) newFog.setDensity(settings.density);
+                    if (settings.layers !== undefined) newFog.setLayers(settings.layers);
+                    if (settings.blur !== undefined) newFog.setBlur(settings.blur);
+                    if (settings.noiseScale !== undefined) newFog.setNoiseScale(settings.noiseScale);
+                    if (settings.fadeEdges !== undefined) newFog.setFadeEdges(settings.fadeEdges);
+                    if (settings.mixBlendMode !== undefined) newFog.setMixBlendMode(settings.mixBlendMode);
+                    if (settings.particleVariation !== undefined) newFog.setParticleVariation(settings.particleVariation);
+                }
+                
+                console.log(`Created replacement fog ${this.id} after fade-out completion with preserved properties`);
+                
+                // Call callback if provided
+                if (pendingFog.callback) {
+                    pendingFog.callback(newFog);
+                }
+            }, 100); // Small delay to ensure cleanup
+        }
+
         console.log(`Fog effect ${this.id} destroyed (particles cleared, performance optimized)`);
     }
 
@@ -1322,7 +1443,12 @@ export class PIXEffect_fog {
     public static EmergencyDestroyAllFog(): void {
         console.log("=== EMERGENCY FOG CLEANUP ===");
         
-        // First, destroy all tracked instances
+        // Clear all pending fog creations first
+        const pendingCount = PIXEffect_fog.pendingFogCreations.size;
+        PIXEffect_fog.pendingFogCreations.clear();
+        console.log(`Cleared ${pendingCount} pending fog creations`);
+        
+        // First, try graceful cleanup
         const fogs = Array.from(PIXEffect_fog.instances.values());
         fogs.forEach(fog => {
             try {
@@ -1367,7 +1493,7 @@ export class PIXEffect_fog {
         PIXEffect_fog.idCounter = 0;
         PIXEffect_fog.currentEditingFog = null;
         
-        console.log(`Emergency cleanup completed: destroyed ${fogs.length} tracked fogs`);
+        console.log(`Emergency cleanup completed: destroyed ${fogs.length} tracked fogs, cleared ${pendingCount} pending`);
     }
 
     /**
@@ -1420,6 +1546,28 @@ export class PIXEffect_fog {
                 ImGui.Text(`ID: ${fog.getId()}`);
                 ImGui.Text(`Type: ${fog.type}`);
                 ImGui.Text(`Style: ${fog.style}`);
+                
+                // Show fade status
+                const isFadingOut = (fog as any).isFadingOut;
+                const isFadingIn = (fog as any).isFadingIn;
+                if (isFadingOut) {
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), "Status: FADING OUT");
+                } else if (isFadingIn) {
+                    ImGui.TextColored(new ImGui.ImVec4(0.0, 1.0, 0.5, 1.0), "Status: FADING IN");
+                } else {
+                    ImGui.TextColored(new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0), "Status: ACTIVE");
+                }
+                
+                // Show pending fog info
+                const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+                if (pendingInfo.count > 0) {
+                    ImGui.Separator();
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), `Pending Fogs: ${pendingInfo.count}`);
+                    pendingInfo.pending.forEach(pendingId => {
+                        ImGui.BulletText(pendingId);
+                    });
+                }
+                
                 ImGui.Separator();
             }
 
@@ -1982,6 +2130,7 @@ export class PIXEffect_fog {
      * @param width Width of the fog area
      * @param height Height of the fog area
      * @param id Optional ID
+     * @param layer Optional layer name
      */
     public static GenerateLargeScaleFog(
         type: FogType,
@@ -1989,7 +2138,8 @@ export class PIXEffect_fog {
         duration: number = 0,
         width: number = 1920,
         height: number = 1080,
-        id?: string
+        id?: string,
+        layer: string = "html_c3"
     ): PIXEffect_fog {
         // Auto-enable performance optimizations for large fog
         const wasPerformanceMode = PIXEffect_fog.PERFORMANCE_MODE;
@@ -2005,7 +2155,7 @@ export class PIXEffect_fog {
         }
 
         // Create the fog instance
-        const fog = PIXEffect_fog.GenerateFog(type, style, duration, id);
+        const fog = PIXEffect_fog.GenerateFog(type, style, duration, id, layer);
 
         // Set size and optimize for large scale
         fog.setSize(width, height)
@@ -2070,12 +2220,19 @@ export class PIXEffect_fog {
         // Create fog debug window
         const renderCallback = () => {
             const fogInfo = PIXEffect_fog.GetFogInfo();
+            const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
             const performanceStats = PIXEffect_fog.GetPerformanceStats();
             
             // Fog Overview Section
             if (ImGui.CollapsingHeader("Fog Overview", ImGui.TreeNodeFlags.DefaultOpen)) {
                 // Active fog count with visual indicator
                 ImGui.Text(`Active Fog Instances: ${fogInfo.count}`);
+                
+                // Pending fog count with visual indicator
+                if (pendingInfo.count > 0) {
+                    ImGui.SameLine();
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), `(${pendingInfo.count} pending)`);
+                }
                 
                 if (fogInfo.count > 0) {
                     const fogProgress = Math.min(fogInfo.count / 10.0, 1.0); // Max 10 for full bar
@@ -2086,11 +2243,33 @@ export class PIXEffect_fog {
                     ImGui.ProgressBar(fogProgress, new ImGui.ImVec2(-1, 0), `${fogInfo.count} instances`);
                     ImGui.PopStyleColor();
                     
-                    // List fog IDs
-                    ImGui.Text("Fog IDs:");
+                    // List fog IDs with status
+                    ImGui.Text("Active Fog IDs:");
                     ImGui.Indent();
                     fogInfo.fogs.forEach((id: string) => {
+                        const fog = PIXEffect_fog.GetFog(id);
+                        let statusText = "";
+                        let statusColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green default
+                        
+                        if (fog) {
+                            const isFadingOut = (fog as any).isFadingOut;
+                            const isFadingIn = (fog as any).isFadingIn;
+                            
+                            if (isFadingOut) {
+                                statusText = " [FADING OUT]";
+                                statusColor = new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0); // Orange
+                            } else if (isFadingIn) {
+                                statusText = " [FADING IN]";
+                                statusColor = new ImGui.ImVec4(0.0, 1.0, 0.5, 1.0); // Light green
+                            } else {
+                                statusText = " [ACTIVE]";
+                                statusColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green
+                            }
+                        }
+                        
                         ImGui.BulletText(id);
+                        ImGui.SameLine();
+                        ImGui.TextColored(statusColor, statusText);
                         ImGui.SameLine();
                         if (ImGui.SmallButton(`Edit##${id}`)) {
                             PIXEffect_fog.OpenFogEditor(id);
@@ -2101,6 +2280,28 @@ export class PIXEffect_fog {
                         }
                     });
                     ImGui.Unindent();
+                }
+                
+                // Show pending fog information
+                if (pendingInfo.count > 0) {
+                    ImGui.Separator();
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), "Pending Fog Creations:");
+                    ImGui.Indent();
+                    pendingInfo.pending.forEach((id: string) => {
+                        ImGui.BulletText(id);
+                        ImGui.SameLine();
+                        ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), "[WAITING FOR FADE-OUT]");
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton(`Cancel##${id}`)) {
+                            PIXEffect_fog.CancelPendingFog(id);
+                        }
+                    });
+                    ImGui.Unindent();
+                    
+                    // Pending fog controls
+                    if (ImGui.Button("Cancel All Pending", new ImGui.ImVec2(120, 25))) {
+                        PIXEffect_fog.CancelAllPendingFog();
+                    }
                 }
                 
                 ImGui.Separator();
@@ -2116,6 +2317,20 @@ export class PIXEffect_fog {
                     PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LEVEL, 60, "level_fog")
                         .setPosition(0, 0)
                         .setSize(6000, 3000);
+                }
+                ImGui.SameLine();
+                if (ImGui.Button("Test Replacement", new ImGui.ImVec2(100, 25))) {
+                    // Test the new replacement logic
+                    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 5, "replacement_test")
+                        .setPosition(400, 300)
+                        .setSize(300, 200);
+                    
+                    // Try to replace it immediately (should queue)
+                    setTimeout(() => {
+                        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 8, "replacement_test")
+                            .setPosition(400, 300)
+                            .setSize(300, 200);
+                    }, 1000);
                 }
             }
             
@@ -2463,6 +2678,256 @@ export class PIXEffect_fog {
         } catch (error: any) {
             console.warn(`Error recreating fog after scene change: ${error.message}`);
         }
+    }
+
+    /**
+     * Enhanced GenerateFog with callback support for when fog is actually created
+     * @param type Fog type (persistent or temporary)
+     * @param style Visual style of the fog
+     * @param duration Duration in seconds (only for temporary fog, 0 = persistent)
+     * @param id Optional unique identifier
+     * @param callback Optional callback when fog is actually created (useful for queued fogs)
+     * @param layer Optional layer name (defaults to "html_c3")
+     */
+    public static GenerateFogWithCallback(
+        type: FogType,
+        style: FogStyle = FogStyle.MEDIUM,
+        duration: number = 0,
+        id?: string,
+        callback?: (fog: PIXEffect_fog) => void,
+        layer: string = "html_c3"
+    ): PIXEffect_fog {
+        // Generate ID if not provided
+        if (!id) {
+            id = `auto_${type}_${style}_${Date.now()}`;
+        }
+
+        // Check if instance with this ID already exists
+        if (PIXEffect_fog.instances.has(id)) {
+            const existingFog = PIXEffect_fog.instances.get(id);
+            if (existingFog && !existingFog.isDestroyed) {
+                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
+                // If existing fog is already fading out, queue the new fog creation
+                if (existingFog.isFadingOut) {
+                    console.log(`Fog ${id} is already fading out. Queueing new fog creation with callback...`);
+                    PIXEffect_fog.pendingFogCreations.set(id, {
+                        type,
+                        style,
+                        duration,
+                        layer,
+                        callback
+                    });
+                    return existingFog; // Return existing fog for now
+                }
+                
+                // If existing fog is not fading out, start fade-out and queue new creation
+                console.log(`Starting fade-out for existing fog ${id} and queueing replacement with callback...`);
+                PIXEffect_fog.pendingFogCreations.set(id, {
+                    type,
+                    style,
+                    duration,
+                    layer,
+                    callback
+                });
+                
+                existingFog.startFadeOut();
+                return existingFog; // Return existing fog for now
+            }
+        }
+
+        // No existing fog or existing fog is destroyed, create new one immediately
+        const instance = new PIXEffect_fog(type, style, duration, layer);
+        instance.id = id; // Override the auto-generated ID
+        PIXEffect_fog.instances.set(id, instance);
+
+        console.log(`Created new fog ${id} immediately`);
+        
+        // Call callback immediately since fog was created
+        if (callback) {
+            callback(instance);
+        }
+        
+        return instance;
+    }
+
+    /**
+     * Gets pending fog creation info for debugging
+     */
+    public static GetPendingFogInfo(): { count: number, pending: string[] } {
+        const pendingIds = Array.from(PIXEffect_fog.pendingFogCreations.keys());
+        return {
+            count: pendingIds.length,
+            pending: pendingIds
+        };
+    }
+
+    /**
+     * Cancels a pending fog creation
+     * @param id Fog ID to cancel
+     */
+    public static CancelPendingFog(id: string): boolean {
+        if (PIXEffect_fog.pendingFogCreations.has(id)) {
+            PIXEffect_fog.pendingFogCreations.delete(id);
+            console.log(`Cancelled pending fog creation for ${id}`);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Cancels all pending fog creations
+     */
+    public static CancelAllPendingFog(): void {
+        const count = PIXEffect_fog.pendingFogCreations.size;
+        PIXEffect_fog.pendingFogCreations.clear();
+        console.log(`Cancelled ${count} pending fog creations`);
+    }
+
+    /**
+     * Enhanced GenerateFog that allows applying custom settings to replacement fog
+     * @param type Fog type (persistent or temporary)
+     * @param style Visual style of the fog
+     * @param duration Duration in seconds (only for temporary fog, 0 = persistent)
+     * @param id Optional unique identifier
+     * @param layer Optional layer name (defaults to "html_c3")
+     * @param customSettings Optional custom settings to apply to the fog
+     */
+    public static GenerateFogWithSettings(
+        type: FogType,
+        style: FogStyle = FogStyle.MEDIUM,
+        duration: number = 0,
+        id?: string,
+        layer: string = "html_c3",
+        customSettings?: {
+            position?: { x: number, y: number },
+            size?: { width: number, height: number },
+            scale?: number,
+            speed?: number,
+            opacity?: number,
+            color?: string,
+            density?: number,
+            layers?: number,
+            blur?: number,
+            noiseScale?: number,
+            fadeEdges?: number,
+            mixBlendMode?: string,
+            particleVariation?: number
+        }
+    ): PIXEffect_fog {
+        // Generate ID if not provided
+        if (!id) {
+            id = `auto_${type}_${style}_${Date.now()}`;
+        }
+
+        // Check if instance with this ID already exists
+        if (PIXEffect_fog.instances.has(id)) {
+            const existingFog = PIXEffect_fog.instances.get(id);
+            if (existingFog && !existingFog.isDestroyed) {
+                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
+                // Capture existing fog properties for replacement
+                const existingProperties = {
+                    position: customSettings?.position || { x: existingFog._x, y: existingFog._y },
+                    size: customSettings?.size || { width: existingFog._width, height: existingFog._height },
+                    fogParams: { ...existingFog.fogParams }
+                };
+                
+                // Merge custom settings with existing properties
+                const mergedCustomSettings = {
+                    ...customSettings
+                };
+                
+                // If existing fog is already fading out, queue the new fog creation
+                if (existingFog.isFadingOut) {
+                    console.log(`Fog ${id} is already fading out. Queueing new fog creation with custom settings...`);
+                    PIXEffect_fog.pendingFogCreations.set(id, {
+                        type,
+                        style,
+                        duration,
+                        layer,
+                        position: existingProperties.position,
+                        size: existingProperties.size,
+                        fogParams: existingProperties.fogParams,
+                        customSettings: mergedCustomSettings
+                    });
+                    return existingFog; // Return existing fog for now
+                }
+                
+                // If existing fog is not fading out, start fade-out and queue new creation
+                console.log(`Starting fade-out for existing fog ${id} and queueing replacement with custom settings...`);
+                PIXEffect_fog.pendingFogCreations.set(id, {
+                    type,
+                    style,
+                    duration,
+                    layer,
+                    position: existingProperties.position,
+                    size: existingProperties.size,
+                    fogParams: existingProperties.fogParams,
+                    customSettings: mergedCustomSettings
+                });
+                
+                existingFog.startFadeOut();
+                return existingFog; // Return existing fog for now
+            }
+        }
+
+        // No existing fog or existing fog is destroyed, create new one immediately
+        const instance = new PIXEffect_fog(type, style, duration, layer);
+        instance.id = id; // Override the auto-generated ID
+        PIXEffect_fog.instances.set(id, instance);
+
+        // Apply custom settings immediately if provided
+        if (customSettings) {
+            if (customSettings.position) {
+                instance.setPosition(customSettings.position.x, customSettings.position.y);
+            }
+            if (customSettings.size) {
+                instance.setSize(customSettings.size.width, customSettings.size.height);
+            }
+            if (customSettings.scale !== undefined) instance.setScale(customSettings.scale);
+            if (customSettings.speed !== undefined) instance.setSpeed(customSettings.speed);
+            if (customSettings.opacity !== undefined) instance.setOpacity(customSettings.opacity);
+            if (customSettings.color !== undefined) instance.setColor(customSettings.color);
+            if (customSettings.density !== undefined) instance.setDensity(customSettings.density);
+            if (customSettings.layers !== undefined) instance.setLayers(customSettings.layers);
+            if (customSettings.blur !== undefined) instance.setBlur(customSettings.blur);
+            if (customSettings.noiseScale !== undefined) instance.setNoiseScale(customSettings.noiseScale);
+            if (customSettings.fadeEdges !== undefined) instance.setFadeEdges(customSettings.fadeEdges);
+            if (customSettings.mixBlendMode !== undefined) instance.setMixBlendMode(customSettings.mixBlendMode);
+            if (customSettings.particleVariation !== undefined) instance.setParticleVariation(customSettings.particleVariation);
+        }
+
+        console.log(`Created new fog ${id} immediately with custom settings`);
+        return instance;
+    }
+
+    /**
+     * Gets the current position of the fog
+     */
+    public getPosition(): { x: number, y: number } {
+        return { x: this._x, y: this._y };
+    }
+
+    /**
+     * Gets the current size of the fog
+     */
+    public getSize(): { width: number, height: number } {
+        return { width: this._width, height: this._height };
+    }
+
+    /**
+     * Gets the fog style
+     */
+    public getStyle(): FogStyle {
+        return this.style;
+    }
+
+    /**
+     * Gets the fog type
+     */
+    public getType(): FogType {
+        return this.type;
     }
 }
 
@@ -3134,5 +3599,483 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (fogInfo.count > 0) {
             console.log("Active fog IDs:", fogInfo.fogs);
         }
+    });
+
+    // Add new test category for pending fog system
+    var pending_fog_category = IMGUIDebugButton.AddCategory("pending_fog_system");
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Fog Replacement Logic", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING FOG REPLACEMENT LOGIC ===");
+        
+        // Create first fog
+        console.log("Step 1: Creating initial fog...");
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.HEAVY, 8, "replacement_test")
+            .setPosition(x - 200, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.8)
+            .setColor("#ff0000");
+
+        // Try to replace it after 2 seconds (should queue)
+        setTimeout(() => {
+            console.log("Step 2: Attempting to replace fog (should queue)...");
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 10, "replacement_test")
+                .setPosition(x - 200, y - 200)
+                .setSize(400, 300)
+                .setOpacity(0.8)
+                .setColor("#00ff00");
+            
+            const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+            console.log(`Pending fogs after replacement attempt: ${pendingInfo.count}`);
+        }, 2000);
+
+        // Try to replace again after 4 seconds (should update queue)
+        setTimeout(() => {
+            console.log("Step 3: Attempting second replacement (should update queue)...");
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.TOXIC, 12, "replacement_test")
+                .setPosition(x - 200, y - 200)
+                .setSize(400, 300)
+                .setOpacity(0.8)
+                .setColor("#0000ff");
+            
+            const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+            console.log(`Pending fogs after second replacement: ${pendingInfo.count}`);
+        }, 4000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Multiple ID Replacements", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING MULTIPLE ID REPLACEMENTS ===");
+        
+        // Create multiple fogs with different IDs
+        const fogIds = ["test_fog_1", "test_fog_2", "test_fog_3"];
+        const colors = ["#ff0000", "#00ff00", "#0000ff"];
+        
+        fogIds.forEach((id, index) => {
+            console.log(`Creating fog ${id}...`);
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 6, id)
+                .setPosition(x - 300 + (index * 200), y - 150)
+                .setSize(180, 150)
+                .setOpacity(0.7)
+                .setColor(colors[index]);
+        });
+
+        // Try to replace all of them after 2 seconds
+        setTimeout(() => {
+            console.log("Attempting to replace all fogs...");
+            const newColors = ["#ffff00", "#ff00ff", "#00ffff"];
+            
+            fogIds.forEach((id, index) => {
+                PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 8, id)
+                    .setPosition(x - 300 + (index * 200), y - 150)
+                    .setSize(180, 150)
+                    .setOpacity(0.7)
+                    .setColor(newColors[index]);
+            });
+            
+            const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+            console.log(`Total pending fogs: ${pendingInfo.count}`);
+            console.log(`Pending IDs: ${pendingInfo.pending.join(", ")}`);
+        }, 2000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Callback System", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING CALLBACK SYSTEM ===");
+        
+        // Create initial fog
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LIGHT, 5, "callback_test")
+            .setPosition(x - 150, y - 150)
+            .setSize(300, 300)
+            .setOpacity(0.6)
+            .setColor("#ffffff");
+
+        // Use callback system to replace it
+        setTimeout(() => {
+            console.log("Using GenerateFogWithCallback...");
+            PIXEffect_fog.GenerateFogWithCallback(
+                FogType.TEMPORARY, 
+                FogStyle.HEAVY, 
+                8, 
+                "callback_test",
+                (newFog: PIXEffect_fog) => {
+                    console.log(`Callback triggered! New fog created: ${newFog.getId()}`);
+                    newFog.setColor("#ff6b6b")
+                          .setOpacity(0.8)
+                          .setScale(2.0);
+                    console.log("Applied custom settings via callback");
+                }
+            );
+        }, 2000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Show Pending Fog Info", () => {
+        const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+        const fogInfo = PIXEffect_fog.GetFogInfo();
+        
+        console.log("=== PENDING FOG SYSTEM STATUS ===");
+        console.log(`Active fogs: ${fogInfo.count}`);
+        console.log(`Pending fogs: ${pendingInfo.count}`);
+        
+        if (fogInfo.count > 0) {
+            console.log("Active fog IDs:", fogInfo.fogs);
+            
+            // Show fade status for each active fog
+            fogInfo.fogs.forEach(id => {
+                const fog = PIXEffect_fog.GetFog(id);
+                if (fog) {
+                    const isFadingOut = (fog as any).isFadingOut;
+                    const isFadingIn = (fog as any).isFadingIn;
+                    let status = "ACTIVE";
+                    if (isFadingOut) status = "FADING OUT";
+                    else if (isFadingIn) status = "FADING IN";
+                    console.log(`  ${id}: ${status}`);
+                }
+            });
+        }
+        
+        if (pendingInfo.count > 0) {
+            console.log("Pending fog IDs:", pendingInfo.pending);
+        }
+        
+        console.log("================================");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Cancel All Pending Fogs", () => {
+        const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+        console.log(`Cancelling ${pendingInfo.count} pending fog creations...`);
+        PIXEffect_fog.CancelAllPendingFog();
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Rapid Replacement", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING RAPID REPLACEMENT ===");
+        
+        // Create initial fog
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 10, "rapid_test")
+            .setPosition(x - 200, y - 200)
+            .setSize(400, 300)
+            .setOpacity(0.7)
+            .setColor("#ffffff");
+
+        // Rapidly try to replace it multiple times
+        const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+        const styles = [FogStyle.HEAVY, FogStyle.MYSTICAL, FogStyle.TOXIC, FogStyle.LIGHT, FogStyle.MEDIUM];
+        
+        colors.forEach((color, index) => {
+            setTimeout(() => {
+                console.log(`Rapid replacement ${index + 1}: ${color}`);
+                PIXEffect_fog.GenerateFog(FogType.TEMPORARY, styles[index], 8, "rapid_test")
+                    .setPosition(x - 200, y - 200)
+                    .setSize(400, 300)
+                    .setOpacity(0.7)
+                    .setColor(color);
+                
+                const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+                console.log(`  Pending count: ${pendingInfo.count}`);
+            }, (index + 1) * 500); // Every 500ms
+        });
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Edge Cases", () => {
+        console.log("=== TESTING EDGE CASES ===");
+        
+        // Test 1: Try to replace non-existent fog
+        console.log("Test 1: Replacing non-existent fog...");
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 5, "non_existent_test")
+            .setPosition(100, 100)
+            .setSize(200, 200);
+        
+        // Test 2: Try to cancel non-existent pending fog
+        setTimeout(() => {
+            console.log("Test 2: Cancelling non-existent pending fog...");
+            const result = PIXEffect_fog.CancelPendingFog("non_existent_pending");
+            console.log(`Cancel result: ${result}`);
+        }, 1000);
+        
+        // Test 3: Create fog, destroy it immediately, then try to replace
+        setTimeout(() => {
+            console.log("Test 3: Create, destroy, then replace...");
+            const fog = PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LIGHT, 5, "destroy_test")
+                .setPosition(300, 300)
+                .setSize(200, 200);
+            
+            // Destroy immediately
+            fog.destroy();
+            
+            // Try to replace
+            setTimeout(() => {
+                PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.HEAVY, 5, "destroy_test")
+                    .setPosition(300, 300)
+                    .setSize(200, 200);
+            }, 100);
+        }, 2000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Stress Test Pending System", () => {
+        console.log("=== STRESS TESTING PENDING SYSTEM ===");
+        
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        // Create 5 different fog IDs
+        const fogIds = ["stress_1", "stress_2", "stress_3", "stress_4", "stress_5"];
+        
+        // Create initial fogs
+        fogIds.forEach((id, index) => {
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 8, id)
+                .setPosition(x - 400 + (index * 200), y - 200)
+                .setSize(180, 150)
+                .setOpacity(0.6)
+                .setColor("#ffffff");
+        });
+        
+        // Rapidly replace all of them multiple times
+        for (let round = 1; round <= 3; round++) {
+            setTimeout(() => {
+                console.log(`Stress test round ${round}...`);
+                const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+                
+                fogIds.forEach((id, index) => {
+                    PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 6, id)
+                        .setPosition(x - 400 + (index * 200), y - 200)
+                        .setSize(180, 150)
+                        .setOpacity(0.7)
+                        .setColor(colors[index]);
+                });
+                
+                const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+                console.log(`Round ${round} - Pending: ${pendingInfo.count}, IDs: ${pendingInfo.pending.join(", ")}`);
+            }, round * 1000);
+        }
+        
+        // Show final status
+        setTimeout(() => {
+            const finalPending = PIXEffect_fog.GetPendingFogInfo();
+            const finalActive = PIXEffect_fog.GetFogInfo();
+            console.log("=== STRESS TEST COMPLETE ===");
+            console.log(`Final active fogs: ${finalActive.count}`);
+            console.log(`Final pending fogs: ${finalPending.count}`);
+            console.log("============================");
+        }, 5000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Size/Position Preservation", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING SIZE/POSITION PRESERVATION ===");
+        
+        // Create initial fog with specific size and position
+        console.log("Step 1: Creating initial fog with custom size and position...");
+        const initialFog = PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.HEAVY, 8, "size_test")
+            .setPosition(x - 300, y - 200)
+            .setSize(600, 400)
+            .setOpacity(0.8)
+            .setColor("#ff0000")
+            .setScale(2.0)
+            .setDensity(1.5);
+
+        console.log(`Initial fog - Position: (${initialFog.getPosition().x}, ${initialFog.getPosition().y}), Size: ${initialFog.getSize().width}x${initialFog.getSize().height}`);
+
+        // Try to replace it after 2 seconds (should preserve size and position)
+        setTimeout(() => {
+            console.log("Step 2: Replacing fog (should preserve size and position)...");
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 10, "size_test");
+            
+            const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
+            console.log(`Pending fogs: ${pendingInfo.count}`);
+        }, 2000);
+
+        // Check the replacement fog after fade-out completes
+        setTimeout(() => {
+            const replacementFog = PIXEffect_fog.GetFog("size_test");
+            if (replacementFog) {
+                console.log(`Replacement fog - Position: (${replacementFog.getPosition().x}, ${replacementFog.getPosition().y}), Size: ${replacementFog.getSize().width}x${replacementFog.getSize().height}`);
+                console.log("Size and position should be preserved!");
+            } else {
+                console.log("Replacement fog not found");
+            }
+        }, 5000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Custom Settings Method", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING CUSTOM SETTINGS METHOD ===");
+        
+        // Create initial fog
+        console.log("Step 1: Creating initial fog...");
+        PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.LIGHT, 6, "custom_test")
+            .setPosition(x - 200, y - 150)
+            .setSize(400, 300)
+            .setOpacity(0.6)
+            .setColor("#ffffff");
+
+        // Use GenerateFogWithSettings to replace with custom settings
+        setTimeout(() => {
+            console.log("Step 2: Using GenerateFogWithSettings to replace...");
+            PIXEffect_fog.GenerateFogWithSettings(
+                FogType.TEMPORARY, 
+                FogStyle.MYSTICAL, 
+                8, 
+                "custom_test",
+                "html_c3",
+                {
+                    position: { x: x - 250, y: y - 200 }, // New position
+                    size: { width: 500, height: 350 },    // New size
+                    color: "#9c27b0",
+                    scale: 2.5,
+                    opacity: 0.9,
+                    speed: 0.5
+                }
+            );
+        }, 2000);
+
+        // Check the result
+        setTimeout(() => {
+            const resultFog = PIXEffect_fog.GetFog("custom_test");
+            if (resultFog) {
+                console.log(`Result fog - Position: (${resultFog.getPosition().x}, ${resultFog.getPosition().y}), Size: ${resultFog.getSize().width}x${resultFog.getSize().height}`);
+                console.log(`Color: ${resultFog.getFogParams().color}, Scale: ${resultFog.getFogParams().scale}`);
+            }
+        }, 5000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Test Property Inheritance", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== TESTING PROPERTY INHERITANCE ===");
+        
+        // Create initial fog with many custom properties
+        console.log("Step 1: Creating fog with many custom properties...");
+        const complexFog = PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.HEAVY, 5, "inheritance_test")
+            .setPosition(x - 350, y - 250)
+            .setSize(700, 500)
+            .setOpacity(0.75)
+            .setColor("#4caf50")
+            .setScale(1.8)
+            .setSpeed(0.7)
+            .setDensity(1.3)
+            .setLayers(4)
+            .setBlur(18)
+            .setNoiseScale(0.6);
+
+        console.log("Initial fog properties:");
+        console.log(`  Position: (${complexFog.getPosition().x}, ${complexFog.getPosition().y})`);
+        console.log(`  Size: ${complexFog.getSize().width}x${complexFog.getSize().height}`);
+        console.log(`  Color: ${complexFog.getFogParams().color}`);
+        console.log(`  Scale: ${complexFog.getFogParams().scale}`);
+        console.log(`  Opacity: ${complexFog.getFogParams().opacity}`);
+
+        // Replace with different style but should inherit properties
+        setTimeout(() => {
+            console.log("Step 2: Replacing with different style (should inherit properties)...");
+            PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 8, "inheritance_test");
+        }, 2000);
+
+        // Check inheritance
+        setTimeout(() => {
+            const inheritedFog = PIXEffect_fog.GetFog("inheritance_test");
+            if (inheritedFog) {
+                console.log("Inherited fog properties:");
+                console.log(`  Position: (${inheritedFog.getPosition().x}, ${inheritedFog.getPosition().y}) - Should match initial`);
+                console.log(`  Size: ${inheritedFog.getSize().width}x${inheritedFog.getSize().height} - Should match initial`);
+                console.log(`  Color: ${inheritedFog.getFogParams().color} - Should be inherited`);
+                console.log(`  Scale: ${inheritedFog.getFogParams().scale} - Should be inherited`);
+                console.log(`  Opacity: ${inheritedFog.getFogParams().opacity} - Should be inherited`);
+                console.log(`  Style: ${inheritedFog.getStyle()} - Should be MYSTICAL`);
+            }
+        }, 5000);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(pending_fog_category, "Compare Before/After Properties", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        const x = PlayerInstance ? PlayerInstance.x : 400;
+        const y = PlayerInstance ? PlayerInstance.y : 300;
+
+        console.log("=== COMPARING BEFORE/AFTER PROPERTIES ===");
+        
+        // Create fog and capture its properties
+        const testFog = PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.TOXIC, 4, "compare_test")
+            .setPosition(x - 400, y - 300)
+            .setSize(800, 600)
+            .setOpacity(0.85)
+            .setColor("#ff6b6b")
+            .setScale(2.2)
+            .setSpeed(1.5)
+            .setDensity(1.8);
+
+        // Capture initial properties
+        const initialProps = {
+            position: testFog.getPosition(),
+            size: testFog.getSize(),
+            fogParams: testFog.getFogParams(),
+            style: testFog.getStyle(),
+            type: testFog.getType()
+        };
+
+        console.log("=== INITIAL PROPERTIES ===");
+        console.log("Position:", initialProps.position);
+        console.log("Size:", initialProps.size);
+        console.log("Style:", initialProps.style);
+        console.log("Type:", initialProps.type);
+        console.log("Color:", initialProps.fogParams.color);
+        console.log("Scale:", initialProps.fogParams.scale);
+        console.log("Opacity:", initialProps.fogParams.opacity);
+        console.log("Speed:", initialProps.fogParams.speed);
+        console.log("Density:", initialProps.fogParams.density);
+
+        // Replace after 2 seconds
+        setTimeout(() => {
+            console.log("Replacing fog...");
+            PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.LIGHT, 0, "compare_test");
+        }, 2000);
+
+        // Compare after replacement
+        setTimeout(() => {
+            const replacedFog = PIXEffect_fog.GetFog("compare_test");
+            if (replacedFog) {
+                console.log("=== AFTER REPLACEMENT PROPERTIES ===");
+                console.log("Position:", replacedFog.getPosition());
+                console.log("Size:", replacedFog.getSize());
+                console.log("Style:", replacedFog.getStyle(), "(should be LIGHT)");
+                console.log("Type:", replacedFog.getType(), "(should be PERSISTENT)");
+                console.log("Color:", replacedFog.getFogParams().color);
+                console.log("Scale:", replacedFog.getFogParams().scale);
+                console.log("Opacity:", replacedFog.getFogParams().opacity);
+                console.log("Speed:", replacedFog.getFogParams().speed);
+                console.log("Density:", replacedFog.getFogParams().density);
+
+                console.log("=== COMPARISON RESULTS ===");
+                const posMatch = replacedFog.getPosition().x === initialProps.position.x && replacedFog.getPosition().y === initialProps.position.y;
+                const sizeMatch = replacedFog.getSize().width === initialProps.size.width && replacedFog.getSize().height === initialProps.size.height;
+                
+                console.log(`Position preserved: ${posMatch ? '✓' : '✗'}`);
+                console.log(`Size preserved: ${sizeMatch ? '✓' : '✗'}`);
+                console.log(`Style changed: ${replacedFog.getStyle() !== initialProps.style ? '✓' : '✗'}`);
+                console.log(`Type changed: ${replacedFog.getType() !== initialProps.type ? '✓' : '✗'}`);
+            } else {
+                console.log("❌ Replacement fog not found!");
+            }
+        }, 6000);
     });
 }); 
