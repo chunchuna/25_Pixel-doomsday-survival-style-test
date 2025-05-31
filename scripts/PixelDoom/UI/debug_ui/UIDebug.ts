@@ -79,7 +79,7 @@ export class UIDebug {
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
     private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
-    private static consoleFontSize: number = 24; // 控制台字体大小
+    private static consoleFontSize: number = 10; // 控制台字体大小
     private static consoleUseBackplate: boolean = true; // 是否使用底板样式
     private static consoleBackplateColor: string = '74, 74, 74'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0     // 底板透明度

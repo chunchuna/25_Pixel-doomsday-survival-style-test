@@ -898,10 +898,20 @@ export class DebugObjectRenderer {
     }
 }
 
+
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
+
+    DebugObjectRenderer.clearAll();
+
+})
+
 // Auto-initialize when module is loaded
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     DebugObjectRenderer.initialize();
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
 
     var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {

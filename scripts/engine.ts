@@ -3,7 +3,9 @@
 
 enum GAME_STATES {
     INIT = "afteranylayoutstart",
+    INIT_BEFORE = "beforeanylayoutstart",
     TICK = "tick",
+    LAYOUT_END = "afteranylayoutend",
 
 }
 
@@ -15,6 +17,9 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     public static RUN_TIME_: IRuntime;
 
     public static OBJECT: IConstructProjectObjects | any
+
+
+    public static LayoutName: string;
 
     //The entry point function of Construct 3 engine, used to register callbacks at startup.
     //This function will be called at engine startup, passing in the current runtime environment (` IRuntime `).
@@ -36,7 +41,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
             // Create C3 Timer instance for interval timing
             const timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
             const timerTag = `interval_${Date.now()}_${Math.random()}`;
-            
+
             // Set up timer event listener
             timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === timerTag) {
@@ -45,10 +50,10 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
                     timerInstance.behaviors.Timer.startTimer(intervalSeconds, timerTag, "regular");
                 }
             });
-            
+
             // Start the timer
             timerInstance.behaviors.Timer.startTimer(intervalSeconds, timerTag, "regular");
-            
+
             //console.log(`Started C3Timer interval with ${intervalSeconds}s interval`);
             return timerInstance; // Return timer instance for manual cleanup if needed
         } catch (error: any) {
@@ -81,9 +86,14 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         }
     }
 
+    public static gl$_getlayoutname() {
+        return pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name;
+    }
+
     public static gl$_ubu_init = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.INIT, Function);
+
         });
     }
 
@@ -94,6 +104,12 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         });
     };
 
+
+    public static gl$_layout_end = (Function: () => void) => {
+        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            runtime.addEventListener(GAME_STATES.LAYOUT_END, Function)
+        })
+    }
 
     public static async gl$_call_eventhandle_(EventName: string, func: any,) {
         // @ts-ignore
@@ -183,6 +199,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTR
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_ = runtime;
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.OBJECT = runtime.objects;
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.TryGetHandlerAgainFuckThisHandler();
+
 
 });
 
