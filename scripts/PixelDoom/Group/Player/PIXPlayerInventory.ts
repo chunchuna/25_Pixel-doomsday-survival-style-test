@@ -43,7 +43,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     };
     
     // Bind main inventory and get the returned control object
-    const inventoryControl = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "I");
+    const inventoryControl = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "Tab");
     
     // Save reference to ensure unbind function is available
     PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryControl;

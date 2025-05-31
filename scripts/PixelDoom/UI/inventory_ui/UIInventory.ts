@@ -65,6 +65,7 @@ interface IUIInventory {
     DeserializeInventory(data: string): { inventory: Item[], rows: number, columns: number };
     SerializeItemsOnly(inventoryArray: Item[]): string;
     DeserializeItemsOnly(data: string): Item[];
+    bind_QuickCloseInventoryWindow(key: string): { unbind: () => void };
 }
 
 // 库存UI管理类
@@ -131,6 +132,10 @@ class UIInventory implements IUIInventory {
     private onMainInventoryCloseCallback: (() => void) | null = null;
     private onOtherInventoryOpenCallback: (() => void) | null = null;
     private onOtherInventoryCloseCallback: (() => void) | null = null;
+
+    // 添加快速关闭库存窗口的按键绑定
+    private quickCloseKey: string | null = null;
+    private quickCloseKeyListener: ((event: KeyboardEvent) => void) | null = null;
 
     private constructor() {
         this.initStyles();
@@ -3754,6 +3759,66 @@ class UIInventory implements IUIInventory {
     public OnOtherInventoryClose(callback: () => void): void {
         this.onOtherInventoryCloseCallback = callback;
     }
+
+    // 添加快速关闭库存窗口的按键绑定方法
+    public bind_QuickCloseInventoryWindow(key: string): { unbind: () => void } {
+        // 如果已经有绑定的按键，先解绑
+        if (this.quickCloseKeyListener) {
+            document.removeEventListener('keydown', this.quickCloseKeyListener);
+        }
+
+        // 保存按键
+        this.quickCloseKey = key.toLowerCase();
+
+        // 创建按键监听器
+        this.quickCloseKeyListener = (event: KeyboardEvent) => {
+            // 检查按下的按键是否匹配
+            if (event.key.toLowerCase() === this.quickCloseKey) {
+                // 防止默认行为
+                event.preventDefault();
+                
+                // 执行快速关闭逻辑：先关闭其他库存，再关闭主库存
+                this.executeQuickClose();
+            }
+        };
+
+        // 添加事件监听器
+        document.addEventListener('keydown', this.quickCloseKeyListener);
+
+        // 返回解绑函数
+        return {
+            unbind: () => {
+                if (this.quickCloseKeyListener) {
+                    document.removeEventListener('keydown', this.quickCloseKeyListener);
+                    this.quickCloseKeyListener = null;
+                    this.quickCloseKey = null;
+                }
+            }
+        };
+    }
+
+    // 执行快速关闭逻辑
+    private executeQuickClose(): void {
+        let hasClosedSomething = false;
+
+        // 首先尝试关闭其他库存
+        if (this.closeOtherInventoryFunc) {
+            this.closeOtherInventoryFunc();
+            hasClosedSomething = true;
+            console.log("Quick close: Other inventory closed");
+        }
+        // 如果没有其他库存打开，则关闭主库存
+        else if (this.isMainInventoryVisible) {
+            this.toggleMainInventory();
+            hasClosedSomething = true;
+            console.log("Quick close: Main inventory closed");
+        }
+
+        // 如果没有关闭任何窗口，输出调试信息
+        if (!hasClosedSomething) {
+            console.log("Quick close: No inventory windows are open");
+        }
+    }
 }
 
 // 导出公共接口
@@ -3815,6 +3880,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();
+    inventoryManager.bind_QuickCloseInventoryWindow("Escape")
+    
 
 });
 
@@ -3864,4 +3931,15 @@ export function OnOtherInventoryClose(callback: () => void): void {
   if (inventoryManager) {
     inventoryManager.OnOtherInventoryClose(callback);
   }
+}
+
+// 导出快速关闭库存窗口的按键绑定方法
+export function bind_QuickCloseInventoryWindow(key: string): { unbind: () => void } {
+  if (inventoryManager) {
+    return inventoryManager.bind_QuickCloseInventoryWindow(key);
+  }
+  // 如果inventoryManager不存在，返回一个空的解绑函数
+  return {
+    unbind: () => {}
+  };
 }
