@@ -676,62 +676,6 @@
 											"script-info": {
 												"purpose": "none"
 											}
-										},
-										{
-											"name": "UIInventoryTypes.ts",
-											"type": "application/typescript",
-											"sid": 286680602048282,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryCore.ts",
-											"type": "application/typescript",
-											"sid": 808242218065177,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryCore2.ts",
-											"type": "application/typescript",
-											"sid": 228366267355495,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryRender.ts",
-											"type": "application/typescript",
-											"sid": 351308909739876,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryDrag.ts",
-											"type": "application/typescript",
-											"sid": 935423235952405,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryUtils.ts",
-											"type": "application/typescript",
-											"sid": 215758499194213,
-											"script-info": {
-												"purpose": "none"
-											}
-										},
-										{
-											"name": "UIInventoryStyles.ts",
-											"type": "application/typescript",
-											"sid": 129034734480953,
-											"script-info": {
-												"purpose": "none"
-											}
 										}
 									],
 									"subfolders": [],
