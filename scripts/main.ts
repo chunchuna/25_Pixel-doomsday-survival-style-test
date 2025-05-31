@@ -4,6 +4,8 @@
 import "./engine.js"
 
 import "./PixelDoom/UI/font/font.js"
+import "./PixelDoom/UI/imgui_lib/imgui.js"
+import "./PixelDoom/UI/debug_ui/UIConsole.js"
 
 import "./PixelDoom/Global/PIXGlobal.js"
 import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
@@ -35,11 +37,11 @@ import "./PixelDoom/Renderer/DebugObjectRenderer.js"
 
 
 //UI
-import "./PixelDoom/UI/imgui_lib/imgui.js"
+
 import "./PixelDoom/UI/imgui_lib/ChineseFontExample.js"
 import "./PixelDoom/UI/debug_ui/UIvariableMonitoring.js"
 import "./PixelDoom/UI/debug_ui/UIDbugButton.js"
-import "./PixelDoom/UI/debug_ui/UIConsole.js"
+
 import "./PixelDoom/UI/window_lib_ui/UIWindowLib.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js"
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js"

@@ -2,8 +2,25 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 import { IMGUIDebugButton } from "./UIDbugButton.js";
 
+/**
+ * Performance settings for variable monitoring
+ */
+interface PerformanceSettings {
+    updateInterval: number;        // Update interval in milliseconds
+    maxDisplayItems: number;       // Maximum number of items to display
+    enableCaching: boolean;        // Enable value caching
+    enableLazyFormatting: boolean; // Enable lazy formatting for complex objects
+    maxStringLength: number;       // Maximum string length for display
+}
 
-
+/**
+ * Cached value entry
+ */
+interface CachedValue {
+    formattedValue: string;
+    lastUpdate: number;
+    isValid: boolean;
+}
 
 /**
  * Variable monitoring class - used to monitor variable values in real time
@@ -14,12 +31,79 @@ export class VariableMonitoring {
     private static isInitialized: boolean = false;
     private static monitoredValues: Map<string, { value: any, source: string }> = new Map();
 
+    // Performance optimization properties
+    private static lastUpdateTime: number = 0;
+    private static cachedFormattedValues: Map<string, CachedValue> = new Map();
+    private static performanceSettings: PerformanceSettings = {
+        updateInterval: 100,        // Update every 100ms by default
+        maxDisplayItems: 50,        // Display max 50 items
+        enableCaching: true,        // Enable caching
+        enableLazyFormatting: true, // Enable lazy formatting
+        maxStringLength: 200        // Max 200 characters for strings
+    };
+    private static isPaused: boolean = false;
+    private static frameSkipCounter: number = 0;
+    private static frameSkipInterval: number = 3; // Update every 3 frames
+
     // Storage map for expanded status
     private static expandedItems: Map<string, boolean> = new Map();
 
     // Current variable name displayed in detail window
     private static currentDetailItem: string | null = null;
     private static detailWindowId: string = "variable_detail_window";
+
+    /**
+     * Set performance settings
+     */
+    public static SetPerformanceSettings(settings: Partial<PerformanceSettings>): void {
+        this.performanceSettings = { ...this.performanceSettings, ...settings };
+        // Clear cache when settings change
+        this.cachedFormattedValues.clear();
+    }
+
+    /**
+     * Get current performance settings
+     */
+    public static GetPerformanceSettings(): PerformanceSettings {
+        return { ...this.performanceSettings };
+    }
+
+    /**
+     * Pause/resume monitoring updates
+     */
+    public static SetPaused(paused: boolean): void {
+        this.isPaused = paused;
+    }
+
+    /**
+     * Check if monitoring is paused
+     */
+    public static IsPaused(): boolean {
+        return this.isPaused;
+    }
+
+    /**
+     * Set frame skip interval for updates
+     */
+    public static SetFrameSkipInterval(interval: number): void {
+        this.frameSkipInterval = Math.max(1, interval);
+    }
+
+    /**
+     * Clear all caches
+     */
+    public static ClearCache(): void {
+        this.cachedFormattedValues.clear();
+    }
+
+    /**
+     * Get cache statistics
+     */
+    public static GetCacheStats(): { size: number, hitRate: number } {
+        const size = this.cachedFormattedValues.size;
+        // Simple hit rate calculation (this is a simplified version)
+        return { size, hitRate: 0.8 }; // Placeholder hit rate
+    }
 
     /**
      * Get variable monitoring instance
@@ -103,6 +187,67 @@ export class VariableMonitoring {
     }
 
     /**
+     * Check if we should update this frame
+     */
+    private static shouldUpdateThisFrame(): boolean {
+        if (this.isPaused) return false;
+
+        // Frame skip check
+        this.frameSkipCounter++;
+        if (this.frameSkipCounter < this.frameSkipInterval) {
+            return false;
+        }
+        this.frameSkipCounter = 0;
+
+        // Time-based throttling
+        const currentTime = Date.now();
+        if (currentTime - this.lastUpdateTime < this.performanceSettings.updateInterval) {
+            return false;
+        }
+        this.lastUpdateTime = currentTime;
+
+        return true;
+    }
+
+    /**
+     * Get cached or format value with performance optimizations
+     */
+    private static getCachedFormattedValue(name: string, value: any, isExpanded: boolean = false): string {
+        if (!this.performanceSettings.enableCaching) {
+            return this.formatValue(value, isExpanded);
+        }
+
+        const cacheKey = `${name}_${isExpanded}`;
+        const cached = this.cachedFormattedValues.get(cacheKey);
+        const currentTime = Date.now();
+
+        // Check if cached value is still valid
+        if (cached && cached.isValid && (currentTime - cached.lastUpdate) < this.performanceSettings.updateInterval) {
+            return cached.formattedValue;
+        }
+
+        // Format new value
+        try {
+            const formattedValue = this.formatValue(value, isExpanded);
+            this.cachedFormattedValues.set(cacheKey, {
+                formattedValue,
+                lastUpdate: currentTime,
+                isValid: true
+            });
+            return formattedValue;
+        } catch (e: any) {
+            // Cache error state
+            const errorValue = `[Error: ${e.message}]`;
+            this.cachedFormattedValues.set(cacheKey, {
+                formattedValue: errorValue,
+                lastUpdate: currentTime,
+                isValid: false
+            });
+            return errorValue;
+        }
+    }
+
+    /**
      * Render detail window
      */
     private static renderDetailWindow(): void {
@@ -133,12 +278,63 @@ export class VariableMonitoring {
         ImGui.Text(`Source: ${item.source}`);
         ImGui.Separator();
 
+        // Performance controls in detail window
+        if (ImGui.CollapsingHeader("Performance Controls")) {
+            const settings = this.performanceSettings;
+
+            // Update interval slider
+            const updateInterval = [settings.updateInterval];
+            if (ImGui.SliderInt("Update Interval (ms)", updateInterval, 50, 1000)) {
+                this.SetPerformanceSettings({ updateInterval: updateInterval[0] });
+            }
+
+            // Max display items
+            const maxItems = [settings.maxDisplayItems];
+            if (ImGui.SliderInt("Max Display Items", maxItems, 10, 200)) {
+                this.SetPerformanceSettings({ maxDisplayItems: maxItems[0] });
+            }
+
+            // Cache controls
+            let enableCaching = [settings.enableCaching];
+            if (ImGui.Checkbox("Enable Caching", enableCaching)) {
+                this.SetPerformanceSettings({ enableCaching: enableCaching[0] });
+            }
+
+            // Pause button
+            let isPaused = [this.isPaused];
+            if (ImGui.Checkbox("Pause Updates", isPaused)) {
+                this.SetPaused(isPaused[0]);
+            }
+
+            // Clear cache button
+            if (ImGui.Button("Clear Cache")) {
+                this.ClearCache();
+            }
+
+            ImGui.Separator();
+        }
+
         // To ensure safe handling, display content in batches to avoid memory overflow
         try {
+            // For detail window, always show full content (bypass lazy formatting)
             const fullContent = this.formatValue(item.value, true);
 
             // First display content type
             ImGui.Text(`Type: ${typeof item.value}`);
+            
+            // Show additional object information
+            if (typeof item.value === "object" && item.value !== null) {
+                if (Array.isArray(item.value)) {
+                    ImGui.Text(`Array Length: ${item.value.length}`);
+                } else {
+                    const keys = Object.keys(item.value);
+                    ImGui.Text(`Object Keys: ${keys.length}`);
+                    if (keys.length > 0) {
+                        ImGui.Text(`Keys: ${keys.slice(0, 10).join(', ')}${keys.length > 10 ? '...' : ''}`);
+                    }
+                }
+            }
+            
             ImGui.Separator();
 
             // Display content
@@ -165,8 +361,11 @@ export class VariableMonitoring {
      * Clean up destroyed or invalid objects from monitoring
      */
     private static cleanupDestroyedObjects(): void {
+        // Only cleanup if we should update this frame
+        if (!this.shouldUpdateThisFrame()) return;
+
         const keysToRemove: string[] = [];
-        
+
         this.monitoredValues.forEach((item, name) => {
             try {
                 // Test if the value is still valid by attempting to format it
@@ -176,10 +375,13 @@ export class VariableMonitoring {
                 keysToRemove.push(name);
             }
         });
-        
+
         // Remove invalid entries
         keysToRemove.forEach(key => {
             this.monitoredValues.delete(key);
+            // Also remove from cache
+            this.cachedFormattedValues.delete(`${key}_false`);
+            this.cachedFormattedValues.delete(`${key}_true`);
         });
     }
 
@@ -189,12 +391,25 @@ export class VariableMonitoring {
     private static renderMonitoringWindow(): void {
         const ImGui = globalThis.ImGui;
 
-        // Clean up destroyed objects before rendering
-        this.cleanupDestroyedObjects();
+        // Performance status display
+        ImGui.Text(`UIvariable (${this.isPaused ? 'PAUSED' : 'ACTIVE'})`);
+        ImGui.SameLine();
+        ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
+            `Items: ${this.monitoredValues.size}/${this.performanceSettings.maxDisplayItems}`);
 
-        // Set title bar
-        ImGui.Text("UIvariable");
+        // Performance controls
+        if (ImGui.SmallButton(this.isPaused ? "Resume" : "Pause")) {
+            this.SetPaused(!this.isPaused);
+        }
+        ImGui.SameLine();
+        if (ImGui.SmallButton("Clear Cache")) {
+            this.ClearCache();
+        }
+
         ImGui.Separator();
+
+        // Clean up destroyed objects before rendering (with throttling)
+        this.cleanupDestroyedObjects();
 
         // Table title
         const tableFlags =
@@ -210,17 +425,23 @@ export class VariableMonitoring {
             ImGui.TableSetupColumn("from");
             ImGui.TableHeadersRow();
 
-            // Fill table data
+            // Fill table data with performance limits
             let rowIndex = 0;
-            this.monitoredValues.forEach((item, name) => {
+            const maxItems = this.performanceSettings.maxDisplayItems;
+
+            for (const [name, item] of this.monitoredValues) {
+                if (rowIndex >= maxItems) {
+                    // Show truncation message
+                    ImGui.TableNextRow();
+                    ImGui.TableSetColumnIndex(0);
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0),
+                        `... ${this.monitoredValues.size - maxItems} more items (increase max display limit)`);
+                    break;
+                }
+
                 ImGui.TableNextRow();
                 const textId = `value_${rowIndex}`;
                 ImGui.PushID(textId);
-
-                // Check if it's long content
-                const isLongContent =
-                    (typeof item.value === "string" && item.value.length > 100) ||
-                    (typeof item.value === "object" && JSON.stringify(item.value).length > 100);
 
                 // Variable name column
                 ImGui.TableSetColumnIndex(0);
@@ -229,21 +450,33 @@ export class VariableMonitoring {
                 // Value column
                 ImGui.TableSetColumnIndex(1);
 
-                // For long content, display button and summary
-                if (isLongContent) {
-                    // Display view details button
-                    if (ImGui.SmallButton("View")) {
+                // Use cached formatting for better performance
+                try {
+                    const formattedValue = this.getCachedFormattedValue(name, item.value, false);
+                    
+                    // Check if it's long content OR complex object that should have a detail view
+                    const isLongContent = formattedValue.length > 100;
+                    const isComplexObject = typeof item.value === "object" && 
+                                          item.value !== null && 
+                                          item.value !== undefined;
+
+                    // Always show a small view button for easy access to details
+                    if (ImGui.SmallButton(`View##${rowIndex}`)) {
                         // Display detail window
                         this.showDetailWindow(name);
                     }
 
-                    // Display summary after button
+                    // Display value after button
                     ImGui.SameLine();
-                    const summaryText = this.formatValue(item.value, false); // Summary
-                    ImGui.Text(summaryText);
-                } else {
-                    // Normal text display
-                    ImGui.Text(this.formatValue(item.value, false));
+                    if (isLongContent || isComplexObject) {
+                        // For complex content, show truncated version
+                        ImGui.Text(formattedValue);
+                    } else {
+                        // Normal text display
+                        ImGui.Text(formattedValue);
+                    }
+                } catch (e: any) {
+                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), "[Error]");
                 }
 
                 // Source column
@@ -252,7 +485,7 @@ export class VariableMonitoring {
 
                 ImGui.PopID();
                 rowIndex++;
-            });
+            }
 
             ImGui.EndTable();
         }
@@ -287,14 +520,17 @@ export class VariableMonitoring {
         if (value === null) return "null";
         if (value === undefined) return "undefined";
 
+        // Apply string length limit for performance
+        const maxLength = isExpanded ? this.performanceSettings.maxStringLength * 5 : this.performanceSettings.maxStringLength;
+
         if (typeof value === "object") {
             try {
                 // Check if the object is a C3 instance that might be destroyed
                 if (value && typeof value === "object" && value.constructor && value.constructor.name) {
                     // Check for common C3 object patterns that might be destroyed
                     const constructorName = value.constructor.name;
-                    if (constructorName.includes("Instance") || 
-                        constructorName.includes("Behavior") || 
+                    if (constructorName.includes("Instance") ||
+                        constructorName.includes("Behavior") ||
                         constructorName.includes("Plugin")) {
                         // Try to access a basic property to test if object is still valid
                         try {
@@ -308,30 +544,42 @@ export class VariableMonitoring {
                     }
                 }
 
-                // Convert object or array to JSON string
-                const jsonStr = JSON.stringify(value, (key, val) => {
-                    // Custom replacer to handle problematic values
-                    if (val === null || val === undefined) {
-                        return val;
+                // For performance, limit object depth and size
+                let jsonStr: string;
+                if (this.performanceSettings.enableLazyFormatting && !isExpanded) {
+                    // Quick object summary for non-expanded view
+                    if (Array.isArray(value)) {
+                        jsonStr = `Array(${value.length})`;
+                    } else {
+                        const keys = Object.keys(value);
+                        jsonStr = `Object{${keys.slice(0, 3).join(', ')}${keys.length > 3 ? '...' : ''}}`;
                     }
-                    
-                    // Handle circular references and problematic objects
-                    if (typeof val === "object") {
-                        try {
-                            // Test if the object can be safely stringified
-                            JSON.stringify(val);
+                } else {
+                    // Full JSON stringify with depth limit
+                    jsonStr = JSON.stringify(value, (key, val) => {
+                        // Custom replacer to handle problematic values
+                        if (val === null || val === undefined) {
                             return val;
-                        } catch (e: any) {
-                            return "[Unserializable Object]";
                         }
-                    }
-                    
-                    return val;
-                });
-                
-                // If not expanded and string length exceeds 100, truncate display
-                if (!isExpanded && jsonStr.length > 100) {
-                    return jsonStr.substring(0, 97) + "...";
+
+                        // Handle circular references and problematic objects
+                        if (typeof val === "object") {
+                            try {
+                                // Test if the object can be safely stringified
+                                JSON.stringify(val);
+                                return val;
+                            } catch (e: any) {
+                                return "[Unserializable Object]";
+                            }
+                        }
+
+                        return val;
+                    }, isExpanded ? 2 : 0); // Add indentation only when expanded
+                }
+
+                // Truncate if too long
+                if (jsonStr.length > maxLength) {
+                    return jsonStr.substring(0, maxLength - 3) + "...";
                 }
                 return jsonStr;
             } catch (e: any) {
@@ -340,18 +588,21 @@ export class VariableMonitoring {
             }
         }
 
-        // Handle strings
+        // Handle strings with length limit
         if (typeof value === "string") {
-            // If not expanded and string length exceeds 100, truncate display
-            if (!isExpanded && value.length > 100) {
-                return value.substring(0, 97) + "...";
+            if (value.length > maxLength) {
+                return value.substring(0, maxLength - 3) + "...";
             }
             return value;
         }
 
         // Numbers, booleans convert directly to string
         try {
-            return String(value);
+            const stringValue = String(value);
+            if (stringValue.length > maxLength) {
+                return stringValue.substring(0, maxLength - 3) + "...";
+            }
+            return stringValue;
         } catch (e: any) {
             return "[Value Error]";
         }
@@ -369,6 +620,10 @@ export class VariableMonitoring {
 
         // Add or update variable
         this.monitoredValues.set(name, { value, source });
+
+        // Clear cache for this variable to ensure fresh data
+        this.cachedFormattedValues.delete(`${name}_false`);
+        this.cachedFormattedValues.delete(`${name}_true`);
     }
 
     /**
@@ -377,6 +632,9 @@ export class VariableMonitoring {
      */
     public static RemoveValue(name: string): void {
         this.monitoredValues.delete(name);
+        // Also remove from cache
+        this.cachedFormattedValues.delete(`${name}_false`);
+        this.cachedFormattedValues.delete(`${name}_true`);
     }
 
     /**
@@ -384,6 +642,7 @@ export class VariableMonitoring {
      */
     public static ClearAll(): void {
         this.monitoredValues.clear();
+        this.cachedFormattedValues.clear();
     }
 
     /**
@@ -392,6 +651,129 @@ export class VariableMonitoring {
      */
     public static CleanupDestroyed(): void {
         this.cleanupDestroyedObjects();
+    }
+
+    /**
+     * Enable high performance mode (reduces update frequency and limits display)
+     */
+    public static EnableHighPerformanceMode(): void {
+        this.SetPerformanceSettings({
+            updateInterval: 500,        // Update every 500ms
+            maxDisplayItems: 20,        // Show only 20 items
+            enableCaching: true,        // Enable caching
+            enableLazyFormatting: true, // Enable lazy formatting
+            maxStringLength: 100        // Shorter strings
+        });
+        this.SetFrameSkipInterval(5);   // Skip more frames
+    }
+
+    /**
+     * Enable balanced performance mode (default settings)
+     */
+    public static EnableBalancedMode(): void {
+        this.SetPerformanceSettings({
+            updateInterval: 100,        // Update every 100ms
+            maxDisplayItems: 50,        // Show 50 items
+            enableCaching: true,        // Enable caching
+            enableLazyFormatting: true, // Enable lazy formatting
+            maxStringLength: 200        // Medium strings
+        });
+        this.SetFrameSkipInterval(3);   // Default frame skip
+    }
+
+    /**
+     * Enable real-time mode (maximum responsiveness, may impact performance)
+     */
+    public static EnableRealTimeMode(): void {
+        this.SetPerformanceSettings({
+            updateInterval: 16,         // Update every frame (~60fps)
+            maxDisplayItems: 100,       // Show more items
+            enableCaching: false,       // Disable caching for real-time
+            enableLazyFormatting: false,// Disable lazy formatting
+            maxStringLength: 500        // Longer strings
+        });
+        this.SetFrameSkipInterval(1);   // No frame skip
+    }
+
+    /**
+     * Get performance statistics
+     */
+    public static GetPerformanceStats(): {
+        monitoredCount: number,
+        cacheSize: number,
+        updateInterval: number,
+        isPaused: boolean,
+        frameSkipInterval: number
+    } {
+        return {
+            monitoredCount: this.monitoredValues.size,
+            cacheSize: this.cachedFormattedValues.size,
+            updateInterval: this.performanceSettings.updateInterval,
+            isPaused: this.isPaused,
+            frameSkipInterval: this.frameSkipInterval
+        };
+    }
+
+    /**
+     * Performance test - adds test data to measure performance impact
+     * Use this to test different performance settings
+     */
+    public static RunPerformanceTest(itemCount: number = 50): void {
+        console.log("Starting Variable Monitoring Performance Test...");
+
+        // Clear existing data
+        this.ClearAll();
+
+        // Add various types of test data
+        for (let i = 0; i < itemCount; i++) {
+            // Simple values
+            this.AddValue(`test_number_${i}`, Math.random() * 1000, "PerformanceTest");
+            this.AddValue(`test_string_${i}`, `Test string value ${i} with some additional text to make it longer`, "PerformanceTest");
+
+            // Complex objects
+            if (i % 5 === 0) {
+                const complexObject = {
+                    id: i,
+                    name: `Object ${i}`,
+                    data: Array.from({ length: 10 }, (_, j) => ({ index: j, value: Math.random() })),
+                    nested: {
+                        level1: {
+                            level2: {
+                                value: `Nested value ${i}`
+                            }
+                        }
+                    }
+                };
+                this.AddValue(`test_object_${i}`, complexObject, "PerformanceTest");
+            }
+
+            // Arrays
+            if (i % 7 === 0) {
+                const testArray = Array.from({ length: 20 }, (_, j) => `Array item ${j}`);
+                this.AddValue(`test_array_${i}`, testArray, "PerformanceTest");
+            }
+        }
+
+        console.log(`Added ${itemCount} test variables. Monitor framerate and adjust settings as needed.`);
+        console.log("Use monitoring.ClearTestData() to remove test data when done.");
+    }
+
+    /**
+     * Clear test data added by RunPerformanceTest
+     */
+    public static ClearTestData(): void {
+        const keysToRemove: string[] = [];
+        this.monitoredValues.forEach((item, name) => {
+            if (item.source === "PerformanceTest") {
+                keysToRemove.push(name);
+            }
+        });
+
+        keysToRemove.forEach(key => {
+            this.RemoveValue(key);
+        });
+
+        console.log(`Removed ${keysToRemove.length} test variables.`);
     }
 
     /**
@@ -454,10 +836,11 @@ export class VariableMonitoring {
     }
 }
 
-
 var isBindButtonIntoDebugPanel = false;
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    VariableMonitoring.EnableHighPerformanceMode();
 
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
@@ -471,30 +854,54 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 })
 
-
 // Export a more concise alias for easier use
 export const monitoring = VariableMonitoring;
 
-// Example: How to use the variable monitoring class
+// Example: How to use the variable monitoring class with performance controls
 /*
 // 1. Import monitoring class
 import { monitoring } from "./UI/debug_ui/UIvariableMonitoring";
 
-// 2. Show monitoring window
+// 2. PERFORMANCE CONTROL - Choose appropriate mode based on your needs:
+
+// For high performance (low impact on framerate):
+monitoring.EnableHighPerformanceMode();
+
+// For balanced performance (default):
+monitoring.EnableBalancedMode();
+
+// For real-time monitoring (may impact performance):
+monitoring.EnableRealTimeMode();
+
+// 3. Manual performance settings:
+monitoring.SetPerformanceSettings({
+    updateInterval: 200,        // Update every 200ms
+    maxDisplayItems: 30,        // Show max 30 items
+    enableCaching: true,        // Enable value caching
+    enableLazyFormatting: true, // Use lazy formatting for objects
+    maxStringLength: 150        // Limit string display length
+});
+
+// 4. Frame control:
+monitoring.SetFrameSkipInterval(5); // Update every 5 frames
+monitoring.SetPaused(true);         // Pause all updates
+monitoring.SetPaused(false);        // Resume updates
+
+// 5. Show monitoring window
 monitoring.Show();
 
-// 3. Add variables for monitoring
+// 6. Add variables for monitoring
 let playerHealth = 100;
 monitoring.AddValue("Player Health", playerHealth, "PlayerController");
 
 let enemyCount = 5;
 monitoring.AddValue("Enemy Count", enemyCount, "EnemyManager");
 
-// 4. Update monitoring when variable values change
+// 7. Update monitoring when variable values change
 playerHealth -= 10;
 monitoring.AddValue("Player Health", playerHealth, "PlayerController");
 
-// 5. Add more complex data structures
+// 8. Add more complex data structures
 const playerStats = {
     strength: 15,
     agility: 12,
@@ -502,27 +909,52 @@ const playerStats = {
 };
 monitoring.AddValue("Player Stats", playerStats, "PlayerStats");
 
-// 6. Hide/show window
+// 9. Performance monitoring:
+const stats = monitoring.GetPerformanceStats();
+console.log(`Monitoring ${stats.monitoredCount} variables, cache size: ${stats.cacheSize}`);
+
+// 10. Cache management:
+monitoring.ClearCache();            // Clear all cached values
+const cacheStats = monitoring.GetCacheStats();
+
+// 11. Hide/show window
 // monitoring.Hide();
 // monitoring.Show();
 // monitoring.Toggle();
 
-// 7. Check if window is visible
+// 12. Check if window is visible
 // const isVisible = monitoring.IsVisible();
 
-// 8. Remove specific variable
+// 13. Remove specific variable
 // monitoring.RemoveValue("Enemy Count");
 
-// 9. Clear all monitored variables
+// 14. Clear all monitored variables
 // monitoring.ClearAll();
 
-// 10. IMPORTANT: Clean up destroyed objects during scene transitions
+// 15. IMPORTANT: Clean up destroyed objects during scene transitions
 // Call this in your scene transition code to prevent crashes:
 // monitoring.CleanupDestroyed();
 
-// 11. Example scene transition handling:
+// 16. Example scene transition handling with performance considerations:
 // function onSceneChange() {
-//     monitoring.CleanupDestroyed(); // Clean up before scene change
+//     monitoring.CleanupDestroyed();     // Clean up before scene change
+//     monitoring.ClearCache();           // Clear cache to free memory
+//     monitoring.EnableHighPerformanceMode(); // Use high performance mode during transitions
 //     // ... your scene transition code ...
+//     monitoring.EnableBalancedMode();   // Return to balanced mode after transition
 // }
+
+// 17. Performance troubleshooting:
+// If experiencing low framerate:
+// - Use monitoring.EnableHighPerformanceMode()
+// - Increase monitoring.SetFrameSkipInterval(10)
+// - Reduce monitoring.SetPerformanceSettings({ maxDisplayItems: 10 })
+// - Use monitoring.SetPaused(true) when not actively debugging
+
+// 18. Real-time debugging workflow:
+// - Start with monitoring.EnableHighPerformanceMode()
+// - Add only essential variables to monitor
+// - Use monitoring.SetPaused(true) when not actively looking at values
+// - Switch to monitoring.EnableRealTimeMode() only when needed for detailed debugging
+// - Always call monitoring.CleanupDestroyed() during scene transitions
 */
