@@ -176,7 +176,7 @@ export class PIXEffect_fog {
         // Start fade-in animation
         this.startFadeIn();
 
-        console.log(`Created ${this.style} fog with ID: ${this.id}, type: ${this.type}, duration: ${this.duration}s, layer: ${this.layer}`);
+        
     }
 
     /**
@@ -203,7 +203,7 @@ export class PIXEffect_fog {
         if (PIXEffect_fog.instances.has(id)) {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
-                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
 
                 // Capture existing fog properties for replacement
                 const existingProperties = {
@@ -217,7 +217,7 @@ export class PIXEffect_fog {
 
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
-                    console.log(`Fog ${id} is already fading out. Queueing new fog creation...`);
+                    
                     PIXEffect_fog.pendingFogCreations.set(id, {
                         type,
                         style,
@@ -231,7 +231,7 @@ export class PIXEffect_fog {
                 }
 
                 // If existing fog is not fading out, start fade-out and queue new creation
-                console.log(`Starting fade-out for existing fog ${id} and queueing replacement...`);
+                
                 PIXEffect_fog.pendingFogCreations.set(id, {
                     type,
                     style,
@@ -252,7 +252,7 @@ export class PIXEffect_fog {
         instance.id = id; // Override the auto-generated ID
         PIXEffect_fog.instances.set(id, instance);
 
-        console.log(`Created new fog ${id} immediately`);
+        
         return instance;
     }
 
@@ -301,7 +301,7 @@ export class PIXEffect_fog {
         if (PIXEffect_fog.instances.has(id)) {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
-                console.log(`Dynamic fog ${id} already exists, updating configuration...`);
+                
                 existingFog.updateDynamicConfig(finalConfig);
                 return existingFog;
             }
@@ -315,7 +315,7 @@ export class PIXEffect_fog {
         // Initialize dynamic fog
         instance.initializeDynamicFog(finalConfig);
 
-        console.log(`Created dynamic fog ${id} with natural variation system`);
+        
         return instance;
     }
 
@@ -422,7 +422,7 @@ export class PIXEffect_fog {
      */
     private createHtmlElement(): void {
         try {
-            console.log(`🏗️ Creating HTML element for fog ${this.id} (type: ${this.type}, duration: ${this.duration})`);
+            
 
             // Create HTML element using HTML_c3 object
             this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(
@@ -440,16 +440,16 @@ export class PIXEffect_fog {
             this.renderHTML();
             this.startAnimation();
 
-            console.log(`🏗️ HTML element created successfully for fog ${this.id}`);
+            
 
             // Start auto-destroy timer for temporary fog using C3 timer
             if (this.type === FogType.TEMPORARY && this.duration > 0) {
-                console.log(`⏰ Starting C3 timer for temporary fog ${this.id}, duration: ${this.duration}s`);
+                
                 this.startC3Timer();
             } else if (this.isDynamic) {
-                console.log(`🌫️ Fog ${this.id} is dynamic, no auto-destroy timer needed`);
+                
             } else {
-                console.log(`♾️ Fog ${this.id} is persistent, no auto-destroy timer needed`);
+                
             }
 
         } catch (error: any) {
@@ -472,14 +472,14 @@ export class PIXEffect_fog {
             // Listen for timer events
             this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.timerTag) {
-                    console.log(`Fog ${this.id} timer completed, starting fade-out`);
+                    
                     this.startFadeOut();
                 }
             });
 
             // Start the timer
             this.timerInstance.behaviors.Timer.startTimer(this.duration, this.timerTag, "once");
-            console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
+            
 
         } catch (error: any) {
             console.error(`Failed to create C3 timer for fog: ${error.message}`);
@@ -501,7 +501,7 @@ export class PIXEffect_fog {
         this.fadeStartTime = Date.now();
         this.initialOpacity = this.fogParams.opacity;
 
-        console.log(`Starting fade-out for fog ${this.id}`);
+        
 
         // Start fade-out animation loop
         this.fadeOutStep();
@@ -533,7 +533,7 @@ export class PIXEffect_fog {
             setTimeout(() => this.fadeOutStep(), 16); // ~60 FPS
         } else {
             // Fade-out complete, destroy fog
-            console.log(`Fade-out complete for fog ${this.id}, destroying`);
+            
             this.destroy();
         }
     }
@@ -547,7 +547,7 @@ export class PIXEffect_fog {
         this.isFadingIn = true;
         this.fadeInStartTime = Date.now();
 
-        console.log(`Starting fade-in for fog ${this.id}`);
+        
 
         // Start fade-in animation loop
         this.fadeInStep();
@@ -581,7 +581,7 @@ export class PIXEffect_fog {
             // Fade-in complete
             this.isFadingIn = false;
             this.fogParams.opacity = this.targetOpacity; // Ensure exact target opacity
-            console.log(`Fade-in complete for fog ${this.id}`);
+            
         }
     }
 
@@ -591,7 +591,7 @@ export class PIXEffect_fog {
     private startAutoDestroy(): void {
         // This method is now replaced by startC3Timer
         // Keeping it for compatibility but it does nothing
-        console.warn("startAutoDestroy is deprecated, use startC3Timer instead");
+        
     }
 
     /**
@@ -606,7 +606,7 @@ export class PIXEffect_fog {
         // 为动态雾保证最小粒子数量
         if (this.isDynamic) {
             baseParticleCount = Math.max(baseParticleCount, 30); // 动态雾最少30个粒子
-            console.log(`🌫️ Dynamic fog ${this.id} ensuring minimum 30 particles`);
+            
         }
 
         // Apply performance optimizations
@@ -638,7 +638,7 @@ export class PIXEffect_fog {
         if (this.isDynamic) {
             // 动态雾不受全局粒子限制影响，确保可见性
             const finalParticleCount = Math.max(baseParticleCount, 25); // 至少25个粒子
-            console.log(`🌫️ Dynamic fog ${this.id}: Area=${this._width}x${this._height}, LOD=${this.lodLevel}, Particles=${finalParticleCount} (guaranteed minimum)`);
+            
 
             // 直接创建粒子，不检查全局限制
             this.createParticles(finalParticleCount);
@@ -648,7 +648,7 @@ export class PIXEffect_fog {
             const availableParticles = PIXEffect_fog.MAX_PARTICLES_GLOBAL - currentGlobalParticles;
             const finalParticleCount = Math.min(baseParticleCount, Math.max(0, availableParticles));
 
-            console.log(`Fog ${this.id}: Area=${this._width}x${this._height}, LOD=${this.lodLevel}, Particles=${finalParticleCount}/${baseParticleCount}`);
+            
             this.createParticles(finalParticleCount);
         }
     }
@@ -784,7 +784,7 @@ export class PIXEffect_fog {
     private renderHTML(): void {
         // Add comprehensive null checks and error handling
         if (!this.htmlElement) {
-            console.warn(`🌫️ Fog ${this.id}: HTML element is null, stopping render`);
+            
             return;
         }
 
@@ -792,14 +792,14 @@ export class PIXEffect_fog {
         try {
             // Test if the element is still accessible
             if (!this.htmlElement.setContent || typeof this.htmlElement.setContent !== 'function') {
-                console.warn(`🌫️ Fog ${this.id}: HTML element setContent method is not available`);
+                
                 this.handleInvalidElement();
                 return;
             }
 
             // Additional check for element validity
             if (this.htmlElement.isDestroyed === true) {
-                console.warn(`🌫️ Fog ${this.id}: HTML element is marked as destroyed`);
+                
                 this.handleInvalidElement();
                 return;
             }
@@ -835,7 +835,7 @@ export class PIXEffect_fog {
      * Handles invalid HTML element (likely due to scene change)
      */
     private handleInvalidElement(): void {
-        console.log(`Fog ${this.id}: Handling invalid HTML element, likely due to scene change`);
+        
 
         // Mark element as null to prevent further render attempts
         this.htmlElement = null;
@@ -988,7 +988,7 @@ export class PIXEffect_fog {
 
             // Add check for valid HTML element before continuing animation
             if (!this.htmlElement) {
-                console.warn(`Fog ${this.id}: Animation stopped due to null HTML element`);
+                
                 return;
             }
 
@@ -1114,7 +1114,7 @@ export class PIXEffect_fog {
             try {
                 this.htmlElement.destroy();
             } catch (error: any) {
-                console.warn(`Error destroying fog HTML element during layer change: ${error.message}`);
+                
             }
             this.htmlElement = null;
 
@@ -1145,7 +1145,7 @@ export class PIXEffect_fog {
             this.renderHTML();
             this.startAnimation();
 
-            console.log(`Fog ${this.id} recreated on layer: ${this.layer}`);
+            
 
         } catch (error: any) {
             console.error(`Failed to recreate fog HTML element on new layer: ${error.message}`);
@@ -1319,16 +1319,16 @@ export class PIXEffect_fog {
      */
     public destroy(): void {
         // ADD DETAILED DEBUG TRACKING
-        console.log(`🔥 FOG DESTROY CALLED for ${this.id}`);
-        console.log(`🔥 Fog Type: ${this.type}, Style: ${this.style}, isDynamic: ${this.isDynamic}`);
-        console.log(`🔥 isFadingOut: ${this.isFadingOut}, isFadingIn: ${this.isFadingIn}`);
-        console.log(`🔥 isDestroyed: ${this.isDestroyed}`);
+        
+        
+        
+        
 
         // Get call stack to see what's calling destroy
         try {
             throw new Error("Stack trace for fog destroy");
         } catch (e: any) {
-            console.log(`🔥 DESTROY CALL STACK:`, e.stack);
+            
         }
 
         // Alert for immediate visibility
@@ -1344,7 +1344,7 @@ export class PIXEffect_fog {
                 }
                 this.dynamicTimer.destroy();
             } catch (error: any) {
-                console.warn(`Error destroying dynamic timer: ${error.message}`);
+                
             }
             this.dynamicTimer = null;
         }
@@ -1359,7 +1359,7 @@ export class PIXEffect_fog {
                 // Destroy the timer instance
                 this.timerInstance.destroy();
             } catch (error: any) {
-                console.warn(`Error destroying C3 timer: ${error.message}`);
+                
             }
             this.timerInstance = null;
         }
@@ -1387,7 +1387,7 @@ export class PIXEffect_fog {
                     this.htmlElement.destroy();
                 }
             } catch (error: any) {
-                console.warn(`Error destroying fog HTML element: ${error.message}`);
+                
             }
             this.htmlElement = null;
         }
@@ -1408,7 +1408,7 @@ export class PIXEffect_fog {
             const pendingFog = PIXEffect_fog.pendingFogCreations.get(this.id)!;
             PIXEffect_fog.pendingFogCreations.delete(this.id);
 
-            console.log(`Fog ${this.id} destroyed, creating pending replacement...`);
+            
 
             // Create the pending fog after a short delay to ensure cleanup is complete
             setTimeout(() => {
@@ -1449,7 +1449,7 @@ export class PIXEffect_fog {
                     if (settings.particleVariation !== undefined) newFog.setParticleVariation(settings.particleVariation);
                 }
 
-                console.log(`Created replacement fog ${this.id} after fade-out completion with preserved properties`);
+                
 
                 // Call callback if provided
                 if (pendingFog.callback) {
@@ -1458,7 +1458,7 @@ export class PIXEffect_fog {
             }, 100); // Small delay to ensure cleanup
         }
 
-        console.log(`Fog effect ${this.id} destroyed (particles cleared, performance optimized)`);
+        
     }
 
     /**
@@ -1467,7 +1467,7 @@ export class PIXEffect_fog {
     public destroyWithFadeOut(): void {
         if (this.isDestroyed || this.isFadingOut) return;
 
-        console.log(`Starting graceful destruction of fog ${this.id} with fade-out`);
+        
         this.startFadeOut();
     }
 
@@ -1491,7 +1491,7 @@ export class PIXEffect_fog {
     public static SetFadeOutDuration(duration: number): void {
         if (duration > 0) {
             PIXEffect_fog.FADE_OUT_DURATION = duration;
-            console.log(`Set fog fade-out duration to ${duration}ms`);
+            
         }
     }
 
@@ -1508,7 +1508,7 @@ export class PIXEffect_fog {
      */
     public static SetPerformanceMode(enabled: boolean): void {
         PIXEffect_fog.PERFORMANCE_MODE = enabled;
-        console.log(`Performance mode ${enabled ? 'enabled' : 'disabled'}`);
+        
 
         // Reinitialize all existing fog particles
         PIXEffect_fog.instances.forEach(fog => {
@@ -1524,7 +1524,7 @@ export class PIXEffect_fog {
      */
     public static SetMaxParticlesPerFog(maxParticles: number): void {
         PIXEffect_fog.MAX_PARTICLES_PER_FOG = Math.max(10, maxParticles);
-        console.log(`Max particles per fog set to: ${PIXEffect_fog.MAX_PARTICLES_PER_FOG}`);
+        
 
         // Reinitialize all existing fog particles
         PIXEffect_fog.instances.forEach(fog => {
@@ -1540,7 +1540,7 @@ export class PIXEffect_fog {
      */
     public static SetMaxParticlesGlobal(maxParticles: number): void {
         PIXEffect_fog.MAX_PARTICLES_GLOBAL = Math.max(50, maxParticles);
-        console.log(`Global max particles set to: ${PIXEffect_fog.MAX_PARTICLES_GLOBAL}`);
+        
 
         // Reinitialize all existing fog particles
         PIXEffect_fog.instances.forEach(fog => {
@@ -1556,7 +1556,7 @@ export class PIXEffect_fog {
      */
     public static SetLODEnabled(enabled: boolean): void {
         PIXEffect_fog.LOD_ENABLED = enabled;
-        console.log(`LOD system ${enabled ? 'enabled' : 'disabled'}`);
+        
 
         // Reinitialize all existing fog particles
         PIXEffect_fog.instances.forEach(fog => {
@@ -1572,7 +1572,7 @@ export class PIXEffect_fog {
      */
     public static SetUpdateFrequency(frequency: number): void {
         PIXEffect_fog.UPDATE_FREQUENCY = Math.max(8, frequency);
-        console.log(`Update frequency set to: ${PIXEffect_fog.UPDATE_FREQUENCY}ms`);
+        
     }
 
     /**
@@ -1625,7 +1625,7 @@ export class PIXEffect_fog {
      * Optimizes all fog instances for better performance
      */
     public static OptimizeAllFog(): void {
-        console.log("Optimizing all fog instances...");
+        
 
         const stats = PIXEffect_fog.GetPerformanceStats();
 
@@ -1644,7 +1644,7 @@ export class PIXEffect_fog {
             PIXEffect_fog.SetLODEnabled(true);
         }
 
-        console.log("Optimization complete. New stats:", PIXEffect_fog.GetPerformanceStats());
+        
     }
 
     /**
@@ -1661,20 +1661,20 @@ export class PIXEffect_fog {
     public static DestroyAllFog(): void {
         const fogs = Array.from(PIXEffect_fog.instances.values());
         fogs.forEach(fog => fog.destroy());
-        console.log(`Destroyed ${fogs.length} fog effects`);
+        
     }
 
     /**
      * Emergency cleanup that destroys all fog instances and orphaned HTML elements
      */
     public static EmergencyDestroyAllFog(): void {
-        console.log("🚨 === EMERGENCY FOG CLEANUP CALLED ===");
+        
 
         // Get call stack to see what's calling this
         try {
             throw new Error("Stack trace for emergency cleanup");
         } catch (e: any) {
-            console.log(`🚨 EMERGENCY CLEANUP CALL STACK:`, e.stack);
+            
         }
 
         alert("EMERGENCY FOG CLEANUP CALLED - Check console for details");
@@ -1682,7 +1682,7 @@ export class PIXEffect_fog {
         // Clear all pending fog creations first
         const pendingCount = PIXEffect_fog.pendingFogCreations.size;
         PIXEffect_fog.pendingFogCreations.clear();
-        console.log(`Cleared ${pendingCount} pending fog creations`);
+        
 
         // First, try graceful cleanup
         const fogs = Array.from(PIXEffect_fog.instances.values());
@@ -1690,7 +1690,7 @@ export class PIXEffect_fog {
             try {
                 fog.destroy();
             } catch (error) {
-                console.warn(`Error destroying fog ${fog.id}:`, error);
+                
             }
         });
 
@@ -1708,7 +1708,7 @@ export class PIXEffect_fog {
                     if (htmlElement.getContent && typeof htmlElement.getContent === 'function') {
                         const content = htmlElement.getContent();
                         if (content && (content.includes('fog-particle') || content.includes('fog-'))) {
-                            console.log(`Destroying orphaned fog HTML element`);
+                            
                             if (htmlElement.destroy && typeof htmlElement.destroy === 'function') {
                                 htmlElement.destroy();
                                 destroyedOrphans++;
@@ -1716,20 +1716,20 @@ export class PIXEffect_fog {
                         }
                     }
                 } catch (error) {
-                    console.warn(`Error checking/destroying HTML element:`, error);
+                    
                 }
             });
 
-            console.log(`Destroyed ${destroyedOrphans} orphaned fog HTML elements`);
+            
         } catch (error) {
-            console.warn(`Error during orphaned HTML cleanup:`, error);
+            
         }
 
         // Reset static counters
         PIXEffect_fog.idCounter = 0;
         PIXEffect_fog.currentEditingFog = null;
 
-        console.log(`Emergency cleanup completed: destroyed ${fogs.length} tracked fogs, cleared ${pendingCount} pending`);
+        
     }
 
     /**
@@ -1749,7 +1749,7 @@ export class PIXEffect_fog {
     public static OpenFogEditor(fogId: string): void {
         const fog = PIXEffect_fog.instances.get(fogId);
         if (!fog) {
-            console.warn(`Fog with ID ${fogId} not found`);
+            
             return;
         }
 
@@ -1948,7 +1948,7 @@ export class PIXEffect_fog {
                 ImGui.SameLine();
                 if (ImGui.Button("Show Global Stats")) {
                     const stats = PIXEffect_fog.GetPerformanceStats();
-                    console.log("Global Performance Stats:", stats);
+                    
                 }
             }
         };
@@ -2180,7 +2180,7 @@ export class PIXEffect_fog {
                                             }
                                         }
                                     } catch (error: any) {
-                                        console.warn(`Error accessing C3 timer: ${error.message}`);
+                                        
                                     }
                                 }
 
@@ -2306,9 +2306,9 @@ export class PIXEffect_fog {
                                                 const newDuration = remainingTime + 30;
                                                 // Start new timer with extended duration
                                                 timerInstance.behaviors.Timer.startTimer(newDuration, timerTag, "once");
-                                                console.log(`Extended fog ${id} timer by 30 seconds (new total: ${newDuration.toFixed(1)}s)`);
+                                                
                                             } catch (error: any) {
-                                                console.warn(`Failed to extend timer for fog ${id}: ${error.message}`);
+                                                
                                             }
                                         }
                                     }
@@ -2419,7 +2419,7 @@ export class PIXEffect_fog {
         PIXEffect_fog.PERFORMANCE_MODE = wasPerformanceMode;
         PIXEffect_fog.LOD_ENABLED = wasLODEnabled;
 
-        console.log(`Created optimized large-scale fog: ${width}x${height}, particles: ${fog.particles.length}`);
+        
 
         return fog;
     }
@@ -2431,7 +2431,7 @@ export class PIXEffect_fog {
     public static SetFadeInDuration(duration: number): void {
         if (duration > 0) {
             PIXEffect_fog.FADE_IN_DURATION = duration;
-            console.log(`Set fog fade-in duration to ${duration}ms`);
+            
         }
     }
 
@@ -2727,7 +2727,7 @@ export class PIXEffect_fog {
         // Manually add to windows map
         (Imgui_chunchun as any).windows.set(windowId, windowConfig);
 
-        console.log("Fog debug window created");
+        
     }
 
     /**
@@ -2737,11 +2737,11 @@ export class PIXEffect_fog {
         try {
             // Listen for layout end events (scene changes in C3)
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", (event: any) => {
-                console.log("Scene ending detected, starting graceful fog cleanup...");
+                
 
                 const fogInfo = PIXEffect_fog.GetFogInfo();
                 if (fogInfo.count > 0) {
-                    console.log(`Gracefully destroying ${fogInfo.count} fog effects before scene change...`);
+                    
 
                     // Option 1: Graceful fade-out for all fog (recommended)
                     fogInfo.fogs.forEach(fogId => {
@@ -2751,31 +2751,31 @@ export class PIXEffect_fog {
                     // Wait a bit for fade-out to complete before scene actually ends
                     // This ensures smooth transition
                 } else {
-                    console.log("No fog effects to clean up before scene change");
+                    
                 }
             });
 
             // Listen for layout start events to handle emergency cleanup if needed
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", (event: any) => {
-                console.log("New scene starting, checking for orphaned fog effects...");
+                
 
                 const fogInfo = PIXEffect_fog.GetFogInfo();
                 if (fogInfo.count > 0) {
-                    console.log(`Found ${fogInfo.count} orphaned fog effects, performing emergency cleanup...`);
+                    
                     PIXEffect_fog.EmergencyDestroyAllFog();
                 }
             });
 
             // Optional: Listen for after layout start to recreate persistent fog if needed
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("afteranylayoutstart", (event: any) => {
-                console.log("New scene started, fog system ready for new effects");
+                
                 // You can add auto-recreation logic here if needed
                 PIXEffect_fog.RecreateAfterSceneChange();
             });
 
-            console.log("Scene change cleanup listeners added successfully");
+            
         } catch (error: any) {
-            console.warn(`Failed to add scene change listeners: ${error.message}`);
+            
         }
     }
 
@@ -2783,13 +2783,13 @@ export class PIXEffect_fog {
      * Enhanced method to handle emergency cleanup with better error handling
      */
     public static EmergencyCleanupOnSceneChange(): void {
-        console.log("=== EMERGENCY SCENE CHANGE CLEANUP ===");
+        
 
         try {
             // First, try graceful cleanup
             const fogInfo = PIXEffect_fog.GetFogInfo();
             if (fogInfo.count > 0) {
-                console.log(`Attempting graceful cleanup of ${fogInfo.count} fog effects...`);
+                
 
                 // Set very fast fade-out for emergency cleanup
                 const originalFadeDuration = PIXEffect_fog.GetFadeOutDuration();
@@ -2800,7 +2800,7 @@ export class PIXEffect_fog {
                     try {
                         PIXEffect_fog.DestroyFogWithFadeOut(fogId);
                     } catch (error: any) {
-                        console.warn(`Error during graceful cleanup of fog ${fogId}: ${error.message}`);
+                        
                     }
                 });
 
@@ -2812,7 +2812,7 @@ export class PIXEffect_fog {
                 }, 300);
 
             } else {
-                console.log("No fog effects found during emergency cleanup");
+                
             }
         } catch (error: any) {
             console.error(`Error during emergency scene change cleanup: ${error.message}`);
@@ -2820,7 +2820,7 @@ export class PIXEffect_fog {
             PIXEffect_fog.EmergencyDestroyAllFog();
         }
 
-        console.log("Emergency scene change cleanup completed");
+        
     }
 
     /**
@@ -2832,7 +2832,7 @@ export class PIXEffect_fog {
             // Remove existing listeners first to avoid duplicates
             // Note: C3 doesn't provide removeEventListener, so we track if already setup
             if ((PIXEffect_fog as any)._autoCleanupSetup) {
-                console.log("Auto cleanup already setup, skipping...");
+                
                 return;
             }
 
@@ -2865,7 +2865,7 @@ export class PIXEffect_fog {
                     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", () => {
                         const fogInfo = PIXEffect_fog.GetFogInfo();
                         if (fogInfo.count > 0) {
-                            console.log("Backup cleanup: removing orphaned fog effects");
+                            
                             PIXEffect_fog.EmergencyDestroyAllFog();
                         }
                     });
@@ -2874,7 +2874,7 @@ export class PIXEffect_fog {
 
             // Mark as setup to avoid duplicates
             (PIXEffect_fog as any)._autoCleanupSetup = true;
-            console.log(`Auto fog cleanup setup with '${strategy}' strategy`);
+            
 
         } catch (error: any) {
             console.error(`Failed to setup auto cleanup: ${error.message}`);
@@ -2886,7 +2886,7 @@ export class PIXEffect_fog {
      */
     public static DisableAutoCleanup(): void {
         (PIXEffect_fog as any)._autoCleanupSetup = false;
-        console.log("Auto fog cleanup disabled (note: existing listeners cannot be removed in C3)");
+        
     }
 
     /**
@@ -2902,17 +2902,17 @@ export class PIXEffect_fog {
     public static RecreateAfterSceneChange(): void {
         // This method can be called after scene change to recreate fog effects
         // You would need to store fog configurations and recreate them
-        console.log("Recreating fog effects after scene change...");
+        
 
         // Example: Recreate a basic level fog if needed
         // This is just an example - you'd implement based on your game's needs
         try {
             if (PIXEffect_fog.instances.size === 0) {
                 // No fog exists, you might want to recreate default fog here
-                console.log("No fog effects found after scene change");
+                
             }
         } catch (error: any) {
-            console.warn(`Error recreating fog after scene change: ${error.message}`);
+            
         }
     }
 
@@ -2942,11 +2942,11 @@ export class PIXEffect_fog {
         if (PIXEffect_fog.instances.has(id)) {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
-                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
 
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
-                    console.log(`Fog ${id} is already fading out. Queueing new fog creation with callback...`);
+                    
                     PIXEffect_fog.pendingFogCreations.set(id, {
                         type,
                         style,
@@ -2958,7 +2958,7 @@ export class PIXEffect_fog {
                 }
 
                 // If existing fog is not fading out, start fade-out and queue new creation
-                console.log(`Starting fade-out for existing fog ${id} and queueing replacement with callback...`);
+                
                 PIXEffect_fog.pendingFogCreations.set(id, {
                     type,
                     style,
@@ -2977,7 +2977,7 @@ export class PIXEffect_fog {
         instance.id = id; // Override the auto-generated ID
         PIXEffect_fog.instances.set(id, instance);
 
-        console.log(`Created new fog ${id} immediately`);
+        
 
         // Call callback immediately since fog was created
         if (callback) {
@@ -3005,7 +3005,7 @@ export class PIXEffect_fog {
     public static CancelPendingFog(id: string): boolean {
         if (PIXEffect_fog.pendingFogCreations.has(id)) {
             PIXEffect_fog.pendingFogCreations.delete(id);
-            console.log(`Cancelled pending fog creation for ${id}`);
+            
             return true;
         }
         return false;
@@ -3017,7 +3017,7 @@ export class PIXEffect_fog {
     public static CancelAllPendingFog(): void {
         const count = PIXEffect_fog.pendingFogCreations.size;
         PIXEffect_fog.pendingFogCreations.clear();
-        console.log(`Cancelled ${count} pending fog creations`);
+        
     }
 
     /**
@@ -3060,7 +3060,7 @@ export class PIXEffect_fog {
         if (PIXEffect_fog.instances.has(id)) {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
-                console.log(`Fog ${id} already exists. Checking fade status...`);
+                
 
                 // Capture existing fog properties for replacement
                 const existingProperties = {
@@ -3076,7 +3076,7 @@ export class PIXEffect_fog {
 
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
-                    console.log(`Fog ${id} is already fading out. Queueing new fog creation with custom settings...`);
+                    
                     PIXEffect_fog.pendingFogCreations.set(id, {
                         type,
                         style,
@@ -3091,7 +3091,7 @@ export class PIXEffect_fog {
                 }
 
                 // If existing fog is not fading out, start fade-out and queue new creation
-                console.log(`Starting fade-out for existing fog ${id} and queueing replacement with custom settings...`);
+                
                 PIXEffect_fog.pendingFogCreations.set(id, {
                     type,
                     style,
@@ -3134,7 +3134,7 @@ export class PIXEffect_fog {
             if (customSettings.particleVariation !== undefined) instance.setParticleVariation(customSettings.particleVariation);
         }
 
-        console.log(`Created new fog ${id} immediately with custom settings`);
+        
         return instance;
     }
 
@@ -3206,7 +3206,7 @@ export class PIXEffect_fog {
      */
     public updateDynamicConfig(config: any): void {
         if (!this.isDynamic) {
-            console.warn(`Fog ${this.id} is not dynamic, cannot update dynamic config`);
+            
             return;
         }
 
@@ -3217,7 +3217,7 @@ export class PIXEffect_fog {
             this.dynamicState.nextChangeTime = Date.now() + this.getRandomChangeInterval() * 1000;
         }
 
-        console.log(`Updated dynamic config for fog ${this.id}`);
+        
     }
 
     /**
@@ -3239,7 +3239,7 @@ export class PIXEffect_fog {
             // Schedule first change
             this.scheduleDynamicChange();
 
-            console.log(`Created dynamic timer for fog ${this.id}`);
+            
         } catch (error: any) {
             console.error(`Failed to create dynamic timer for fog: ${error.message}`);
         }
@@ -3257,7 +3257,7 @@ export class PIXEffect_fog {
         try {
             this.dynamicTimer.behaviors.Timer.startTimer(interval, this.dynamicTimerTag, "once");
         } catch (error: any) {
-            console.warn(`Error scheduling dynamic change: ${error.message}`);
+            
         }
     }
 
@@ -3277,31 +3277,31 @@ export class PIXEffect_fog {
      */
     private processDynamicChange(): void {
         if (!this.dynamicConfig || !this.dynamicState || this.isDestroyed) {
-            console.log(`🌫️ Dynamic change skipped for ${this.id}: config=${!!this.dynamicConfig}, state=${!!this.dynamicState}, destroyed=${this.isDestroyed}`);
+            
             return;
         }
 
-        console.log(`🌫️ Processing dynamic change for ${this.id}`);
+        
 
         const currentTime = Date.now();
         this.dynamicState.lastChangeTime = currentTime;
 
         // Check if fog should disappear
         if (!this.dynamicState.isDisappeared && Math.random() < this.dynamicConfig.disappearChance) {
-            console.log(`🌫️ ${this.id} starting disappearance (chance: ${this.dynamicConfig.disappearChance})`);
+            
             this.startFogDisappearance();
             return;
         }
 
         // If currently disappeared, check if should reappear
         if (this.dynamicState.isDisappeared) {
-            console.log(`🌫️ ${this.id} starting reappearance`);
+            
             this.startFogReappearance();
             return;
         }
 
         // Normal dynamic change
-        console.log(`🌫️ ${this.id} normal dynamic change`);
+        
         this.generateNewTargets();
         this.startDynamicTransition();
     }
@@ -3469,13 +3469,13 @@ export class PIXEffect_fog {
 
         // 强制可见性检查 - 如果透明度太低，强制提高
         if (this.fogParams.opacity < 0.1) {
-            console.warn(`🌫️ Fog ${this.id} opacity too low (${this.fogParams.opacity.toFixed(3)}), forcing to 0.3`);
+            
             this.fogParams.opacity = 0.3;
         }
 
         // 强制密度检查 - 如果密度太低，强制提高
         if (this.fogParams.density < 0.2) {
-            console.warn(`🌫️ Fog ${this.id} density too low (${this.fogParams.density.toFixed(3)}), forcing to 0.5`);
+            
             this.fogParams.density = 0.5;
         }
 
@@ -3483,14 +3483,14 @@ export class PIXEffect_fog {
 
         // 检查粒子数量 - 如果太少，立即重新初始化
         if (this.particles.length < 10) {
-            console.warn(`🌫️ Fog ${this.id} has too few particles (${this.particles.length}), reinitializing immediately`);
+            
             this.initParticles();
         }
 
         // 检查是否需要重新初始化粒子 - 减少重新初始化的频率
         const sizeDiff = Math.abs(this.dynamicState.currentSize - this.dynamicState.targetSize);
         if (sizeDiff > 1.0 && this.particles.length < 15) { // 提高阈值，减少重新初始化
-            console.log(`🌫️ Reinitializing particles for ${this.id} due to significant size change (${sizeDiff.toFixed(2)}) and low particle count (${this.particles.length})`);
+            
             this.initParticles();
         }
 
@@ -3540,7 +3540,7 @@ export class PIXEffect_fog {
                 }
                 this.dynamicTimer.destroy();
             } catch (error: any) {
-                console.warn(`Error stopping dynamic timer: ${error.message}`);
+                
             }
             this.dynamicTimer = null;
         }
@@ -3555,7 +3555,7 @@ export class PIXEffect_fog {
         this.dynamicConfig = null;
         this.dynamicState = null;
 
-        console.log(`Dynamic behavior stopped for fog ${this.id}`);
+        
     }
 
     /**
@@ -3597,7 +3597,7 @@ export class PIXEffect_fog {
         dynamicFogs.forEach(fog => {
             fog.stopDynamicBehavior();
         });
-        console.log(`Stopped dynamic behavior for ${dynamicFogs.length} fog instances`);
+        
     }
 
     /**
@@ -3698,7 +3698,7 @@ export class PIXEffect_fog {
      * Creates a simple test fog for debugging visibility issues
      */
     public static CreateTestFog(id: string = "test_fog"): PIXEffect_fog {
-        console.log(`🧪 Creating test fog ${id} for visibility debugging`);
+        
 
         const testFog = new PIXEffect_fog(FogType.PERSISTENT, FogStyle.MEDIUM, 0, "html_c3");
         testFog.id = id;
@@ -3737,8 +3737,8 @@ export class PIXEffect_fog {
 
         PIXEffect_fog.instances.set(id, testFog);
 
-        console.log(`🧪 Test fog ${id} created with ${testFog.particles.length} particles`);
-        console.log(`🧪 Test fog parameters: opacity=${testFog.fogParams.opacity}, scale=${testFog.fogParams.scale}, density=${testFog.fogParams.density}`);
+        
+        
 
         return testFog;
     }

@@ -13,7 +13,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     var fog_category = IMGUIDebugButton.AddCategory("Fog");
 
     // === TOP PRIORITY: Window/Editor Triggering Buttons (Yellow Highlight) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Fog Property Editor", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Fog Property Editor", [1.0, 0.84, 0.0, 1.0], () => {
         const fogInfo = PIXEffect_fog.GetFogInfo();
         if (fogInfo.count > 0) {
             PIXEffect_fog.OpenFogEditor(fogInfo.fogs[0]);
@@ -28,15 +28,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
             PIXEffect_fog.OpenFogEditor("editor_test_fog");
         }
-    }, "#FFD700");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Performance Monitor", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Performance Monitor", [1.0, 0.84, 0.0, 1.0], () => {
         PIXEffect_fog.OpenPerformanceMonitor();
-    }, "#FFD700");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "ImGui Fog Debug Window", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "ImGui Fog Debug Window", [1.0, 0.84, 0.0, 1.0], () => {
         PIXEffect_fog.CreateImGuiFogDebugWindow();
-    }, "#FFD700");
+    });
 
     // === FOG GENERATION BUTTONS (Default Color) ===
     IMGUIDebugButton.AddButtonToCategory(fog_category, "Generate Whole Level Fog", () => {
@@ -165,25 +165,25 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     // === DESTRUCTION BUTTONS (Red Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Destroy All Fog", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Destroy All Fog", [1.0, 0.42, 0.42, 1.0], () => {
         PIXEffect_fog.DestroyAllFog();
-    }, "#FF6B6B");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "EMERGENCY FOG CLEANUP", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "EMERGENCY FOG CLEANUP", [1.0, 0.27, 0.27, 1.0], () => {
         PIXEffect_fog.EmergencyDestroyAllFog();
-    }, "#FF4444");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Destroy All Fog Gracefully", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Destroy All Fog Gracefully", [1.0, 0.42, 0.42, 1.0], () => {
         const fogInfo = PIXEffect_fog.GetFogInfo();
         console.log(`Gracefully destroying ${fogInfo.count} fog effects...`);
 
         fogInfo.fogs.forEach(fogId => {
             PIXEffect_fog.DestroyFogWithFadeOut(fogId);
         });
-    }, "#FF6B6B");
+    });
 
     // === INFORMATION BUTTONS (Blue Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Show Fog Info", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Show Fog Info", [0.31, 0.76, 0.97, 1.0], () => {
         const info = PIXEffect_fog.GetFogInfo();
         console.log(`Active fog effects: ${info.count}`);
         console.log(`Fog IDs: ${info.fogs.join(", ")}`);
@@ -194,9 +194,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 console.log(`Fog ${fogId}:`, fog.getDebugInfo());
             }
         });
-    }, "#4FC3F7");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Show Performance Stats", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Show Performance Stats", [0.31, 0.76, 0.97, 1.0], () => {
         const stats = PIXEffect_fog.GetPerformanceStats();
         console.log("=== Fog Performance Statistics ===");
         console.log(`Total Fogs: ${stats.totalFogs}`);
@@ -210,9 +210,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         console.log(`Performance Level: ${(stats.avgPerformanceLevel * 100).toFixed(1)}%`);
         console.log(`LOD Distribution:`, stats.lodDistribution);
         console.log("================================");
-    }, "#4FC3F7");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Show Pending Fog Info", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Show Pending Fog Info", [0.31, 0.76, 0.97, 1.0], () => {
         const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
         const fogInfo = PIXEffect_fog.GetFogInfo();
 
@@ -241,54 +241,54 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         }
 
         console.log("================================");
-    }, "#4FC3F7");
+    });
 
     // === PERFORMANCE CONTROL BUTTONS (Green Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Enable Performance Mode", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Enable Performance Mode", [0.30, 0.69, 0.31, 1.0], () => {
         PIXEffect_fog.SetPerformanceMode(true);
-    }, "#4CAF50");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Disable Performance Mode", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Disable Performance Mode", [0.30, 0.69, 0.31, 1.0], () => {
         PIXEffect_fog.SetPerformanceMode(false);
-    }, "#4CAF50");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Enable LOD System", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Enable LOD System", [0.30, 0.69, 0.31, 1.0], () => {
         PIXEffect_fog.SetLODEnabled(true);
-    }, "#4CAF50");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Disable LOD System", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Disable LOD System", [0.30, 0.69, 0.31, 1.0], () => {
         PIXEffect_fog.SetLODEnabled(false);
-    }, "#4CAF50");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Auto Optimize All Fog", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Auto Optimize All Fog", [0.30, 0.69, 0.31, 1.0], () => {
         PIXEffect_fog.OptimizeAllFog();
-    }, "#4CAF50");
+    });
 
     // === FADE CONTROL BUTTONS (Purple Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Set Fast Fade (500ms)", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Set Fast Fade (500ms)", [0.61, 0.15, 0.69, 1.0], () => {
         PIXEffect_fog.SetFadeOutDuration(500);
         PIXEffect_fog.SetFadeInDuration(500);
-    }, "#9C27B0");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Set Normal Fade (2000ms)", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Set Normal Fade (2000ms)", [0.61, 0.15, 0.69, 1.0], () => {
         PIXEffect_fog.SetFadeOutDuration(2000);
         PIXEffect_fog.SetFadeInDuration(1500);
-    }, "#9C27B0");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Set Slow Fade (5000ms)", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Set Slow Fade (5000ms)", [0.61, 0.15, 0.69, 1.0], () => {
         PIXEffect_fog.SetFadeOutDuration(5000);
         PIXEffect_fog.SetFadeInDuration(3000);
-    }, "#9C27B0");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Show Fade Duration", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Show Fade Duration", [0.61, 0.15, 0.69, 1.0], () => {
         const fadeInDuration = PIXEffect_fog.GetFadeInDuration();
         const fadeOutDuration = PIXEffect_fog.GetFadeOutDuration();
         console.log(`Current fade-in duration: ${fadeInDuration}ms`);
         console.log(`Current fade-out duration: ${fadeOutDuration}ms`);
-    }, "#9C27B0");
+    });
 
     // === TEST BUTTONS (Orange Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Test Fade Effects", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Test Fade Effects", [1.0, 0.60, 0.0, 1.0], () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         const x = PlayerInstance ? PlayerInstance.x : 400;
         const y = PlayerInstance ? PlayerInstance.y : 300;
@@ -300,9 +300,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .setColor("#4fc3f7");
 
         console.log("Created 3-second fog to test fade-out effect");
-    }, "#FF9800");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Test Fog Replacement", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Test Fog Replacement", [1.0, 0.60, 0.0, 1.0], () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         const x = PlayerInstance ? PlayerInstance.x : 400;
         const y = PlayerInstance ? PlayerInstance.y : 300;
@@ -322,9 +322,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 .setOpacity(0.8)
                 .setColor("#00ff00");
         }, 3000);
-    }, "#FF9800");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Test Color Variations", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Test Color Variations", [1.0, 0.60, 0.0, 1.0], () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
@@ -344,9 +344,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 .setColor(color)
                 .setSpeed(0.8);
         });
-    }, "#FF9800");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Test Performance Stress", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Test Performance Stress", [1.0, 0.60, 0.0, 1.0], () => {
         console.log("Creating large fog instances for performance testing...");
 
         for (let i = 0; i < 3; i++) {
@@ -361,16 +361,16 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             const stats = PIXEffect_fog.GetPerformanceStats();
             console.log("Performance test results:", stats);
         }, 1000);
-    }, "#FF9800");
+    });
 
     // === SCENE CHANGE TEST BUTTONS (Cyan Color) ===
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Test Scene Change Cleanup", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Test Scene Change Cleanup", [0.0, 0.74, 0.83, 1.0], () => {
         console.log("Simulating scene change cleanup...");
         PIXEffect_fog.EmergencyDestroyAllFog();
-    }, "#00BCD4");
+    });
 
-    IMGUIDebugButton.AddButtonToCategory(fog_category, "Add Scene Change Listener", () => {
+    IMGUIDebugButton.AddColorButtonToCategory(fog_category, "Add Scene Change Listener", [0.0, 0.74, 0.83, 1.0], () => {
         console.log("Setting up scene change listener...");
         PIXEffect_fog.AddSceneChangeCleanup();
-    }, "#00BCD4");
+    });
 }); 
