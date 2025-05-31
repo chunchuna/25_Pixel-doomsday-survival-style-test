@@ -55,20 +55,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 // debug 相关
 var isBindButtonIntoDebugPanel = false;
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
-    //DEBUG 面板绘制 
-    if (!DEBUG.DebugMainUI) return
-    var LevelFather = DEBUG.DebugMainUI.DebuPanelAddFatherButton("LEVEL")
-    LevelFather.AddChildButton(" go main menu", () => {
-        if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
-        GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
-
-    })
-
     // IMGUI 面本绘制按钮
     var level_cat = IMGUIDebugButton.AddCategory("Level")
+   
     if (level_cat) {
+
         IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
             if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
             GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")

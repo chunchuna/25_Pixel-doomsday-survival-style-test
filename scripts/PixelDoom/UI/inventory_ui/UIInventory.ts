@@ -1748,6 +1748,15 @@ class UIInventory implements IUIInventory {
             slot.classList.add('oneline-slot');
         }
         
+        // Add quality-based slot styling
+        slot.classList.add(`slot-quality-${item.itemLevel.toLowerCase().replace('+', 'plus')}`);
+        
+        // Add special effects for TOP tier items
+        if (item.itemLevel === ItemLevel.Top) {
+            slot.classList.add('slot-top-tier');
+            this.addTopTierEffects(slot);
+        }
+        
         slot.setAttribute('data-slot-index', slotIndex.toString());
         slot.setAttribute('data-inventory-type', inventoryType);
 
@@ -1816,6 +1825,28 @@ class UIInventory implements IUIInventory {
 
         slot.appendChild(itemElement);
         return slot;
+    }
+
+    // Add method to create TOP tier effects
+    private addTopTierEffects(slot: HTMLElement): void {
+        // Create particle container
+        const particleContainer = document.createElement('div');
+        particleContainer.className = 'top-tier-particles';
+        
+        // Create multiple particles
+        for (let i = 0; i < 6; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.animationDelay = `${i * 0.3}s`;
+            particleContainer.appendChild(particle);
+        }
+        
+        slot.appendChild(particleContainer);
+        
+        // Create glow effect overlay
+        const glowOverlay = document.createElement('div');
+        glowOverlay.className = 'top-tier-glow';
+        slot.appendChild(glowOverlay);
     }
 
     // 创建空格子
@@ -2188,6 +2219,176 @@ class UIInventory implements IUIInventory {
                 background-color: #0a0a0a;
             }
             
+            /* Quality-based slot colors */
+            .slot-quality-top {
+                background-color: #1a1500;
+                border: 1px solid #e6c000;
+                box-shadow: 0 0 8px rgba(230, 192, 0, 0.3), inset 0 0 5px rgba(230, 192, 0, 0.1);
+            }
+            
+            .slot-quality-s {
+                background-color: #1a0f00;
+                border: 1px solid #e65000;
+                box-shadow: 0 0 6px rgba(230, 80, 0, 0.3), inset 0 0 5px rgba(230, 80, 0, 0.1);
+            }
+            
+            .slot-quality-aplus {
+                background-color: #1a0000;
+                border: 1px solid #e60000;
+                box-shadow: 0 0 6px rgba(230, 0, 0, 0.3), inset 0 0 5px rgba(230, 0, 0, 0.1);
+            }
+            
+            .slot-quality-a {
+                background-color: #1a0612;
+                border: 1px solid #e63060;
+                box-shadow: 0 0 6px rgba(230, 48, 96, 0.3), inset 0 0 5px rgba(230, 48, 96, 0.1);
+            }
+            
+            .slot-quality-b {
+                background-color: #10061a;
+                border: 1px solid #8030e0;
+                box-shadow: 0 0 6px rgba(128, 48, 224, 0.3), inset 0 0 5px rgba(128, 48, 224, 0.1);
+            }
+            
+            .slot-quality-c {
+                background-color: #00121a;
+                border: 1px solid #3090e0;
+                box-shadow: 0 0 6px rgba(48, 144, 224, 0.3), inset 0 0 5px rgba(48, 144, 224, 0.1);
+            }
+            
+            .slot-quality-d {
+                background-color: #001a00;
+                border: 1px solid #30c030;
+                box-shadow: 0 0 6px rgba(48, 192, 48, 0.3), inset 0 0 5px rgba(48, 192, 48, 0.1);
+            }
+            
+            .slot-quality-e {
+                background-color: #1a1a1a;
+                border: 1px solid #c0c0c0;
+                box-shadow: 0 0 4px rgba(192, 192, 192, 0.2), inset 0 0 5px rgba(192, 192, 192, 0.1);
+            }
+            
+            .slot-quality-low {
+                background-color: #151515;
+                border: 1px solid #909090;
+                box-shadow: 0 0 3px rgba(144, 144, 144, 0.2), inset 0 0 5px rgba(144, 144, 144, 0.1);
+            }
+            
+            .slot-quality-break {
+                background-color: #0f0f0f;
+                border: 1px solid #606060;
+                box-shadow: 0 0 2px rgba(96, 96, 96, 0.2), inset 0 0 5px rgba(96, 96, 96, 0.1);
+            }
+            
+            /* TOP tier special effects */
+            .slot-top-tier {
+                position: relative;
+                animation: topTierPulse 2s ease-in-out infinite;
+            }
+            
+            @keyframes topTierPulse {
+                0%, 100% {
+                    box-shadow: 0 0 8px rgba(230, 192, 0, 0.3), inset 0 0 5px rgba(230, 192, 0, 0.1);
+                }
+                50% {
+                    box-shadow: 0 0 15px rgba(230, 192, 0, 0.6), inset 0 0 8px rgba(230, 192, 0, 0.2);
+                }
+            }
+            
+            /* TOP tier glow overlay */
+            .top-tier-glow {
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                background: linear-gradient(45deg, transparent, rgba(230, 192, 0, 0.1), transparent);
+                border-radius: 4px;
+                pointer-events: none;
+                animation: topTierGlowRotate 3s linear infinite;
+            }
+            
+            @keyframes topTierGlowRotate {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            
+            /* TOP tier particles */
+            .top-tier-particles {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                overflow: hidden;
+            }
+            
+            .particle {
+                position: absolute;
+                width: 3px;
+                height: 3px;
+                background: radial-gradient(circle, #e6c000, transparent);
+                border-radius: 50%;
+                animation: particleFloat 2s ease-in-out infinite;
+                opacity: 0.8;
+            }
+            
+            .particle:nth-child(1) {
+                left: 10%;
+                animation-duration: 2.2s;
+            }
+            
+            .particle:nth-child(2) {
+                left: 30%;
+                animation-duration: 1.8s;
+            }
+            
+            .particle:nth-child(3) {
+                left: 50%;
+                animation-duration: 2.5s;
+            }
+            
+            .particle:nth-child(4) {
+                left: 70%;
+                animation-duration: 1.9s;
+            }
+            
+            .particle:nth-child(5) {
+                left: 85%;
+                animation-duration: 2.1s;
+            }
+            
+            .particle:nth-child(6) {
+                left: 15%;
+                animation-duration: 2.3s;
+            }
+            
+            @keyframes particleFloat {
+                0% {
+                    bottom: -5px;
+                    opacity: 0;
+                    transform: translateX(0) scale(0.5);
+                }
+                20% {
+                    opacity: 0.8;
+                    transform: translateX(5px) scale(1);
+                }
+                80% {
+                    opacity: 0.8;
+                    transform: translateX(-5px) scale(1);
+                }
+                100% {
+                    bottom: 105%;
+                    opacity: 0;
+                    transform: translateX(0) scale(0.5);
+                }
+            }
+            
             /* 格子高亮效果 */
             .slot-highlight {
                 border-color: #444444;
@@ -2198,6 +2399,47 @@ class UIInventory implements IUIInventory {
             
             .slot-highlight.empty {
                 background-color: #161616;
+            }
+            
+            /* Quality-based highlight effects */
+            .slot-quality-top.slot-highlight {
+                box-shadow: 0 0 12px rgba(230, 192, 0, 0.6), inset 0 0 8px rgba(230, 192, 0, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-s.slot-highlight {
+                box-shadow: 0 0 10px rgba(230, 80, 0, 0.6), inset 0 0 8px rgba(230, 80, 0, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-aplus.slot-highlight {
+                box-shadow: 0 0 10px rgba(230, 0, 0, 0.6), inset 0 0 8px rgba(230, 0, 0, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-a.slot-highlight {
+                box-shadow: 0 0 10px rgba(230, 48, 96, 0.6), inset 0 0 8px rgba(230, 48, 96, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-b.slot-highlight {
+                box-shadow: 0 0 10px rgba(128, 48, 224, 0.6), inset 0 0 8px rgba(128, 48, 224, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-c.slot-highlight {
+                box-shadow: 0 0 10px rgba(48, 144, 224, 0.6), inset 0 0 8px rgba(48, 144, 224, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-d.slot-highlight {
+                box-shadow: 0 0 10px rgba(48, 192, 48, 0.6), inset 0 0 8px rgba(48, 192, 48, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-e.slot-highlight {
+                box-shadow: 0 0 8px rgba(192, 192, 192, 0.5), inset 0 0 8px rgba(192, 192, 192, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-low.slot-highlight {
+                box-shadow: 0 0 6px rgba(144, 144, 144, 0.5), inset 0 0 8px rgba(144, 144, 144, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
+            }
+            
+            .slot-quality-break.slot-highlight {
+                box-shadow: 0 0 4px rgba(96, 96, 96, 0.5), inset 0 0 8px rgba(96, 96, 96, 0.2), 0 0 4px rgba(255, 255, 255, 0.3);
             }
             
             /* 源格子样式（拖拽来源） */
@@ -2454,6 +2696,67 @@ class UIInventory implements IUIInventory {
                 white-space: nowrap;
                 text-align: right;
                 margin-left: auto;
+            }
+            
+            /* 单列模式下品质相关的高亮效果 */
+            .oneline-slot.slot-quality-top.slot-highlight {
+                background-color: #2a2200;
+                border-color: #e6c000;
+                box-shadow: 0 0 8px rgba(230, 192, 0, 0.4), inset 0 0 5px rgba(230, 192, 0, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-s.slot-highlight {
+                background-color: #2a1600;
+                border-color: #e65000;
+                box-shadow: 0 0 6px rgba(230, 80, 0, 0.4), inset 0 0 5px rgba(230, 80, 0, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-aplus.slot-highlight {
+                background-color: #2a0000;
+                border-color: #e60000;
+                box-shadow: 0 0 6px rgba(230, 0, 0, 0.4), inset 0 0 5px rgba(230, 0, 0, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-a.slot-highlight {
+                background-color: #2a0c18;
+                border-color: #e63060;
+                box-shadow: 0 0 6px rgba(230, 48, 96, 0.4), inset 0 0 5px rgba(230, 48, 96, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-b.slot-highlight {
+                background-color: #1c0c2a;
+                border-color: #8030e0;
+                box-shadow: 0 0 6px rgba(128, 48, 224, 0.4), inset 0 0 5px rgba(128, 48, 224, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-c.slot-highlight {
+                background-color: #001e2a;
+                border-color: #3090e0;
+                box-shadow: 0 0 6px rgba(48, 144, 224, 0.4), inset 0 0 5px rgba(48, 144, 224, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-d.slot-highlight {
+                background-color: #002a00;
+                border-color: #30c030;
+                box-shadow: 0 0 6px rgba(48, 192, 48, 0.4), inset 0 0 5px rgba(48, 192, 48, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-e.slot-highlight {
+                background-color: #2a2a2a;
+                border-color: #c0c0c0;
+                box-shadow: 0 0 4px rgba(192, 192, 192, 0.3), inset 0 0 5px rgba(192, 192, 192, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-low.slot-highlight {
+                background-color: #252525;
+                border-color: #909090;
+                box-shadow: 0 0 3px rgba(144, 144, 144, 0.3), inset 0 0 5px rgba(144, 144, 144, 0.2);
+            }
+            
+            .oneline-slot.slot-quality-break.slot-highlight {
+                background-color: #1f1f1f;
+                border-color: #606060;
+                box-shadow: 0 0 2px rgba(96, 96, 96, 0.3), inset 0 0 5px rgba(96, 96, 96, 0.2);
             }
         `;
 
@@ -3513,26 +3816,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();
 
-    // //测试item组
-    // var PlayerItems: Item[] = [
-    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-    //     { itemName: "医疗包", itemDescribe: "恢复生命值，在战斗中使用可以快速回复HP", itemLevel: ItemLevel.A },
-    //     { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
-    //     { itemName: "弹药", itemDescribe: "补充子弹，可以为武器提供额外弹药", itemLevel: ItemLevel.B },
-    //     { itemName: "手枪", itemDescribe: "标准手枪，伤害一般但射速较快", itemLevel: ItemLevel.C },
-    //     { itemName: "霰弹枪", itemDescribe: "近距离威力巨大的武器", itemLevel: ItemLevel.B },
-    //     { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
-    //     { itemName: "能量饮料", itemDescribe: "提供短暂的移动速度提升", itemLevel: ItemLevel.D },
-    //     { itemName: "破损的部件", itemDescribe: "看起来已经无法使用了", itemLevel: ItemLevel.Break },
-    //     { itemName: "神秘宝石", itemDescribe: "散发着奇异光芒的宝石，似乎有特殊价值", itemLevel: ItemLevel.S },
-    //     { itemName: "防弹衣", itemDescribe: "减少受到的伤害", itemLevel: ItemLevel.A },
-    //     { itemName: "地图", itemDescribe: "显示周围地区的详细信息", itemLevel: ItemLevel.C },
-    //     { itemName: "眼镜", itemDescribe: "普通的眼镜，似乎没什么特别之处", itemLevel: ItemLevel.Low },
-    //     { itemName: "密码本", itemDescribe: "记录着一些重要的密码", itemLevel: ItemLevel.B },
-    // ];
-
-    // BindPlayerMainInventory(PlayerItems, 5, 6, "i");
 });
 
 // 导出实例更新回调接口
