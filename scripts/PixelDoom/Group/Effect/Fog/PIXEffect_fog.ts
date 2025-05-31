@@ -94,6 +94,9 @@ export class PIXEffect_fog {
     private fadeInStartTime: number = 0;
     private targetOpacity: number = 1.0;
 
+    // 首先，我需要在类中添加一个属性来跟踪计时器开始时间
+    private timerStartTime: number = 0;
+
     private constructor(type: FogType, style: FogStyle = FogStyle.MEDIUM, duration: number = 0, layer: string = "html_c3") {
         this.id = `fog_${++PIXEffect_fog.idCounter}_${Date.now()}`;
         this.type = type;
@@ -292,6 +295,7 @@ export class PIXEffect_fog {
             // Create C3 Timer instance
             this.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
             this.timerTag = `fog_${this.id}_${Date.now()}`;
+            this.timerStartTime = Date.now(); // Record start time
 
             // Listen for timer events
             this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -303,11 +307,12 @@ export class PIXEffect_fog {
 
             // Start the timer
             this.timerInstance.behaviors.Timer.startTimer(this.duration, this.timerTag, "once");
-            //console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
+            console.log(`Started C3 timer for fog ${this.id}, duration: ${this.duration}s`);
 
         } catch (error: any) {
             console.error(`Failed to create C3 timer for fog: ${error.message}`);
             // Fallback to JavaScript timer if C3 timer fails
+            this.timerStartTime = Date.now();
             setTimeout(() => {
                 this.startFadeOut();
             }, this.duration * 1000);
@@ -1001,10 +1006,19 @@ export class PIXEffect_fog {
             style: this.style,
             layer: this.layer,
             isDestroyed: this.isDestroyed,
+            isFadingOut: this.isFadingOut,
+            isFadingIn: this.isFadingIn,
             hasHtmlElement: !!this.htmlElement,
+            hasTimerInstance: !!this.timerInstance,
+            timerTag: this.timerTag,
+            timerStartTime: this.timerStartTime,
             position: { x: this._x, y: this._y },
             size: { width: this._width, height: this._height },
-            duration: this.duration
+            duration: this.duration,
+            currentOpacity: this.fogParams.opacity,
+            fadeProgress: this.isFadingOut ? 
+                Math.min((Date.now() - this.fadeStartTime) / PIXEffect_fog.FADE_OUT_DURATION, 1.0) : 
+                (this.isFadingIn ? Math.min((Date.now() - this.fadeInStartTime) / PIXEffect_fog.FADE_IN_DURATION, 1.0) : 0)
         };
     }
 
@@ -1696,7 +1710,172 @@ export class PIXEffect_fog {
                         const lodLevel = fog.getLODLevel();
                         const perfLevel = fog.getPerformanceLevel();
 
-                        if (ImGui.TreeNode(`${id} (${particleCount} particles)`)) {
+                        // Check if fog is fading out or fading in
+                        const isFadingOut = (fog as any).isFadingOut;
+                        const isFadingIn = (fog as any).isFadingIn;
+                        
+                        // Create status indicator
+                        let statusText = "";
+                        let statusColor = new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0); // White default
+                        
+                        if (isFadingOut) {
+                            statusText = " [FADING OUT]";
+                            statusColor = new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0); // Orange
+                        } else if (isFadingIn) {
+                            statusText = " [FADING IN]";
+                            statusColor = new ImGui.ImVec4(0.0, 1.0, 0.5, 1.0); // Green
+                        } else {
+                            statusText = " [ACTIVE]";
+                            statusColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green
+                        }
+
+                        if (ImGui.TreeNode(`${id} (${particleCount} particles)${statusText}`)) {
+                            // Show status with color
+                            ImGui.Text("Status:");
+                            ImGui.SameLine();
+                            ImGui.TextColored(statusColor, statusText.trim());
+                            
+                            // Show fade progress if fading
+                            if (isFadingOut || isFadingIn) {
+                                const fadeStartTime = isFadingOut ? (fog as any).fadeStartTime : (fog as any).fadeInStartTime;
+                                const fadeDuration = isFadingOut ? PIXEffect_fog.GetFadeOutDuration() : PIXEffect_fog.GetFadeInDuration();
+                                const elapsed = Date.now() - fadeStartTime;
+                                const progress = Math.min(elapsed / fadeDuration, 1.0);
+                                
+                                ImGui.Text(`Fade Progress: ${(progress * 100).toFixed(1)}%`);
+                                ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0), `${(progress * 100).toFixed(1)}%`);
+                                
+                                // Show current opacity
+                                const currentOpacity = (fog as any).fogParams.opacity;
+                                ImGui.Text(`Current Opacity: ${(currentOpacity * 100).toFixed(1)}%`);
+                            }
+                            
+                            // Show temporary fog duration progress
+                            if (debugInfo.type === "temporary" && debugInfo.duration > 0 && !isFadingOut) {
+                                const timerInstance = (fog as any).timerInstance;
+                                const timerTag = (fog as any).timerTag;
+                                const timerStartTime = (fog as any).timerStartTime || Date.now();
+                                
+                                let remainingTime = 0;
+                                let elapsedTime = 0;
+                                let progress = 0;
+                                let timerMethod = "Unknown";
+                                
+                                // Method 1: Try to get remaining time from C3 timer
+                                if (timerInstance && timerTag) {
+                                    try {
+                                        // Try different possible API methods
+                                        if (timerInstance.behaviors && timerInstance.behaviors.Timer) {
+                                            const timer = timerInstance.behaviors.Timer;
+                                            
+                                            // Try method 1: getRemainingTime
+                                            if (typeof timer.getRemainingTime === 'function') {
+                                                remainingTime = timer.getRemainingTime(timerTag);
+                                                elapsedTime = debugInfo.duration - remainingTime;
+                                                progress = Math.min(elapsedTime / debugInfo.duration, 1.0);
+                                                timerMethod = "C3 getRemainingTime";
+                                            }
+                                            // Try method 2: check if timer is running and calculate manually
+                                            else if (typeof timer.isTimerRunning === 'function' && timer.isTimerRunning(timerTag)) {
+                                                const currentTime = Date.now();
+                                                const elapsedMs = currentTime - timerStartTime;
+                                                elapsedTime = elapsedMs / 1000;
+                                                remainingTime = Math.max(0, debugInfo.duration - elapsedTime);
+                                                progress = Math.min(elapsedTime / debugInfo.duration, 1.0);
+                                                timerMethod = "C3 isTimerRunning + manual calc";
+                                            }
+                                            // Try method 3: access timer properties directly
+                                            else if (timer.timers && timer.timers[timerTag]) {
+                                                const timerObj = timer.timers[timerTag];
+                                                if (timerObj.remainingTime !== undefined) {
+                                                    remainingTime = timerObj.remainingTime;
+                                                    elapsedTime = debugInfo.duration - remainingTime;
+                                                    progress = Math.min(elapsedTime / debugInfo.duration, 1.0);
+                                                    timerMethod = "C3 direct timer access";
+                                                }
+                                            }
+                                        }
+                                    } catch (error: any) {
+                                        console.warn(`Error accessing C3 timer: ${error.message}`);
+                                    }
+                                }
+                                
+                                // Fallback: Calculate based on start time
+                                if (timerMethod === "Unknown" || remainingTime === 0) {
+                                    const currentTime = Date.now();
+                                    const elapsedMs = currentTime - timerStartTime;
+                                    elapsedTime = elapsedMs / 1000;
+                                    remainingTime = Math.max(0, debugInfo.duration - elapsedTime);
+                                    progress = Math.min(elapsedTime / debugInfo.duration, 1.0);
+                                    timerMethod = "Fallback calculation";
+                                }
+                                
+                                ImGui.Separator();
+                                ImGui.Text("Temporary Fog Timer:");
+                                ImGui.Text(`Method: ${timerMethod}`);
+                                ImGui.Text(`Remaining: ${remainingTime.toFixed(1)}s / ${debugInfo.duration}s`);
+                                ImGui.Text(`Elapsed: ${elapsedTime.toFixed(1)}s`);
+                                
+                                // Show timer instance info for debugging
+                                if (timerInstance) {
+                                    ImGui.Text(`Timer Instance: ${timerInstance ? 'EXISTS' : 'NULL'}`);
+                                    ImGui.Text(`Timer Tag: ${timerTag || 'NONE'}`);
+                                    
+                                    // Try to show timer status
+                                    try {
+                                        if (timerInstance.behaviors && timerInstance.behaviors.Timer) {
+                                            const timer = timerInstance.behaviors.Timer;
+                                            if (typeof timer.isTimerRunning === 'function') {
+                                                const isRunning = timer.isTimerRunning(timerTag);
+                                                ImGui.Text(`Timer Running: ${isRunning ? 'YES' : 'NO'}`);
+                                            }
+                                        }
+                                    } catch (e) {
+                                        ImGui.Text("Timer Status: Error checking");
+                                    }
+                                } else {
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), "No Timer Instance");
+                                }
+                                
+                                // Progress bar with color coding
+                                let progressColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green
+                                if (progress > 0.8) {
+                                    progressColor = new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0); // Red
+                                } else if (progress > 0.6) {
+                                    progressColor = new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0); // Orange
+                                } else if (progress > 0.4) {
+                                    progressColor = new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0); // Yellow
+                                }
+                                
+                                ImGui.PushStyleColor(ImGui.Col.PlotHistogram, progressColor);
+                                ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0), 
+                                    `${(progress * 100).toFixed(1)}% (${elapsedTime.toFixed(1)}s elapsed)`);
+                                ImGui.PopStyleColor();
+                                
+                                // Show time until auto-destroy
+                                if (remainingTime <= 10 && remainingTime > 0) {
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+                                        `⚠ Auto-destroy in ${remainingTime.toFixed(1)}s!`);
+                                } else if (remainingTime <= 30 && remainingTime > 0) {
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), 
+                                        `Auto-destroy in ${remainingTime.toFixed(1)}s`);
+                                } else if (remainingTime <= 0) {
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+                                        "Timer expired - should be fading out");
+                                }
+                                
+                            } else if (debugInfo.type === "temporary" && debugInfo.duration > 0 && isFadingOut) {
+                                // Show that temporary fog is in fade-out phase
+                                ImGui.Separator();
+                                ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), 
+                                    "Temporary fog timer completed - now fading out");
+                            } else if (debugInfo.type === "persistent") {
+                                ImGui.Separator();
+                                ImGui.TextColored(new ImGui.ImVec4(0.0, 0.8, 1.0, 1.0), 
+                                    "Persistent fog - no auto-destroy timer");
+                            }
+                            
+                            ImGui.Separator();
                             ImGui.Text(`Type: ${debugInfo.type}`);
                             ImGui.Text(`Style: ${debugInfo.style}`);
                             ImGui.Text(`Size: ${debugInfo.size.width}x${debugInfo.size.height}`);
@@ -1704,12 +1883,52 @@ export class PIXEffect_fog {
                             ImGui.Text(`Performance: ${(perfLevel * 100).toFixed(0)}%`);
                             ImGui.Text(`Frame Time: ${fog.getAverageFrameTime().toFixed(1)}ms`);
 
-                            if (ImGui.Button(`Edit##${id}`)) {
-                                PIXEffect_fog.OpenFogEditor(id);
-                            }
-                            ImGui.SameLine();
-                            if (ImGui.Button(`Destroy##${id}`)) {
-                                fog.destroy();
+                            // Disable edit/destroy buttons if fading out
+                            if (isFadingOut) {
+                                ImGui.PushStyleVar(ImGui.StyleVar.Alpha, 0.5);
+                                ImGui.Button(`Edit##${id}`); // Disabled
+                                ImGui.SameLine();
+                                ImGui.Button(`Destroy##${id}`); // Disabled
+                                ImGui.PopStyleVar();
+                                ImGui.SameLine();
+                                ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), "(Fading out...)");
+                            } else {
+                                if (ImGui.Button(`Edit##${id}`)) {
+                                    PIXEffect_fog.OpenFogEditor(id);
+                                }
+                                ImGui.SameLine();
+                                if (ImGui.Button(`Destroy##${id}`)) {
+                                    fog.destroy();
+                                }
+                                
+                                // Add graceful destroy button
+                                ImGui.SameLine();
+                                if (ImGui.Button(`Fade Out##${id}`)) {
+                                    fog.destroyWithFadeOut();
+                                }
+                                
+                                // Add extend timer button for temporary fog
+                                if (debugInfo.type === "temporary" && debugInfo.duration > 0) {
+                                    ImGui.SameLine();
+                                    if (ImGui.Button(`+30s##${id}`)) {
+                                        const timerInstance = (fog as any).timerInstance;
+                                        const timerTag = (fog as any).timerTag;
+                                        if (timerInstance && timerTag) {
+                                            try {
+                                                // Stop current timer
+                                                timerInstance.behaviors.Timer.stopTimer(timerTag);
+                                                // Get remaining time and add 30 seconds
+                                                const remainingTime = timerInstance.behaviors.Timer.getRemainingTime(timerTag);
+                                                const newDuration = remainingTime + 30;
+                                                // Start new timer with extended duration
+                                                timerInstance.behaviors.Timer.startTimer(newDuration, timerTag, "once");
+                                                console.log(`Extended fog ${id} timer by 30 seconds (new total: ${newDuration.toFixed(1)}s)`);
+                                            } catch (error: any) {
+                                                console.warn(`Failed to extend timer for fog ${id}: ${error.message}`);
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
                             ImGui.TreePop();
