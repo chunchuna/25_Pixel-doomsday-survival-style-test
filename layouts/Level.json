@@ -311,7 +311,47 @@
 							"name": "Bus",
 							"overriden": 0,
 							"subLayers": [],
-							"instances": [],
+							"instances": [
+								{
+									"type": "Bus",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 1225,
+									"sid": 452727044732776,
+									"tags": "",
+									"instanceVariables": {
+										"GetYPosition": 0
+									},
+									"behaviors": {},
+									"instanceFolderItem": {
+										"sid": 452727044732776,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 576,
+										"y": 2342,
+										"width": 879.9856769608085,
+										"height": 293.3285589869362,
+										"originX": 0.5064102564102564,
+										"originY": 0.9423076923076923,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0,
+										"zElevation": 0
+									}
+								}
+							],
 							"sid": 313659484017005,
 							"effectTypes": [],
 							"isInitiallyVisible": true,
@@ -396,8 +436,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1437.8405585254943,
-										"y": 893.6381041914678,
+										"x": 1462.6566655323402,
+										"y": 957.1671301740253,
 										"width": 86.30491926640632,
 										"height": 86.30491926640632,
 										"originX": 0.46875,
@@ -463,8 +503,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1552.969778135449,
-										"y": 826.3551754718042,
+										"x": 1577.7858851422948,
+										"y": 889.8842014543616,
 										"width": 69.10877937818725,
 										"height": 84.58089416434856,
 										"originX": 0.4925373134328358,
@@ -526,8 +566,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1450,
-										"y": 730,
+										"x": 1474.8161070068459,
+										"y": 793.5290259825574,
 										"width": 366.7158254301935,
 										"height": 249.17870189487502,
 										"originX": 0.47435897435897434,
@@ -1583,8 +1623,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 2950.700138509707,
-										"y": 2217.5147269639256,
+										"x": 2975.5162455165528,
+										"y": 2281.043752946483,
 										"width": 384.65724967311996,
 										"height": 144.3004347984542,
 										"originX": 0.5158730158730159,
@@ -58203,8 +58243,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1217,
-										"y": 952,
+										"x": 1241.8161070068459,
+										"y": 1015.5290259825574,
 										"width": 60.7088636824307,
 										"height": 146.08070323584894,
 										"originX": 0.5104166666666666,
@@ -64499,7 +64539,12 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 452727044732776,
+				"expanded": true
+			}
+		],
 		"subfolders": [
 			{
 				"items": [

@@ -1,0 +1,52 @@
+{
+	"name": "Bus",
+	"plugin-id": "Sprite",
+	"sid": 713961305052731,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 156,
+						"height": 52,
+						"originX": 0.5064102564102564,
+						"originY": 0.9423076923076923,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 5973590,
+						"collisionPoly": {
+							"points": [
+								0.00641025641025641,
+								0.019230769230769232,
+								0.9935897435897436,
+								0.019230769230769232,
+								0.9935897435897436,
+								0.9807692307692307,
+								0.00641025641025641,
+								0.9807692307692307
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 918164386944789,
+				"name": "Default",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}

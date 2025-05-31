@@ -43,10 +43,7 @@
 					"behaviors": {},
 					"instanceFolderItem": {
 						"sid": 752021280383033,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -100,10 +97,7 @@
 		"items": [
 			{
 				"sid": 752021280383033,
-				"expanded": true,
-				"folderName": "",
-				"indexInFolder": -1,
-				"folderNestingLevel": -1
+				"expanded": true
 			}
 		],
 		"subfolders": []

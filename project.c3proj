@@ -173,7 +173,9 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [],
+		"items": [
+			"Bus"
+		],
 		"subfolders": [
 			{
 				"items": [

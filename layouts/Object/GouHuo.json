@@ -218,10 +218,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 129773173844247,
-						"expanded": false,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": false
 					},
 					"showing": true,
 					"locked": false,
@@ -302,10 +299,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 224945119358496,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -386,10 +380,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 318256804731092,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -470,10 +461,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 895777855594948,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -554,10 +542,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 644286206184160,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -638,10 +623,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 632836947930467,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -722,10 +704,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 835296670888156,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -806,10 +785,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 354991845251962,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -890,10 +866,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 457290142630735,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -974,10 +947,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 785091293557099,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1058,10 +1028,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 101362399573405,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1488,10 +1455,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 294522128968485,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1571,10 +1535,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 374656065041034,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1654,10 +1615,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 961387991086271,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1737,10 +1695,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 512103808401619,
-						"expanded": true,
-						"folderName": "",
-						"indexInFolder": -1,
-						"folderNestingLevel": -1
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -1796,10 +1751,7 @@
 		"items": [
 			{
 				"sid": 294522128968485,
-				"expanded": true,
-				"folderName": "",
-				"indexInFolder": -1,
-				"folderNestingLevel": -1
+				"expanded": true
 			}
 		],
 		"subfolders": []
