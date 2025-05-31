@@ -66,6 +66,7 @@ interface IUIInventory {
     SerializeItemsOnly(inventoryArray: Item[]): string;
     DeserializeItemsOnly(data: string): Item[];
     bind_QuickCloseInventoryWindow(key: string): { unbind: () => void };
+    ForceOnelineMode(): void;
 }
 
 // 库存UI管理类
@@ -136,6 +137,9 @@ class UIInventory implements IUIInventory {
     // 添加快速关闭库存窗口的按键绑定
     private quickCloseKey: string | null = null;
     private quickCloseKeyListener: ((event: KeyboardEvent) => void) | null = null;
+
+    // 添加强制单列模式标志
+    private forceOnelineMode: boolean = false;
 
     private constructor() {
         this.initStyles();
@@ -767,7 +771,8 @@ class UIInventory implements IUIInventory {
         }
 
         // 判断是否是单列模式
-        const isOnelineMode = (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+        const isOnelineMode = this.forceOnelineMode || 
+                             (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
                              (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
         
         // 获取当前的列数
@@ -1526,8 +1531,9 @@ class UIInventory implements IUIInventory {
         gridContainer.className = 'inventory-grid';
 
         // 判断是否是单列模式
-        const isOnelineMode = (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
-                            (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
+        const isOnelineMode = this.forceOnelineMode || 
+                             (container.id === 'main-inventory' && this.isMainInventoryOnelineMode) || 
+                             (container.id === 'other-inventory' && this.isOtherInventoryOnelineMode);
                             
         // 明确设置固定的列数和间隔
         if (isOnelineMode) {
@@ -1747,7 +1753,8 @@ class UIInventory implements IUIInventory {
         slot.className = 'inventory-slot';
         
         // 检查是否为单列模式，添加相应的类
-        const isOnelineMode = (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
+        const isOnelineMode = this.forceOnelineMode || 
+                             (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
                              (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
         if (isOnelineMode) {
             slot.classList.add('oneline-slot');
@@ -1860,7 +1867,8 @@ class UIInventory implements IUIInventory {
         slot.className = 'inventory-slot empty';
         
         // 检查是否为单列模式，添加相应的类
-        const isOnelineMode = (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
+        const isOnelineMode = this.forceOnelineMode || 
+                             (inventoryType === 'main' && this.isMainInventoryOnelineMode) || 
                              (inventoryType === 'other' && this.isOtherInventoryOnelineMode);
         if (isOnelineMode) {
             slot.classList.add('oneline-slot');
@@ -3819,6 +3827,63 @@ class UIInventory implements IUIInventory {
             console.log("Quick close: No inventory windows are open");
         }
     }
+
+    // 强制单列模式方法
+    public ForceOnelineMode(): void {
+        console.log("Force oneline mode activated");
+        this.forceOnelineMode = true;
+
+        // 如果主库存当前可见，重新渲染以应用强制单列模式
+        if (this.isMainInventoryVisible) {
+            // 强制设置主库存为单列模式
+            this.isMainInventoryOnelineMode = true;
+            this.shouldMainInventoryUseOnelineMode = true;
+            
+            // 重新渲染主库存
+            this.renderMainInventory();
+            
+            // 调整窗口大小以适应单列模式
+            const newWidth = 300;
+            const newHeight = Math.max(this.MainInventoryWindowSize[1], 500);
+            
+            this.mainInventoryContainer.style.width = `${newWidth}px`;
+            this.mainInventoryContainer.style.height = `${newHeight}px`;
+            this.MainInventoryWindowSize = [newWidth, newHeight];
+            
+            // 调整网格以适应窗口大小
+            setTimeout(() => {
+                this.adjustGridBasedOnWindowSize(this.mainInventoryContainer);
+            }, 100);
+        }
+
+        // 如果其他库存当前可见，重新渲染以应用强制单列模式
+        if (this.otherInventoryInstance) {
+            // 强制设置其他库存为单列模式
+            this.isOtherInventoryOnelineMode = true;
+            
+            // 获取库存名称并更新记忆状态
+            const inventoryName = this.otherInventoryInstance.getAttribute('data-inventory-name') || 'default';
+            this.otherInventoryTypeOnelineModes.set(inventoryName, true);
+            
+            // 重新渲染其他库存
+            this.renderOtherInventory(this.otherInventoryRows, this.otherInventoryColumns, inventoryName);
+            
+            // 调整窗口大小以适应单列模式
+            const newWidth = 300;
+            const newHeight = Math.max(this.OtherInventoryWindowSize[1], 500);
+            
+            this.otherInventoryInstance.style.width = `${newWidth}px`;
+            this.otherInventoryInstance.style.height = `${newHeight}px`;
+            this.OtherInventoryWindowSize = [newWidth, newHeight];
+            
+            // 调整网格以适应窗口大小
+            setTimeout(() => {
+                if (this.otherInventoryInstance) {
+                    this.adjustGridBasedOnWindowSize(this.otherInventoryInstance);
+                }
+            }, 100);
+        }
+    }
 }
 
 // 导出公共接口
@@ -3881,7 +3946,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();
     inventoryManager.bind_QuickCloseInventoryWindow("Escape")
-    
+    inventoryManager.ForceOnelineMode();
 
 });
 
@@ -3942,4 +4007,11 @@ export function bind_QuickCloseInventoryWindow(key: string): { unbind: () => voi
   return {
     unbind: () => {}
   };
+}
+
+// 导出强制单列模式方法
+export function ForceOnelineMode(): void {
+  if (inventoryManager) {
+    inventoryManager.ForceOnelineMode();
+  }
 }
