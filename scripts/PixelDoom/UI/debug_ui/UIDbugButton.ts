@@ -384,16 +384,90 @@ export class IMGUIDebugButton {
             }
         }
 
-        // If has hover tooltip
-        if (button.tooltip && ImGui.IsItemHovered()) {
+        // Enhanced tooltip with source script info
+        if (ImGui.IsItemHovered()) {
             ImGui.BeginTooltip();
-            ImGui.Text(button.tooltip);
+            
+            // Show original tooltip if exists
+            if (button.tooltip) {
+                ImGui.Text(button.tooltip);
+                ImGui.Separator();
+            }
+            
+            // Show source script info
+            ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 1.0, 1.0), "Source:");
+            ImGui.SameLine();
+            ImGui.Text(button.sourceScript || "Unknown");
+            
             ImGui.EndTooltip();
         }
 
         // If has custom color, restore style
         if (button.color) {
             ImGui.PopStyleColor(3);
+        }
+
+        // Show source script as small text below button
+        if (button.sourceScript) {
+            ImGui.PushStyleColor(ImGui.Col.Text, new ImGui.ImVec4(0.6, 0.6, 0.6, 1.0));
+            ImGui.Indent(30); // Align with button (after star)
+            ImGui.TextWrapped(`[${button.sourceScript}]`);
+            ImGui.Unindent(30);
+            ImGui.PopStyleColor(1);
+        }
+    }
+
+    /**
+     * Get source script name from call stack
+     * @private
+     */
+    private static getSourceScriptName(): string {
+        try {
+            const stack = new Error().stack;
+            if (!stack) return "Unknown";
+            
+            const lines = stack.split('\n');
+            // Skip the first few lines (Error, getSourceScriptName, AddButton methods)
+            for (let i = 3; i < lines.length; i++) {
+                const line = lines[i];
+                
+                // Try different patterns to extract script file names
+                let match = null;
+                
+                // Pattern 1: /path/to/file.js or /path/to/file.ts
+                match = line.match(/\/([^\/\s]+\.(?:js|ts))/);
+                if (match) {
+                    return match[1];
+                }
+                
+                // Pattern 2: \path\to\file.js or \path\to\file.ts (Windows paths)
+                match = line.match(/\\([^\\\/\s]+\.(?:js|ts))/);
+                if (match) {
+                    return match[1];
+                }
+                
+                // Pattern 3: file.js:line:column format
+                match = line.match(/([^\/\\:\s]+\.(?:js|ts)):\d+:\d+/);
+                if (match) {
+                    return match[1];
+                }
+                
+                // Pattern 4: at functionName (file.js:line:column)
+                match = line.match(/\(([^\/\\:\s]+\.(?:js|ts)):\d+:\d+\)/);
+                if (match) {
+                    return match[1];
+                }
+                
+                // Pattern 5: Simple filename extraction from any path-like string
+                match = line.match(/([^\/\\:\s()]+\.(?:js|ts))/);
+                if (match && !match[1].includes('UIDbugButton')) {
+                    // Exclude self-references
+                    return match[1];
+                }
+            }
+            return "Unknown";
+        } catch (e) {
+            return "Unknown";
         }
     }
 
@@ -408,12 +482,14 @@ export class IMGUIDebugButton {
         this.ensureInitialized();
 
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sourceScript = this.getSourceScriptName();
 
         this.buttons.push({
             id: buttonId,
             name,
             callback,
-            tooltip
+            tooltip,
+            sourceScript
         });
 
         return buttonId;
@@ -436,13 +512,15 @@ export class IMGUIDebugButton {
         this.ensureInitialized();
 
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sourceScript = this.getSourceScriptName();
 
         this.buttons.push({
             id: buttonId,
             name,
             color,
             callback,
-            tooltip
+            tooltip,
+            sourceScript
         });
 
         return buttonId;
@@ -508,13 +586,15 @@ export class IMGUIDebugButton {
         }
 
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sourceScript = this.getSourceScriptName();
 
         this.buttons.push({
             id: buttonId,
             name,
             callback,
             tooltip,
-            categoryId
+            categoryId,
+            sourceScript
         });
 
         return buttonId;
@@ -545,6 +625,7 @@ export class IMGUIDebugButton {
         }
 
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sourceScript = this.getSourceScriptName();
 
         this.buttons.push({
             id: buttonId,
@@ -552,7 +633,8 @@ export class IMGUIDebugButton {
             color,
             callback,
             tooltip,
-            categoryId
+            categoryId,
+            sourceScript
         });
 
         return buttonId;
@@ -735,13 +817,15 @@ export class IMGUIDebugButton {
         tooltip?: string
     ): string {
         const buttonId = `btn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sourceScript = this.getSourceScriptName();
 
         this.buttons.push({
             id: buttonId,
             name,
             callback,
             tooltip,
-            categoryId
+            categoryId,
+            sourceScript
         });
 
         return buttonId;
@@ -1033,6 +1117,7 @@ interface DebugButton {
     tooltip?: string;
     color?: [number, number, number, number]; // [r, g, b, a] color values (0-1)
     categoryId?: string; // Category ID it belongs to
+    sourceScript?: string; // Source script name where button was created
 }
 
 // Category interface

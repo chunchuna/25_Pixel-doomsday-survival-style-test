@@ -88,7 +88,7 @@ export class PIXEffect_fog {
         weatherInfluence: boolean,
         naturalVariation: boolean
     } | null = null;
-    
+
     // Dynamic state tracking
     protected dynamicState: {
         currentIntensity: number,
@@ -104,7 +104,7 @@ export class PIXEffect_fog {
         baseScale: number,
         baseDensity: number
     } | null = null;
-    
+
     // Dynamic timer for C3
     protected dynamicTimer: any = null;
     protected dynamicTimerTag: string = "";
@@ -204,7 +204,7 @@ export class PIXEffect_fog {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
                 console.log(`Fog ${id} already exists. Checking fade status...`);
-                
+
                 // Capture existing fog properties for replacement
                 const existingProperties = {
                     position: { x: existingFog._x, y: existingFog._y },
@@ -214,7 +214,7 @@ export class PIXEffect_fog {
                         // We'll apply new settings, but keep existing ones as fallback
                     }
                 };
-                
+
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
                     console.log(`Fog ${id} is already fading out. Queueing new fog creation...`);
@@ -229,7 +229,7 @@ export class PIXEffect_fog {
                     });
                     return existingFog; // Return existing fog for now
                 }
-                
+
                 // If existing fog is not fading out, start fade-out and queue new creation
                 console.log(`Starting fade-out for existing fog ${id} and queueing replacement...`);
                 PIXEffect_fog.pendingFogCreations.set(id, {
@@ -241,7 +241,7 @@ export class PIXEffect_fog {
                     size: existingProperties.size,
                     fogParams: existingProperties.fogParams
                 });
-                
+
                 existingFog.startFadeOut();
                 return existingFog; // Return existing fog for now
             }
@@ -423,7 +423,7 @@ export class PIXEffect_fog {
     private createHtmlElement(): void {
         try {
             console.log(`🏗️ Creating HTML element for fog ${this.id} (type: ${this.type}, duration: ${this.duration})`);
-            
+
             // Create HTML element using HTML_c3 object
             this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(
                 this.layer,
@@ -639,7 +639,7 @@ export class PIXEffect_fog {
             // 动态雾不受全局粒子限制影响，确保可见性
             const finalParticleCount = Math.max(baseParticleCount, 25); // 至少25个粒子
             console.log(`🌫️ Dynamic fog ${this.id}: Area=${this._width}x${this._height}, LOD=${this.lodLevel}, Particles=${finalParticleCount} (guaranteed minimum)`);
-            
+
             // 直接创建粒子，不检查全局限制
             this.createParticles(finalParticleCount);
         } else {
@@ -647,7 +647,7 @@ export class PIXEffect_fog {
             const currentGlobalParticles = this.getTotalActiveParticles();
             const availableParticles = PIXEffect_fog.MAX_PARTICLES_GLOBAL - currentGlobalParticles;
             const finalParticleCount = Math.min(baseParticleCount, Math.max(0, availableParticles));
-            
+
             console.log(`Fog ${this.id}: Area=${this._width}x${this._height}, LOD=${this.lodLevel}, Particles=${finalParticleCount}/${baseParticleCount}`);
             this.createParticles(finalParticleCount);
         }
@@ -806,15 +806,15 @@ export class PIXEffect_fog {
 
 
             const fogHtml = this.generateFogHTML();
-            
+
             // 检查生成的HTML内容
             if (!fogHtml || fogHtml.trim().length === 0) {
                 console.error(`🌫️ Fog ${this.id}: Generated HTML is empty!`);
                 return;
             }
-            
 
-            
+
+
             // 检查是否有可见的粒子
             const visibleParticles = this.particles.filter(p => {
                 const layerOpacity = this.fogParams.opacity * p.opacity * (1 - p.layer * 0.15);
@@ -836,10 +836,10 @@ export class PIXEffect_fog {
      */
     private handleInvalidElement(): void {
         console.log(`Fog ${this.id}: Handling invalid HTML element, likely due to scene change`);
-        
+
         // Mark element as null to prevent further render attempts
         this.htmlElement = null;
-        
+
         // Stop animation to prevent further errors
         if (this.animationId) {
             if (typeof cancelAnimationFrame !== 'undefined') {
@@ -853,7 +853,7 @@ export class PIXEffect_fog {
             }
             this.animationId = null;
         }
-        
+
         // Optionally auto-destroy the fog instance
         // Uncomment the next line if you want fog to auto-destroy on scene change
         // this.destroy();
@@ -863,7 +863,7 @@ export class PIXEffect_fog {
      * Generates the HTML structure for the fog effect
      */
     private generateFogHTML(): string {
-        
+
         if (this.particles.length === 0) {
             return `<div id="fog-${this.id}" style="position: relative; width: 100%; height: 100%; overflow: hidden; pointer-events: none;"><!-- No particles --></div>`;
         }
@@ -918,7 +918,7 @@ export class PIXEffect_fog {
                 transition: all 0.1s ease-out;
             "></div>`;
         }).filter(html => html.length > 0).join('');
-;
+        ;
 
         if (visibleParticleCount === 0) {
             console.error(`🌫️ Fog ${this.id}: No visible particles generated! All particles are transparent or too small.`);
@@ -938,7 +938,7 @@ export class PIXEffect_fog {
                 pointer-events: none;
                 z-index: 1000;
             "></div>`;
-            
+
             return `
             <div id="fog-${this.id}" style="
                 position: relative;
@@ -1280,8 +1280,8 @@ export class PIXEffect_fog {
             size: { width: this._width, height: this._height },
             duration: this.duration,
             currentOpacity: this.fogParams.opacity,
-            fadeProgress: this.isFadingOut ? 
-                Math.min((Date.now() - this.fadeStartTime) / PIXEffect_fog.FADE_OUT_DURATION, 1.0) : 
+            fadeProgress: this.isFadingOut ?
+                Math.min((Date.now() - this.fadeStartTime) / PIXEffect_fog.FADE_OUT_DURATION, 1.0) :
                 (this.isFadingIn ? Math.min((Date.now() - this.fadeInStartTime) / PIXEffect_fog.FADE_IN_DURATION, 1.0) : 0)
         };
     }
@@ -1323,14 +1323,14 @@ export class PIXEffect_fog {
         console.log(`🔥 Fog Type: ${this.type}, Style: ${this.style}, isDynamic: ${this.isDynamic}`);
         console.log(`🔥 isFadingOut: ${this.isFadingOut}, isFadingIn: ${this.isFadingIn}`);
         console.log(`🔥 isDestroyed: ${this.isDestroyed}`);
-        
+
         // Get call stack to see what's calling destroy
         try {
             throw new Error("Stack trace for fog destroy");
         } catch (e: any) {
             console.log(`🔥 DESTROY CALL STACK:`, e.stack);
         }
-        
+
         // Alert for immediate visibility
         alert(`FOG DESTROYED: ${this.id} (Type: ${this.type}, Dynamic: ${this.isDynamic})`);
 
@@ -1407,24 +1407,24 @@ export class PIXEffect_fog {
         if (PIXEffect_fog.pendingFogCreations.has(this.id)) {
             const pendingFog = PIXEffect_fog.pendingFogCreations.get(this.id)!;
             PIXEffect_fog.pendingFogCreations.delete(this.id);
-            
+
             console.log(`Fog ${this.id} destroyed, creating pending replacement...`);
-            
+
             // Create the pending fog after a short delay to ensure cleanup is complete
             setTimeout(() => {
                 const newFog = new PIXEffect_fog(pendingFog.type, pendingFog.style, pendingFog.duration, pendingFog.layer);
                 newFog.id = this.id; // Use the same ID
                 PIXEffect_fog.instances.set(this.id, newFog);
-                
+
                 // Apply saved properties if they exist
                 if (pendingFog.position) {
                     newFog.setPosition(pendingFog.position.x, pendingFog.position.y);
                 }
-                
+
                 if (pendingFog.size) {
                     newFog.setSize(pendingFog.size.width, pendingFog.size.height);
                 }
-                
+
                 // Apply saved fog parameters (this preserves the visual settings)
                 if (pendingFog.fogParams) {
                     // First set the new style's default parameters
@@ -1432,7 +1432,7 @@ export class PIXEffect_fog {
                     // Then apply the saved parameters to maintain visual consistency
                     newFog.updateFogParams(pendingFog.fogParams);
                 }
-                
+
                 // Apply any custom settings if they exist
                 if (pendingFog.customSettings) {
                     const settings = pendingFog.customSettings;
@@ -1448,9 +1448,9 @@ export class PIXEffect_fog {
                     if (settings.mixBlendMode !== undefined) newFog.setMixBlendMode(settings.mixBlendMode);
                     if (settings.particleVariation !== undefined) newFog.setParticleVariation(settings.particleVariation);
                 }
-                
+
                 console.log(`Created replacement fog ${this.id} after fade-out completion with preserved properties`);
-                
+
                 // Call callback if provided
                 if (pendingFog.callback) {
                     pendingFog.callback(newFog);
@@ -1669,21 +1669,21 @@ export class PIXEffect_fog {
      */
     public static EmergencyDestroyAllFog(): void {
         console.log("🚨 === EMERGENCY FOG CLEANUP CALLED ===");
-        
+
         // Get call stack to see what's calling this
         try {
             throw new Error("Stack trace for emergency cleanup");
         } catch (e: any) {
             console.log(`🚨 EMERGENCY CLEANUP CALL STACK:`, e.stack);
         }
-        
+
         alert("EMERGENCY FOG CLEANUP CALLED - Check console for details");
-        
+
         // Clear all pending fog creations first
         const pendingCount = PIXEffect_fog.pendingFogCreations.size;
         PIXEffect_fog.pendingFogCreations.clear();
         console.log(`Cleared ${pendingCount} pending fog creations`);
-        
+
         // First, try graceful cleanup
         const fogs = Array.from(PIXEffect_fog.instances.values());
         fogs.forEach(fog => {
@@ -1693,15 +1693,15 @@ export class PIXEffect_fog {
                 console.warn(`Error destroying fog ${fog.id}:`, error);
             }
         });
-        
+
         // Clear the instances map completely
         PIXEffect_fog.instances.clear();
-        
+
         // Find and destroy orphaned HTML elements that might contain fog
         try {
             const htmlElements = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.getAllInstances();
             let destroyedOrphans = 0;
-            
+
             htmlElements.forEach((htmlElement: any) => {
                 try {
                     // Check if this HTML element contains fog-related content
@@ -1719,16 +1719,16 @@ export class PIXEffect_fog {
                     console.warn(`Error checking/destroying HTML element:`, error);
                 }
             });
-            
+
             console.log(`Destroyed ${destroyedOrphans} orphaned fog HTML elements`);
         } catch (error) {
             console.warn(`Error during orphaned HTML cleanup:`, error);
         }
-        
+
         // Reset static counters
         PIXEffect_fog.idCounter = 0;
         PIXEffect_fog.currentEditingFog = null;
-        
+
         console.log(`Emergency cleanup completed: destroyed ${fogs.length} tracked fogs, cleared ${pendingCount} pending`);
     }
 
@@ -1782,7 +1782,7 @@ export class PIXEffect_fog {
                 ImGui.Text(`ID: ${fog.getId()}`);
                 ImGui.Text(`Type: ${fog.type}`);
                 ImGui.Text(`Style: ${fog.style}`);
-                
+
                 // Show fade status
                 const isFadingOut = (fog as any).isFadingOut;
                 const isFadingIn = (fog as any).isFadingIn;
@@ -1793,7 +1793,7 @@ export class PIXEffect_fog {
                 } else {
                     ImGui.TextColored(new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0), "Status: ACTIVE");
                 }
-                
+
                 // Show pending fog info
                 const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
                 if (pendingInfo.count > 0) {
@@ -1803,7 +1803,7 @@ export class PIXEffect_fog {
                         ImGui.BulletText(pendingId);
                     });
                 }
-                
+
                 ImGui.Separator();
             }
 
@@ -2097,11 +2097,11 @@ export class PIXEffect_fog {
                         // Check if fog is fading out or fading in
                         const isFadingOut = (fog as any).isFadingOut;
                         const isFadingIn = (fog as any).isFadingIn;
-                        
+
                         // Create status indicator
                         let statusText = "";
                         let statusColor = new ImGui.ImVec4(1.0, 1.0, 1.0, 1.0); // White default
-                        
+
                         if (isFadingOut) {
                             statusText = " [FADING OUT]";
                             statusColor = new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0); // Orange
@@ -2118,40 +2118,40 @@ export class PIXEffect_fog {
                             ImGui.Text("Status:");
                             ImGui.SameLine();
                             ImGui.TextColored(statusColor, statusText.trim());
-                            
+
                             // Show fade progress if fading
                             if (isFadingOut || isFadingIn) {
                                 const fadeStartTime = isFadingOut ? (fog as any).fadeStartTime : (fog as any).fadeInStartTime;
                                 const fadeDuration = isFadingOut ? PIXEffect_fog.GetFadeOutDuration() : PIXEffect_fog.GetFadeInDuration();
                                 const elapsed = Date.now() - fadeStartTime;
                                 const progress = Math.min(elapsed / fadeDuration, 1.0);
-                                
+
                                 ImGui.Text(`Fade Progress: ${(progress * 100).toFixed(1)}%`);
                                 ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0), `${(progress * 100).toFixed(1)}%`);
-                                
+
                                 // Show current opacity
                                 const currentOpacity = (fog as any).fogParams.opacity;
                                 ImGui.Text(`Current Opacity: ${(currentOpacity * 100).toFixed(1)}%`);
                             }
-                            
+
                             // Show temporary fog duration progress
                             if (debugInfo.type === "temporary" && debugInfo.duration > 0 && !isFadingOut) {
                                 const timerInstance = (fog as any).timerInstance;
                                 const timerTag = (fog as any).timerTag;
                                 const timerStartTime = (fog as any).timerStartTime || Date.now();
-                                
+
                                 let remainingTime = 0;
                                 let elapsedTime = 0;
                                 let progress = 0;
                                 let timerMethod = "Unknown";
-                                
+
                                 // Method 1: Try to get remaining time from C3 timer
                                 if (timerInstance && timerTag) {
                                     try {
                                         // Try different possible API methods
                                         if (timerInstance.behaviors && timerInstance.behaviors.Timer) {
                                             const timer = timerInstance.behaviors.Timer;
-                                            
+
                                             // Try method 1: getRemainingTime
                                             if (typeof timer.getRemainingTime === 'function') {
                                                 remainingTime = timer.getRemainingTime(timerTag);
@@ -2183,7 +2183,7 @@ export class PIXEffect_fog {
                                         console.warn(`Error accessing C3 timer: ${error.message}`);
                                     }
                                 }
-                                
+
                                 // Fallback: Calculate based on start time
                                 if (timerMethod === "Unknown" || remainingTime === 0) {
                                     const currentTime = Date.now();
@@ -2193,18 +2193,18 @@ export class PIXEffect_fog {
                                     progress = Math.min(elapsedTime / debugInfo.duration, 1.0);
                                     timerMethod = "Fallback calculation";
                                 }
-                                
+
                                 ImGui.Separator();
                                 ImGui.Text("Temporary Fog Timer:");
                                 ImGui.Text(`Method: ${timerMethod}`);
                                 ImGui.Text(`Remaining: ${remainingTime.toFixed(1)}s / ${debugInfo.duration}s`);
                                 ImGui.Text(`Elapsed: ${elapsedTime.toFixed(1)}s`);
-                                
+
                                 // Show timer instance info for debugging
                                 if (timerInstance) {
                                     ImGui.Text(`Timer Instance: ${timerInstance ? 'EXISTS' : 'NULL'}`);
                                     ImGui.Text(`Timer Tag: ${timerTag || 'NONE'}`);
-                                    
+
                                     // Try to show timer status
                                     try {
                                         if (timerInstance.behaviors && timerInstance.behaviors.Timer) {
@@ -2220,7 +2220,7 @@ export class PIXEffect_fog {
                                 } else {
                                     ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), "No Timer Instance");
                                 }
-                                
+
                                 // Progress bar with color coding
                                 let progressColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green
                                 if (progress > 0.8) {
@@ -2230,35 +2230,35 @@ export class PIXEffect_fog {
                                 } else if (progress > 0.4) {
                                     progressColor = new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0); // Yellow
                                 }
-                                
+
                                 ImGui.PushStyleColor(ImGui.Col.PlotHistogram, progressColor);
-                                ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0), 
+                                ImGui.ProgressBar(progress, new ImGui.ImVec2(-1, 0),
                                     `${(progress * 100).toFixed(1)}% (${elapsedTime.toFixed(1)}s elapsed)`);
                                 ImGui.PopStyleColor();
-                                
+
                                 // Show time until auto-destroy
                                 if (remainingTime <= 10 && remainingTime > 0) {
-                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0),
                                         `⚠ Auto-destroy in ${remainingTime.toFixed(1)}s!`);
                                 } else if (remainingTime <= 30 && remainingTime > 0) {
-                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), 
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0),
                                         `Auto-destroy in ${remainingTime.toFixed(1)}s`);
                                 } else if (remainingTime <= 0) {
-                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), 
+                                    ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0),
                                         "Timer expired - should be fading out");
                                 }
-                                
+
                             } else if (debugInfo.type === "temporary" && debugInfo.duration > 0 && isFadingOut) {
                                 // Show that temporary fog is in fade-out phase
                                 ImGui.Separator();
-                                ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), 
+                                ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0),
                                     "Temporary fog timer completed - now fading out");
                             } else if (debugInfo.type === "persistent") {
                                 ImGui.Separator();
-                                ImGui.TextColored(new ImGui.ImVec4(0.0, 0.8, 1.0, 1.0), 
+                                ImGui.TextColored(new ImGui.ImVec4(0.0, 0.8, 1.0, 1.0),
                                     "Persistent fog - no auto-destroy timer");
                             }
-                            
+
                             ImGui.Separator();
                             ImGui.Text(`Type: ${debugInfo.type}`);
                             ImGui.Text(`Style: ${debugInfo.style}`);
@@ -2284,13 +2284,13 @@ export class PIXEffect_fog {
                                 if (ImGui.Button(`Destroy##${id}`)) {
                                     fog.destroy();
                                 }
-                                
+
                                 // Add graceful destroy button
                                 ImGui.SameLine();
                                 if (ImGui.Button(`Fade Out##${id}`)) {
                                     fog.destroyWithFadeOut();
                                 }
-                                
+
                                 // Add extend timer button for temporary fog
                                 if (debugInfo.type === "temporary" && debugInfo.duration > 0) {
                                     ImGui.SameLine();
@@ -2447,38 +2447,38 @@ export class PIXEffect_fog {
      */
     public static CreateImGuiFogDebugWindow(): void {
         const windowId = "fog_debug_window";
-        
+
         // Close existing window if open
         if (Imgui_chunchun.IsWindowOpen(windowId)) {
             Imgui_chunchun.DestroyWindow(windowId);
         }
-        
+
         // Create fog debug window
         const renderCallback = () => {
             const fogInfo = PIXEffect_fog.GetFogInfo();
             const pendingInfo = PIXEffect_fog.GetPendingFogInfo();
             const performanceStats = PIXEffect_fog.GetPerformanceStats();
-            
+
             // Fog Overview Section
             if (ImGui.CollapsingHeader("Fog Overview", ImGui.TreeNodeFlags.DefaultOpen)) {
                 // Active fog count with visual indicator
                 ImGui.Text(`Active Fog Instances: ${fogInfo.count}`);
-                
+
                 // Pending fog count with visual indicator
                 if (pendingInfo.count > 0) {
                     ImGui.SameLine();
                     ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), `(${pendingInfo.count} pending)`);
                 }
-                
+
                 if (fogInfo.count > 0) {
                     const fogProgress = Math.min(fogInfo.count / 10.0, 1.0); // Max 10 for full bar
-                    const progressColor = fogProgress > 0.8 ? 
+                    const progressColor = fogProgress > 0.8 ?
                         new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0) : // Red if too many
                         new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0);   // Green if normal
                     ImGui.PushStyleColor(ImGui.Col.PlotHistogram, progressColor);
                     ImGui.ProgressBar(fogProgress, new ImGui.ImVec2(-1, 0), `${fogInfo.count} instances`);
                     ImGui.PopStyleColor();
-                    
+
                     // List fog IDs with status
                     ImGui.Text("Active Fog IDs:");
                     ImGui.Indent();
@@ -2486,11 +2486,11 @@ export class PIXEffect_fog {
                         const fog = PIXEffect_fog.GetFog(id);
                         let statusText = "";
                         let statusColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green default
-                        
+
                         if (fog) {
                             const isFadingOut = (fog as any).isFadingOut;
                             const isFadingIn = (fog as any).isFadingIn;
-                            
+
                             if (isFadingOut) {
                                 statusText = " [FADING OUT]";
                                 statusColor = new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0); // Orange
@@ -2502,7 +2502,7 @@ export class PIXEffect_fog {
                                 statusColor = new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0); // Green
                             }
                         }
-                        
+
                         ImGui.BulletText(id);
                         ImGui.SameLine();
                         ImGui.TextColored(statusColor, statusText);
@@ -2517,7 +2517,7 @@ export class PIXEffect_fog {
                     });
                     ImGui.Unindent();
                 }
-                
+
                 // Show pending fog information
                 if (pendingInfo.count > 0) {
                     ImGui.Separator();
@@ -2533,15 +2533,15 @@ export class PIXEffect_fog {
                         }
                     });
                     ImGui.Unindent();
-                    
+
                     // Pending fog controls
                     if (ImGui.Button("Cancel All Pending", new ImGui.ImVec2(120, 25))) {
                         PIXEffect_fog.CancelAllPendingFog();
                     }
                 }
-                
+
                 ImGui.Separator();
-                
+
                 // Quick fog creation buttons
                 if (ImGui.Button("Create Test Fog", new ImGui.ImVec2(100, 25))) {
                     PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 10, "test_fog")
@@ -2560,7 +2560,7 @@ export class PIXEffect_fog {
                     PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MEDIUM, 5, "replacement_test")
                         .setPosition(400, 300)
                         .setSize(300, 200);
-                    
+
                     // Try to replace it immediately (should queue)
                     setTimeout(() => {
                         PIXEffect_fog.GenerateFog(FogType.TEMPORARY, FogStyle.MYSTICAL, 8, "replacement_test")
@@ -2569,37 +2569,37 @@ export class PIXEffect_fog {
                     }, 1000);
                 }
             }
-            
+
             // Performance Section
             if (ImGui.CollapsingHeader("Performance Stats", ImGui.TreeNodeFlags.DefaultOpen)) {
                 if (performanceStats) {
                     // Particle usage
                     ImGui.Text(`Total Particles: ${performanceStats.totalParticles}/${performanceStats.maxParticlesGlobal}`);
-                    const particleRatio = performanceStats.maxParticlesGlobal > 0 ? 
+                    const particleRatio = performanceStats.maxParticlesGlobal > 0 ?
                         performanceStats.totalParticles / performanceStats.maxParticlesGlobal : 0;
-                    ImGui.ProgressBar(particleRatio, new ImGui.ImVec2(-1, 0), 
+                    ImGui.ProgressBar(particleRatio, new ImGui.ImVec2(-1, 0),
                         `${(particleRatio * 100).toFixed(1)}% used`);
-                    
+
                     // FPS with color coding
                     ImGui.Text("Estimated FPS:");
                     ImGui.SameLine();
-                    const fpsColor = performanceStats.estimatedFPS >= 50 ? 
+                    const fpsColor = performanceStats.estimatedFPS >= 50 ?
                         new ImGui.ImVec4(0.3, 1.0, 0.3, 1.0) : // Green
-                        performanceStats.estimatedFPS >= 30 ? 
-                        new ImGui.ImVec4(1.0, 1.0, 0.3, 1.0) : // Yellow
-                        new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0);   // Red
+                        performanceStats.estimatedFPS >= 30 ?
+                            new ImGui.ImVec4(1.0, 1.0, 0.3, 1.0) : // Yellow
+                            new ImGui.ImVec4(1.0, 0.3, 0.3, 1.0);   // Red
                     ImGui.TextColored(fpsColor, `${performanceStats.estimatedFPS}`);
-                    
+
                     // Frame time slider-like display
                     ImGui.Text(`Avg Frame Time: ${performanceStats.avgFrameTime.toFixed(2)}ms`);
                     const frameTimeRatio = Math.min(performanceStats.avgFrameTime / 33.33, 1.0); // 33.33ms = 30fps
-                    ImGui.ProgressBar(frameTimeRatio, new ImGui.ImVec2(-1, 0), 
+                    ImGui.ProgressBar(frameTimeRatio, new ImGui.ImVec2(-1, 0),
                         `${performanceStats.avgFrameTime.toFixed(1)}ms`);
-                    
+
                     // Performance settings with checkboxes
                     ImGui.Separator();
                     ImGui.Text("Performance Settings:");
-                    
+
                     let perfMode = performanceStats.performanceMode;
                     if (ImGui.Checkbox("Performance Mode", (value = perfMode) => perfMode = value)) {
                         // Only trigger when checkbox is actually clicked
@@ -2607,7 +2607,7 @@ export class PIXEffect_fog {
                             PIXEffect_fog.SetPerformanceMode(perfMode);
                         }
                     }
-                    
+
                     let lodEnabled = performanceStats.lodEnabled;
                     if (ImGui.Checkbox("LOD System", (value = lodEnabled) => lodEnabled = value)) {
                         // Only trigger when checkbox is actually clicked
@@ -2615,20 +2615,20 @@ export class PIXEffect_fog {
                             PIXEffect_fog.SetLODEnabled(lodEnabled);
                         }
                     }
-                    
+
                     // Particle limits with sliders
                     ImGui.Separator();
                     let maxParticlesPerFog = performanceStats.maxParticlesPerFog;
-                    if (ImGui.SliderInt("Max Particles Per Fog", 
+                    if (ImGui.SliderInt("Max Particles Per Fog",
                         (value = maxParticlesPerFog) => maxParticlesPerFog = value, 10, 300)) {
                         // Only trigger when slider is actually changed
                         if (maxParticlesPerFog !== performanceStats.maxParticlesPerFog) {
                             PIXEffect_fog.SetMaxParticlesPerFog(maxParticlesPerFog);
                         }
                     }
-                    
+
                     let maxParticlesGlobal = performanceStats.maxParticlesGlobal;
-                    if (ImGui.SliderInt("Max Particles Global", 
+                    if (ImGui.SliderInt("Max Particles Global",
                         (value = maxParticlesGlobal) => maxParticlesGlobal = value, 50, 1000)) {
                         // Only trigger when slider is actually changed
                         if (maxParticlesGlobal !== performanceStats.maxParticlesGlobal) {
@@ -2637,24 +2637,24 @@ export class PIXEffect_fog {
                     }
                 }
             }
-            
+
             // LOD Distribution Section
             if (ImGui.CollapsingHeader("LOD Distribution")) {
                 if (performanceStats && performanceStats.lodDistribution) {
                     const lod = performanceStats.lodDistribution;
                     const total = lod.full + lod.high + lod.medium + lod.low;
-                    
+
                     if (total > 0) {
                         // LOD distribution with progress bars
                         ImGui.Text(`Full Detail: ${lod.full}`);
                         ImGui.ProgressBar(lod.full / total, new ImGui.ImVec2(-1, 0), `${lod.full}`);
-                        
+
                         ImGui.Text(`High Detail: ${lod.high}`);
                         ImGui.ProgressBar(lod.high / total, new ImGui.ImVec2(-1, 0), `${lod.high}`);
-                        
+
                         ImGui.Text(`Medium Detail: ${lod.medium}`);
                         ImGui.ProgressBar(lod.medium / total, new ImGui.ImVec2(-1, 0), `${lod.medium}`);
-                        
+
                         ImGui.Text(`Low Detail: ${lod.low}`);
                         ImGui.ProgressBar(lod.low / total, new ImGui.ImVec2(-1, 0), `${lod.low}`);
                     } else {
@@ -2662,7 +2662,7 @@ export class PIXEffect_fog {
                     }
                 }
             }
-            
+
             // Quick Actions Section
             if (ImGui.CollapsingHeader("Quick Actions")) {
                 // Cleanup actions
@@ -2673,9 +2673,9 @@ export class PIXEffect_fog {
                 if (ImGui.Button("Emergency Cleanup", new ImGui.ImVec2(120, 25))) {
                     PIXEffect_fog.EmergencyDestroyAllFog();
                 }
-                
+
                 ImGui.Separator();
-                
+
                 // Optimization actions
                 if (ImGui.Button("Optimize All Fog", new ImGui.ImVec2(120, 25))) {
                     PIXEffect_fog.OptimizeAllFog();
@@ -2684,9 +2684,9 @@ export class PIXEffect_fog {
                 if (ImGui.Button("Open Performance Monitor", new ImGui.ImVec2(120, 25))) {
                     PIXEffect_fog.OpenPerformanceMonitor();
                 }
-                
+
                 ImGui.Separator();
-                
+
                 // Fade duration controls
                 ImGui.Text("Fade Duration Controls:");
                 if (ImGui.Button("Fast Fade (500ms)", new ImGui.ImVec2(120, 25))) {
@@ -2697,24 +2697,24 @@ export class PIXEffect_fog {
                     PIXEffect_fog.SetFadeOutDuration(2000);
                 }
             }
-            
+
             // System Info Section
             if (ImGui.CollapsingHeader("System Info")) {
                 ImGui.Text(`Fade Out Duration: ${PIXEffect_fog.GetFadeOutDuration()}ms`);
                 ImGui.Text(`Fade In Duration: ${PIXEffect_fog.GetFadeInDuration()}ms`);
                 ImGui.Text(`Update Frequency: ${performanceStats?.updateFrequency || 'N/A'}ms`);
-                
+
                 ImGui.Separator();
                 ImGui.Text("Window auto-refreshes every frame");
             }
-            
+
             // Close button
             ImGui.Separator();
             if (ImGui.Button("Close Debug Window", new ImGui.ImVec2(-1, 30))) {
                 Imgui_chunchun.CloseWindow(windowId);
             }
         };
-        
+
         // Create the window
         const windowConfig = {
             title: "Fog System Debug",
@@ -2723,10 +2723,10 @@ export class PIXEffect_fog {
             position: { x: 500, y: 50 },
             renderCallback: renderCallback
         };
-        
+
         // Manually add to windows map
         (Imgui_chunchun as any).windows.set(windowId, windowConfig);
-        
+
         console.log("Fog debug window created");
     }
 
@@ -2738,41 +2738,41 @@ export class PIXEffect_fog {
             // Listen for layout end events (scene changes in C3)
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", (event: any) => {
                 console.log("Scene ending detected, starting graceful fog cleanup...");
-                
+
                 const fogInfo = PIXEffect_fog.GetFogInfo();
                 if (fogInfo.count > 0) {
                     console.log(`Gracefully destroying ${fogInfo.count} fog effects before scene change...`);
-                    
+
                     // Option 1: Graceful fade-out for all fog (recommended)
                     fogInfo.fogs.forEach(fogId => {
                         PIXEffect_fog.DestroyFogWithFadeOut(fogId);
                     });
-                    
+
                     // Wait a bit for fade-out to complete before scene actually ends
                     // This ensures smooth transition
                 } else {
                     console.log("No fog effects to clean up before scene change");
                 }
             });
-            
+
             // Listen for layout start events to handle emergency cleanup if needed
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", (event: any) => {
                 console.log("New scene starting, checking for orphaned fog effects...");
-                
+
                 const fogInfo = PIXEffect_fog.GetFogInfo();
                 if (fogInfo.count > 0) {
                     console.log(`Found ${fogInfo.count} orphaned fog effects, performing emergency cleanup...`);
                     PIXEffect_fog.EmergencyDestroyAllFog();
                 }
             });
-            
+
             // Optional: Listen for after layout start to recreate persistent fog if needed
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("afteranylayoutstart", (event: any) => {
                 console.log("New scene started, fog system ready for new effects");
                 // You can add auto-recreation logic here if needed
                 PIXEffect_fog.RecreateAfterSceneChange();
             });
-            
+
             console.log("Scene change cleanup listeners added successfully");
         } catch (error: any) {
             console.warn(`Failed to add scene change listeners: ${error.message}`);
@@ -2784,17 +2784,17 @@ export class PIXEffect_fog {
      */
     public static EmergencyCleanupOnSceneChange(): void {
         console.log("=== EMERGENCY SCENE CHANGE CLEANUP ===");
-        
+
         try {
             // First, try graceful cleanup
             const fogInfo = PIXEffect_fog.GetFogInfo();
             if (fogInfo.count > 0) {
                 console.log(`Attempting graceful cleanup of ${fogInfo.count} fog effects...`);
-                
+
                 // Set very fast fade-out for emergency cleanup
                 const originalFadeDuration = PIXEffect_fog.GetFadeOutDuration();
                 PIXEffect_fog.SetFadeOutDuration(200); // Very fast fade
-                
+
                 // Start fade-out for all fog
                 fogInfo.fogs.forEach(fogId => {
                     try {
@@ -2803,14 +2803,14 @@ export class PIXEffect_fog {
                         console.warn(`Error during graceful cleanup of fog ${fogId}: ${error.message}`);
                     }
                 });
-                
+
                 // Wait a moment then do emergency cleanup
                 setTimeout(() => {
                     PIXEffect_fog.EmergencyDestroyAllFog();
                     // Restore original fade duration
                     PIXEffect_fog.SetFadeOutDuration(originalFadeDuration);
                 }, 300);
-                
+
             } else {
                 console.log("No fog effects found during emergency cleanup");
             }
@@ -2819,7 +2819,7 @@ export class PIXEffect_fog {
             // Fallback to immediate destruction
             PIXEffect_fog.EmergencyDestroyAllFog();
         }
-        
+
         console.log("Emergency scene change cleanup completed");
     }
 
@@ -2835,7 +2835,7 @@ export class PIXEffect_fog {
                 console.log("Auto cleanup already setup, skipping...");
                 return;
             }
-            
+
             switch (strategy) {
                 case 'graceful':
                     // Only use fade-out, slower but prettier
@@ -2846,21 +2846,21 @@ export class PIXEffect_fog {
                         });
                     });
                     break;
-                    
+
                 case 'immediate':
                     // Immediate destruction, fastest
                     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", () => {
                         PIXEffect_fog.EmergencyDestroyAllFog();
                     });
                     break;
-                    
+
                 case 'smart':
                 default:
                     // Smart strategy: graceful if time allows, emergency if needed
                     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutend", () => {
                         PIXEffect_fog.EmergencyCleanupOnSceneChange();
                     });
-                    
+
                     // Backup cleanup on scene start
                     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("beforeanylayoutstart", () => {
                         const fogInfo = PIXEffect_fog.GetFogInfo();
@@ -2871,11 +2871,11 @@ export class PIXEffect_fog {
                     });
                     break;
             }
-            
+
             // Mark as setup to avoid duplicates
             (PIXEffect_fog as any)._autoCleanupSetup = true;
             console.log(`Auto fog cleanup setup with '${strategy}' strategy`);
-            
+
         } catch (error: any) {
             console.error(`Failed to setup auto cleanup: ${error.message}`);
         }
@@ -2903,7 +2903,7 @@ export class PIXEffect_fog {
         // This method can be called after scene change to recreate fog effects
         // You would need to store fog configurations and recreate them
         console.log("Recreating fog effects after scene change...");
-        
+
         // Example: Recreate a basic level fog if needed
         // This is just an example - you'd implement based on your game's needs
         try {
@@ -2943,7 +2943,7 @@ export class PIXEffect_fog {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
                 console.log(`Fog ${id} already exists. Checking fade status...`);
-                
+
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
                     console.log(`Fog ${id} is already fading out. Queueing new fog creation with callback...`);
@@ -2956,7 +2956,7 @@ export class PIXEffect_fog {
                     });
                     return existingFog; // Return existing fog for now
                 }
-                
+
                 // If existing fog is not fading out, start fade-out and queue new creation
                 console.log(`Starting fade-out for existing fog ${id} and queueing replacement with callback...`);
                 PIXEffect_fog.pendingFogCreations.set(id, {
@@ -2966,7 +2966,7 @@ export class PIXEffect_fog {
                     layer,
                     callback
                 });
-                
+
                 existingFog.startFadeOut();
                 return existingFog; // Return existing fog for now
             }
@@ -2978,12 +2978,12 @@ export class PIXEffect_fog {
         PIXEffect_fog.instances.set(id, instance);
 
         console.log(`Created new fog ${id} immediately`);
-        
+
         // Call callback immediately since fog was created
         if (callback) {
             callback(instance);
         }
-        
+
         return instance;
     }
 
@@ -3061,19 +3061,19 @@ export class PIXEffect_fog {
             const existingFog = PIXEffect_fog.instances.get(id);
             if (existingFog && !existingFog.isDestroyed) {
                 console.log(`Fog ${id} already exists. Checking fade status...`);
-                
+
                 // Capture existing fog properties for replacement
                 const existingProperties = {
                     position: customSettings?.position || { x: existingFog._x, y: existingFog._y },
                     size: customSettings?.size || { width: existingFog._width, height: existingFog._height },
                     fogParams: { ...existingFog.fogParams }
                 };
-                
+
                 // Merge custom settings with existing properties
                 const mergedCustomSettings = {
                     ...customSettings
                 };
-                
+
                 // If existing fog is already fading out, queue the new fog creation
                 if (existingFog.isFadingOut) {
                     console.log(`Fog ${id} is already fading out. Queueing new fog creation with custom settings...`);
@@ -3089,7 +3089,7 @@ export class PIXEffect_fog {
                     });
                     return existingFog; // Return existing fog for now
                 }
-                
+
                 // If existing fog is not fading out, start fade-out and queue new creation
                 console.log(`Starting fade-out for existing fog ${id} and queueing replacement with custom settings...`);
                 PIXEffect_fog.pendingFogCreations.set(id, {
@@ -3102,7 +3102,7 @@ export class PIXEffect_fog {
                     fogParams: existingProperties.fogParams,
                     customSettings: mergedCustomSettings
                 });
-                
+
                 existingFog.startFadeOut();
                 return existingFog; // Return existing fog for now
             }
@@ -3194,7 +3194,6 @@ export class PIXEffect_fog {
         if (this.fogParams.density < 0.5) {
             this.fogParams.density = 0.5;
             this.dynamicState.baseDensity = 0.5;
-            console.log(`🌫️ Increased density for dynamic fog ${this.id} to ensure visibility`);
         }
 
         // Create dynamic timer for C3
@@ -3212,7 +3211,7 @@ export class PIXEffect_fog {
         }
 
         this.dynamicConfig = { ...this.dynamicConfig, ...config };
-        
+
         // Update next change time if interval changed
         if (this.dynamicState) {
             this.dynamicState.nextChangeTime = Date.now() + this.getRandomChangeInterval() * 1000;
@@ -3267,7 +3266,7 @@ export class PIXEffect_fog {
      */
     private getRandomChangeInterval(): number {
         if (!this.dynamicConfig) return 30;
-        
+
         const min = this.dynamicConfig.changeInterval.min;
         const max = this.dynamicConfig.changeInterval.max;
         return pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GetRandomNumber(min, max);
@@ -3283,7 +3282,7 @@ export class PIXEffect_fog {
         }
 
         console.log(`🌫️ Processing dynamic change for ${this.id}`);
-        
+
         const currentTime = Date.now();
         this.dynamicState.lastChangeTime = currentTime;
 
@@ -3313,12 +3312,11 @@ export class PIXEffect_fog {
     private startFogDisappearance(): void {
         if (!this.dynamicConfig || !this.dynamicState) return;
 
-        console.log(`Dynamic fog ${this.id} starting disappearance`);
-        
+
         this.dynamicState.isDisappeared = true;
         this.dynamicState.targetIntensity = 0;
         this.dynamicState.targetSize = 0.1;
-        
+
         this.startDynamicTransition();
 
         // Schedule reappearance
@@ -3340,8 +3338,7 @@ export class PIXEffect_fog {
     private startFogReappearance(): void {
         if (!this.dynamicConfig || !this.dynamicState) return;
 
-        console.log(`Dynamic fog ${this.id} starting reappearance`);
-        
+
         this.dynamicState.isDisappeared = false;
         this.generateNewTargets();
         this.startDynamicTransition();
@@ -3388,13 +3385,12 @@ export class PIXEffect_fog {
             const variation = 0.1;
             this.dynamicState.targetIntensity += (Math.random() - 0.5) * variation;
             this.dynamicState.targetSize += (Math.random() - 0.5) * variation;
-            
+
             // Clamp values
             this.dynamicState.targetIntensity = Math.max(0, Math.min(1, this.dynamicState.targetIntensity));
             this.dynamicState.targetSize = Math.max(0.1, Math.min(5, this.dynamicState.targetSize));
         }
 
-        console.log(`Dynamic fog ${this.id} new targets: intensity=${this.dynamicState.targetIntensity.toFixed(2)}, size=${this.dynamicState.targetSize.toFixed(2)}`);
     }
 
     /**
@@ -3404,7 +3400,7 @@ export class PIXEffect_fog {
         if (!this.dynamicState) return;
 
         this.dynamicState.transitionStartTime = Date.now();
-        
+
         // Start transition animation
         this.updateDynamicTransition();
     }
@@ -3420,8 +3416,8 @@ export class PIXEffect_fog {
         const progress = Math.min(elapsed / this.dynamicState.transitionDuration, 1.0);
 
         // Smooth easing function (ease-in-out)
-        const easedProgress = progress < 0.5 
-            ? 2 * progress * progress 
+        const easedProgress = progress < 0.5
+            ? 2 * progress * progress
             : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
         // Store previous values for comparison
@@ -3440,9 +3436,6 @@ export class PIXEffect_fog {
 
         // 添加过渡调试信息（每10次更新输出一次，避免日志过多）
         if (Math.floor(progress * 20) !== Math.floor((progress - 0.05) * 20)) {
-            console.log(`🌫️ Dynamic fog ${this.id} transition progress: ${(progress * 100).toFixed(1)}%`);
-            console.log(`   - Intensity: ${prevIntensity.toFixed(3)} → ${this.dynamicState.currentIntensity.toFixed(3)} (target: ${targetIntensity.toFixed(3)})`);
-            console.log(`   - Size: ${prevSize.toFixed(3)} → ${this.dynamicState.currentSize.toFixed(3)} (target: ${targetSize.toFixed(3)})`);
         }
 
         // Apply changes to fog
@@ -3455,7 +3448,6 @@ export class PIXEffect_fog {
             // Transition complete
             this.dynamicState.currentIntensity = this.dynamicState.targetIntensity;
             this.dynamicState.currentSize = this.dynamicState.targetSize;
-            console.log(`🌫️ Dynamic fog ${this.id} transition completed - Final intensity: ${this.dynamicState.currentIntensity.toFixed(3)}, size: ${this.dynamicState.currentSize.toFixed(3)}`);
         }
     }
 
@@ -3488,11 +3480,6 @@ export class PIXEffect_fog {
         }
 
         // 添加详细的调试信息
-        console.log(`🌫️ Dynamic fog ${this.id} applying changes:`);
-        console.log(`   - Intensity: ${intensityFactor.toFixed(3)} (opacity: ${this.fogParams.opacity.toFixed(3)})`);
-        console.log(`   - Size: ${this.dynamicState.currentSize.toFixed(3)} (scale: ${this.fogParams.scale.toFixed(3)}, base: ${this.dynamicState.baseScale.toFixed(3)})`);
-        console.log(`   - Particles: ${this.particles.length}`);
-        console.log(`   - Density: ${this.fogParams.density.toFixed(3)}`);
 
         // 检查粒子数量 - 如果太少，立即重新初始化
         if (this.particles.length < 10) {
@@ -3544,7 +3531,7 @@ export class PIXEffect_fog {
         if (!this.isDynamic) return;
 
         this.isDynamic = false;
-        
+
         // Stop dynamic timer
         if (this.dynamicTimer) {
             try {
@@ -3712,21 +3699,21 @@ export class PIXEffect_fog {
      */
     public static CreateTestFog(id: string = "test_fog"): PIXEffect_fog {
         console.log(`🧪 Creating test fog ${id} for visibility debugging`);
-        
+
         const testFog = new PIXEffect_fog(FogType.PERSISTENT, FogStyle.MEDIUM, 0, "html_c3");
         testFog.id = id;
-        
+
         // Set very visible parameters
         testFog.fogParams.opacity = 0.8;
         testFog.fogParams.scale = 2.0;
         testFog.fogParams.density = 1.0;
         testFog.fogParams.color = '#ffffff';
         testFog.fogParams.blur = 10;
-        
+
         // Set position and size
         testFog.setPosition(200, 200);
         testFog.setSize(800, 600);
-        
+
         // Force create particles
         testFog.particles = [];
         for (let i = 0; i < 50; i++) {
@@ -3747,79 +3734,20 @@ export class PIXEffect_fog {
                 updateCounter: 0
             });
         }
-        
+
         PIXEffect_fog.instances.set(id, testFog);
-        
+
         console.log(`🧪 Test fog ${id} created with ${testFog.particles.length} particles`);
         console.log(`🧪 Test fog parameters: opacity=${testFog.fogParams.opacity}, scale=${testFog.fogParams.scale}, density=${testFog.fogParams.density}`);
-        
+
         return testFog;
     }
 }
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     PIXEffect_fog.SetupAutoCleanup('smart');
-
-    // Add dynamic fog debug buttons
-    var fog_system = IMGUIDebugButton.AddCategory("fog_system");
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Dynamic Fog (Subtle)", () => {
-        PIXEffect_fog.CreatePresetDynamicFog('subtle', 'test_subtle_fog')
-            .setPosition(400, 300)
-            .setSize(800, 600);
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Dynamic Fog (Moderate)", () => {
-        PIXEffect_fog.CreatePresetDynamicFog('moderate', 'test_moderate_fog')
-            .setPosition(400, 300)
-            .setSize(800, 600);
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Dynamic Fog (Dramatic)", () => {
-        PIXEffect_fog.CreatePresetDynamicFog('dramatic', 'test_dramatic_fog')
-            .setPosition(400, 300)
-            .setSize(800, 600);
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Dynamic Fog (Mystical)", () => {
-        PIXEffect_fog.CreatePresetDynamicFog('mystical', 'test_mystical_fog')
-            .setPosition(400, 300)
-            .setSize(800, 600);
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Dynamic Fog (Stormy)", () => {
-        PIXEffect_fog.CreatePresetDynamicFog('stormy', 'test_stormy_fog')
-            .setPosition(400, 300)
-            .setSize(800, 600);
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Create Test Fog (Debug)", () => {
-        PIXEffect_fog.CreateTestFog('debug_test_fog');
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Show Dynamic Fog Info", () => {
-        const dynamicInfo = PIXEffect_fog.GetDynamicFogInfo();
-        console.log("=== DYNAMIC FOG INFO ===");
-        console.log("Dynamic Fog Count:", dynamicInfo.count);
-        dynamicInfo.fogs.forEach((fog: any) => {
-            console.log(`Fog ${fog.id}:`, fog.status);
-        });
-        console.log("========================");
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Stop All Dynamic Fog", () => {
-        PIXEffect_fog.StopAllDynamicFog();
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Open Fog Debug Window", () => {
-        PIXEffect_fog.CreateImGuiFogDebugWindow();
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(fog_system, "Open Performance Monitor", () => {
-        PIXEffect_fog.OpenPerformanceMonitor();
-    });
 
 })
 
