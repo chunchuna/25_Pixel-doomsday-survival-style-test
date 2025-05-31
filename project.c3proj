@@ -521,6 +521,14 @@
 													"script-info": {
 														"purpose": "none"
 													}
+												},
+												{
+													"name": "FogEffectDebug.ts",
+													"type": "application/typescript",
+													"sid": 682258433839990,
+													"script-info": {
+														"purpose": "none"
+													}
 												}
 											],
 											"subfolders": [],
