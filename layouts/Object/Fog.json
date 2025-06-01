@@ -7,56 +7,162 @@
 			"subLayers": [],
 			"instances": [
 				{
-					"type": "FogEffect_c3",
+					"type": "FogSprite",
 					"properties": {
-						"rate": 10,
-						"spray-cone": 60,
-						"type": "continuous-spray",
-						"object": -1,
 						"initially-visible": true,
-						"live-preview": true,
-						"speed": 50,
-						"size": 100,
-						"opacity": 20,
-						"grow-rate": 80,
-						"x-randomiser": 20,
-						"y-randomiser": 0,
-						"initial-speed-randomiser": 20,
-						"size-randomiser": 20,
-						"grow-rate-randomiser": 20,
-						"acceleration": 0,
-						"gravity": -8,
-						"angle-randomiser": 0,
-						"life-speed-randomiser": 0,
-						"opacity-randomiser": 0,
-						"destroy-mode": "fade-to-invisible",
-						"timeout": 1
+						"initial-animation": "Default",
+						"initial-frame": 0,
+						"enable-collisions": true,
+						"live-preview": false
 					},
 					"uid": 1226,
-					"sid": 757812582632911,
+					"sid": 470576561919924,
 					"tags": "",
 					"instanceVariables": {},
-					"behaviors": {},
+					"behaviors": {
+						"正弦运动": {
+							"properties": {
+								"movement": "size",
+								"wave": "sine",
+								"period": 0.25,
+								"period-random": 0,
+								"period-offset": 2,
+								"period-offset-random": 2,
+								"magnitude": 10,
+								"magnitude-random": 2,
+								"enabled": true,
+								"live-preview": false
+							}
+						}
+					},
+					"sceneGraphData": {
+						"parent-uid": null,
+						"uid": 1226,
+						"flags": {
+							"x": true,
+							"y": true,
+							"z": true,
+							"w": true,
+							"h": true,
+							"a": true,
+							"o": false,
+							"v": false,
+							"d": true,
+							"sm": "normal"
+						},
+						"preview": {
+							"transformX": 0,
+							"transformY": 0,
+							"transformZElevation": 0,
+							"transformW": 0,
+							"transformH": 0,
+							"transformA": 0,
+							"transformSX": 0,
+							"transformSY": 0,
+							"transformO": 0,
+							"previewSceneGraph": false
+						}
+					},
 					"instanceFolderItem": {
-						"sid": 757812582632911,
+						"sid": 470576561919924,
 						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": 291,
-						"y": 230,
-						"width": 100,
-						"height": 100,
-						"originX": 0,
+						"x": 549,
+						"y": 363,
+						"width": 1500,
+						"height": 1500,
+						"originX": 0.5,
 						"originY": 0.5,
 						"color": [
-							1,
-							1,
-							1,
-							1
+							0.47058823529411764,
+							0.47058823529411764,
+							0.47058823529411764,
+							0.6
 						],
-						"angle": 0,
+						"angle": 0.004290848540001724,
+						"zElevation": 0
+					}
+				},
+				{
+					"type": "FogSprite",
+					"properties": {
+						"initially-visible": true,
+						"initial-animation": "Default",
+						"initial-frame": 0,
+						"enable-collisions": true,
+						"live-preview": false
+					},
+					"uid": 1227,
+					"sid": 136623150195625,
+					"tags": "",
+					"instanceVariables": {},
+					"behaviors": {
+						"正弦运动": {
+							"properties": {
+								"movement": "size",
+								"wave": "sine",
+								"period": 0.25,
+								"period-random": 0,
+								"period-offset": 2,
+								"period-offset-random": 2,
+								"magnitude": 10,
+								"magnitude-random": 2,
+								"enabled": true,
+								"live-preview": false
+							}
+						}
+					},
+					"sceneGraphData": {
+						"parent-uid": null,
+						"uid": 1227,
+						"flags": {
+							"x": true,
+							"y": true,
+							"z": true,
+							"w": true,
+							"h": true,
+							"a": true,
+							"o": false,
+							"v": false,
+							"d": true,
+							"sm": "normal"
+						},
+						"preview": {
+							"transformX": 0,
+							"transformY": 0,
+							"transformZElevation": 0,
+							"transformW": 0,
+							"transformH": 0,
+							"transformA": 0,
+							"transformSX": 0,
+							"transformSY": 0,
+							"transformO": 0,
+							"previewSceneGraph": false
+						}
+					},
+					"instanceFolderItem": {
+						"sid": 136623150195625,
+						"expanded": true
+					},
+					"showing": true,
+					"locked": false,
+					"world": {
+						"x": 549,
+						"y": 520,
+						"width": 1500,
+						"height": 1500,
+						"originX": 0.5,
+						"originY": 0.5,
+						"color": [
+							0.47058823529411764,
+							0.47058823529411764,
+							0.47058823529411764,
+							0.6
+						],
+						"angle": 0.004290848540001724,
 						"zElevation": 0
 					}
 				}
@@ -92,7 +198,16 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 470576561919924,
+				"expanded": true
+			},
+			{
+				"sid": 136623150195625,
+				"expanded": true
+			}
+		],
 		"subfolders": []
 	},
 	"sid": 853106934266135,

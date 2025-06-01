@@ -1,0 +1,58 @@
+{
+	"name": "FogSprite",
+	"plugin-id": "Sprite",
+	"sid": 440366721522128,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Sin",
+			"name": "正弦运动",
+			"sid": 599021874149605
+		}
+	],
+	"effectTypes": [],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 64,
+						"height": 64,
+						"originX": 0.5,
+						"originY": 0.5,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 1335167,
+						"collisionPoly": {
+							"points": [
+								0.0010256410256410256,
+								0.0010204081632653062,
+								0.9989743589743589,
+								0.0010204081632653062,
+								0.9989743589743589,
+								0.9989795918367347,
+								0.0010256410256410256,
+								0.9989795918367347
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 878634894563927,
+				"name": "Default",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}

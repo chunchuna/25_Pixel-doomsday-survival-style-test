@@ -209,7 +209,8 @@
 					"XueJiDimian",
 					"DaoDiNvHai",
 					"DaoDiNanRen",
-					"C3Ctimer"
+					"C3Ctimer",
+					"FogSprite"
 				],
 				"subfolders": [],
 				"name": "Sprite"

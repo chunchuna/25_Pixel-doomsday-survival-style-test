@@ -58288,6 +58288,40 @@
 							"blendMode": "normal",
 							"zElevation": 0,
 							"global": false
+						},
+						{
+							"name": "Fog",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [],
+							"sid": 182534928311576,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
 						}
 					],
 					"instances": [
@@ -61370,7 +61404,7 @@
 							},
 							"instanceFolderItem": {
 								"sid": 351283556122960,
-								"expanded": false
+								"expanded": true
 							},
 							"showing": true,
 							"locked": false,
@@ -69144,7 +69178,7 @@
 					},
 					{
 						"sid": 351283556122960,
-						"expanded": false
+						"expanded": true
 					},
 					{
 						"sid": 779168961953812,
