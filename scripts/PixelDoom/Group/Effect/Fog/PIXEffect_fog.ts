@@ -14,7 +14,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         RUN_TIME_.objects.
         RedHairGirlSprite.getFirstInstance(), 20, 100, 3, 200)
 
-    
+
 
 })
 
@@ -41,6 +41,11 @@ let globalFogDistanceData: Array<{
 
 var TargetInstance: null;
 var MaxDsitance = 0;
+var FogInstanceArray: InstanceType.FogSprite[] = [];
+var MaxFogCount = 0; // 记录最大雾数量
+var FogRadius = 100; // 记录雾的半径
+
+
 //实时获取雾和实例的距离
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
@@ -73,7 +78,7 @@ export async function createFogAroundInstance(
     targetInstance: any,
     fogCount: number,
     radius: number = 100,
-    checkInterval: number = 2, // Keep parameter for compatibility but won't use
+    checkInterval: number = 2,
     maxDistance: number = 500
 ): Promise<void> {
 
@@ -84,6 +89,30 @@ export async function createFogAroundInstance(
     // Set global variables for your distance calculation system
     TargetInstance = targetInstance;
     MaxDsitance = maxDistance;
+    MaxFogCount = fogCount; // 记录最大雾数量
+    FogRadius = radius; // 记录雾半径
+    
+    var FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100)
+    FogTimer.behaviors.Timer.startTimer(checkInterval, "fog_check_timer", "regular")
+    FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
+        if (e.tag === "fog_check_timer") {
+            // 检查当前雾实例数量
+            const currentFogInstances = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+                RUN_TIME_.objects.FogSprite.getAllInstances();
+            const currentFogCount = currentFogInstances.length;
+            
+            console.log(`Current fog count: ${currentFogCount}, Max fog count: ${MaxFogCount}`);
+            
+            // 如果当前雾数量小于最大值，则补充雾实例
+            if (currentFogCount < MaxFogCount && TargetInstance) {
+                const missingFogCount = MaxFogCount - currentFogCount;
+                console.log(`Need to create ${missingFogCount} more fog instances`);
+                
+                // 创建缺失的雾实例
+                createMissingFogInstances(TargetInstance, missingFogCount, FogRadius);
+            }
+        }
+    })
 
     if (!targetInstance || fogCount <= 0) {
         console.log("Invalid parameters for fog creation");
@@ -150,6 +179,101 @@ export async function createFogAroundInstance(
     }
 
     console.log(`Successfully created ${fogCount} fog instances around target at (${centerX}, ${centerY})`);
+}
+
+/**
+ * Create missing fog instances to maintain the maximum count
+ * @param targetInstance - The target instance to surround with fog
+ * @param missingCount - Number of fog instances to create
+ * @param radius - Distance from the target instance
+ */
+function createMissingFogInstances(targetInstance: any, missingCount: number, radius: number): void {
+    if (!targetInstance || missingCount <= 0) return;
+
+    const centerX = targetInstance.x;
+    const centerY = targetInstance.y;
+
+    // Get current fog instances to avoid overlapping positions
+    const currentFogInstances = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+        RUN_TIME_.objects.FogSprite.getAllInstances();
+
+    for (let i = 0; i < missingCount; i++) {
+        // Find a suitable position that doesn't overlap with existing fog
+        let fogX, fogY;
+        let attempts = 0;
+        const maxAttempts = 50; // Prevent infinite loop
+
+        do {
+            // Generate random angle for new fog position
+            const angle = Math.random() * 2 * Math.PI;
+            // Add some randomness to radius to avoid perfect circles
+            const randomRadius = radius + (Math.random() - 0.5) * 50;
+            fogX = centerX + Math.cos(angle) * randomRadius;
+            fogY = centerY + Math.sin(angle) * randomRadius;
+            attempts++;
+
+            // Check if position is too close to existing fog instances
+            let tooClose = false;
+            for (const existingFog of currentFogInstances) {
+                const distance = Math.sqrt(
+                    Math.pow(fogX - existingFog.x, 2) + 
+                    Math.pow(fogY - existingFog.y, 2)
+                );
+                if (distance < 30) { // Minimum distance between fog instances
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose || attempts >= maxAttempts) break;
+        } while (attempts < maxAttempts);
+
+        // Create fog instance at calculated position
+        const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+            RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
+
+        // Add debug visualization for this fog instance
+        try {
+            // Add debug box around fog instance
+            const boxKey = DebugObjectRenderer
+                .setColorPreset(DebugColors.GREEN, 0.8) // Use green to indicate newly created fog
+                .setBoxThickness(2)
+                .setHollow()
+                .setLayer("GameContent")
+                .RenderBoxtoInstance(fogInstance);
+
+            // Add debug line connecting fog to target instance
+            const lineKey = DebugObjectRenderer
+                .setColorPreset(DebugColors.YELLOW, 0.6)
+                .setBoxThickness(1)
+                .RenderLineBetweenInstances(fogInstance, targetInstance);
+
+            console.log(`Added debug visualization for replacement fog instance ${i + 1}`);
+        } catch (error) {
+            console.log(`Failed to add debug visualization for replacement fog instance ${i + 1}: ${error}`);
+        }
+
+        // Add fade-in effect to the fog instance
+        try {
+            const fadeBehavior = fogInstance.behaviors.Fade;
+            if (fadeBehavior) {
+                // Set fade parameters
+                fadeBehavior.fadeInTime = 1.0;  // 1 second fade in
+                fadeBehavior.waitTime = 99999;      // Long wait time
+                fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out when triggered
+
+                // Start the fade effect
+                fadeBehavior.startFade();
+                console.log(`Started fade-in effect for replacement fog instance ${i + 1}`);
+            }
+        } catch (error) {
+            console.log(`Failed to apply fade effect to replacement fog instance ${i + 1}: ${error}`);
+        }
+
+        console.log(`Created replacement fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)})`);
+    }
+
+    console.log(`Successfully created ${missingCount} replacement fog instances`);
 }
 
 //==============================================
