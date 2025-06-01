@@ -44,6 +44,7 @@ var MaxDsitance = 0;
 var FogInstanceArray: InstanceType.FogSprite[] = [];
 var MaxFogCount = 0; // 记录最大雾数量
 var FogRadius = 100; // 记录雾的半径
+var DebugRender = true;
 
 // 新增：存储雾实例与debug元素的映射关系
 var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();
@@ -55,14 +56,14 @@ var FogInstancesFadingOut: Set<number> = new Set();
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (TargetInstance == null) return;
-    
+
     // Get all fog instances
     const fogInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
         RUN_TIME_.objects.FogSprite.instances());
-    
+
     for (var FogSprites of fogInstances) {
         if (FogSprites == null) continue;
-        
+
         FogSprites.instVars.DistanceFromInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
             //@ts-ignore
             CalculateDistancehahaShitCode(TargetInstance.x,
@@ -74,7 +75,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
             if (!FogInstancesFadingOut.has(FogSprites.uid)) {
                 // Mark this fog instance as fading out
                 FogInstancesFadingOut.add(FogSprites.uid);
-                
+
                 // Start fade-out effect instead of direct destruction
                 try {
                     const fadeBehavior = FogSprites.behaviors.Fade;
@@ -83,18 +84,18 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
                         fadeBehavior.fadeInTime = 0;      // No fade in
                         fadeBehavior.waitTime = 0;        // No wait time
                         fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out
-                        
+
                         // Start the fade effect
                         fadeBehavior.startFade();
                         console.log(`Started fade-out for fog instance UID: ${FogSprites.uid}`);
-                        
+
                         // Clean up debug elements immediately when fade starts
                         cleanupFogDebugElements(FogSprites.uid);
-                        
+
                         // Set up a timer to clean up the tracking set after fade completes
                         const cleanupTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
                             RUN_TIME_.objects.C3Ctimer.createInstance("Other", -200, -200, false);
-                        
+
                         if (cleanupTimer && cleanupTimer.behaviors.Timer) {
                             cleanupTimer.behaviors.Timer.startTimer(1.2, `cleanup_${FogSprites.uid}`, "once");
                             cleanupTimer.behaviors.Timer.addEventListener("timer", (e) => {
@@ -131,6 +132,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
  * @param fogUID - The UID of the fog instance
  */
 function cleanupFogDebugElements(fogUID: number): void {
+    // Only cleanup debug elements if DebugRender was enabled when they were created
+    if (!DebugRender) {
+        return; // No debug elements to clean up
+    }
+
     const debugElements = FogDebugMap.get(fogUID);
     if (debugElements) {
         try {
@@ -139,7 +145,7 @@ function cleanupFogDebugElements(fogUID: number): void {
                 DebugObjectRenderer.Remove(debugElements.boxKey);
                 console.log(`Removed debug box for fog UID: ${fogUID}`);
             }
-            
+
             // Remove debug line
             if (debugElements.lineKey) {
                 DebugObjectRenderer.removeDebugLine(debugElements.lineKey);
@@ -148,7 +154,7 @@ function cleanupFogDebugElements(fogUID: number): void {
         } catch (error) {
             console.log(`Failed to cleanup debug elements for fog UID ${fogUID}: ${error}`);
         }
-        
+
         // Remove from mapping
         FogDebugMap.delete(fogUID);
         console.log(`Cleaned up debug elements for fog UID: ${fogUID}`);
@@ -168,40 +174,44 @@ function createFogInstanceWithDebug(targetInstance: any, fogX: number, fogY: num
     const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
         RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
 
-    // Add debug visualization for this fog instance
-    let boxKey = "";
-    let lineKey = "";
+    // Only add debug visualization if DebugRender is enabled
+    if (DebugRender) {
+        let boxKey = "";
+        let lineKey = "";
 
-    try {
-        // Choose color based on whether it's a replacement fog
-        const boxColor = isReplacement ? DebugColors.GREEN : DebugColors.CYAN;
-        
-        // Add debug box around fog instance
-        boxKey = DebugObjectRenderer
-            .setColorPreset(boxColor, 0.8)
-            .setBoxThickness(2)
-            .setHollow()
-            .setLayer("GameContent")
-            .RenderBoxtoInstance(fogInstance);
+        try {
+            // Choose color based on whether it's a replacement fog
+            const boxColor = isReplacement ? DebugColors.GREEN : DebugColors.CYAN;
 
-        // Add debug line connecting fog to target instance
-        lineKey = DebugObjectRenderer
-            .setColorPreset(DebugColors.YELLOW, 0.6)
-            .setBoxThickness(1)
-            .RenderLineBetweenInstances(fogInstance, targetInstance);
+            // Add debug box around fog instance
+            boxKey = DebugObjectRenderer
+                .setColorPreset(boxColor, 0.8)
+                .setBoxThickness(2)
+                .setHollow()
+                .setLayer("GameContent")
+                .RenderBoxtoInstance(fogInstance);
 
-        // Store the mapping between fog UID and debug elements
-        FogDebugMap.set(fogInstance.uid, {
-            boxKey: boxKey,
-            lineKey: lineKey
-        });
+            // Add debug line connecting fog to target instance
+            lineKey = DebugObjectRenderer
+                .setColorPreset(DebugColors.YELLOW, 0.6)
+                .setBoxThickness(1)
+                .RenderLineBetweenInstances(fogInstance, targetInstance);
 
-        console.log(`Added debug visualization for fog instance UID: ${fogInstance.uid} (${isReplacement ? 'replacement' : 'original'})`);
-    } catch (error) {
-        console.log(`Failed to add debug visualization for fog instance: ${error}`);
+            // Store the mapping between fog UID and debug elements
+            FogDebugMap.set(fogInstance.uid, {
+                boxKey: boxKey,
+                lineKey: lineKey
+            });
+
+            console.log(`Added debug visualization for fog instance UID: ${fogInstance.uid} (${isReplacement ? 'replacement' : 'original'})`);
+        } catch (error) {
+            console.log(`Failed to add debug visualization for fog instance: ${error}`);
+        }
+    } else {
+        console.log(`Created fog instance UID: ${fogInstance.uid} without debug visualization (DebugRender disabled)`);
     }
 
-    // Add fade-in effect to the fog instance
+    // Add fade-in effect to the fog instance (this is independent of debug rendering)
     try {
         const fadeBehavior = fogInstance.behaviors.Fade;
         if (fadeBehavior) {
@@ -237,7 +247,6 @@ export async function createFogAroundInstance(
 ): Promise<void> {
 
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
-    alert(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName)
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
 
     // Set global variables for your distance calculation system
@@ -245,7 +254,7 @@ export async function createFogAroundInstance(
     MaxDsitance = maxDistance;
     MaxFogCount = fogCount; // 记录最大雾数量
     FogRadius = radius; // 记录雾半径
-    
+
     var FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100)
     FogTimer.behaviors.Timer.startTimer(checkInterval, "fog_check_timer", "regular")
     FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
@@ -254,14 +263,14 @@ export async function createFogAroundInstance(
             const currentFogInstances = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
                 RUN_TIME_.objects.FogSprite.getAllInstances();
             const currentFogCount = currentFogInstances.length;
-            
+
             console.log(`Current fog count: ${currentFogCount}, Max fog count: ${MaxFogCount}`);
-            
+
             // 如果当前雾数量小于最大值，则补充雾实例
             if (currentFogCount < MaxFogCount && TargetInstance) {
                 const missingFogCount = MaxFogCount - currentFogCount;
                 console.log(`Need to create ${missingFogCount} more fog instances`);
-                
+
                 // 创建缺失的雾实例
                 createMissingFogInstances(TargetInstance, missingFogCount, FogRadius);
             }
@@ -328,7 +337,7 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
             let tooClose = false;
             for (const existingFog of currentFogInstances) {
                 const distance = Math.sqrt(
-                    Math.pow(fogX - existingFog.x, 2) + 
+                    Math.pow(fogX - existingFog.x, 2) +
                     Math.pow(fogY - existingFog.y, 2)
                 );
                 if (distance < 30) { // Minimum distance between fog instances
