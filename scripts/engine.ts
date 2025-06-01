@@ -190,7 +190,11 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
 
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name;
 
+
+})
 
 
 // Engine here

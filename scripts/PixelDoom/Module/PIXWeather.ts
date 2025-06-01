@@ -1,5 +1,4 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
-import { PIXFogManager } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { _Audio } from "./PIXAudio.js";
 
 export enum WEATHER_TYPE {
@@ -36,7 +35,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 async function handleWeather() {
-    //EnableFog(); // Use dynamic fog instead of static fog
+    EnableFog(); // Use dynamic fog instead of static fog
     Normal();
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
@@ -91,39 +90,7 @@ async function Normal() {
 }
 
 export function EnableFog(): void {
-    // Prevent multiple calls
-    if (isFogEnabled) {
-        console.log("Fog already enabled, skipping duplicate call");
-        return;
-    }
-    
-    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-    if (!PlayerInstance) {
-        console.error("Player instance not found for fog generation");
-        return;
-    }
-    
-    PIXFogManager.GenerateFogAroundInstance(PlayerInstance, 30, 1200, 2);
-    isFogEnabled = true;
-    WeatherState.FogEnabled = true;
-    console.log("Fog enabled successfully");
-}
-
-// Add function to disable fog
-export function DisableFog(): void {
-    if (!isFogEnabled) {
-        console.log("Fog already disabled");
-        return;
-    }
-    
-    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-    if (PlayerInstance) {
-        PIXFogManager.CleanupFogForTarget(PlayerInstance);
-    }
-    
-    isFogEnabled = false;
-    WeatherState.FogEnabled = false;
-    console.log("Fog disabled successfully");
+   
 }
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
