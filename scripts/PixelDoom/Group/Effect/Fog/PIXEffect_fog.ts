@@ -48,12 +48,15 @@ var FogRadius = 100; // 记录雾的半径
 // 新增：存储雾实例与debug元素的映射关系
 var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();
 
+// Add a Set to track fog instances that are already fading out
+var FogInstancesFadingOut: Set<number> = new Set();
+
 //实时获取雾和实例的距离
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (TargetInstance == null) return;
     
-    // 获取所有雾实例
+    // Get all fog instances
     const fogInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
         RUN_TIME_.objects.FogSprite.instances());
     
@@ -67,9 +70,58 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
                 TargetInstance.y, FogSprites.x, FogSprites.y);
 
         if (FogSprites.instVars.DistanceFromInstance > MaxDsitance) {
-            // 在销毁雾实例之前，先清理对应的debug元素
-            cleanupFogDebugElements(FogSprites.uid);
-            FogSprites.destroy();
+            // Check if this fog instance is already fading out
+            if (!FogInstancesFadingOut.has(FogSprites.uid)) {
+                // Mark this fog instance as fading out
+                FogInstancesFadingOut.add(FogSprites.uid);
+                
+                // Start fade-out effect instead of direct destruction
+                try {
+                    const fadeBehavior = FogSprites.behaviors.Fade;
+                    if (fadeBehavior) {
+                        // Set fade-out parameters
+                        fadeBehavior.fadeInTime = 0;      // No fade in
+                        fadeBehavior.waitTime = 0;        // No wait time
+                        fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out
+                        
+                        // Start the fade effect
+                        fadeBehavior.startFade();
+                        console.log(`Started fade-out for fog instance UID: ${FogSprites.uid}`);
+                        
+                        // Clean up debug elements immediately when fade starts
+                        cleanupFogDebugElements(FogSprites.uid);
+                        
+                        // Set up a timer to clean up the tracking set after fade completes
+                        const cleanupTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+                            RUN_TIME_.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                        
+                        if (cleanupTimer && cleanupTimer.behaviors.Timer) {
+                            cleanupTimer.behaviors.Timer.startTimer(1.2, `cleanup_${FogSprites.uid}`, "once");
+                            cleanupTimer.behaviors.Timer.addEventListener("timer", (e) => {
+                                if (e.tag === `cleanup_${FogSprites.uid}`) {
+                                    // Remove from tracking set after fade completes
+                                    FogInstancesFadingOut.delete(FogSprites.uid);
+                                    // Destroy the cleanup timer
+                                    cleanupTimer.destroy();
+                                    console.log(`Cleaned up tracking for fog UID: ${FogSprites.uid}`);
+                                }
+                            });
+                        }
+                    } else {
+                        // Fallback: if no Fade behavior, destroy directly
+                        console.log(`No Fade behavior found for fog UID: ${FogSprites.uid}, destroying directly`);
+                        cleanupFogDebugElements(FogSprites.uid);
+                        FogSprites.destroy();
+                        FogInstancesFadingOut.delete(FogSprites.uid);
+                    }
+                } catch (error) {
+                    console.log(`Failed to start fade-out for fog UID ${FogSprites.uid}: ${error}`);
+                    // Fallback: destroy directly if fade fails
+                    cleanupFogDebugElements(FogSprites.uid);
+                    FogSprites.destroy();
+                    FogInstancesFadingOut.delete(FogSprites.uid);
+                }
+            }
         }
     }
 });
