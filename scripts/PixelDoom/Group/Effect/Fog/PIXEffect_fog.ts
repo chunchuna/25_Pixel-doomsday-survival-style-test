@@ -14,89 +14,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         RUN_TIME_.objects.
         RedHairGirlSprite.getFirstInstance(), 20, 100, 3, 200)
 
-    // Start the ImGui fog distance monitoring
-    console.log("Starting ImGui fog distance monitoring...");
+    
 
-    // Use C3 timer instead of setTimeout
-    const startupTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.C3Ctimer.createInstance("Other", 0, 0, false);
-
-    if (startupTimer && startupTimer.behaviors.Timer) {
-        const timer = startupTimer.behaviors.Timer;
-        timer.startTimer(2, "startImGuiMonitor", "once");
-
-        timer.addEventListener("timer", (e) => {
-            if (e.tag === "startImGuiMonitor") {
-                startFogDistanceMonitoring();
-                // Clean up the startup timer
-                startupTimer.destroy();
-            }
-        });
-    }
-
-    // Add debug buttons for fog monitoring
-    setTimeout(() => {
-        const fogCategoryId = IMGUIDebugButton.AddCategory("Fog System");
-        
-        IMGUIDebugButton.AddButtonToCategory(
-            fogCategoryId,
-            "Open Fog Monitor",
-            () => {
-                showFogDistanceDebugWindow();
-                console.log("Fog distance monitor window opened");
-            },
-            "Open ImGui window to monitor all fog instances and their distances"
-        );
-
-        IMGUIDebugButton.AddButtonToCategory(
-            fogCategoryId,
-            "Start Auto Monitor",
-            () => {
-                startFogDistanceMonitoring();
-                console.log("Started automatic fog distance monitoring");
-            },
-            "Start persistent fog monitoring with auto-refresh"
-        );
-
-        IMGUIDebugButton.AddColorButtonToCategory(
-            fogCategoryId,
-            "Clear All Fog",
-            [1.0, 0.3, 0.3, 1.0], // Red color for destructive action
-            () => {
-                const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
-                if (runtime) {
-                    const fogInstances = runtime.objects.FogSprite.getAllInstances();
-                    fogInstances.forEach(fog => {
-                        if (fog && fog.destroy) {
-                            fog.destroy();
-                        }
-                    });
-                    console.log(`Cleared ${fogInstances.length} fog instances`);
-                }
-            },
-            "WARNING: Remove all fog instances from the scene"
-        );
-
-        IMGUIDebugButton.AddButtonToCategory(
-            fogCategoryId,
-            "Create Test Fog",
-            () => {
-                const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
-                if (runtime) {
-                    const targetInstance = runtime.objects.RedHairGirlSprite.getFirstInstance();
-                    if (targetInstance) {
-                        createFogAroundInstance(targetInstance, 10, 150, 2, 300);
-                        console.log("Created test fog instances around player");
-                    } else {
-                        console.log("No target instance found for fog creation");
-                    }
-                }
-            },
-            "Create 10 test fog instances around the player"
-        );
-
-        console.log("Fog debug buttons added to debug panel");
-    }, 500);
 })
 
 // Structure to store fog instance data including debug elements
@@ -116,25 +35,55 @@ let globalFogDistanceData: Array<{
     targetPosition: { x: number; y: number };
 }> = [];
 
+
+
+
+
+var TargetInstance: null;
+var MaxDsitance = 0;
+//实时获取雾和实例的距离
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+    if (TargetInstance == null) return;
+    for (var FogSprites of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+        RUN_TIME_.objects.FogSprite.instances()
+    ) {
+        if (FogSprites == null) return
+        FogSprites.instVars.DistanceFromInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+            //@ts-ignore
+            CalculateDistancehahaShitCode(TargetInstance.x,
+                //@ts-ignore
+                TargetInstance.y, FogSprites.x, FogSprites.y);
+
+        if (FogSprites.instVars.DistanceFromInstance > MaxDsitance) {
+            FogSprites.destroy();
+        }
+    }
+});
+
+
 /**
  * Create fog instances around a target instance in a circular pattern
  * @param targetInstance - The instance to surround with fog
  * @param fogCount - Number of fog instances to create around the target
  * @param radius - Distance from the target instance (default: 100)
- * @param checkInterval - Interval in seconds to check fog distances (default: 2)
  * @param maxDistance - Maximum allowed distance before fog is destroyed (default: 500)
  */
 export async function createFogAroundInstance(
     targetInstance: any,
     fogCount: number,
     radius: number = 100,
-    checkInterval: number = 2,
+    checkInterval: number = 2, // Keep parameter for compatibility but won't use
     maxDistance: number = 500
 ): Promise<void> {
 
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
     alert(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName)
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
+
+    // Set global variables for your distance calculation system
+    TargetInstance = targetInstance;
+    MaxDsitance = maxDistance;
 
     if (!targetInstance || fogCount <= 0) {
         console.log("Invalid parameters for fog creation");
@@ -143,9 +92,6 @@ export async function createFogAroundInstance(
 
     const centerX = targetInstance.x;
     const centerY = targetInstance.y;
-
-    // Array to store fog instance data with debug elements
-    const fogInstancesData: FogInstanceData[] = [];
 
     // Calculate angle step for equal distribution
     const angleStep = (2 * Math.PI) / fogCount;
@@ -183,15 +129,6 @@ export async function createFogAroundInstance(
             console.log(`Failed to add debug visualization for fog instance ${i + 1}: ${error}`);
         }
 
-        // Store fog instance data
-        const fogData: FogInstanceData = {
-            fogInstance: fogInstance,
-            debugBoxKey: boxKey,
-            debugLineKey: lineKey
-        };
-
-        fogInstancesData.push(fogData);
-
         // Add fade-in effect to the fog instance
         try {
             const fadeBehavior = fogInstance.behaviors.Fade;
@@ -212,194 +149,7 @@ export async function createFogAroundInstance(
         console.log(`Created fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)})`);
     }
 
-    // Create a timer instance for distance checking
-    const timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.C3Ctimer.createInstance("Other", 0, 0, false);
-
-    // Set up distance checking timer
-    if (timerInstance && timerInstance.behaviors.Timer) {
-        const timer = timerInstance.behaviors.Timer;
-
-        // Start repeating timer for distance checking
-        timer.startTimer(checkInterval, "fogDistanceCheck", "regular");
-
-        // Add event listener for timer events
-        timer.addEventListener("timer", (e) => {
-            if (e.tag === "fogDistanceCheck") {
-                checkFogDistancesWithDebug(targetInstance, fogInstancesData, maxDistance);
-            }
-        });
-
-        console.log(`Started distance checking timer with ${checkInterval}s interval`);
-    }
-
     console.log(`Successfully created ${fogCount} fog instances around target at (${centerX}, ${centerY})`);
-}
-
-/**
- * Check distances of fog instances and update debug visualizations
- * @param targetInstance - The target instance to measure distance from
- * @param fogInstancesData - Array of fog instances data with debug elements
- * @param maxDistance - Maximum allowed distance
- */
-function checkFogDistancesWithDebug(targetInstance: any, fogInstancesData: FogInstanceData[], maxDistance: number): void {
-    if (!targetInstance) return;
-
-    const targetX = targetInstance.x;
-    const targetY = targetInstance.y;
-
-    for (let i = fogInstancesData.length - 1; i >= 0; i--) {
-        const fogData = fogInstancesData[i];
-        const fogInstance = fogData.fogInstance;
-
-        if (!fogInstance || !fogInstance.isValid) {
-            // Clean up debug elements for invalid instances
-            if (fogData.debugBoxKey) {
-                DebugObjectRenderer.Remove(fogData.debugBoxKey);
-            }
-            if (fogData.debugLineKey) {
-                DebugObjectRenderer.removeDebugLine(fogData.debugLineKey);
-            }
-            if (fogData.textRenderer) {
-                fogData.textRenderer.release();
-            }
-
-            // Remove invalid instances from array
-            fogInstancesData.splice(i, 1);
-            continue;
-        }
-
-        // Calculate distance between target and fog
-        const distance = Math.sqrt(
-            Math.pow(fogInstance.x - targetX, 2) +
-            Math.pow(fogInstance.y - targetY, 2)
-        );
-
-        // Store distance in the fog instance's custom variable
-        try {
-            fogInstance.instVars.DistanceFromInstance = distance;
-        } catch (error) {
-            console.log(`Failed to store distance in fog ${i} instVars: ${error}`);
-        }
-
-        // Update debug box color based on distance
-        try {
-            if (distance > maxDistance * 0.8) {
-                // Close to max distance - change to red
-                DebugObjectRenderer.Remove(fogData.debugBoxKey);
-                fogData.debugBoxKey = DebugObjectRenderer
-                    .setColorPreset(DebugColors.RED, 0.9)
-                    .setBoxThickness(3)
-                    .setHollow()
-                    .setLayer("GameContent")
-                    .RenderBoxtoInstance(fogInstance);
-            } else if (distance > maxDistance * 0.5) {
-                // Medium distance - change to orange
-                DebugObjectRenderer.Remove(fogData.debugBoxKey);
-                fogData.debugBoxKey = DebugObjectRenderer
-                    .setColorPreset(DebugColors.ORANGE, 0.8)
-                    .setBoxThickness(2)
-                    .setHollow()
-                    .setLayer("GameContent")
-                    .RenderBoxtoInstance(fogInstance);
-            }
-        } catch (error) {
-            console.log(`Failed to update debug box color: ${error}`);
-        }
-
-        // Update global fog distance data for ImGui display
-        const existingDataIndex = globalFogDistanceData.findIndex(data =>
-            Math.abs(data.position.x - fogInstance.x) < 5 &&
-            Math.abs(data.position.y - fogInstance.y) < 5
-        );
-
-        const fogDistanceInfo = {
-            fogIndex: i + 1,
-            distance: Math.round(distance * 100) / 100, // Round to 2 decimal places
-            maxDistance: maxDistance,
-            position: { x: Math.round(fogInstance.x), y: Math.round(fogInstance.y) },
-            targetPosition: { x: Math.round(targetX), y: Math.round(targetY) }
-        };
-
-        if (existingDataIndex !== -1) {
-            globalFogDistanceData[existingDataIndex] = fogDistanceInfo;
-        } else {
-            globalFogDistanceData.push(fogDistanceInfo);
-        }
-
-        if (distance > maxDistance) {
-            console.log(`Fog instance at distance ${distance.toFixed(2)} exceeds maximum ${maxDistance}, starting fade-out`);
-
-            // Clean up debug elements before destruction
-            if (fogData.debugBoxKey) {
-                DebugObjectRenderer.Remove(fogData.debugBoxKey);
-            }
-            if (fogData.debugLineKey) {
-                DebugObjectRenderer.removeDebugLine(fogData.debugLineKey);
-            }
-            if (fogData.textRenderer) {
-                fogData.textRenderer.release();
-            }
-
-            // Remove from global distance data
-            globalFogDistanceData = globalFogDistanceData.filter(data =>
-                !(Math.abs(data.position.x - fogInstance.x) < 5 &&
-                    Math.abs(data.position.y - fogInstance.y) < 5)
-            );
-
-            // Start fade-out and destruction
-            try {
-                const fadeBehavior = fogInstance.behaviors.Fade;
-                if (fadeBehavior) {
-                    // Set fade-out parameters
-                    fadeBehavior.fadeInTime = 0;
-                    fadeBehavior.waitTime = 0;
-                    fadeBehavior.fadeOutTime = 1.0;  // 1 second fade out
-
-                    // Restart fade to begin fade-out
-                    fadeBehavior.restartFade();
-
-                    // Schedule destruction using C3 timer instead of setTimeout
-                    const destructionTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-                        RUN_TIME_.objects.C3Ctimer.createInstance("DestructionTimer", 0, 0, false);
-
-                    if (destructionTimer && destructionTimer.behaviors.Timer) {
-                        const timer = destructionTimer.behaviors.Timer;
-                        timer.startTimer(1.1, "destroyFog", "once");
-
-                        timer.addEventListener("timer", (e) => {
-                            if (e.tag === "destroyFog") {
-                                if (fogInstance && fogInstance.isValid) {
-                                    fogInstance.destroy();
-                                }
-                                // Clean up the timer instance
-                                destructionTimer.destroy();
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.log(`Failed to fade-out fog instance: ${error}`);
-                // Directly destroy if fade fails
-                fogInstance.destroy();
-            }
-
-            // Remove from tracking array
-            fogInstancesData.splice(i, 1);
-        }
-    }
-}
-
-// Legacy function for backward compatibility
-function checkFogDistances(targetInstance: any, fogInstances: any[], maxDistance: number): void {
-    // Convert old format to new format for compatibility
-    const fogInstancesData: FogInstanceData[] = fogInstances.map(fog => ({
-        fogInstance: fog,
-        debugBoxKey: "",
-        debugLineKey: ""
-    }));
-
-    checkFogDistancesWithDebug(targetInstance, fogInstancesData, maxDistance);
 }
 
 //==============================================
@@ -444,10 +194,10 @@ export function showFogDistanceDebugWindow(): void {
                 if (typeof ImGui !== 'undefined') {
                     // Header with statistics
                     ImGui.Text(`Total Fog Instances: ${fogInstances.length}`);
-                    
+
                     if (targetInstance) {
                         ImGui.SameLine();
-                        ImGui.TextColored(new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0), 
+                        ImGui.TextColored(new ImGui.ImVec4(0.0, 1.0, 0.0, 1.0),
                             `Target: (${Math.round(targetInstance.x)}, ${Math.round(targetInstance.y)})`);
                     } else {
                         ImGui.SameLine();
@@ -466,7 +216,7 @@ export function showFogDistanceDebugWindow(): void {
                             totalDistance += distance;
                             const maxDistance = 200;
                             const distancePercent = (distance / maxDistance) * 100;
-                            
+
                             if (distancePercent > 80) dangerCount++;
                             else if (distancePercent > 50) warningCount++;
                             else safeCount++;
@@ -481,7 +231,7 @@ export function showFogDistanceDebugWindow(): void {
                         ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.0, 1.0), `Warning: ${warningCount}`);
                         ImGui.SameLine();
                         ImGui.TextColored(new ImGui.ImVec4(1.0, 0.0, 0.0, 1.0), `Danger: ${dangerCount}`);
-                        
+
                         ImGui.Text(`Average Distance: ${avgDistance.toFixed(2)}`);
                     }
 
@@ -490,7 +240,7 @@ export function showFogDistanceDebugWindow(): void {
                     if (fogInstances.length === 0) {
                         ImGui.TextColored(new ImGui.ImVec4(1.0, 0.5, 0.5, 1.0), "No fog instances found.");
                         ImGui.Text("Create fog instances first using createFogAroundInstance().");
-                        
+
                         ImGui.Separator();
                         if (ImGui.Button("Create Test Fog")) {
                             if (targetInstance) {
@@ -562,7 +312,7 @@ export function showFogDistanceDebugWindow(): void {
                                         console.log(`Deleted fog instance #${index + 1}`);
                                     }
                                 }
-                                
+
                                 if (ImGui.IsItemHovered()) {
                                     ImGui.BeginTooltip();
                                     ImGui.Text("Delete this fog instance");
@@ -664,18 +414,70 @@ export function startFogDistanceMonitoring(): void {
     }
 }
 
-/**
- * Get current fog distance data for external monitoring
- * @returns Array of fog distance information
- */
-export function getFogDistanceData(): typeof globalFogDistanceData {
-    return [...globalFogDistanceData]; // Return copy to prevent external modification
-}
 
-/**
- * Clear all fog distance monitoring data
- */
-export function clearFogDistanceData(): void {
-    globalFogDistanceData = [];
-    console.log("Cleared all fog distance monitoring data");
-}
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+
+    // Start the ImGui fog distance monit
+
+    const fogCategoryId = IMGUIDebugButton.AddCategory("Fog System");
+
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Open Fog Monitor",
+        () => {
+            showFogDistanceDebugWindow();
+            console.log("Fog distance monitor window opened");
+        },
+        "Open ImGui window to monitor all fog instances and their distances"
+    );
+
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Start Auto Monitor",
+        () => {
+            startFogDistanceMonitoring();
+            console.log("Started automatic fog distance monitoring");
+        },
+        "Start persistent fog monitoring with auto-refresh"
+    );
+
+    IMGUIDebugButton.AddColorButtonToCategory(
+        fogCategoryId,
+        "Clear All Fog",
+        [1.0, 0.3, 0.3, 1.0], // Red color for destructive action
+        () => {
+            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            if (runtime) {
+                const fogInstances = runtime.objects.FogSprite.getAllInstances();
+                fogInstances.forEach(fog => {
+                    if (fog && fog.destroy) {
+                        fog.destroy();
+                    }
+                });
+                console.log(`Cleared ${fogInstances.length} fog instances`);
+            }
+        },
+        "WARNING: Remove all fog instances from the scene"
+    );
+
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Create Test Fog",
+        () => {
+            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            if (runtime) {
+                const targetInstance = runtime.objects.RedHairGirlSprite.getFirstInstance();
+                if (targetInstance) {
+                    createFogAroundInstance(targetInstance, 10, 150, 2, 300);
+                    console.log("Created test fog instances around player");
+                } else {
+                    console.log("No target instance found for fog creation");
+                }
+            }
+        },
+        "Create 10 test fog instances around the player"
+    );
+
+    console.log("Fog debug buttons added to debug panel");
+})
+
