@@ -303,22 +303,27 @@ export class IMGUIDebugButton {
         // Get uncategorized buttons
         const uncategorizedButtons = this.buttons.filter(btn => !btn.categoryId);
 
-        // Render uncategorized buttons
+        // Render uncategorized buttons with category suffix
         uncategorizedButtons.forEach(button => {
-            this.renderButton(button);
+            this.renderButton(button, "_general");
         });
     }
 
     /**
      * Render button
      * @param button Button config
+     * @param idSuffix Optional ID suffix to avoid conflicts when same button appears in multiple places
      * @private
      */
-    private static renderButton(button: DebugButton): void {
+    private static renderButton(button: DebugButton, idSuffix: string = ""): void {
         const ImGui = globalThis.ImGui;
 
         // Button row - favorite star + button + tooltip
         const buttonWidth = ImGui.GetContentRegionAvail().x - 30; // Leave space for star
+
+        // Create unique IDs for this button instance
+        const starId = `star_${button.id}${idSuffix}`;
+        const buttonId = `${button.name}##${button.id}${idSuffix}`;
 
         // Favorite star button
         const isFavorite = this.favoriteButtons.has(button.id);
@@ -326,7 +331,7 @@ export class IMGUIDebugButton {
         const starColor = isFavorite ? [1.0, 1.0, 0.0, 1.0] : [0.5, 0.5, 0.5, 1.0];
         
         ImGui.PushStyleColor(ImGui.Col.Text, new ImGui.ImVec4(...starColor));
-        if (ImGui.SmallButton(starText + "##star_" + button.id)) {
+        if (ImGui.SmallButton(starText + "##" + starId)) {
             if (isFavorite) {
                 this.favoriteButtons.delete(button.id);
             } else {
@@ -371,8 +376,8 @@ export class IMGUIDebugButton {
             );
         }
 
-        // Render button
-        if (ImGui.Button(button.name, new ImGui.ImVec2(buttonWidth, 0))) {
+        // Render button with unique ID
+        if (ImGui.Button(buttonId, new ImGui.ImVec2(buttonWidth, 0))) {
             if (button.callback) {
                 try {
                     button.callback();
@@ -877,9 +882,9 @@ export class IMGUIDebugButton {
     private static renderSearchResults(buttons: DebugButton[], categories: Map<string, Category>): void {
         const ImGui = globalThis.ImGui;
 
-        // Render each button
+        // Render each button with search suffix
         buttons.forEach(button => {
-            this.renderButton(button);
+            this.renderButton(button, "_search");
         });
     }
 
@@ -1018,22 +1023,22 @@ export class IMGUIDebugButton {
 
         let hasQuickAccess = false;
 
-        // Render favorites
+        // Render favorites with unique suffix
         if (favoriteButtonsList.length > 0) {
             hasQuickAccess = true;
             ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), "Favorites:");
             favoriteButtonsList.forEach(button => {
-                this.renderButton(button);
+                this.renderButton(button, "_favorite");
             });
         }
 
-        // Render recent
+        // Render recent with unique suffix
         if (recentButtonsList.length > 0) {
             if (hasQuickAccess) ImGui.Spacing();
             hasQuickAccess = true;
             ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 1.0, 1.0), "Recent:");
             recentButtonsList.forEach(button => {
-                this.renderButton(button);
+                this.renderButton(button, "_recent");
             });
         }
 
@@ -1098,7 +1103,9 @@ export class IMGUIDebugButton {
         if (currentPageButtons.length > 0) {
             ImGui.TextColored(new ImGui.ImVec4(0.8, 0.8, 1.0, 1.0), `${currentPageName}:`);
             currentPageButtons.forEach(button => {
-                this.renderButton(button);
+                // Use page name as suffix to ensure uniqueness
+                const pageSuffix = `_page_${currentPageName.toLowerCase().replace(/\s+/g, '_')}`;
+                this.renderButton(button, pageSuffix);
             });
         } else {
             ImGui.TextColored(
