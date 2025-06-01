@@ -4,7 +4,15 @@
 	"sid": 440366721522128,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
-	"instanceVariables": [],
+	"instanceVariables": [
+		{
+			"name": "DistanceFromInstance",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 447738514017667
+		}
+	],
 	"behaviorTypes": [
 		{
 			"behaviorId": "Sin",

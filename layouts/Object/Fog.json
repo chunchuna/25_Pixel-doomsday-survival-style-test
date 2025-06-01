@@ -18,7 +18,9 @@
 					"uid": 1227,
 					"sid": 136623150195625,
 					"tags": "",
-					"instanceVariables": {},
+					"instanceVariables": {
+						"DistanceFromInstance": 0
+					},
 					"behaviors": {
 						"正弦运动": {
 							"properties": {

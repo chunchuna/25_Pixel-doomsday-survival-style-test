@@ -1142,23 +1142,39 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         IMGUIDebugButton.MarkButtonsAdded();
 
         // Add system buttons
-        // const systemCategoryId = IMGUIDebugButton.AddCategory("System");
-        // if (systemCategoryId) {
-        //     IMGUIDebugButton.AddButtonToCategory(systemCategoryId, "Clear Console", () => {
-        //         console.clear();
-        //     });
+        const systemCategoryId = IMGUIDebugButton.AddCategory("System");
+        if (systemCategoryId) {
+            IMGUIDebugButton.AddButtonToCategory(systemCategoryId, "Clear Console", () => {
+                console.clear();
+            });
 
-        //     // Add warning button example
-        //     IMGUIDebugButton.AddColorButtonToCategory(
-        //         systemCategoryId,
-        //         "Warning Test", 
-        //         [1.0, 0.3, 0.3, 1.0], // Red
-        //         () => {
-        //             console.warn("This is a warning test");
-        //         },
-        //         "Click to show warning message"
-        //     );
-        // }
+            // Add warning button example
+            IMGUIDebugButton.AddColorButtonToCategory(
+                systemCategoryId,
+                "Warning Test", 
+                [1.0, 0.3, 0.3, 1.0], // Red
+                () => {
+                    console.warn("This is a warning test");
+                },
+                "Click to show warning message"
+            );
+        }
+
+        // Add quick access fog monitoring button
+        IMGUIDebugButton.AddColorButton(
+            "Fog Monitor", 
+            [0.0, 0.8, 1.0, 1.0], // Cyan color
+            () => {
+                // Import and call fog monitoring function
+                import("../../Group/Effect/Fog/PIXEffect_fog.js").then(module => {
+                    module.showFogDistanceDebugWindow();
+                    console.log("Fog monitor opened from quick access");
+                }).catch(error => {
+                    console.error("Failed to load fog monitoring module:", error);
+                });
+            },
+            "Quick access: Open fog distance monitoring window"
+        );
 
     }, 100); // 短暂延迟确保初始化完成
 });
