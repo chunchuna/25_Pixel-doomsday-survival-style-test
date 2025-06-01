@@ -19,6 +19,20 @@ export enum FogStyle {
     LEVEL = "level"      // Dangerous, green fog
 }
 
+// Enum for fog colors with 10 basic colors
+export enum FogColor {
+    WHITE = "#ffffff",        // Pure white fog
+    LIGHT_GRAY = "#d3d3d3",   // Light gray fog
+    GRAY = "#808080",         // Medium gray fog
+    DARK_GRAY = "#404040",    // Dark gray fog
+    BLUE = "#4fc3f7",         // Light blue fog
+    PURPLE = "#9c27b0",       // Purple mystical fog
+    GREEN = "#4caf50",        // Green toxic fog
+    RED = "#f44336",          // Red danger fog
+    YELLOW = "#ffeb3b",       // Yellow warning fog
+    ORANGE = "#ff9800"        // Orange sunset fog
+}
+
 export class PIXEffect_fog {
     private static instances: Map<string, PIXEffect_fog> = new Map();
     private static idCounter: number = 0;
@@ -1067,9 +1081,9 @@ export class PIXEffect_fog {
 
     /**
      * Sets the fog color
-     * @param color Hex color string
+     * @param color Hex color string or FogColor enum value
      */
-    public setColor(color: string): PIXEffect_fog {
+    public setColor(color: string | FogColor): PIXEffect_fog {
         this.fogParams.color = color;
         return this;
     }
@@ -3644,7 +3658,7 @@ export class PIXEffect_fog {
                 style = FogStyle.HEAVY;
                 config = {
                     intensityRange: { min: 0.3, max: 0.9 },
-                    sizeRange: { min: 1.0, max: 3.0 },
+                    sizeRange: { min: 0.2, max: 0.6 },
                     changeInterval: { min: 15, max: 35 },
                     disappearChance: 0.2,
                     disappearDuration: { min: 5, max: 20 },
@@ -3692,6 +3706,54 @@ export class PIXEffect_fog {
         }
 
         return PIXEffect_fog.GenerateDynamicFog(style, id, layer, config);
+    }
+
+    /**
+     * Sets fog color using predefined color enum
+     * @param color FogColor enum value
+     */
+    public setColorPreset(color: FogColor): PIXEffect_fog {
+        return this.setColor(color);
+    }
+
+    /**
+     * Gets all available fog colors as an array for UI selection
+     */
+    public static GetAvailableColors(): { name: string, value: string, description: string }[] {
+        return [
+            { name: "WHITE", value: FogColor.WHITE, description: "Pure white fog" },
+            { name: "LIGHT_GRAY", value: FogColor.LIGHT_GRAY, description: "Light gray fog" },
+            { name: "GRAY", value: FogColor.GRAY, description: "Medium gray fog" },
+            { name: "DARK_GRAY", value: FogColor.DARK_GRAY, description: "Dark gray fog" },
+            { name: "BLUE", value: FogColor.BLUE, description: "Light blue fog" },
+            { name: "PURPLE", value: FogColor.PURPLE, description: "Purple mystical fog" },
+            { name: "GREEN", value: FogColor.GREEN, description: "Green toxic fog" },
+            { name: "RED", value: FogColor.RED, description: "Red danger fog" },
+            { name: "YELLOW", value: FogColor.YELLOW, description: "Yellow warning fog" },
+            { name: "ORANGE", value: FogColor.ORANGE, description: "Orange sunset fog" }
+        ];
+    }
+
+    /**
+     * Creates fog with a specific color preset
+     * @param type Fog type
+     * @param style Fog style
+     * @param color Predefined color
+     * @param duration Duration in seconds
+     * @param id Optional ID
+     * @param layer Optional layer
+     */
+    public static GenerateFogWithColor(
+        type: FogType,
+        style: FogStyle,
+        color: FogColor,
+        duration: number = 0,
+        id?: string,
+        layer: string = "html_c3"
+    ): PIXEffect_fog {
+        const fog = PIXEffect_fog.GenerateFog(type, style, duration, id, layer);
+        fog.setColor(color);
+        return fog;
     }
 
     /**

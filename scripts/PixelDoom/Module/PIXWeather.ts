@@ -1,5 +1,5 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
-import { FogStyle, FogType, PIXEffect_fog } from "../Group/Effect/Fog/PIXEffect_fog.js";
+import { FogColor, FogStyle, FogType, PIXEffect_fog } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { _Audio } from "./PIXAudio.js";
 
 export enum WEATHER_TYPE {
@@ -34,7 +34,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 async function handleWeather() {
-    EnableDynamicFog(); // Use dynamic fog instead of static fog
+    //EnableFog(); // Use dynamic fog instead of static fog
     Normal();
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
@@ -91,49 +91,13 @@ async function Normal() {
 
 
 
-export function EnableDynamicFog(): PIXEffect_fog | void {
+export function EnableFog(): PIXEffect_fog | void {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    var SizeWidth =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
+    var SizeHieght = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.height
+    var Fog =PIXEffect_fog.GenerateFog(FogType.PERSISTENT,FogStyle.HEAVY,0,"level_fog","html_c3",).setSize(SizeWidth,SizeHieght)
+    .setScale(0.5).setColor(FogColor.BLUE)
 
-    console.log("Enabling dynamic fog effect...");
-
-    // Set fog state
-    WeatherState.FogEnabled = true;
-
-    // Check if dynamic fog already exists
-    const existingDynamicFog = PIXEffect_fog.GetFog("dynamic_level_fog");
-    if (existingDynamicFog && (existingDynamicFog as any).isDynamic) {
-        console.log("Dynamic fog already exists and is active");
-        return existingDynamicFog;
-    }
-
-
-    WeatherState.FogEnabled = true; // Reset after cleanup
-
-    // Check if fog is still enabled after waiting
-    if (!WeatherState.FogEnabled) {
-        console.log("Fog was disabled during initialization, aborting dynamic fog creation");
-        return;
-    }
-
-    // Create dynamic fog with natural variation
-    console.log("Creating dynamic level fog...");
-    const dynamicFog = PIXEffect_fog.GenerateDynamicFog(FogStyle.LEVEL, "dynamic_level_fog", "html_c3", {
-        intensityRange: { min: 0.4, max: 0.9 },  // 提高强度范围，确保可见性
-        sizeRange: { min: 1.2, max: 1.8 },       // 使用更保守的尺寸范围，避免过小
-        changeInterval: { min: 25, max: 45 },    // 适中的变化间隔
-        disappearChance: 0.005,                  // 极低的消失概率
-        disappearDuration: { min: 3, max: 8 },   // 短暂的消失时间
-        transitionDuration: 15,                  // 平滑的过渡时间
-        weatherInfluence: true,
-        naturalVariation: true
-    })
-        .setPosition(0, 0)
-        .setSize(6000, 3000)
-        .setScale(1.5)      // 合理的初始缩放
-        .setOpacity(0.8);   // 较高的初始透明度
-
-    console.log("Dynamic fog enabled with weather influence and natural variation");
-    return dynamicFog;
 }
 
 
