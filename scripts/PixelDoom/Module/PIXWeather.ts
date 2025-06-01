@@ -34,7 +34,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 async function handleWeather() {
-    //EnableFog(); // Use dynamic fog instead of static fog
+    EnableFog(); // Use dynamic fog instead of static fog
     Normal();
     await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(10)
     Rain();
@@ -93,10 +93,14 @@ async function Normal() {
 
 export function EnableFog(): PIXEffect_fog | void {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
-    var SizeWidth =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
+    var SizeWidth = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
     var SizeHieght = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.height
-    var Fog =PIXEffect_fog.GenerateFog(FogType.PERSISTENT,FogStyle.HEAVY,0,"level_fog","html_c3",).setSize(SizeWidth,SizeHieght)
-    .setScale(0.5).setColor(FogColor.BLUE)
+    // var Fog =PIXEffect_fog.GenerateFog(FogType.PERSISTENT,FogStyle.HEAVY,0,"level_fog","html_c3",).setSize(SizeWidth,SizeHieght)
+    // .setScale(0.5).setColor(FogColor.BLUE)
+    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    if (PlayerInstance)
+        var FogCutting = PIXEffect_fog.GenerateFog(FogType.PERSISTENT, FogStyle.LEVEL, 0, "level_fog", "html_c3",).setSize(1000, 1000)
+            .setScale(0.5).setColor(FogColor.GREEN).setPreventCutting(true, 0.5).setPosition(PlayerInstance.x, PlayerInstance.y)
 
 }
 

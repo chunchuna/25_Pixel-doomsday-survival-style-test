@@ -50,6 +50,8 @@ export class PIXEffect_fog {
         size?: { width: number, height: number },
         fogParams?: any,
         customSettings?: {
+            position?: { x: number, y: number },
+            size?: { width: number, height: number },
             scale?: number,
             speed?: number,
             opacity?: number,
@@ -60,7 +62,9 @@ export class PIXEffect_fog {
             noiseScale?: number,
             fadeEdges?: number,
             mixBlendMode?: string,
-            particleVariation?: number
+            particleVariation?: number,
+            preventCutting?: boolean,
+            cuttingMargin?: number
         }
     }> = new Map();
 
@@ -139,6 +143,16 @@ export class PIXEffect_fog {
         particleVariation: 0.3  // Size variation between particles
     };
 
+    // Prevent cutting properties
+    protected preventCutting: boolean = false;
+    protected cuttingMargin: number = 0.15; // Default margin as percentage of size (15%)
+    protected effectiveArea: {
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    } = { x: 0, y: 0, width: 0, height: 0 };
+
     // Animation properties
     protected particles: any[] = [];
     protected animationId: number | null = null;
@@ -183,6 +197,9 @@ export class PIXEffect_fog {
         // Store target opacity and start with 0 for fade-in effect
         this.targetOpacity = this.fogParams.opacity;
         this.fogParams.opacity = 0; // Start invisible
+
+        // Initialize effective area
+        this.updateEffectiveArea();
 
         // Create HTML element
         this.createHtmlElement();
@@ -341,8 +358,8 @@ export class PIXEffect_fog {
             case FogStyle.LEVEL:
                 this.fogParams = {
                     density: 0.3,
-                    speed: 0.6,
-                    scale: 1.2,
+                    speed: 3,
+                    scale: 0.5,
                     opacity: 0.9,
                     color: '#ffffff',
                     layers: 2,
@@ -677,9 +694,15 @@ export class PIXEffect_fog {
             // Scale particle size based on LOD
             const lodScaledSize = baseSize * sizeVariation * (1 + (1 - this.lodLevel) * 2); // Larger particles for lower LOD
 
+            // Use effective area for particle positioning when prevent cutting is enabled
+            const areaX = this.effectiveArea.x;
+            const areaY = this.effectiveArea.y;
+            const areaWidth = this.effectiveArea.width;
+            const areaHeight = this.effectiveArea.height;
+
             this.particles.push({
-                x: Math.random() * this._width,
-                y: Math.random() * this._height,
+                x: areaX + Math.random() * areaWidth,
+                y: areaY + Math.random() * areaHeight,
                 size: lodScaledSize,
                 baseSpeedX: (Math.random() - 0.5) * 0.3 + 0.2,
                 baseSpeedY: (Math.random() - 0.5) * 0.2 - 0.1,
@@ -776,16 +799,23 @@ export class PIXEffect_fog {
 
             // Wrap around screen (optimized boundary checking)
             const size = particle.size;
-            if (particle.x > this._width + size) {
-                particle.x = -size;
-            } else if (particle.x < -size) {
-                particle.x = this._width + size;
+            
+            // Use effective area boundaries when prevent cutting is enabled
+            const leftBound = this.preventCutting ? this.effectiveArea.x : 0;
+            const rightBound = this.preventCutting ? this.effectiveArea.x + this.effectiveArea.width : this._width;
+            const topBound = this.preventCutting ? this.effectiveArea.y : 0;
+            const bottomBound = this.preventCutting ? this.effectiveArea.y + this.effectiveArea.height : this._height;
+            
+            if (particle.x > rightBound + size) {
+                particle.x = leftBound - size;
+            } else if (particle.x < leftBound - size) {
+                particle.x = rightBound + size;
             }
 
-            if (particle.y > this._height + size) {
-                particle.y = -size;
-            } else if (particle.y < -size) {
-                particle.y = this._height + size;
+            if (particle.y > bottomBound + size) {
+                particle.y = topBound - size;
+            } else if (particle.y < topBound - size) {
+                particle.y = bottomBound + size;
             }
         }
 
@@ -1176,6 +1206,9 @@ export class PIXEffect_fog {
         this._width = width;
         this._height = height;
 
+        // Update effective area for prevent cutting
+        this.updateEffectiveArea();
+
         if (this.htmlElement) {
             this.htmlElement.width = width;
             this.htmlElement.height = height;
@@ -1461,6 +1494,8 @@ export class PIXEffect_fog {
                     if (settings.fadeEdges !== undefined) newFog.setFadeEdges(settings.fadeEdges);
                     if (settings.mixBlendMode !== undefined) newFog.setMixBlendMode(settings.mixBlendMode);
                     if (settings.particleVariation !== undefined) newFog.setParticleVariation(settings.particleVariation);
+                    if (settings.preventCutting !== undefined) newFog.setPreventCutting(settings.preventCutting);
+                    if (settings.cuttingMargin !== undefined) newFog.setPreventCutting(settings.preventCutting ?? false, settings.cuttingMargin);
                 }
 
                 
@@ -1887,6 +1922,21 @@ export class PIXEffect_fog {
                 if (ImGui.SliderFloat("Particle Variation", (value = particleVariation) => particleVariation = value, 0.0, 1.0)) {
                     editParams.particleVariation = particleVariation;
                     fog.updateFogParams(editParams);
+                }
+
+                // Prevent Cutting
+                ImGui.Separator();
+                let preventCutting = (fog as any).preventCutting;
+                if (ImGui.Checkbox("Prevent Edge Cutting", (value = preventCutting) => preventCutting = value)) {
+                    fog.setPreventCutting(preventCutting);
+                }
+
+                if (preventCutting) {
+                    let cuttingMargin = (fog as any).cuttingMargin;
+                    if (ImGui.SliderFloat("Edge Margin", (value = cuttingMargin) => cuttingMargin = value, 0.0, 0.5)) {
+                        fog.setPreventCutting(true, cuttingMargin);
+                    }
+                    ImGui.Text(`Effective Area: ${Math.round((fog as any).effectiveArea.width)}x${Math.round((fog as any).effectiveArea.height)}`);
                 }
 
                 // Mix Blend Mode
@@ -3062,7 +3112,9 @@ export class PIXEffect_fog {
             noiseScale?: number,
             fadeEdges?: number,
             mixBlendMode?: string,
-            particleVariation?: number
+            particleVariation?: number,
+            preventCutting?: boolean,
+            cuttingMargin?: number
         }
     ): PIXEffect_fog {
         // Generate ID if not provided
@@ -3146,6 +3198,8 @@ export class PIXEffect_fog {
             if (customSettings.fadeEdges !== undefined) instance.setFadeEdges(customSettings.fadeEdges);
             if (customSettings.mixBlendMode !== undefined) instance.setMixBlendMode(customSettings.mixBlendMode);
             if (customSettings.particleVariation !== undefined) instance.setParticleVariation(customSettings.particleVariation);
+            if (customSettings.preventCutting !== undefined) instance.setPreventCutting(customSettings.preventCutting);
+            if (customSettings.cuttingMargin !== undefined) instance.setPreventCutting(customSettings.preventCutting ?? false, customSettings.cuttingMargin);
         }
 
         
@@ -3803,6 +3857,56 @@ export class PIXEffect_fog {
         
 
         return testFog;
+    }
+
+    /**
+     * Updates the effective area for fog generation based on prevent cutting settings
+     */
+    private updateEffectiveArea(): void {
+        if (this.preventCutting) {
+            // Calculate margin in pixels
+            const marginX = this._width * this.cuttingMargin;
+            const marginY = this._height * this.cuttingMargin;
+
+            this.effectiveArea = {
+                x: marginX,
+                y: marginY,
+                width: this._width - (marginX * 2),
+                height: this._height - (marginY * 2)
+            };
+
+            // Ensure minimum effective area
+            this.effectiveArea.width = Math.max(this.effectiveArea.width, this._width * 0.3);
+            this.effectiveArea.height = Math.max(this.effectiveArea.height, this._height * 0.3);
+
+            // Recalculate position to center the effective area
+            this.effectiveArea.x = (this._width - this.effectiveArea.width) / 2;
+            this.effectiveArea.y = (this._height - this.effectiveArea.height) / 2;
+        } else {
+            // Use full component area
+            this.effectiveArea = {
+                x: 0,
+                y: 0,
+                width: this._width,
+                height: this._height
+            };
+        }
+    }
+
+    /**
+     * Sets prevent cutting mode to avoid fog being cut off at component edges
+     * @param enabled Enable prevent cutting mode
+     * @param margin Optional margin as percentage of size (0.0-0.5, default 0.15)
+     */
+    public setPreventCutting(enabled: boolean, margin: number = 0.15): PIXEffect_fog {
+        this.preventCutting = enabled;
+        this.cuttingMargin = Math.max(0, Math.min(0.5, margin)); // Clamp between 0-50%
+        
+        // Update effective area and reinitialize particles
+        this.updateEffectiveArea();
+        this.initParticles();
+        
+        return this;
     }
 }
 
