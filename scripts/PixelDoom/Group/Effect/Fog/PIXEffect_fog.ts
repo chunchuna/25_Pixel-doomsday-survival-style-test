@@ -12,7 +12,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         RUN_TIME_.objects.FogSprite.createInstance("Fog", 0, 0, false)
     createFogAroundInstance(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
         RUN_TIME_.objects.
-        RedHairGirlSprite.getFirstInstance(), 20, 100, 3, 200)
+        RedHairGirlSprite.getFirstInstance(), 50, 1000, 3, 1000)
 
 
 
