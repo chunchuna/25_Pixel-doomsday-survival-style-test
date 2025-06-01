@@ -45,15 +45,21 @@ var FogInstanceArray: InstanceType.FogSprite[] = [];
 var MaxFogCount = 0; // 记录最大雾数量
 var FogRadius = 100; // 记录雾的半径
 
+// 新增：存储雾实例与debug元素的映射关系
+var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();
 
 //实时获取雾和实例的距离
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
     if (TargetInstance == null) return;
-    for (var FogSprites of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.FogSprite.instances()
-    ) {
-        if (FogSprites == null) return
+    
+    // 获取所有雾实例
+    const fogInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+        RUN_TIME_.objects.FogSprite.instances());
+    
+    for (var FogSprites of fogInstances) {
+        if (FogSprites == null) continue;
+        
         FogSprites.instVars.DistanceFromInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
             //@ts-ignore
             CalculateDistancehahaShitCode(TargetInstance.x,
@@ -61,11 +67,107 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
                 TargetInstance.y, FogSprites.x, FogSprites.y);
 
         if (FogSprites.instVars.DistanceFromInstance > MaxDsitance) {
+            // 在销毁雾实例之前，先清理对应的debug元素
+            cleanupFogDebugElements(FogSprites.uid);
             FogSprites.destroy();
         }
     }
 });
 
+/**
+ * Clean up debug elements (box and line) for a specific fog instance
+ * @param fogUID - The UID of the fog instance
+ */
+function cleanupFogDebugElements(fogUID: number): void {
+    const debugElements = FogDebugMap.get(fogUID);
+    if (debugElements) {
+        try {
+            // Remove debug box
+            if (debugElements.boxKey) {
+                DebugObjectRenderer.Remove(debugElements.boxKey);
+                console.log(`Removed debug box for fog UID: ${fogUID}`);
+            }
+            
+            // Remove debug line
+            if (debugElements.lineKey) {
+                DebugObjectRenderer.removeDebugLine(debugElements.lineKey);
+                console.log(`Removed debug line for fog UID: ${fogUID}`);
+            }
+        } catch (error) {
+            console.log(`Failed to cleanup debug elements for fog UID ${fogUID}: ${error}`);
+        }
+        
+        // Remove from mapping
+        FogDebugMap.delete(fogUID);
+        console.log(`Cleaned up debug elements for fog UID: ${fogUID}`);
+    }
+}
+
+/**
+ * Create fog instance with debug elements and register them
+ * @param targetInstance - Target instance
+ * @param fogX - Fog X position
+ * @param fogY - Fog Y position
+ * @param isReplacement - Whether this is a replacement fog (affects debug color)
+ * @returns Created fog instance
+ */
+function createFogInstanceWithDebug(targetInstance: any, fogX: number, fogY: number, isReplacement: boolean = false): any {
+    // Create fog instance at calculated position
+    const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+        RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
+
+    // Add debug visualization for this fog instance
+    let boxKey = "";
+    let lineKey = "";
+
+    try {
+        // Choose color based on whether it's a replacement fog
+        const boxColor = isReplacement ? DebugColors.GREEN : DebugColors.CYAN;
+        
+        // Add debug box around fog instance
+        boxKey = DebugObjectRenderer
+            .setColorPreset(boxColor, 0.8)
+            .setBoxThickness(2)
+            .setHollow()
+            .setLayer("GameContent")
+            .RenderBoxtoInstance(fogInstance);
+
+        // Add debug line connecting fog to target instance
+        lineKey = DebugObjectRenderer
+            .setColorPreset(DebugColors.YELLOW, 0.6)
+            .setBoxThickness(1)
+            .RenderLineBetweenInstances(fogInstance, targetInstance);
+
+        // Store the mapping between fog UID and debug elements
+        FogDebugMap.set(fogInstance.uid, {
+            boxKey: boxKey,
+            lineKey: lineKey
+        });
+
+        console.log(`Added debug visualization for fog instance UID: ${fogInstance.uid} (${isReplacement ? 'replacement' : 'original'})`);
+    } catch (error) {
+        console.log(`Failed to add debug visualization for fog instance: ${error}`);
+    }
+
+    // Add fade-in effect to the fog instance
+    try {
+        const fadeBehavior = fogInstance.behaviors.Fade;
+        if (fadeBehavior) {
+            // Set fade parameters
+            fadeBehavior.fadeInTime = 1.0;  // 1 second fade in
+            fadeBehavior.waitTime = 99999;      // Long wait time
+            fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out when triggered
+
+            // Start the fade effect
+            fadeBehavior.startFade();
+            console.log(`Started fade-in effect for fog instance UID: ${fogInstance.uid}`);
+        }
+    } catch (error) {
+        console.log(`Failed to apply fade effect to fog instance: ${error}`);
+    }
+
+    return fogInstance;
+}
 
 /**
  * Create fog instances around a target instance in a circular pattern
@@ -130,52 +232,10 @@ export async function createFogAroundInstance(
         const fogX = centerX + Math.cos(angle) * radius;
         const fogY = centerY + Math.sin(angle) * radius;
 
-        // Create fog instance at calculated position
-        const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-            RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
+        // Use the new function to create fog with debug elements
+        const fogInstance = createFogInstanceWithDebug(targetInstance, fogX, fogY, false);
 
-        // Add debug visualization for this fog instance
-        let boxKey = "";
-        let lineKey = "";
-
-        try {
-            // Add debug box around fog instance
-            boxKey = DebugObjectRenderer
-                .setColorPreset(DebugColors.CYAN, 0.8)
-                .setBoxThickness(2)
-                .setHollow()
-                .setLayer("GameContent")
-                .RenderBoxtoInstance(fogInstance);
-
-            // Add debug line connecting fog to target instance
-            lineKey = DebugObjectRenderer
-                .setColorPreset(DebugColors.YELLOW, 0.6)
-                .setBoxThickness(1)
-                .RenderLineBetweenInstances(fogInstance, targetInstance);
-
-            console.log(`Added debug visualization for fog instance ${i + 1}`);
-        } catch (error) {
-            console.log(`Failed to add debug visualization for fog instance ${i + 1}: ${error}`);
-        }
-
-        // Add fade-in effect to the fog instance
-        try {
-            const fadeBehavior = fogInstance.behaviors.Fade;
-            if (fadeBehavior) {
-                // Set fade parameters
-                fadeBehavior.fadeInTime = 1.0;  // 1 second fade in
-                fadeBehavior.waitTime = 99999;      // Long wait time
-                fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out when triggered
-
-                // Start the fade effect
-                fadeBehavior.startFade();
-                console.log(`Started fade-in effect for fog instance ${i + 1}`);
-            }
-        } catch (error) {
-            console.log(`Failed to apply fade effect to fog instance ${i + 1}: ${error}`);
-        }
-
-        console.log(`Created fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)})`);
+        console.log(`Created fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)}) with UID: ${fogInstance.uid}`);
     }
 
     console.log(`Successfully created ${fogCount} fog instances around target at (${centerX}, ${centerY})`);
@@ -228,49 +288,10 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
             if (!tooClose || attempts >= maxAttempts) break;
         } while (attempts < maxAttempts);
 
-        // Create fog instance at calculated position
-        const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-            RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
+        // Use the new function to create replacement fog with debug elements
+        const fogInstance = createFogInstanceWithDebug(targetInstance, fogX, fogY, true);
 
-        // Add debug visualization for this fog instance
-        try {
-            // Add debug box around fog instance
-            const boxKey = DebugObjectRenderer
-                .setColorPreset(DebugColors.GREEN, 0.8) // Use green to indicate newly created fog
-                .setBoxThickness(2)
-                .setHollow()
-                .setLayer("GameContent")
-                .RenderBoxtoInstance(fogInstance);
-
-            // Add debug line connecting fog to target instance
-            const lineKey = DebugObjectRenderer
-                .setColorPreset(DebugColors.YELLOW, 0.6)
-                .setBoxThickness(1)
-                .RenderLineBetweenInstances(fogInstance, targetInstance);
-
-            console.log(`Added debug visualization for replacement fog instance ${i + 1}`);
-        } catch (error) {
-            console.log(`Failed to add debug visualization for replacement fog instance ${i + 1}: ${error}`);
-        }
-
-        // Add fade-in effect to the fog instance
-        try {
-            const fadeBehavior = fogInstance.behaviors.Fade;
-            if (fadeBehavior) {
-                // Set fade parameters
-                fadeBehavior.fadeInTime = 1.0;  // 1 second fade in
-                fadeBehavior.waitTime = 99999;      // Long wait time
-                fadeBehavior.fadeOutTime = 1.0;   // 1 second fade out when triggered
-
-                // Start the fade effect
-                fadeBehavior.startFade();
-                console.log(`Started fade-in effect for replacement fog instance ${i + 1}`);
-            }
-        } catch (error) {
-            console.log(`Failed to apply fade effect to replacement fog instance ${i + 1}: ${error}`);
-        }
-
-        console.log(`Created replacement fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)})`);
+        console.log(`Created replacement fog instance ${i + 1} at position (${fogX.toFixed(2)}, ${fogY.toFixed(2)}) with UID: ${fogInstance.uid}`);
     }
 
     console.log(`Successfully created ${missingCount} replacement fog instances`);
@@ -432,8 +453,10 @@ export function showFogDistanceDebugWindow(): void {
                                 ImGui.TableSetColumnIndex(6);
                                 if (ImGui.SmallButton(`Del##${index}`)) {
                                     if (fogInstance && fogInstance.destroy) {
+                                        // 先清理debug元素，再销毁雾实例
+                                        cleanupFogDebugElements(fogInstance.uid);
                                         fogInstance.destroy();
-                                        console.log(`Deleted fog instance #${index + 1}`);
+                                        console.log(`Deleted fog instance #${index + 1} with UID: ${fogInstance.uid}`);
                                     }
                                 }
 
@@ -600,6 +623,41 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             }
         },
         "Create 10 test fog instances around the player"
+    );
+
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Clean Debug Elements",
+        () => {
+            // 清理所有debug元素
+            FogDebugMap.forEach((debugElements, fogUID) => {
+                try {
+                    if (debugElements.boxKey) {
+                        DebugObjectRenderer.Remove(debugElements.boxKey);
+                    }
+                    if (debugElements.lineKey) {
+                        DebugObjectRenderer.removeDebugLine(debugElements.lineKey);
+                    }
+                } catch (error) {
+                    console.log(`Failed to cleanup debug elements for fog UID ${fogUID}: ${error}`);
+                }
+            });
+            FogDebugMap.clear();
+            console.log("Cleaned up all fog debug elements");
+        },
+        "Clean up all debug boxes and lines for fog instances"
+    );
+
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Show Debug Info",
+        () => {
+            console.log(`Total debug mappings: ${FogDebugMap.size}`);
+            FogDebugMap.forEach((debugElements, fogUID) => {
+                console.log(`Fog UID ${fogUID}: Box=${debugElements.boxKey}, Line=${debugElements.lineKey}`);
+            });
+        },
+        "Show debug information about fog-debug element mappings"
     );
 
     console.log("Fog debug buttons added to debug panel");
