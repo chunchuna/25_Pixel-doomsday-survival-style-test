@@ -10,6 +10,11 @@
 			"behaviorId": "Sin",
 			"name": "正弦运动",
 			"sid": 599021874149605
+		},
+		{
+			"behaviorId": "Fade",
+			"name": "Fade",
+			"sid": 874902738908345
 		}
 	],
 	"effectTypes": [],

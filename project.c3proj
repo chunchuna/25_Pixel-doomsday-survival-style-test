@@ -87,6 +87,13 @@
 		},
 		{
 			"type": "behavior",
+			"id": "Fade",
+			"name": "淡入淡出",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
 			"id": "NoSave",
 			"name": "不存档",
 			"author": "Scirra",

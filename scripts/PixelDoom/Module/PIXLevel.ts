@@ -1,5 +1,4 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
-import { PIXEffect_fog } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
