@@ -98,6 +98,10 @@ export class IMGUIDebugButton {
     // Input text state (simple string for ImGui)
     private static inputTextValue: string = "";
 
+    // Storage keys for localStorage (remove window position and size)
+    private static readonly STORAGE_KEY_FAVORITES = "imgui_debug_button_favorites";
+    private static readonly STORAGE_KEY_RECENT = "imgui_debug_button_recent";
+
     /**
      * Check if buttons have been added already
      * @returns True if buttons have been added
@@ -114,6 +118,143 @@ export class IMGUIDebugButton {
     }
 
     /**
+     * Get stable button identifier for storage
+     * @param button Button object
+     * @returns Stable identifier string
+     * @private
+     */
+    private static getButtonStableId(button: DebugButton): string {
+        // Use button name + source script as stable identifier
+        return `${button.name}|${button.sourceScript || 'unknown'}`;
+    }
+
+    /**
+     * Find button by stable identifier
+     * @param stableId Stable identifier
+     * @returns Button object or undefined
+     * @private
+     */
+    private static findButtonByStableId(stableId: string): DebugButton | undefined {
+        const [name, sourceScript] = stableId.split('|');
+        return this.buttons.find(btn => 
+            btn.name === name && (btn.sourceScript || 'unknown') === sourceScript
+        );
+    }
+
+    /**
+     * Load data from localStorage
+     * @private
+     */
+    private static loadFromStorage(): void {
+        try {
+            // Load favorite buttons using stable IDs
+            const favoritesData = localStorage.getItem(this.STORAGE_KEY_FAVORITES);
+            if (favoritesData) {
+                const favoriteStableIds = JSON.parse(favoritesData) as string[];
+                console.log("Loading favorite buttons from storage:", favoriteStableIds);
+                
+                // Convert stable IDs back to current button IDs
+                this.favoriteButtons.clear();
+                favoriteStableIds.forEach(stableId => {
+                    const button = this.findButtonByStableId(stableId);
+                    if (button) {
+                        this.favoriteButtons.add(button.id);
+                        console.log(`Restored favorite button: ${button.name}`);
+                    } else {
+                        console.log(`Could not find button for stable ID: ${stableId}`);
+                    }
+                });
+            }
+
+            // Load recent buttons using stable IDs
+            const recentData = localStorage.getItem(this.STORAGE_KEY_RECENT);
+            if (recentData) {
+                const recentStableIds = JSON.parse(recentData) as string[];
+                console.log("Loading recent buttons from storage:", recentStableIds);
+                
+                // Convert stable IDs back to current button IDs
+                this.recentButtons = [];
+                recentStableIds.forEach(stableId => {
+                    const button = this.findButtonByStableId(stableId);
+                    if (button) {
+                        this.recentButtons.push(button.id);
+                        console.log(`Restored recent button: ${button.name}`);
+                    } else {
+                        console.log(`Could not find button for stable ID: ${stableId}`);
+                    }
+                });
+                
+                // Limit to MAX_RECENT_BUTTONS
+                this.recentButtons = this.recentButtons.slice(0, this.MAX_RECENT_BUTTONS);
+            }
+        } catch (error) {
+            console.warn("Failed to load debug button data from storage:", error);
+        }
+    }
+
+    /**
+     * Save favorite buttons to localStorage
+     * @private
+     */
+    private static saveFavoritesToStorage(): void {
+        try {
+            // Convert current button IDs to stable IDs for storage
+            const favoriteStableIds: string[] = [];
+            this.favoriteButtons.forEach(buttonId => {
+                const button = this.buttons.find(btn => btn.id === buttonId);
+                if (button) {
+                    favoriteStableIds.push(this.getButtonStableId(button));
+                }
+            });
+            
+            localStorage.setItem(this.STORAGE_KEY_FAVORITES, JSON.stringify(favoriteStableIds));
+            console.log("Saved favorite buttons to storage:", favoriteStableIds);
+        } catch (error) {
+            console.warn("Failed to save favorite buttons to storage:", error);
+        }
+    }
+
+    /**
+     * Save recent buttons to localStorage
+     * @private
+     */
+    private static saveRecentToStorage(): void {
+        try {
+            // Convert current button IDs to stable IDs for storage
+            const recentStableIds: string[] = [];
+            this.recentButtons.forEach(buttonId => {
+                const button = this.buttons.find(btn => btn.id === buttonId);
+                if (button) {
+                    recentStableIds.push(this.getButtonStableId(button));
+                }
+            });
+            
+            localStorage.setItem(this.STORAGE_KEY_RECENT, JSON.stringify(recentStableIds));
+            console.log("Saved recent buttons to storage:", recentStableIds);
+        } catch (error) {
+            console.warn("Failed to save recent buttons to storage:", error);
+        }
+    }
+
+    /**
+     * Clear all stored data
+     */
+    public static ClearStoredData(): void {
+        try {
+            localStorage.removeItem(this.STORAGE_KEY_FAVORITES);
+            localStorage.removeItem(this.STORAGE_KEY_RECENT);
+            
+            // Reset current data
+            this.favoriteButtons.clear();
+            this.recentButtons = [];
+            
+            console.log("Cleared all debug button stored data");
+        } catch (error) {
+            console.warn("Failed to clear stored data:", error);
+        }
+    }
+
+    /**
      * Initialize Debug Button Panel
      * @private
      */
@@ -123,7 +264,7 @@ export class IMGUIDebugButton {
         // Set initialized flag first to prevent recursive calls
         this.isInitialized = true;
 
-        // Create IMGUI window
+        // Create IMGUI window (without loading storage data yet)
         Imgui_chunchun.CreateTextWindow(
             this.WINDOW_ID,
             "debug_panel",
@@ -148,6 +289,15 @@ export class IMGUIDebugButton {
         this.setupKeyboardEvents();
 
         console.log("IMGUIDebugButton initialized");
+    }
+
+    /**
+     * Load stored data after all buttons have been added
+     * This should be called after all buttons are registered
+     */
+    public static LoadStoredData(): void {
+        console.log("Loading stored button data...");
+        this.loadFromStorage();
     }
 
     /**
@@ -337,6 +487,8 @@ export class IMGUIDebugButton {
             } else {
                 this.favoriteButtons.add(button.id);
             }
+            // Save favorites to storage when changed
+            this.saveFavoritesToStorage();
         }
         ImGui.PopStyleColor(1);
         
@@ -1002,6 +1154,9 @@ export class IMGUIDebugButton {
         if (this.recentButtons.length > this.MAX_RECENT_BUTTONS) {
             this.recentButtons = this.recentButtons.slice(0, this.MAX_RECENT_BUTTONS);
         }
+
+        // Save to storage
+        this.saveRecentToStorage();
     }
 
     /**
@@ -1136,7 +1291,6 @@ interface Category {
 // Initialize IMGUI Debug Button Panel
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
-
     // 使用延时添加按钮，确保初始化完成后再添加
     setTimeout(() => {
         // 如果按钮已经添加过，则不再重复添加
@@ -1182,6 +1336,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             },
             "Quick access: Open fog distance monitoring window"
         );
+
+        // Load stored data after all buttons have been added
+        setTimeout(() => {
+            IMGUIDebugButton.LoadStoredData();
+        }, 200); // Additional delay to ensure all buttons are registered
 
     }, 100); // 短暂延迟确保初始化完成
 });
