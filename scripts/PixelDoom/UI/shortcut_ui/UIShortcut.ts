@@ -36,6 +36,7 @@ interface ShortcutLittleGroup {
     keys: ShortcutKey[];
     description: string;
     parentGroup: ShortcutGroup;
+    layoutMode?: 'linear' | 'hill'; // 添加布局模式
 }
 
 /**
@@ -545,17 +546,73 @@ export class ShortcutLittleGroupBuilder {
     public AddDescribe(description: string): ShortcutLittleGroupBuilder {
         this.littleGroup.description = description;
 
-        // Create description element
-        const descElement = document.createElement('span');
-        descElement.textContent = description;
-        descElement.style.cssText = `
-            color: #ffffff;
-            font-size: 12px;
-            margin-left: 8px;
-            font-family: Arial, sans-serif;
-        `;
+        // Check if this is hill layout mode
+        const isHillMode = (this.littleGroup as any).layoutMode === 'hill';
 
-        this.littleGroup.element.appendChild(descElement);
+        if (isHillMode) {
+            // For hill mode, restructure the layout to have description at bottom
+            const currentContent = this.littleGroup.element.innerHTML;
+            this.littleGroup.element.innerHTML = '';
+            
+            // Create container for the grid layout
+            const gridContainer = document.createElement('div');
+            gridContainer.innerHTML = currentContent;
+            gridContainer.style.cssText = `
+                position: relative;
+                display: grid;
+                grid-template-areas: 
+                    ". top ."
+                    "left center right"
+                    ". . .";
+                grid-template-columns: 28px 28px 28px;
+                grid-template-rows: 28px 28px 28px;
+                gap: 2px;
+                width: 90px;
+                height: 90px;
+                align-items: center;
+                justify-items: center;
+            `;
+
+            // Create description element for hill mode
+            const descElement = document.createElement('span');
+            descElement.textContent = description;
+            descElement.style.cssText = `
+                color: #ffffff;
+                font-size: 11px;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin-top: 4px;
+            `;
+
+            // Update main container to flex column layout
+            this.littleGroup.element.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 8px;
+                padding: 6px;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 4px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            `;
+
+            // Add grid container and description
+            this.littleGroup.element.appendChild(gridContainer);
+            this.littleGroup.element.appendChild(descElement);
+
+        } else {
+            // For linear mode, use original behavior
+            const descElement = document.createElement('span');
+            descElement.textContent = description;
+            descElement.style.cssText = `
+                color: #ffffff;
+                font-size: 12px;
+                margin-left: 8px;
+                font-family: Arial, sans-serif;
+            `;
+
+            this.littleGroup.element.appendChild(descElement);
+        }
 
         // Recalculate positions after adding description with longer delay
         setTimeout(() => {
@@ -563,6 +620,102 @@ export class ShortcutLittleGroupBuilder {
         }, 50); // Increased delay
 
         return this;
+    }
+
+    /**
+     * Set the layout pattern to hill/mountain style for movement keys
+     * This arranges keys in a cross pattern: W(top), A(left), S(center), D(right)
+     * @returns This builder for chaining
+     */
+    public SetRegularHillPattern(): ShortcutLittleGroupBuilder {
+        // Mark this group as using hill layout
+        (this.littleGroup as any).layoutMode = 'hill';
+        
+        // Clear existing linear layout
+        this.littleGroup.element.innerHTML = '';
+        
+        // Apply hill layout styles with larger container
+        this.littleGroup.element.style.cssText = `
+            position: relative;
+            display: grid;
+            grid-template-areas: 
+                ". top ."
+                "left center right"
+                ". . .";
+            grid-template-columns: 28px 28px 28px;
+            grid-template-rows: 28px 28px 28px;
+            gap: 2px;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 8px;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+            justify-items: center;
+        `;
+        
+        // Re-add all keys with hill positioning
+        this.littleGroup.keys.forEach((shortcutKey, index) => {
+            const keyIcon = UIShortcut['createKeyIcon'](shortcutKey.key);
+            this.positionKeyInHill(keyIcon, shortcutKey.key, index);
+            this.littleGroup.element.appendChild(keyIcon);
+        });
+        
+        // Recalculate positions after layout change
+        setTimeout(() => {
+            UIShortcut['recalculatePositions'](this.littleGroup.parentGroup.position);
+        }, 50);
+        
+        return this;
+    }
+
+    /**
+     * Position a key icon in the hill pattern based on the key name
+     * @param keyIcon The key icon element
+     * @param key The key name
+     * @param index The index of the key
+     */
+    private positionKeyInHill(keyIcon: HTMLElement, key: string, index: number): void {
+        const keyUpper = key.toUpperCase();
+        
+        // Define position mapping for common movement keys
+        // S key should be in center position for WASD layout
+        const positionMap: { [key: string]: string } = {
+            'W': 'top',
+            'A': 'left', 
+            'S': 'center',  // Fixed: S should be in center, not bottom
+            'D': 'right',
+            'UP': 'top',
+            'LEFT': 'left',
+            'DOWN': 'center',  // Down arrow also goes to center
+            'RIGHT': 'right',
+            '↑': 'top',
+            '←': 'left',
+            '↓': 'center',  // Down arrow symbol to center
+            '→': 'right',
+            // Support number key cross layout
+            '8': 'top',
+            '4': 'left',
+            '2': 'center',  // Number 2 (down) to center
+            '6': 'right',
+            '5': 'center'   // Number 5 stays in center
+        };
+        
+        // Get grid area for this key, fallback to center for unknown keys
+        const gridArea = positionMap[keyUpper] || 'center';
+        
+        // Apply grid positioning
+        keyIcon.style.gridArea = gridArea;
+        keyIcon.style.margin = '0';
+        
+        // Adjust size for hill layout - slightly larger keys
+        keyIcon.style.width = '24px';
+        keyIcon.style.height = '24px';
+        keyIcon.style.minWidth = '24px';
+        keyIcon.style.fontSize = '10px';
+        keyIcon.style.padding = '2px 4px';
     }
 
     /**
@@ -893,9 +1046,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     UIShortcut.CreateShortLittleGroup(PlayerShortBase)
         .setShort("W")
+        .setShort("A")
         .setShort("S")
         .setShort("D")
-        .setShort("A")
+        .SetRegularHillPattern()
         .AddDescribe("Move");
 
 
