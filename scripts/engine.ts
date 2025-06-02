@@ -97,6 +97,14 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         });
     }
 
+    public static gl$_ubu_init_before = (Function: () => void) => {
+        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            runtime.addEventListener(GAME_STATES.INIT_BEFORE, Function);
+
+        });
+    }
+
+
 
     public static gl$_ubu_update = (Function: () => void) => {
         pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {

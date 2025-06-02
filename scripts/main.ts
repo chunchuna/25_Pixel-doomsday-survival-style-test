@@ -3,6 +3,7 @@
 
 import "./engine.js"
 
+
 import "./PixelDoom/UI/font/font.js"
 import "./PixelDoom/UI/imgui_lib/imgui.js"
 import "./PixelDoom/UI/debug_ui/UIConsole.js"
@@ -24,6 +25,7 @@ import "./PixelDoom/Module/PIXSortObject.js"
 import "./PixelDoom/Module/PIXClickObject.js"
 import "./PixelDoom/Module/PIXAmbientLight.js"
 // ClickObject
+import "./PixelDoom/Group/GouHuo/PIXGouHuo.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_LuYingYi.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectCommonObject.js"
 import "./PixelDoom/Group/ClickObject/PIXClickObjectItem_ZhangPeng.js"
@@ -62,7 +64,7 @@ import "./PixelDoom/UI/tweak_ui/tweak_window_test.js"
 
 import "./PixelDoom/UI/time_cd_ui/UICd.js"
 
-import "./PixelDoom/Group/GouHuo/PIXGouHuo.js"
+
 import "./PixelDoom/UI/bubble_ui/UIBubble.js"
 import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
 import "./PixelDoom/Group/Effect/Fog/FogEffectDebug.js"

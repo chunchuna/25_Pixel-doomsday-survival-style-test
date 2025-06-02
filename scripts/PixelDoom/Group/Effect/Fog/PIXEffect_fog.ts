@@ -55,6 +55,8 @@ var FogInstancesFadingOut: Set<number> = new Set();
 //实时获取雾和实例的距离
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
     if (TargetInstance == null) return;
 
     // Get all fog instances

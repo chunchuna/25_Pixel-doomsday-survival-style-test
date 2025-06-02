@@ -26,6 +26,10 @@
 			"includeSheet": "Save"
 		},
 		{
+			"eventType": "include",
+			"includeSheet": "Gouhuo"
+		},
+		{
 			"eventType": "group",
 			"disabled": false,
 			"title": "LevelInit",

@@ -64,7 +64,7 @@ async function Rain() {
 
     WeatherC3Timer.behaviors.Timer.startTimer(0.5, "rain", "regular")
     WeatherC3Timer.behaviors.Timer.addEventListener("timer", () => {
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 50; i++) {
             if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
             RainDropSpriteClass.createInstance(
                 "Rain",

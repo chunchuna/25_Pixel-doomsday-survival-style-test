@@ -24,7 +24,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -218,7 +218,7 @@
 					},
 					"instanceFolderItem": {
 						"sid": 129773173844247,
-						"expanded": false
+						"expanded": true
 					},
 					"showing": true,
 					"locked": false,
@@ -257,7 +257,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -338,7 +338,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -419,7 +419,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -500,7 +500,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -581,7 +581,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -662,7 +662,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -743,7 +743,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -824,7 +824,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -905,7 +905,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
@@ -986,7 +986,7 @@
 					"behaviors": {},
 					"effects": {
 						"像素化": {
-							"isEnabled": true,
+							"isEnabled": false,
 							"parameters": {
 								"size": 15
 							}
