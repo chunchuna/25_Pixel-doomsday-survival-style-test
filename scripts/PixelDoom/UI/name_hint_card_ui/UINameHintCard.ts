@@ -73,6 +73,53 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .SetScale(2.0);
     });
 
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test flash effect", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        UINameHintCard.CreateHintCardInstance("Flashing Item")
+            .SetPosition(PlayerInstance.x - 100, PlayerInstance.y - 150)
+            .SetFlash(true);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test conspicuous effect", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        UINameHintCard.CreateHintCardInstance("Conspicuous Item")
+            .SetPosition(PlayerInstance.x + 100, PlayerInstance.y - 150)
+            .SetConspicuous(true);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test GOOD quality effect", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        UINameHintCard.CreateHintCardInstance("Legendary Artifact")
+            .SetPosition(PlayerInstance.x, PlayerInstance.y - 250)
+            .SetGOOD(true)
+            .SetScale(1.2);
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test combined effects", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        // Flash + Good quality
+        UINameHintCard.CreateHintCardInstance("Epic Flash Item")
+            .SetPosition(PlayerInstance.x - 150, PlayerInstance.y - 300)
+            .SetFlash(true)
+            .SetGOOD(true)
+            .SetScale(1.1);
+
+        // Conspicuous + Good quality
+        UINameHintCard.CreateHintCardInstance("Ultimate Item")
+            .SetPosition(PlayerInstance.x + 150, PlayerInstance.y - 300)
+            .SetConspicuous(true)
+            .SetGOOD(true)
+            .SetScale(1.3);
+    });
+
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Destroy all hint cards", () => {
         UINameHintCard.DestroyAllCards();
     });
@@ -111,10 +158,20 @@ export class UINameHintCard {
     private static FADE_IN_DURATION: number = 200; // milliseconds
     private static FADE_OUT_DURATION: number = 300; // milliseconds
 
+    // Special effects properties
+    private isFlashing: boolean = false;
+    private isConspicuous: boolean = false;
+    private isGoodQuality: boolean = false;
+    private effectTimer: any | null = null; // C3 Timer for effects
+    private effectTimerTag: string = "";
+
     private constructor(content: string, layer: string = "html_c3") {
         this.id = `hint_card_${++UINameHintCard.idCounter}_${Date.now()}`;
         this.content = content;
         this.layer = layer;
+
+        // Initialize effect timer tag
+        this.effectTimerTag = `effect_${this.id}_${Date.now()}`;
 
         // Calculate auto-size based on content
         this.calculateAutoSize();
@@ -325,6 +382,26 @@ export class UINameHintCard {
     private generateCardHTML(): string {
         const entranceScale = this._scale * 0.9; // Slightly smaller for entrance animation
         
+        // Build animation classes based on active effects
+        let animationClasses = `cardEnter ${UINameHintCard.FADE_IN_DURATION}ms ease-out forwards`;
+        
+        if (this.isFlashing) {
+            animationClasses += `, cardFlash 1s ease-in-out infinite`;
+        }
+        
+        if (this.isGoodQuality) {
+            animationClasses += `, cardGlow 2s ease-in-out infinite, cardFloat 3s ease-in-out infinite`;
+        }
+
+        // Additional styles for good quality effect
+        let additionalStyles = "";
+        if (this.isGoodQuality) {
+            additionalStyles = `
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.4);
+                border: 2px solid #ffd700;
+            `;
+        }
+
         return `
         <div id="hint-card-${this.id}" style="
             position: relative;
@@ -334,8 +411,11 @@ export class UINameHintCard {
             transform: scale(${entranceScale}) translateY(5px);
             font-family: 'Segoe UI', Arial, sans-serif;
             pointer-events: none;
-            animation: cardEnter ${UINameHintCard.FADE_IN_DURATION}ms ease-out forwards;
+            animation: ${animationClasses};
         ">
+            <!-- Particle effects for good quality -->
+            ${this.isGoodQuality ? this.generateParticleEffects() : ''}
+            
             <!-- Main card container -->
             <div style="
                 position: relative;
@@ -351,18 +431,19 @@ export class UINameHintCard {
                 padding: ${this.padding};
                 box-sizing: border-box;
                 backdrop-filter: blur(2px);
+                ${additionalStyles}
             ">
                 <!-- Text content -->
                 <div style="
                     color: ${this.textColor};
                     font-size: ${this.fontSize};
-                    font-weight: 500;
+                    font-weight: ${this.isGoodQuality ? '600' : '500'};
                     text-align: center;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     max-width: 100%;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+                    text-shadow: ${this.isGoodQuality ? '0 0 8px rgba(255, 215, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.8)' : '0 1px 2px rgba(0, 0, 0, 0.8)'};
                     letter-spacing: 0.5px;
                 ">
                     ${this.escapeHtml(this.content)}
@@ -392,7 +473,65 @@ export class UINameHintCard {
                     transform: scale(${entranceScale}) translateY(-5px); 
                 }
             }
+            
+            @keyframes cardFlash {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+            
+            @keyframes cardGlow {
+                0%, 100% { 
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.4);
+                }
+                50% { 
+                    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+                }
+            }
+            
+            @keyframes cardFloat {
+                0%, 100% { transform: scale(${this._scale}) translateY(0px); }
+                50% { transform: scale(${this._scale}) translateY(-3px); }
+            }
+            
+            @keyframes particleFloat {
+                0% { 
+                    transform: translateY(0px) rotate(0deg);
+                    opacity: 0;
+                }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { 
+                    transform: translateY(-30px) rotate(360deg);
+                    opacity: 0;
+                }
+            }
         </style>`;
+    }
+
+    /**
+     * Generates particle effects for good quality cards
+     */
+    private generateParticleEffects(): string {
+        let particles = '';
+        for (let i = 0; i < 6; i++) {
+            const delay = i * 0.5;
+            const left = 10 + (i * 15);
+            particles += `
+                <div style="
+                    position: absolute;
+                    left: ${left}%;
+                    top: 50%;
+                    width: 4px;
+                    height: 4px;
+                    background: radial-gradient(circle, #ffd700, #ffed4e);
+                    border-radius: 50%;
+                    animation: particleFloat 3s ease-in-out infinite;
+                    animation-delay: ${delay}s;
+                    z-index: -1;
+                "></div>
+            `;
+        }
+        return particles;
     }
 
     /**
@@ -564,6 +703,9 @@ export class UINameHintCard {
      * Destroys the hint card immediately
      */
     public destroy(): void {
+        // Clear effect timer
+        this.stopEffectTimer();
+
         // Destroy HTML element
         if (this.htmlElement) {
             try {
@@ -628,5 +770,117 @@ export class UINameHintCard {
      */
     public getHtmlElement(): any {
         return this.htmlElement;
+    }
+
+    /**
+     * Enables flashing animation for the hint card
+     * @param enabled Whether to enable flashing (default: true)
+     */
+    public SetFlash(enabled: boolean = true): UINameHintCard {
+        this.isFlashing = enabled;
+        
+        if (this.htmlElement) {
+            this.renderHTML(); // Re-render with flash effect
+        }
+
+        return this;
+    }
+
+    /**
+     * Enables conspicuous effect with random color switching
+     * @param enabled Whether to enable conspicuous effect (default: true)
+     */
+    public SetConspicuous(enabled: boolean = true): UINameHintCard {
+        this.isConspicuous = enabled;
+        
+        if (enabled) {
+            this.startConspicuousEffect();
+        } else {
+            this.stopEffectTimer();
+        }
+
+        if (this.htmlElement) {
+            this.renderHTML(); // Re-render with conspicuous effect
+        }
+
+        return this;
+    }
+
+    /**
+     * Enables high-quality effect with premium animations and particle effects
+     * @param enabled Whether to enable good quality effect (default: true)
+     */
+    public SetGOOD(enabled: boolean = true): UINameHintCard {
+        this.isGoodQuality = enabled;
+        
+        if (this.htmlElement) {
+            this.renderHTML(); // Re-render with good quality effect
+        }
+
+        return this;
+    }
+
+    /**
+     * Starts the conspicuous color switching effect
+     */
+    private startConspicuousEffect(): void {
+        if (!this.isConspicuous) return;
+
+        try {
+            // Stop existing timer if any
+            this.stopEffectTimer();
+
+            // Create C3 Timer for conspicuous effect
+            this.effectTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+
+            this.effectTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === this.effectTimerTag && this.isConspicuous) {
+                    // Generate random colors
+                    const colors = [
+                        { bg: "#ff0000", border: "#ff6666", text: "#ffffff" }, // Red
+                        { bg: "#00ff00", border: "#66ff66", text: "#000000" }, // Green
+                        { bg: "#0000ff", border: "#6666ff", text: "#ffffff" }, // Blue
+                        { bg: "#ffff00", border: "#ffff66", text: "#000000" }, // Yellow
+                        { bg: "#ff00ff", border: "#ff66ff", text: "#ffffff" }, // Magenta
+                        { bg: "#00ffff", border: "#66ffff", text: "#000000" }, // Cyan
+                        { bg: "#ff8800", border: "#ffaa66", text: "#ffffff" }, // Orange
+                        { bg: "#8800ff", border: "#aa66ff", text: "#ffffff" }  // Purple
+                    ];
+
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    this.backgroundColor = randomColor.bg;
+                    this.borderColor = randomColor.border;
+                    this.textColor = randomColor.text;
+
+                    if (this.htmlElement) {
+                        this.renderHTML();
+                    }
+
+                    // Continue the effect
+                    this.effectTimer.behaviors.Timer.startTimer(0.3, this.effectTimerTag, "once"); // 300ms interval
+                }
+            });
+
+            // Start the effect
+            this.effectTimer.behaviors.Timer.startTimer(0.3, this.effectTimerTag, "once");
+
+        } catch (error: any) {
+            console.error(`Failed to create conspicuous effect timer: ${error.message}`);
+        }
+    }
+
+    /**
+     * Stops the effect timer
+     */
+    private stopEffectTimer(): void {
+        if (this.effectTimer) {
+            try {
+                this.effectTimer.behaviors.Timer.stopTimer(this.effectTimerTag);
+                this.effectTimer.destroy();
+            } catch (error: any) {
+                console.warn(`Error stopping effect timer: ${error.message}`);
+            }
+            this.effectTimer = null;
+        }
     }
 }
