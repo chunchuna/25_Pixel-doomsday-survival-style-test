@@ -67,20 +67,20 @@ export class UIShortcut {
      */
     public static CreateShortGroup(position: ShortPosition = ShortPosition.BottomRight): ShortcutGroup {
         this.Initialize();
-        
+
         const groupId = `shortcut-group-${++this.idCounter}`;
-        
+
         // Create group container
         const groupElement = document.createElement('div');
         groupElement.id = groupId;
         groupElement.className = 'shortcut-group';
-        
+
         // Apply base styling (position will be calculated later)
         this.applyBaseStyles(groupElement);
-        
+
         // Add to document
         document.body.appendChild(groupElement);
-        
+
         // Create group object
         const group: ShortcutGroup = {
             id: groupId,
@@ -89,20 +89,20 @@ export class UIShortcut {
             keys: [],
             littleGroups: []
         };
-        
+
         this.groups.set(groupId, group);
-        
+
         // Add to position tracking
         if (!this.groupsByPosition.has(position)) {
             this.groupsByPosition.set(position, []);
         }
         this.groupsByPosition.get(position)!.push(group);
-        
+
         // Delay position calculation to ensure DOM is rendered
         setTimeout(() => {
             this.recalculatePositions(position);
         }, 50); // Increased delay
-        
+
         return group;
     }
 
@@ -154,7 +154,7 @@ export class UIShortcut {
     public static CreateShort(parentGroup: ShortcutGroup, key: string, description: string): void {
         const shortcutKey: ShortcutKey = { key, description };
         parentGroup.keys.push(shortcutKey);
-        
+
         // Create shortcut element
         const shortcutElement = document.createElement('div');
         shortcutElement.className = 'shortcut-single';
@@ -167,11 +167,11 @@ export class UIShortcut {
             border-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         `;
-        
+
         // Create key icon
         const keyIcon = this.createKeyIcon(key);
         shortcutElement.appendChild(keyIcon);
-        
+
         // Create description
         const descElement = document.createElement('span');
         descElement.textContent = description;
@@ -182,9 +182,9 @@ export class UIShortcut {
             font-family: Arial, sans-serif;
         `;
         shortcutElement.appendChild(descElement);
-        
+
         parentGroup.element.appendChild(shortcutElement);
-        
+
         // Recalculate positions after adding content with longer delay
         setTimeout(() => {
             this.recalculatePositions(parentGroup.position);
@@ -243,14 +243,14 @@ export class UIShortcut {
 
         // Filter out hidden groups
         const visibleGroups = groups.filter(group => group.element.style.display !== 'none');
-        
+
         if (visibleGroups.length === 0) return;
-        
+
         // Force layout calculation to get accurate dimensions
         visibleGroups.forEach(group => {
             group.element.offsetHeight; // Force reflow
         });
-        
+
         // Apply positions with a small delay to ensure DOM is updated
         requestAnimationFrame(() => {
             visibleGroups.forEach((group, index) => {
@@ -266,10 +266,10 @@ export class UIShortcut {
         element.style.cssText = `
             position: fixed;
             z-index: 9000;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 12px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0);
+            border-radius: 1px;
+            padding: -2px;
             backdrop-filter: blur(4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             min-width: 120px;
@@ -290,19 +290,19 @@ export class UIShortcut {
     private static applyPositionStyles(element: HTMLElement, position: ShortPosition, index: number = 0, totalGroups: number = 1): void {
         const baseOffset = 20; // Base distance from screen edge
         const groupSpacing = 15; // Space between groups (increased for better visibility)
-        
+
         // Get actual element dimensions
         const rect = element.getBoundingClientRect();
         const elementHeight = rect.height || element.offsetHeight || 80;
         const elementWidth = rect.width || element.offsetWidth || 180;
-        
+
         // Reset all positioning properties first
         element.style.top = 'auto';
         element.style.bottom = 'auto';
         element.style.left = 'auto';
         element.style.right = 'auto';
         element.style.transform = '';
-        
+
         // Calculate cumulative height for bottom positions
         let cumulativeHeight = 0;
         if (position === ShortPosition.BottomLeft || position === ShortPosition.BottomRight || position === ShortPosition.BottomCenter) {
@@ -317,53 +317,53 @@ export class UIShortcut {
                 }
             }
         }
-        
+
         switch (position) {
             case ShortPosition.TopLeft:
                 element.style.top = `${baseOffset + index * (elementHeight + groupSpacing)}px`;
                 element.style.left = `${baseOffset}px`;
                 break;
-                
+
             case ShortPosition.TopRight:
                 element.style.top = `${baseOffset + index * (elementHeight + groupSpacing)}px`;
                 element.style.right = `${baseOffset}px`;
                 break;
-                
+
             case ShortPosition.BottomLeft:
                 element.style.bottom = `${baseOffset + cumulativeHeight}px`;
                 element.style.left = `${baseOffset}px`;
                 break;
-                
+
             case ShortPosition.BottomRight:
                 element.style.bottom = `${baseOffset + cumulativeHeight}px`;
                 element.style.right = `${baseOffset}px`;
                 break;
-                
+
             case ShortPosition.TopCenter:
                 element.style.top = `${baseOffset + index * (elementHeight + groupSpacing)}px`;
                 element.style.left = '50%';
                 element.style.transform = 'translateX(-50%)';
                 break;
-                
+
             case ShortPosition.BottomCenter:
                 element.style.bottom = `${baseOffset + cumulativeHeight}px`;
                 element.style.left = '50%';
                 element.style.transform = 'translateX(-50%)';
                 break;
-                
+
             case ShortPosition.LeftCenter:
                 element.style.left = `${baseOffset + index * (elementWidth + groupSpacing)}px`;
                 element.style.top = '50%';
                 element.style.transform = 'translateY(-50%)';
                 break;
-                
+
             case ShortPosition.RightCenter:
                 element.style.right = `${baseOffset + index * (elementWidth + groupSpacing)}px`;
                 element.style.top = '50%';
                 element.style.transform = 'translateY(-50%)';
                 break;
         }
-        
+
         // Debug log for troubleshooting
         console.log(`Positioned group ${index + 1}/${totalGroups} at ${position}:`, {
             elementHeight,
@@ -544,7 +544,7 @@ export class ShortcutLittleGroupBuilder {
      */
     public AddDescribe(description: string): ShortcutLittleGroupBuilder {
         this.littleGroup.description = description;
-        
+
         // Create description element
         const descElement = document.createElement('span');
         descElement.textContent = description;
@@ -554,14 +554,14 @@ export class ShortcutLittleGroupBuilder {
             margin-left: 8px;
             font-family: Arial, sans-serif;
         `;
-        
+
         this.littleGroup.element.appendChild(descElement);
-        
+
         // Recalculate positions after adding description with longer delay
         setTimeout(() => {
             UIShortcut['recalculatePositions'](this.littleGroup.parentGroup.position);
         }, 50); // Increased delay
-        
+
         return this;
     }
 
@@ -872,11 +872,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     IMGUIDebugButton.AddButtonToCategory(Short, "Open Short Debug Window", () => {
         UIShortcutDebug.ToggleDebugWindow();
     })
-    
+
     IMGUIDebugButton.AddButtonToCategory(Short, "Recalculate All Positions", () => {
         UIShortcut.RecalculateAllPositions();
     })
-    
+
     IMGUIDebugButton.AddButtonToCategory(Short, "Show Debug Info", () => {
         console.log("Shortcut Debug Info:", UIShortcut.GetDebugInfo());
     })
@@ -885,40 +885,19 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
-    
-    // First group - Player movement
-    var PlayerMovementHintGroup = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
-    UIShortcut.CreateShortLittleGroup(PlayerMovementHintGroup)
+
+    // First group - Player Base
+    var PlayerShortBase = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
+
+    UIShortcut.CreateShort(PlayerShortBase, "TAB", "Inventory")
+
+    UIShortcut.CreateShortLittleGroup(PlayerShortBase)
         .setShort("W")
         .setShort("S")
         .setShort("D")
         .setShort("A")
         .AddDescribe("Move");
-    
-    // Second group - Inventory (same position to test auto-arrangement)
-    var InventoryHintGroup = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
-    UIShortcut.CreateShort(InventoryHintGroup, "TAB", "Inventory")
-    
-    // Third group - Combat actions (same position to test auto-arrangement)
-    var CombatHintGroup = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
-    UIShortcut.CreateShort(CombatHintGroup, "SPACE", "Jump")
-    UIShortcut.CreateShort(CombatHintGroup, "SHIFT", "Run")
 
-    // Fourth group - Additional test
-    var CombatHintGroup2 = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
-    UIShortcut.CreateShort(CombatHintGroup2, "E", "Interact")
-    UIShortcut.CreateShort(CombatHintGroup2, "F", "Use")
-
-    // Force recalculation after all groups are created
-    setTimeout(() => {
-        console.log("Force recalculating positions for all groups...");
-        UIShortcut.RecalculateAllPositions();
-        
-        // Show debug info
-        setTimeout(() => {
-            console.log("Final Debug Info:", UIShortcut.GetDebugInfo());
-        }, 100);
-    }, 200);
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
         .addEventListener("beforeanylayoutend", () => {
