@@ -14,7 +14,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UINameHintCard.CreateHintCard("Mysterious Item")
+        UINameHintCard.CreateHintCardInstance("Mysterious Item")
             .SetPosition(PlayerInstance.x, PlayerInstance.y - 100)
             .SetLayer("html_c3");
     });
@@ -23,7 +23,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UINameHintCard.CreateHintCard("Ancient Sword of the Forgotten Realm")
+        UINameHintCard.CreateHintCardInstance("Ancient Sword of the Forgotten Realm")
             .SetPosition(PlayerInstance.x + 50, PlayerInstance.y - 150)
             .SetLayer("html_c3");
     });
@@ -32,10 +32,23 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
-        UINameHintCard.CreateHintCard("Custom Size Item")
+        UINameHintCard.CreateHintCardInstance("Custom Size Item")
             .SetPosition(PlayerInstance.x - 100, PlayerInstance.y - 80)
             .SetSize(200, 40)
             .SetLayer("html_c3");
+    });
+
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test HTML element return", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        // Test the new CreateHintCard that returns HTML element
+        const htmlElement = UINameHintCard.CreateHintCard("HTML Element Test");
+        if (htmlElement) {
+            htmlElement.x = PlayerInstance.x + 100;
+            htmlElement.y = PlayerInstance.y - 200;
+            console.log("HTML element created and positioned:", htmlElement);
+        }
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Destroy all hint cards", () => {
@@ -87,11 +100,41 @@ export class UINameHintCard {
     }
 
     /**
-     * Creates a new hint card
+     * Creates a new hint card and returns the HTML element
      * @param content Text content to display
      * @param id Optional unique identifier (auto-generated if not provided)
      */
-    public static CreateHintCard(content: string, id?: string): UINameHintCard {
+    public static CreateHintCard(content: string, id?: string): any {
+        // Generate ID if not provided
+        if (!id) {
+            id = `auto_hint_${Date.now()}`;
+        }
+
+        // If instance with this ID already exists, destroy it first
+        if (UINameHintCard.instances.has(id)) {
+            UINameHintCard.instances.get(id)?.destroy();
+        }
+
+        // Create new instance
+        const instance = new UINameHintCard(content);
+        instance.id = id; // Override the auto-generated ID
+        UINameHintCard.instances.set(id, instance);
+
+        // Ensure HTML element is created by calling SetPosition with default values
+        if (!instance.htmlElement) {
+            instance.SetPosition(0, 0);
+        }
+
+        // Return the HTML element instead of the instance
+        return instance.getHtmlElement();
+    }
+
+    /**
+     * Creates a new hint card and returns the UINameHintCard instance
+     * @param content Text content to display
+     * @param id Optional unique identifier (auto-generated if not provided)
+     */
+    public static CreateHintCardInstance(content: string, id?: string): UINameHintCard {
         // Generate ID if not provided
         if (!id) {
             id = `auto_hint_${Date.now()}`;
@@ -529,5 +572,12 @@ export class UINameHintCard {
             UINameHintCard.FADE_OUT_DURATION = fadeOutDuration;
         }
         console.log(`Set hint card animation durations: fade-in=${UINameHintCard.FADE_IN_DURATION}ms, fade-out=${UINameHintCard.FADE_OUT_DURATION}ms`);
+    }
+
+    /**
+     * Gets the HTML element of this hint card
+     */
+    public getHtmlElement(): any {
+        return this.htmlElement;
     }
 }

@@ -2,6 +2,7 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { UIInteractionPanelActionChooseMain_imgui } from "../UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { OnMainInventoryClose, OnMainInventoryOpen, OnOtherInventoryClose, OnOtherInventoryOpen } from "../UI/inventory_ui/UIInventory.js";
+import { UINameHintCard } from "../UI/name_hint_card_ui/UINameHintCard.js";
 import { UISubtitleMain } from "../UI/subtitle_ui/UISubtitle.js";
 import { GL_COMMAND_ } from "./PIXCommandAddon.js";
 
@@ -57,11 +58,18 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.getFirstInstance() == null) return
 
 
-      for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
-            var HuDongTishiInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
-                  .objects.hudongtishi_ui.createInstance("HuDongTiShi_ui", ClickObjects.x, ClickObjects.y - ClickObjects.height / 2, true)
+      // for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
+      //       var HuDongTishiInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+      //             .objects.hudongtishi_ui.createInstance("HuDongTiShi_ui", ClickObjects.x, ClickObjects.y - ClickObjects.height / 2, true)
 
-            ClickObjects.addChild(HuDongTishiInstance);
+      //       ClickObjects.addChild(HuDongTishiInstance);
+      // }
+
+      for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
+
+            var NameCard = UINameHintCard.CreateHintCardInstance(ClickObjects.instVars.ObjectName, ClickObjects.instVars.ID +
+                  String(ClickObjects.uid)).SetPosition(ClickObjects.x, ClickObjects.y)
+            ClickObjects.addChild(NameCard.getHtmlElement());
       }
 })
 
@@ -245,6 +253,7 @@ export class ClickObject {
             //UIInteractionPanelActionChooseMain_imgui.ExplainConetntToButton(Content, WindowName)
       }
 }
+
 
 
 
