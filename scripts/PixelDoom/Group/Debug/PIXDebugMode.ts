@@ -2,9 +2,10 @@ import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../..
 import { UIConsole } from "../../UI/debug_ui/UIConsole.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
+import { startFogDistanceMonitoring } from "../Effect/Fog/PIXEffect_fog.js";
 
 export class dEBUG_MOD {
-    static isEnable = false;
+    static isEnable = true
     static isRunMod = false;
 
 
@@ -19,7 +20,9 @@ export class dEBUG_MOD {
 
             UIConsole.Toggle();
 
+
             dEBUG_MOD.isRunMod = true;
+            startFogDistanceMonitoring();
 
         }
 

@@ -581,7 +581,7 @@ export class ShortcutLittleGroupBuilder {
                 font-size: 11px;
                 font-family: Arial, sans-serif;
                 text-align: center;
-                margin-top: 4px;
+                margin-top: 1px;
             `;
 
             // Update main container to flex column layout
@@ -1042,7 +1042,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // First group - Player Base
     var PlayerShortBase = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
 
-    UIShortcut.CreateShort(PlayerShortBase, "TAB", "Inventory")
+    UIShortcut.CreateShort(PlayerShortBase, "TAB", "库存")
 
     UIShortcut.CreateShortLittleGroup(PlayerShortBase)
         .setShort("W")
@@ -1050,7 +1050,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         .setShort("S")
         .setShort("D")
         .SetRegularHillPattern()
-        .AddDescribe("Move");
+        .AddDescribe("控制");
 
 
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
