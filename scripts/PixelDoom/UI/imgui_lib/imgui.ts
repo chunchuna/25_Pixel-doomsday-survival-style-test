@@ -25,6 +25,7 @@ export class Imgui_chunchun {
     private static sliderValue: number = 0.5;
     private static checkboxValue: boolean = false;
     
+    
     // Async script loading
     private static async loadScript(src: string): Promise<void> {
         return new Promise((resolve, reject) => {

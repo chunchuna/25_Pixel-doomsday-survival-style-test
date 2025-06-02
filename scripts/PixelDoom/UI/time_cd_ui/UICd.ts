@@ -21,12 +21,12 @@ import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 // })
 
-var isBindButtonIntoDebugPanel=false
+var isBindButtonIntoDebugPanel = false
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // for Test
 
-    
+
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
 
@@ -96,7 +96,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "+5 testVariable", () => {
         testVariable.value += 5;
-    }) 
+    })
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "-5 testVariable", () => {
         testVariable.value -= 5;
@@ -175,14 +175,14 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             try {
                 const updateTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
                 const updateTag = `auto_update_${Date.now()}_${Math.random()}`;
-                
+
                 updateTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                     if (e.tag === updateTag) {
                         autoUpdate();
                         updateTimer.destroy();
                     }
                 });
-                
+
                 updateTimer.behaviors.Timer.startTimer(0.05, updateTag, "once"); // 50ms = 0.05s
             } catch (error: any) {
                 console.error(`Failed to create auto-update timer: ${error.message}`);
@@ -291,7 +291,7 @@ export class UICDTimer {
                 console.log(`Created HTML_c3 element successfully`);
             } catch (htmlError: any) {
                 console.warn(`HTML_c3 object not available: ${htmlError.message}`);
-                
+
                 // Try alternative: use hudongtishi_ui as a fallback
                 try {
                     this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.hudongtishi_ui.createInstance(layer, posX, posY, true);
@@ -299,7 +299,7 @@ export class UICDTimer {
                 } catch (fallbackError: any) {
                     console.error(`No suitable UI object found for timer display: ${fallbackError.message}`);
                     console.error(`Available objects might not include HTML_c3 or hudongtishi_ui`);
-                    
+
                     // Create a simple console-based timer as last resort
                     this.htmlElement = null;
                     console.warn(`Timer ${this.id} will run in console-only mode`);
@@ -343,10 +343,10 @@ export class UICDTimer {
         instance.monitoredVariable = monitoredVariable;
         instance.variableMinValue = minValue;
         instance.variableMaxValue = maxValue;
-        
+
         // Set up variable getter function based on the type of monitored variable
         instance.setupVariableGetter();
-        
+
         instance.lastVariableValue = instance.getVariableValue();
 
         // Start variable monitoring
@@ -470,7 +470,7 @@ export class UICDTimer {
             try {
                 const pathParts = propertyPath.split('.');
                 let current = instance;
-                
+
                 for (const part of pathParts) {
                     if (current && typeof current === 'object' && part in current) {
                         current = current[part];
@@ -479,7 +479,7 @@ export class UICDTimer {
                         return minValue;
                     }
                 }
-                
+
                 const numValue = Number(current);
                 return isNaN(numValue) ? minValue : numValue;
             } catch (error: any) {
@@ -522,7 +522,7 @@ export class UICDTimer {
         // For direct variable access, we need to create a smart monitoring approach
         // If the variable is a direct property access (like obj.prop), we create a getter function
         let smartVariable = monitoredVariable;
-        
+
         // If it's a direct number or primitive, we can't monitor changes effectively
         // But we'll create a wrapper that can be updated
         if (typeof monitoredVariable === 'number' || typeof monitoredVariable === 'string') {
@@ -579,7 +579,7 @@ export class UICDTimer {
                     return;
                 }
             }
-            
+
             // If no common properties found, try to convert the object to number
             this.variableGetter = () => {
                 const numValue = Number(this.monitoredVariable);
