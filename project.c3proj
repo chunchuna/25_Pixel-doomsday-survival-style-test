@@ -872,6 +872,20 @@
 									],
 									"subfolders": [],
 									"name": "name_hint_card_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIShortcut.ts",
+											"type": "application/typescript",
+											"sid": 776366817868241,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "shortcut_ui"
 								}
 							],
 							"name": "UI"

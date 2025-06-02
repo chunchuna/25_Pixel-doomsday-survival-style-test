@@ -49,6 +49,7 @@ import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPanelActi
 import "./PixelDoom/UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js"
 import "./PixelDoom/UI/subtitle_ui/UISubtitle.js"
 
+import "./PixelDoom/UI/shortcut_ui/UIShortcut.js"
 
 
 import "./PixelDoom/UI/Translate_ui/UIToolTranslate.js"
