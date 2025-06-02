@@ -69,6 +69,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -113,6 +120,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -161,6 +175,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -203,6 +224,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -247,6 +275,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -293,6 +328,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -339,6 +381,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					},
@@ -383,6 +432,13 @@
 							]
 						},
 						"useCollisionPoly": true,
+						"imagePoints": [
+							{
+								"name": "fix",
+								"x": 0.1111111111111111,
+								"y": 0.36923076923076925
+							}
+						],
 						"duration": 1,
 						"tag": ""
 					}

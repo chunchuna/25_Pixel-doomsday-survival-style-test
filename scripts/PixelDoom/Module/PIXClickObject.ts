@@ -68,7 +68,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
 
             var NameCard = UINameHintCard.CreateHintCardInstance(ClickObjects.instVars.ObjectName, ClickObjects.instVars.ID +
-                  String(ClickObjects.uid)).SetPosition(ClickObjects.x, ClickObjects.y)
+                  String(ClickObjects.uid))
+                  .SetPosition(ClickObjects.getImagePointX(1), ClickObjects.getImagePointY(1)).SetScale(1)
             ClickObjects.addChild(NameCard.getHtmlElement());
       }
 })

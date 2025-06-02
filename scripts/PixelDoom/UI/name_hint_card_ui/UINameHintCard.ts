@@ -51,6 +51,28 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         }
     });
 
+    IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test scale functionality", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        // Test different scales
+        UINameHintCard.CreateHintCardInstance("Small Scale (0.5x)")
+            .SetPosition(PlayerInstance.x - 150, PlayerInstance.y - 100)
+            .SetScale(0.5);
+
+        UINameHintCard.CreateHintCardInstance("Normal Scale (1.0x)")
+            .SetPosition(PlayerInstance.x, PlayerInstance.y - 100)
+            .SetScale(1.0);
+
+        UINameHintCard.CreateHintCardInstance("Large Scale (1.5x)")
+            .SetPosition(PlayerInstance.x + 150, PlayerInstance.y - 100)
+            .SetScale(1.5);
+
+        UINameHintCard.CreateHintCardInstance("Extra Large (2.0x)")
+            .SetPosition(PlayerInstance.x, PlayerInstance.y - 200)
+            .SetScale(2.0);
+    });
+
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Destroy all hint cards", () => {
         UINameHintCard.DestroyAllCards();
     });
@@ -75,6 +97,7 @@ export class UINameHintCard {
     private _y: number = 0;
     private _width: number = 0; // 0 means auto-size
     private _height: number = 0; // 0 means auto-size
+    private _scale: number = 1.0; // Scale factor
 
     // Style properties
     private backgroundColor: string = "#000000";
@@ -190,6 +213,28 @@ export class UINameHintCard {
     }
 
     /**
+     * Sets the scale of the hint card
+     * @param scale Scale factor (1.0 = normal size, 0.5 = half size, 2.0 = double size)
+     */
+    public SetScale(scale: number): UINameHintCard {
+        this._scale = Math.max(0.1, scale); // Minimum scale of 0.1 to prevent invisible cards
+
+        if (this.htmlElement) {
+            // Apply scale using CSS transform
+            this.renderHTML(); // Re-render with new scale
+        }
+
+        return this;
+    }
+
+    /**
+     * Gets the current scale of the hint card
+     */
+    public GetScale(): number {
+        return this._scale;
+    }
+
+    /**
      * Sets the size of the hint card (overrides auto-sizing)
      * @param width Width in pixels
      * @param height Height in pixels
@@ -278,13 +323,15 @@ export class UINameHintCard {
      * Generates the HTML structure for the hint card
      */
     private generateCardHTML(): string {
+        const entranceScale = this._scale * 0.9; // Slightly smaller for entrance animation
+        
         return `
         <div id="hint-card-${this.id}" style="
             position: relative;
             width: 100%;
             height: 100%;
             opacity: 0;
-            transform: scale(0.9) translateY(5px);
+            transform: scale(${entranceScale}) translateY(5px);
             font-family: 'Segoe UI', Arial, sans-serif;
             pointer-events: none;
             animation: cardEnter ${UINameHintCard.FADE_IN_DURATION}ms ease-out forwards;
@@ -327,22 +374,22 @@ export class UINameHintCard {
             @keyframes cardEnter {
                 0% { 
                     opacity: 0; 
-                    transform: scale(0.9) translateY(5px); 
+                    transform: scale(${entranceScale}) translateY(5px); 
                 }
                 100% { 
                     opacity: 1; 
-                    transform: scale(1) translateY(0); 
+                    transform: scale(${this._scale}) translateY(0); 
                 }
             }
             
             @keyframes cardExit {
                 0% { 
                     opacity: 1; 
-                    transform: scale(1) translateY(0); 
+                    transform: scale(${this._scale}) translateY(0); 
                 }
                 100% { 
                     opacity: 0; 
-                    transform: scale(0.9) translateY(-5px); 
+                    transform: scale(${entranceScale}) translateY(-5px); 
                 }
             }
         </style>`;
@@ -409,13 +456,15 @@ export class UINameHintCard {
      * Generates HTML for exit animation
      */
     private generateExitCardHTML(): string {
+        const exitScale = this._scale * 0.9; // Slightly smaller for exit animation
+        
         return `
         <div id="hint-card-${this.id}" style="
             position: relative;
             width: 100%;
             height: 100%;
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(${this._scale}) translateY(0);
             font-family: 'Segoe UI', Arial, sans-serif;
             pointer-events: none;
             animation: cardExit ${UINameHintCard.FADE_OUT_DURATION}ms ease-in forwards;
@@ -458,11 +507,11 @@ export class UINameHintCard {
             @keyframes cardExit {
                 0% { 
                     opacity: 1; 
-                    transform: scale(1) translateY(0); 
+                    transform: scale(${this._scale}) translateY(0); 
                 }
                 100% { 
                     opacity: 0; 
-                    transform: scale(0.9) translateY(-5px); 
+                    transform: scale(${exitScale}) translateY(-5px); 
                 }
             }
         </style>`;
