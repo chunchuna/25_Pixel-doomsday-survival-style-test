@@ -858,6 +858,20 @@
 									],
 									"subfolders": [],
 									"name": "bubble_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UINameHintCard.ts",
+											"type": "application/typescript",
+											"sid": 605753673351243,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "name_hint_card_ui"
 								}
 							],
 							"name": "UI"

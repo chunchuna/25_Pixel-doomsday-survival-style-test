@@ -68,6 +68,7 @@ import "./PixelDoom/UI/time_cd_ui/UICd.js"
 import "./PixelDoom/UI/bubble_ui/UIBubble.js"
 import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
 import "./PixelDoom/Group/Effect/Fog/FogEffectDebug.js"
+import "./PixelDoom/UI/name_hint_card_ui/UINameHintCard.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.

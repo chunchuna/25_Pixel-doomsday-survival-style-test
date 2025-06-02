@@ -239,20 +239,6 @@ export class ClickObject {
       }
 
 
-      /** 通过 GL_COMMAND 生成指令列表 */
-      static GenerateInstructions(ActionConetent: string) {
-            GL_COMMAND_.ACTION_OPEN_();
-            //GL_COMMAND_._draw(ActionConetent)
-            GL_COMMAND_._draw("正在交互:" + LastestChooseObject.instVars.ObjectName)
-            ActionConetent.split(',')
-                  .map(item => item.trim())
-                  .filter(item => item !== "")
-                  .forEach(trimmedItem => {
-                        const formattedAction = `[background=blue][action name=${trimmedItem} color=red]${trimmedItem}[/action][/background]`;
-                        GL_COMMAND_._draw(formattedAction);
-                  });
-      }
-
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {
             UIInteractionPanelActionChooseMain.ExplainConetntToButton(Content, WindowName)
