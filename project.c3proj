@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 44100,
+	"savedWithRelease": 44200,
 	"name": "25_ThePark_h5",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -886,6 +886,20 @@
 									],
 									"subfolders": [],
 									"name": "shortcut_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UILayoutTransition.ts",
+											"type": "application/typescript",
+											"sid": 470456177669600,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "layout_transition_ui"
 								}
 							],
 							"name": "UI"
@@ -914,67 +928,6 @@
 						}
 					],
 					"name": "PixelDoom"
-				},
-				{
-					"items": [],
-					"subfolders": [
-						{
-							"items": [],
-							"subfolders": [
-								{
-									"items": [],
-									"subfolders": [],
-									"name": "emscripten"
-								}
-							],
-							"name": "@types"
-						},
-						{
-							"items": [],
-							"subfolders": [
-								{
-									"items": [],
-									"subfolders": [
-										{
-											"items": [],
-											"subfolders": [
-												{
-													"items": [],
-													"subfolders": [],
-													"name": "embind"
-												}
-											],
-											"name": "imgui"
-										},
-										{
-											"items": [],
-											"subfolders": [],
-											"name": "src"
-										},
-										{
-											"items": [],
-											"subfolders": [
-												{
-													"items": [],
-													"subfolders": [],
-													"name": "js"
-												}
-											],
-											"name": "www"
-										}
-									],
-									"name": "imgui-ts"
-								}
-							],
-							"name": "@zhobo63"
-						}
-					],
-					"name": "node_modules"
-				},
-				{
-					"items": [],
-					"subfolders": [],
-					"name": "resource"
 				}
 			],
 			"autoReloadOnPreview": true
