@@ -4,6 +4,7 @@
  */
 
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayoutTransition.js";
 
 
 
@@ -970,5 +971,6 @@ export type {
 };
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
+    //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
+    LayoutTransition.EnterLayout(TransitionType.HOLE,1)
 })

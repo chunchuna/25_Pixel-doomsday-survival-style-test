@@ -8,186 +8,244 @@ export enum TransitionType {
 }
 
 /**
+ * Transition controller for chaining methods
+ */
+export class TransitionController {
+    private callback: (() => void) | null = null;
+
+    constructor(private layoutTransition: LayoutTransition) {}
+
+    /**
+     * Set callback function to execute when transition finishes
+     * @param callback Function to execute on completion
+     */
+    public onFinish(callback: () => void): TransitionController {
+        this.callback = callback;
+        this.layoutTransition.setCallback(this.callback);
+        return this;
+    }
+}
+
+/**
  * Layout transition class for scene transitions with circular mask effects
  */
 export class LayoutTransition {
-    private static instance: LayoutTransition | null = null;
-    private htmlElement: any = null;
-    private timerInstance: any = null;
-    private timerTag: string = "";
-    private isTransitioning: boolean = false;
-    private transitionCallback: (() => void) | null = null;
+    private static container: HTMLDivElement | null = null;
+    private static overlay: HTMLDivElement | null = null;
+    private static styleElement: HTMLStyleElement | null = null;
+    private static timerInstance: any = null;
+    private static timerTag: string = "";
+    private static isTransitioning: boolean = false;
+    private static transitionCallback: (() => void) | null = null;
+    private static currentTransitionType: 'enter' | 'leave' | null = null;
 
     private constructor() {
         // Private constructor for static class pattern
     }
 
     /**
-     * Initialize the transition system
+     * Set callback function for transition completion
+     * @param callback Function to execute when transition completes
      */
-    private static initialize(): void {
-        if (!LayoutTransition.instance) {
-            LayoutTransition.instance = new LayoutTransition();
-        }
+    public setCallback(callback: (() => void) | null): void {
+        LayoutTransition.transitionCallback = callback;
     }
 
     /**
-     * Enter layout transition - screen starts with black mask, then circular hole expands from center
+     * Initialize the transition system
+     */
+    private static initialize(): void {
+        if (LayoutTransition.container) return; // Already initialized
+
+        // Add CSS styles
+        LayoutTransition.styleElement = document.createElement('style');
+        LayoutTransition.styleElement.textContent = `
+            .layout-transition-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 999999999;
+                overflow: hidden;
+            }
+            .layout-transition-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #000;
+                opacity: 0;
+            }
+            
+            /* Circular hole transition animations */
+            /* Enter transition: Dissolve black mask by expanding transparent hole from center */
+            @keyframes maskDissolveOut {
+                0% { 
+                    clip-path: circle(0% at center);
+                    opacity: 1;
+                }
+                100% { 
+                    clip-path: circle(150% at center);
+                    opacity: 0;
+                }
+            }
+            /* Leave transition: Black circle expanding from center to cover screen */
+            @keyframes blackCircleExpand {
+                0% { 
+                    clip-path: circle(0% at center);
+                    opacity: 1;
+                }
+                100% { 
+                    clip-path: circle(150% at center);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(LayoutTransition.styleElement);
+
+        // Create container
+        LayoutTransition.container = document.createElement('div');
+        LayoutTransition.container.className = 'layout-transition-container';
+        document.body.appendChild(LayoutTransition.container);
+
+        // Create overlay
+        LayoutTransition.overlay = document.createElement('div');
+        LayoutTransition.overlay.className = 'layout-transition-overlay';
+        LayoutTransition.container.appendChild(LayoutTransition.overlay);
+    }
+
+    /**
+     * Enter layout transition - dissolves existing black mask from center outward to reveal scene
+     * Effect: Black screen -> Center starts dissolving and expands outward -> Bright screen (scene visible)
+     * If no mask exists, creates one first, then performs the dissolve effect
      * @param transitionType Type of transition effect
      * @param time Duration of transition in seconds
      * @param callback Optional callback function to execute when transition completes
      */
-    public static EnterLayout(transitionType: TransitionType, time: number, callback?: () => void): void {
+    public static EnterLayout(transitionType: TransitionType, time: number, callback?: () => void): TransitionController {
         LayoutTransition.initialize();
-        const instance = LayoutTransition.instance!;
         
-        if (instance.isTransitioning) {
+        if (LayoutTransition.isTransitioning) {
             console.warn("Transition already in progress, ignoring new transition request");
-            return;
+            return new TransitionController(new LayoutTransition());
         }
 
-        instance.isTransitioning = true;
-        instance.transitionCallback = callback || null;
+        LayoutTransition.isTransitioning = true;
+        LayoutTransition.transitionCallback = callback || null;
+        LayoutTransition.currentTransitionType = 'enter';
         
         try {
-            // Create HTML element for mask overlay
-            instance.createMaskElement();
+            if (!LayoutTransition.overlay) return new TransitionController(new LayoutTransition());
             
-            // Set initial state - full black mask
-            instance.setMaskState(0); // 0% = full mask
+            // Check if black mask already exists (from previous LeaveLayout)
+            const maskAlreadyExists = LayoutTransition.IsMaskVisible();
             
-            // Create and start timer for transition
-            instance.createTransitionTimer(time, true); // true for enter transition
+            if (!maskAlreadyExists) {
+                // No mask exists, create one first
+                console.log("No black mask detected, creating one before enter transition");
+                LayoutTransition.overlay.style.cssText = '';
+                LayoutTransition.overlay.style.opacity = '1';
+                LayoutTransition.overlay.style.backgroundColor = '#000';
+                LayoutTransition.overlay.style.clipPath = 'circle(150% at center)';
+                LayoutTransition.overlay.style.animation = 'none';
+                
+                // Force reflow to ensure mask is visible
+                LayoutTransition.overlay.offsetHeight;
+            }
+            
+            // Ensure we start from full black mask state
+            LayoutTransition.overlay.style.animation = 'none';
+            LayoutTransition.overlay.style.opacity = '1';
+            LayoutTransition.overlay.style.backgroundColor = '#000';
+            LayoutTransition.overlay.style.clipPath = 'circle(0% at center)';
+            
+            // Force reflow
+            LayoutTransition.overlay.offsetHeight;
+            
+            // Start dissolve animation (mask dissolving from center outward)
+            LayoutTransition.overlay.style.animation = `maskDissolveOut ${time * 1000}ms ease-out forwards`;
+            
+            // Create and start timer for completion
+            LayoutTransition.createTransitionTimer(time);
             
             console.log(`Started enter layout transition with duration: ${time}s`);
         } catch (error: any) {
             console.error(`Failed to start enter layout transition: ${error.message}`);
-            instance.cleanup();
+            LayoutTransition.cleanup();
         }
+
+        return new TransitionController(new LayoutTransition());
     }
 
     /**
-     * Leave layout transition - screen starts clear, then black circle expands from center
+     * Leave layout transition - screen starts bright, then black circle expands from center to cover entire screen
+     * Effect: Bright screen (scene visible) -> Center black circle appears and expands -> Full black
      * @param transitionType Type of transition effect
      * @param time Duration of transition in seconds
      * @param callback Optional callback function to execute when transition completes
      */
-    public static LeaveLayout(transitionType: TransitionType, time: number, callback?: () => void): void {
+    public static LeaveLayout(transitionType: TransitionType, time: number, callback?: () => void): TransitionController {
         LayoutTransition.initialize();
-        const instance = LayoutTransition.instance!;
         
-        if (instance.isTransitioning) {
+        if (LayoutTransition.isTransitioning) {
             console.warn("Transition already in progress, ignoring new transition request");
-            return;
+            return new TransitionController(new LayoutTransition());
         }
 
-        instance.isTransitioning = true;
-        instance.transitionCallback = callback || null;
+        LayoutTransition.isTransitioning = true;
+        LayoutTransition.transitionCallback = callback || null;
+        LayoutTransition.currentTransitionType = 'leave';
         
         try {
-            // Create HTML element for mask overlay
-            instance.createMaskElement();
+            if (!LayoutTransition.overlay) return new TransitionController(new LayoutTransition());
             
-            // Set initial state - no mask (fully transparent)
-            instance.setMaskState(100); // 100% = no mask
+            // Set initial state - no mask (completely transparent, screen is bright)
+            LayoutTransition.overlay.style.cssText = '';
+            LayoutTransition.overlay.style.opacity = '0';
+            LayoutTransition.overlay.style.backgroundColor = '#000';
+            LayoutTransition.overlay.style.clipPath = 'circle(0% at center)';
             
-            // Create and start timer for transition
-            instance.createTransitionTimer(time, false); // false for leave transition
+            // Force reflow
+            LayoutTransition.overlay.offsetHeight;
+            
+            // Make overlay visible and start black circle expansion
+            LayoutTransition.overlay.style.opacity = '1';
+            LayoutTransition.overlay.style.animation = `blackCircleExpand ${time * 1000}ms ease-in forwards`;
+            
+            // Create and start timer for completion
+            LayoutTransition.createTransitionTimer(time);
             
             console.log(`Started leave layout transition with duration: ${time}s`);
         } catch (error: any) {
             console.error(`Failed to start leave layout transition: ${error.message}`);
-            instance.cleanup();
+            LayoutTransition.cleanup();
         }
-    }
 
-    /**
-     * Create HTML mask element
-     */
-    private createMaskElement(): void {
-        try {
-            // Get screen dimensions
-            const screenWidth = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.width;
-            const screenHeight = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.height;
-            
-            // Create HTML element on UI layer
-            this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance("UI", 0, 0);
-            this.htmlElement.width = screenWidth;
-            this.htmlElement.height = screenHeight;
-            
-            // Set high z-index to ensure it's on top
-            this.htmlElement.zElevation = 1000;
-            
-        } catch (error: any) {
-            console.error(`Failed to create mask element: ${error.message}`);
-            throw error;
-        }
-    }
-
-    /**
-     * Set mask state based on progress percentage
-     * @param progress Progress from 0 to 100 (0 = full mask, 100 = no mask)
-     */
-    private setMaskState(progress: number): void {
-        if (!this.htmlElement) return;
-        
-        try {
-            const screenWidth = this.htmlElement.width;
-            const screenHeight = this.htmlElement.height;
-            const centerX = screenWidth / 2;
-            const centerY = screenHeight / 2;
-            
-            // Calculate maximum radius needed to cover entire screen
-            const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
-            
-            // Calculate current radius based on progress
-            const currentRadius = (progress / 100) * maxRadius;
-            
-            // Create circular mask using CSS
-            const maskHTML = `
-                <div style="
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: black;
-                    mask: radial-gradient(circle at center, transparent ${currentRadius}px, black ${currentRadius + 1}px);
-                    -webkit-mask: radial-gradient(circle at center, transparent ${currentRadius}px, black ${currentRadius + 1}px);
-                    pointer-events: none;
-                "></div>
-            `;
-            
-            this.htmlElement.setInnerHTML(maskHTML);
-            
-        } catch (error: any) {
-            console.error(`Failed to set mask state: ${error.message}`);
-        }
+        return new TransitionController(new LayoutTransition());
     }
 
     /**
      * Create and start transition timer
      * @param duration Duration in seconds
-     * @param isEnterTransition True for enter transition, false for leave transition
      */
-    private createTransitionTimer(duration: number, isEnterTransition: boolean): void {
+    private static createTransitionTimer(duration: number): void {
         try {
             // Create C3 Timer instance
-            this.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
-            this.timerTag = `layout_transition_${Date.now()}_${Math.random()}`;
-            
-            // Start update loop for smooth animation
-            this.startAnimationLoop(duration, isEnterTransition);
+            LayoutTransition.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            LayoutTransition.timerTag = `layout_transition_${Date.now()}_${Math.random()}`;
             
             // Set up completion timer
-            this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
-                if (e.tag === this.timerTag) {
-                    this.onTransitionComplete();
+            LayoutTransition.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
+                if (e.tag === LayoutTransition.timerTag) {
+                    LayoutTransition.onTransitionComplete();
                 }
             });
             
             // Start completion timer
-            this.timerInstance.behaviors.Timer.startTimer(duration, this.timerTag, "once");
+            LayoutTransition.timerInstance.behaviors.Timer.startTimer(duration, LayoutTransition.timerTag, "once");
             
         } catch (error: any) {
             console.error(`Failed to create transition timer: ${error.message}`);
@@ -196,102 +254,114 @@ export class LayoutTransition {
     }
 
     /**
-     * Start animation loop for smooth transition
-     * @param duration Total duration in seconds
-     * @param isEnterTransition True for enter transition, false for leave transition
-     */
-    private startAnimationLoop(duration: number, isEnterTransition: boolean): void {
-        const startTime = Date.now();
-        const durationMs = duration * 1000;
-        
-        const animate = () => {
-            if (!this.isTransitioning) return;
-            
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / durationMs, 1);
-            
-            let maskProgress: number;
-            if (isEnterTransition) {
-                // Enter: 0% to 100% (mask disappears)
-                maskProgress = progress * 100;
-            } else {
-                // Leave: 100% to 0% (mask appears)
-                maskProgress = (1 - progress) * 100;
-            }
-            
-            this.setMaskState(maskProgress);
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        };
-        
-        animate();
-    }
-
-    /**
      * Handle transition completion
      */
-    private onTransitionComplete(): void {
+    private static onTransitionComplete(): void {
         console.log("Layout transition completed");
         
         // Execute callback if provided
-        if (this.transitionCallback) {
+        if (LayoutTransition.transitionCallback) {
             try {
-                this.transitionCallback();
+                LayoutTransition.transitionCallback();
             } catch (error: any) {
                 console.error(`Error executing transition callback: ${error.message}`);
             }
         }
         
-        // Cleanup
-        this.cleanup();
+        // Different cleanup behavior based on transition type
+        if (LayoutTransition.currentTransitionType === 'enter') {
+            // Enter transition: completely remove the mask
+            LayoutTransition.cleanup();
+        } else if (LayoutTransition.currentTransitionType === 'leave') {
+            // Leave transition: keep the mask but stop the transition state
+            LayoutTransition.cleanupButKeepMask();
+        }
     }
 
     /**
-     * Cleanup transition resources
+     * Cleanup transition resources and completely remove mask
      */
-    private cleanup(): void {
-        this.isTransitioning = false;
-        this.transitionCallback = null;
+    private static cleanup(): void {
+        LayoutTransition.isTransitioning = false;
+        LayoutTransition.transitionCallback = null;
+        LayoutTransition.currentTransitionType = null;
         
         // Destroy timer
-        if (this.timerInstance) {
+        if (LayoutTransition.timerInstance) {
             try {
-                this.timerInstance.behaviors.Timer.stopTimer(this.timerTag);
-                this.timerInstance.destroy();
+                LayoutTransition.timerInstance.behaviors.Timer.stopTimer(LayoutTransition.timerTag);
+                LayoutTransition.timerInstance.destroy();
             } catch (error: any) {
                 console.warn(`Error destroying transition timer: ${error.message}`);
             }
-            this.timerInstance = null;
+            LayoutTransition.timerInstance = null;
         }
         
-        // Destroy HTML element
-        if (this.htmlElement) {
+        // Reset overlay - completely remove mask
+        if (LayoutTransition.overlay) {
+            LayoutTransition.overlay.style.cssText = '';
+            LayoutTransition.overlay.style.opacity = '0';
+        }
+        
+        LayoutTransition.timerTag = "";
+    }
+
+    /**
+     * Cleanup transition resources but keep the mask visible (for leave transitions)
+     */
+    private static cleanupButKeepMask(): void {
+        LayoutTransition.isTransitioning = false;
+        LayoutTransition.transitionCallback = null;
+        LayoutTransition.currentTransitionType = null;
+        
+        // Destroy timer
+        if (LayoutTransition.timerInstance) {
             try {
-                this.htmlElement.destroy();
+                LayoutTransition.timerInstance.behaviors.Timer.stopTimer(LayoutTransition.timerTag);
+                LayoutTransition.timerInstance.destroy();
             } catch (error: any) {
-                console.warn(`Error destroying transition HTML element: ${error.message}`);
+                console.warn(`Error destroying transition timer: ${error.message}`);
             }
-            this.htmlElement = null;
+            LayoutTransition.timerInstance = null;
         }
         
-        this.timerTag = "";
+        // Keep overlay visible - ensure it stays as full black mask
+        if (LayoutTransition.overlay) {
+            LayoutTransition.overlay.style.animation = 'none';
+            LayoutTransition.overlay.style.opacity = '1';
+            LayoutTransition.overlay.style.backgroundColor = '#000';
+            LayoutTransition.overlay.style.clipPath = 'circle(150% at center)';
+        }
+        
+        LayoutTransition.timerTag = "";
+        
+        console.log("Leave transition completed - black mask maintained");
     }
 
     /**
      * Check if transition is currently in progress
      */
     public static IsTransitioning(): boolean {
-        return LayoutTransition.instance?.isTransitioning || false;
+        return LayoutTransition.isTransitioning;
     }
 
     /**
      * Force stop current transition
      */
     public static StopTransition(): void {
-        if (LayoutTransition.instance) {
-            LayoutTransition.instance.cleanup();
-        }
+        LayoutTransition.cleanup();
+    }
+
+    /**
+     * Check if black mask is currently visible (covering the screen)
+     */
+    public static IsMaskVisible(): boolean {
+        if (!LayoutTransition.overlay) return false;
+        
+        const isOpaque = LayoutTransition.overlay.style.opacity === '1';
+        const isFullCoverage = LayoutTransition.overlay.style.clipPath === 'circle(150% at center)' ||
+                              LayoutTransition.overlay.style.clipPath === '';
+        
+        return isOpaque && (isFullCoverage || LayoutTransition.overlay.style.clipPath === '');
     }
 }

@@ -7,6 +7,7 @@ import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 import { UIMainSettingWindow } from "./UIMainSettingWindow.js";
 import { UIMainSaveWindow } from "./UIMainSaveWindow.js";
 import { UIMainAboutWindow } from "./UIMainAboutWindow.js";
+import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayoutTransition.js";
 
 
 
@@ -142,7 +143,10 @@ class UIMainMenu {
             if (freshNewGameBtn) {
                 freshNewGameBtn.addEventListener('click', () => {
                     this.HideALLMainMenuUI(() => {
-                        UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
+                        // UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
+                        //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                        // })
+                        LayoutTransition.LeaveLayout(TransitionType.HOLE,2).onFinish(()=>{
                             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
                         })
                     })
