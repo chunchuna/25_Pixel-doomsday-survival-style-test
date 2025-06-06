@@ -10,6 +10,7 @@ import "./PixelDoom/UI/debug_ui/UIConsole.js"
 
 import "./PixelDoom/Global/PIXGlobal.js"
 import "./PixelDoom/UI/dialogue_ui/UIDialogue.js"
+import "./PixelDoom/UI/layout_transition_ui/UILayoutTransition.js"
 
 import "./PixelDoom/Module/PIXCommandAddon.js"
 import "./PixelDoom/Group/Save/PIXSave.js"

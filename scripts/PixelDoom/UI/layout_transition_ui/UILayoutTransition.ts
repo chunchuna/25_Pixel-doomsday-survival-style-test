@@ -365,3 +365,8 @@ export class LayoutTransition {
         return isOpaque && (isFullCoverage || LayoutTransition.overlay.style.clipPath === '');
     }
 }
+
+pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+    //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
+    LayoutTransition.EnterLayout(TransitionType.HOLE,3)
+})

@@ -970,7 +970,3 @@ export type {
     SpecialEffectOptions
 };
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
-    //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
-    LayoutTransition.EnterLayout(TransitionType.HOLE,1)
-})
