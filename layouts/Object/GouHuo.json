@@ -39,158 +39,6 @@
 					"sceneGraphData": {
 						"parent-uid": 230,
 						"uid": 66,
-						"children": [
-							{
-								"uid": 69,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 70,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 72,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 73,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 74,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 75,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 76,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 77,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 78,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							},
-							{
-								"uid": 79,
-								"flags": {
-									"x": true,
-									"y": true,
-									"z": true,
-									"w": false,
-									"h": false,
-									"a": false,
-									"o": false,
-									"v": false,
-									"d": true,
-									"sm": "normal"
-								}
-							}
-						],
 						"flags": {
 							"x": true,
 							"y": true,
@@ -270,7 +118,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 69,
 						"flags": {
 							"x": true,
@@ -351,7 +199,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 70,
 						"flags": {
 							"x": true,
@@ -432,7 +280,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 72,
 						"flags": {
 							"x": true,
@@ -513,7 +361,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 73,
 						"flags": {
 							"x": true,
@@ -594,7 +442,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 74,
 						"flags": {
 							"x": true,
@@ -675,7 +523,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 75,
 						"flags": {
 							"x": true,
@@ -756,7 +604,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 76,
 						"flags": {
 							"x": true,
@@ -837,7 +685,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 77,
 						"flags": {
 							"x": true,
@@ -918,7 +766,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 78,
 						"flags": {
 							"x": true,
@@ -999,7 +847,7 @@
 						}
 					},
 					"sceneGraphData": {
-						"parent-uid": 66,
+						"parent-uid": 230,
 						"uid": 79,
 						"flags": {
 							"x": true,
@@ -1367,6 +1215,156 @@
 						"parent-uid": null,
 						"uid": 230,
 						"children": [
+							{
+								"uid": 69,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 70,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 72,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 73,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 74,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 75,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 76,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 77,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 78,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
+							{
+								"uid": 79,
+								"flags": {
+									"x": true,
+									"y": true,
+									"z": true,
+									"w": false,
+									"h": false,
+									"a": false,
+									"o": false,
+									"v": false,
+									"d": true,
+									"sm": "normal"
+								}
+							},
 							{
 								"uid": 66,
 								"flags": {
