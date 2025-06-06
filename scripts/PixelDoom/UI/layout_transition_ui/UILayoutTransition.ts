@@ -31,13 +31,14 @@ export class TransitionController {
  */
 export class LayoutTransition {
     private static container: HTMLDivElement | null = null;
-    private static overlay: HTMLDivElement | null = null;
+    private static overlay: HTMLCanvasElement | null = null;
     private static styleElement: HTMLStyleElement | null = null;
     private static timerInstance: any = null;
     private static timerTag: string = "";
     private static isTransitioning: boolean = false;
     private static transitionCallback: (() => void) | null = null;
     private static currentTransitionType: 'enter' | 'leave' | null = null;
+    private static animationId: number | null = null;
 
     private constructor() {
         // Private constructor for static class pattern
@@ -70,28 +71,14 @@ export class LayoutTransition {
                 z-index: 999999999;
                 overflow: hidden;
             }
-            .layout-transition-overlay {
+            .layout-transition-canvas {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-color: #000;
-                opacity: 0;
             }
             
-            /* Circular hole transition animations */
-            /* Enter transition: Dissolve black mask by expanding transparent hole from center */
-            @keyframes maskDissolveOut {
-                0% { 
-                    clip-path: circle(0% at center);
-                    opacity: 1;
-                }
-                100% { 
-                    clip-path: circle(150% at center);
-                    opacity: 0;
-                }
-            }
             /* Leave transition: Black circle expanding from center to cover screen */
             @keyframes blackCircleExpand {
                 0% { 
@@ -111,10 +98,62 @@ export class LayoutTransition {
         LayoutTransition.container.className = 'layout-transition-container';
         document.body.appendChild(LayoutTransition.container);
 
-        // Create overlay
-        LayoutTransition.overlay = document.createElement('div');
-        LayoutTransition.overlay.className = 'layout-transition-overlay';
+        // Create canvas for custom drawing
+        LayoutTransition.overlay = document.createElement('canvas');
+        LayoutTransition.overlay.className = 'layout-transition-canvas';
         LayoutTransition.container.appendChild(LayoutTransition.overlay);
+        
+        // Set canvas size and initialize
+        LayoutTransition.resizeCanvas();
+    }
+
+    /**
+     * Resize canvas to match screen size
+     */
+    private static resizeCanvas(): void {
+        if (!LayoutTransition.overlay) return;
+        
+        LayoutTransition.overlay.width = window.innerWidth;
+        LayoutTransition.overlay.height = window.innerHeight;
+    }
+
+    /**
+     * Draw black mask with circular hole using Canvas
+     * @param progress Progress from 0 to 1 (0 = no hole, 1 = full hole)
+     */
+    private static drawMaskWithHole(progress: number): void {
+        if (!LayoutTransition.overlay) return;
+        
+        const canvas = LayoutTransition.overlay;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        // Calculate maximum radius needed to cover entire screen from center
+        const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
+        const currentRadius = progress * maxRadius;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        if (progress < 1) {
+            // Draw black mask
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Cut out circular hole using composite operation
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Reset composite operation
+            ctx.globalCompositeOperation = 'source-over';
+        }
     }
 
     /**
@@ -140,35 +179,22 @@ export class LayoutTransition {
         try {
             if (!LayoutTransition.overlay) return new TransitionController(new LayoutTransition());
             
-            // Check if black mask already exists (from previous LeaveLayout)
+            // Ensure canvas is properly sized
+            LayoutTransition.resizeCanvas();
+            
+            // Check if black mask already exists
             const maskAlreadyExists = LayoutTransition.IsMaskVisible();
             
             if (!maskAlreadyExists) {
-                // No mask exists, create one first
                 console.log("No black mask detected, creating one before enter transition");
-                LayoutTransition.overlay.style.cssText = '';
-                LayoutTransition.overlay.style.opacity = '1';
-                LayoutTransition.overlay.style.backgroundColor = '#000';
-                LayoutTransition.overlay.style.clipPath = 'circle(150% at center)';
-                LayoutTransition.overlay.style.animation = 'none';
-                
-                // Force reflow to ensure mask is visible
-                LayoutTransition.overlay.offsetHeight;
+                // Draw initial full black mask
+                LayoutTransition.drawMaskWithHole(0);
             }
             
-            // Ensure we start from full black mask state
-            LayoutTransition.overlay.style.animation = 'none';
-            LayoutTransition.overlay.style.opacity = '1';
-            LayoutTransition.overlay.style.backgroundColor = '#000';
-            LayoutTransition.overlay.style.clipPath = 'circle(0% at center)';
+            // Start dissolve animation using requestAnimationFrame
+            LayoutTransition.startDissolveAnimation(time);
             
-            // Force reflow
-            LayoutTransition.overlay.offsetHeight;
-            
-            // Start dissolve animation (mask dissolving from center outward)
-            LayoutTransition.overlay.style.animation = `maskDissolveOut ${time * 1000}ms ease-out forwards`;
-            
-            // Create and start timer for completion
+            // Create timer for completion callback
             LayoutTransition.createTransitionTimer(time);
             
             console.log(`Started enter layout transition with duration: ${time}s`);
@@ -178,6 +204,88 @@ export class LayoutTransition {
         }
 
         return new TransitionController(new LayoutTransition());
+    }
+
+    /**
+     * Start dissolve animation using requestAnimationFrame for smooth effect
+     * @param duration Duration in seconds
+     */
+    private static startDissolveAnimation(duration: number): void {
+        const startTime = Date.now();
+        const durationMs = duration * 1000;
+        
+        const animate = () => {
+            if (!LayoutTransition.isTransitioning) return;
+            
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / durationMs, 1);
+            
+            // Draw mask with expanding hole
+            LayoutTransition.drawMaskWithHole(progress);
+            
+            if (progress < 1) {
+                LayoutTransition.animationId = requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+
+    /**
+     * Draw expanding black circle from center
+     * @param progress Progress from 0 to 1 (0 = no circle, 1 = full coverage)
+     */
+    private static drawExpandingBlackCircle(progress: number): void {
+        if (!LayoutTransition.overlay) return;
+        
+        const canvas = LayoutTransition.overlay;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        // Calculate maximum radius needed to cover entire screen from center
+        const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
+        const currentRadius = progress * maxRadius;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        if (progress > 0) {
+            // Draw expanding black circle
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
+
+    /**
+     * Start black circle expansion animation
+     * @param duration Duration in seconds
+     */
+    private static startBlackCircleAnimation(duration: number): void {
+        const startTime = Date.now();
+        const durationMs = duration * 1000;
+        
+        const animate = () => {
+            if (!LayoutTransition.isTransitioning) return;
+            
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / durationMs, 1);
+            
+            // Draw expanding black circle
+            LayoutTransition.drawExpandingBlackCircle(progress);
+            
+            if (progress < 1) {
+                LayoutTransition.animationId = requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
     }
 
     /**
@@ -202,20 +310,13 @@ export class LayoutTransition {
         try {
             if (!LayoutTransition.overlay) return new TransitionController(new LayoutTransition());
             
-            // Set initial state - no mask (completely transparent, screen is bright)
-            LayoutTransition.overlay.style.cssText = '';
-            LayoutTransition.overlay.style.opacity = '0';
-            LayoutTransition.overlay.style.backgroundColor = '#000';
-            LayoutTransition.overlay.style.clipPath = 'circle(0% at center)';
+            // Ensure canvas is properly sized
+            LayoutTransition.resizeCanvas();
             
-            // Force reflow
-            LayoutTransition.overlay.offsetHeight;
+            // Start black circle expansion animation
+            LayoutTransition.startBlackCircleAnimation(time);
             
-            // Make overlay visible and start black circle expansion
-            LayoutTransition.overlay.style.opacity = '1';
-            LayoutTransition.overlay.style.animation = `blackCircleExpand ${time * 1000}ms ease-in forwards`;
-            
-            // Create and start timer for completion
+            // Create timer for completion callback
             LayoutTransition.createTransitionTimer(time);
             
             console.log(`Started leave layout transition with duration: ${time}s`);
@@ -286,6 +387,12 @@ export class LayoutTransition {
         LayoutTransition.transitionCallback = null;
         LayoutTransition.currentTransitionType = null;
         
+        // Stop animation
+        if (LayoutTransition.animationId) {
+            cancelAnimationFrame(LayoutTransition.animationId);
+            LayoutTransition.animationId = null;
+        }
+        
         // Destroy timer
         if (LayoutTransition.timerInstance) {
             try {
@@ -297,10 +404,12 @@ export class LayoutTransition {
             LayoutTransition.timerInstance = null;
         }
         
-        // Reset overlay - completely remove mask
+        // Clear canvas - completely remove mask
         if (LayoutTransition.overlay) {
-            LayoutTransition.overlay.style.cssText = '';
-            LayoutTransition.overlay.style.opacity = '0';
+            const ctx = LayoutTransition.overlay.getContext('2d');
+            if (ctx) {
+                ctx.clearRect(0, 0, LayoutTransition.overlay.width, LayoutTransition.overlay.height);
+            }
         }
         
         LayoutTransition.timerTag = "";
@@ -314,6 +423,12 @@ export class LayoutTransition {
         LayoutTransition.transitionCallback = null;
         LayoutTransition.currentTransitionType = null;
         
+        // Stop animation
+        if (LayoutTransition.animationId) {
+            cancelAnimationFrame(LayoutTransition.animationId);
+            LayoutTransition.animationId = null;
+        }
+        
         // Destroy timer
         if (LayoutTransition.timerInstance) {
             try {
@@ -325,12 +440,9 @@ export class LayoutTransition {
             LayoutTransition.timerInstance = null;
         }
         
-        // Keep overlay visible - ensure it stays as full black mask
+        // Keep canvas as full black mask
         if (LayoutTransition.overlay) {
-            LayoutTransition.overlay.style.animation = 'none';
-            LayoutTransition.overlay.style.opacity = '1';
-            LayoutTransition.overlay.style.backgroundColor = '#000';
-            LayoutTransition.overlay.style.clipPath = 'circle(150% at center)';
+            LayoutTransition.drawMaskWithHole(0); // Full black mask (no hole)
         }
         
         LayoutTransition.timerTag = "";
@@ -358,15 +470,36 @@ export class LayoutTransition {
     public static IsMaskVisible(): boolean {
         if (!LayoutTransition.overlay) return false;
         
-        const isOpaque = LayoutTransition.overlay.style.opacity === '1';
-        const isFullCoverage = LayoutTransition.overlay.style.clipPath === 'circle(150% at center)' ||
-                              LayoutTransition.overlay.style.clipPath === '';
+        const ctx = LayoutTransition.overlay.getContext('2d');
+        if (!ctx) return false;
         
-        return isOpaque && (isFullCoverage || LayoutTransition.overlay.style.clipPath === '');
+        // Sample a few pixels to check if there's black content
+        const width = LayoutTransition.overlay.width;
+        const height = LayoutTransition.overlay.height;
+        
+        if (width === 0 || height === 0) return false;
+        
+        try {
+            // Check center pixel and a few corner pixels
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            
+            // Sample some pixels to see if there's any black content
+            for (let i = 0; i < data.length; i += 4) {
+                const alpha = data[i + 3]; // Alpha channel
+                if (alpha > 0) {
+                    return true; // Found visible content
+                }
+            }
+            return false;
+        } catch (error: any) {
+            console.warn("Error checking mask visibility:", error.message);
+            return false;
+        }
     }
 }
 
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
-    LayoutTransition.EnterLayout(TransitionType.HOLE,3)
+    LayoutTransition.EnterLayout(TransitionType.HOLE,1)
 })

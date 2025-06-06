@@ -6,6 +6,7 @@ import { VariableMonitoring } from "../UI/debug_ui/UIvariableMonitoring.js";
 import type { DialogueSystem } from "../UI/dialogue_ui/UIDialogue.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { inventoryManager } from "../UI/inventory_ui/UIInventory.js";
+import { LayoutTransition, TransitionType } from "../UI/layout_transition_ui/UILayoutTransition.js";
 import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UIScreenEffect.js";
 import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
@@ -59,7 +60,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     isBindButtonIntoDebugPanel = true
     // IMGUI 面本绘制按钮
     var level_cat = IMGUIDebugButton.AddCategory("Level")
-   
+
     if (level_cat) {
 
         IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
@@ -73,9 +74,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 export class GAMEPLAY_LEVEL {
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
 
-        UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
+        // UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
+        //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
+        // })
+        LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
         })
+
 
     }
 }
