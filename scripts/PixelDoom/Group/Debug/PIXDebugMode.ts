@@ -5,7 +5,7 @@ import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { startFogDistanceMonitoring } from "../Effect/Fog/PIXEffect_fog.js";
 
 export class dEBUG_MOD {
-    static isEnable = true
+    static isEnable = false
     static isRunMod = false;
 
 

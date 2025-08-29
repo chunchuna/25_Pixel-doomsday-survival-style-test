@@ -29,10 +29,12 @@ async function initGameMainScene(): Promise<void> {
     gameMainScene.initialize();
 
     UIMainMenu.getInstance().ShowMainMenu()
+    
 
     setTimeout(() => {
         UIMainMenu.getInstance().AddButtonShakeEffect('new-game-btn', 15, 800)
         //UIMainMenu.getInstance().ShowGameTitle("The Park <一>", "glitch", "flicker", "35%", "15%");
+        
     }, 1000); // 延迟1秒，确保按钮已经完全显示
 
 
@@ -146,7 +148,7 @@ class UIMainMenu {
                         // UIScreenEffect.FadeOut(3000, TransitionEffectType.WIPE_RADIAL, () => {
                         //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
                         // })
-                        LayoutTransition.LeaveLayout(TransitionType.HOLE,2).onFinish(()=>{
+                        LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
                             pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
                         })
                     })

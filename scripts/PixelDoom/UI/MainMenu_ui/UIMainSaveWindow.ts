@@ -1,5 +1,6 @@
 import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
 import { data, LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
+import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayoutTransition.js";
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 import { GameMainScene } from "./UIMainMenu.js";
@@ -334,10 +335,11 @@ export class UIMainSaveWindow {
         slotElement.addEventListener('click', (e) => {
             e.stopPropagation();
             GameMainScene.getInstance().HideALLMainMenuUI(() => {
-                UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, () => {
+                LayoutTransition.LeaveLayout(TransitionType.HOLE,2).onFinish(()=>{
                     SaveSetting.isUseDataEnterNewGame = true;
 
                     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+
 
                 })
 

@@ -44,7 +44,7 @@ var MaxDsitance = 0;
 var FogInstanceArray: InstanceType.FogSprite[] = [];
 var MaxFogCount = 0; // 记录最大雾数量
 var FogRadius = 100; // 记录雾的半径
-var DebugRender = true;
+var DebugRender = false;
 
 // 新增：存储雾实例与debug元素的映射关系
 var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();

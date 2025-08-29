@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 44200,
+	"savedWithRelease": 45200,
 	"name": "25_ThePark_h5",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -175,7 +175,7 @@
 			"name": "[Better Outline]",
 			"author": "skymen",
 			"bundled": true,
-			"version": "2.1.0.1"
+			"version": "2.0.0.4"
 		},
 		{
 			"type": "effect",
@@ -1309,7 +1309,6 @@
 		"orientations": "landscape",
 		"webgpu": "auto",
 		"gpuPreference": "high-performance",
-		"scriptsType": "module",
 		"framerateMode": "vsync",
 		"sampling": "nearest",
 		"downscaling": "medium",
@@ -1320,10 +1319,11 @@
 		"maxSpriteSheetSize": 2048,
 		"loaderStyle": "percent",
 		"preloadSounds": true,
+		"uidAllocationMode": "increment",
 		"cordovaiOSScheme": "app",
 		"cordovaAndroidScheme": "https",
 		"exportFileStructure": "folders",
-		"uidAllocationMode": "increment"
+		"scriptsType": "module"
 	},
 	"viewportWidth": 640,
 	"viewportHeight": 480,
