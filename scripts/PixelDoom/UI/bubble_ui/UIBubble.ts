@@ -18,7 +18,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 3, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset)
+            .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset).setChineseMode()
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show typewriter bubble", () => {
@@ -27,7 +27,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
         UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 5, BubbleType.SPEECH)
             .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset)
-            .enableTypewriter(50); // 50ms per character
+            .enableTypewriter(50).setChineseMode(); // 50ms per character
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show thought bubble", () => {
@@ -107,6 +107,7 @@ export enum BubbleType {
 export class UIBubble {
     private static instances: Map<string, UIBubble> = new Map();
     private static idCounter: number = 0;
+    private static responsiveBound: boolean = false;
 
     private id: string;
     private htmlElement: any; // HTML element instance
@@ -147,6 +148,11 @@ export class UIBubble {
     private isAnimatingOut: boolean = false;
     private hasPlayedEntranceAnimation: boolean = false;
 
+    // Chinese mode properties
+    private chineseModeEnabled: boolean = false;
+    private chineseModeHeightMultiplier: number = 1.5;
+    private chineseModeLineHeight: number = 1.8;
+
     //  Postion OffSet 
 
     public static PositionYOffset: number = -250;
@@ -159,6 +165,9 @@ export class UIBubble {
         this.duration = duration;
         this.type = type;
         this.layer = layer;
+
+        // Ensure responsive handling is bound once
+        UIBubble.ensureResponsiveBinding();
 
         // Initialize timer tags
         this.typewriterTimerTag = `typewriter_${this.id}_${Date.now()}`;
@@ -177,6 +186,22 @@ export class UIBubble {
         this.createHtmlElement();
 
         console.log(`Created ${this.type} bubble with ID: ${this.id}, duration: ${this.duration}s`);
+    }
+
+    /**
+     * Binds a single window resize listener to reflow all bubbles
+     */
+    private static ensureResponsiveBinding(): void {
+        if (UIBubble.responsiveBound) return;
+        try {
+            window.addEventListener("resize", () => {
+                // Reflow all existing bubbles on viewport change
+                UIBubble.instances.forEach((bubble) => bubble.reflowForViewport());
+            });
+            UIBubble.responsiveBound = true;
+        } catch (_) {
+            // Ignore if environment does not support window resize events
+        }
     }
 
     /**
@@ -222,6 +247,20 @@ export class UIBubble {
 
         // Recalculate size for empty content
         this.calculateAutoSize();
+
+        // Pre-size for full content to avoid overflow during typing (especially for Chinese)
+        const prevDisplayed = this.displayedContent;
+        this.displayedContent = this.content;
+        this.calculateAutoSize();
+        const targetWidth = this._width;
+        const targetHeight = this._height;
+        this.displayedContent = prevDisplayed;
+
+        // Ensure initial size is at least the final size so text never overflows
+        this.calculateAutoSize();
+        this._width = Math.max(this._width, targetWidth);
+        this._height = Math.max(this._height, targetHeight);
+
         if (this.htmlElement) {
             this.htmlElement.width = this._width;
             this.htmlElement.height = this._height;
@@ -288,44 +327,58 @@ export class UIBubble {
      * Calculates auto-size based on content length
      */
     private calculateAutoSize(): void {
-        const contentLength = this.typewriterEnabled ? this.displayedContent.length : this.content.length;
+        const content = this.typewriterEnabled ? this.displayedContent : this.content;
+        const contentLength = content.length;
 
-        // Base size calculation
-        let baseWidth = 150;
+        // Viewport-aware constraints
+        let viewportWidth = 1280;
+        let viewportHeight = 720;
+        try {
+            viewportWidth = Math.max(320, Math.min(window.innerWidth || viewportWidth, 4096));
+            viewportHeight = Math.max(240, Math.min(window.innerHeight || viewportHeight, 2160));
+        } catch (_) { /* non-browser runtime */ }
+
+        // Base size calculation (use viewport fractions with caps)
+        let baseWidth = Math.min(Math.floor(viewportWidth * 0.45), 420);
         let baseHeight = 60;
 
-        // Adjust based on content length
-        if (contentLength > 50) {
-            baseWidth = Math.min(400, 150 + (contentLength - 50) * 2);
-            baseHeight = Math.min(200, 60 + Math.floor((contentLength - 50) / 20) * 20);
-        } else if (contentLength > 20) {
-            baseWidth = 150 + (contentLength - 20) * 1.5;
-            baseHeight = 60;
-        }
+        // Estimate characters per line based on width (CJK wider, so fewer per line)
+        const charsPerLine = this.chineseModeEnabled ? Math.max(8, Math.floor(baseWidth / 12)) : Math.max(12, Math.floor(baseWidth / 8));
+        const estimatedLines = Math.max(1, Math.ceil(contentLength / Math.max(1, charsPerLine)));
 
-        // Minimum size for typewriter effect
-        if (this.typewriterEnabled && contentLength === 0) {
-            baseWidth = 100;
-            baseHeight = 50;
-        }
+        // Height based on estimated lines and line-height
+        const lineHeightPx = (this.chineseModeEnabled ? this.chineseModeLineHeight : 1.4) * 12; // font-size = 12px
+        baseHeight = Math.min(Math.floor(viewportHeight * 0.35), Math.max(50, Math.ceil(estimatedLines * lineHeightPx + 18)));
 
         // Adjust based on bubble type
         switch (this.type) {
             case BubbleType.THOUGHT:
-                baseWidth += 20;
+                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 20);
                 baseHeight += 10;
                 break;
             case BubbleType.INFO:
-                baseWidth += 30;
+                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 30);
                 break;
             case BubbleType.WARNING:
-                baseWidth += 10;
+                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 10);
                 baseHeight += 5;
                 break;
         }
 
-        this._width = Math.round(baseWidth);
-        this._height = Math.round(baseHeight);
+        // Apply Chinese mode adjustments
+        if (this.chineseModeEnabled) {
+            // Prefer wider layout on wide screens for CJK readability
+            baseWidth = Math.min(Math.floor(viewportWidth * 0.65), Math.max(baseWidth, Math.floor(viewportWidth * 0.38)));
+
+            // Recompute chars per line after width change
+            const cpl = Math.max(8, Math.floor(baseWidth / 12));
+            const lines = Math.max(1, Math.ceil(contentLength / cpl));
+            const lh = this.chineseModeLineHeight * 12;
+            baseHeight = Math.min(Math.floor(viewportHeight * 0.45), Math.max(90, Math.ceil(lines * lh + 20)));
+        }
+
+        this._width = Math.max(100, Math.round(baseWidth));
+        this._height = Math.max(50, Math.round(baseHeight));
     }
 
     /**
@@ -376,6 +429,76 @@ export class UIBubble {
     }
 
     /**
+     * Generates text container styles for Chinese mode
+     */
+    private getTextContainerStyles(): string {
+        let styles = [
+            `color: ${this.textColor}`,
+            `font-size: 12px`,
+            `line-height: ${this.chineseModeEnabled ? this.chineseModeLineHeight : 1.4}`,
+            `word-wrap: break-word`,
+            `overflow-wrap: break-word`,
+            `max-width: 100%`,
+            `width: 100%`,
+            `box-sizing: border-box`
+        ];
+
+        if (this.chineseModeEnabled) {
+            styles.push(
+                `text-align: left`,
+                `word-break: break-all`,
+                `overflow: hidden`,
+                `padding-top: 2px`,
+                `padding-bottom: 6px`,
+                `padding-left: 0px`,
+                `white-space: normal`,
+                `display: block`
+            );
+        } else {
+            styles.push(
+                `text-align: center`,
+                `overflow: hidden`
+            );
+        }
+
+        return styles.join('; ') + ';';
+    }
+
+    /**
+     * Generates main container styles for Chinese mode
+     */
+    private getMainContainerStyles(): string {
+        let styles = [
+            `position: relative`,
+            `width: 100%`,
+            `height: 100%`,
+            `background-color: ${this.backgroundColor}`,
+            `border: 1px solid ${this.borderColor}`,
+            `border-radius: ${this.getBorderRadius()}`,
+            `box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3)`,
+            `display: flex`,
+            `justify-content: center`,
+            `box-sizing: border-box`,
+            `transition: all 0.3s ease-out`,
+            `overflow: hidden`
+        ];
+
+        if (this.chineseModeEnabled) {
+            styles.push(
+                `align-items: flex-start`,
+                `padding: 8px 10px 8px 4px`
+            );
+        } else {
+            styles.push(
+                `align-items: center`,
+                `padding: 8px 12px`
+            );
+        }
+
+        return styles.join('; ') + ';';
+    }
+
+    /**
      * Generates the HTML structure for the bubble
      */
     private generateBubbleHTML(): string {
@@ -398,33 +521,9 @@ export class UIBubble {
             ${animationStyle}
         ">
             <!-- Main bubble container -->
-            <div style="
-                position: relative;
-                width: 100%;
-                height: 100%;
-                background-color: ${this.backgroundColor};
-                border: 1px solid ${this.borderColor};
-                border-radius: ${this.getBorderRadius()};
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 8px 12px;
-                box-sizing: border-box;
-                transition: all 0.3s ease-out;
-            ">
+            <div style="${this.getMainContainerStyles()}">
                 <!-- Text content -->
-                <div id="bubble-text-${this.id}" style="
-                    color: ${this.textColor};
-                    font-size: 12px;
-                    line-height: 1.4;
-                    text-align: center;
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                    max-width: 100%;
-                    max-height: 100%;
-                    overflow: hidden;
-                ">
+                <div id="bubble-text-${this.id}" style="${this.getTextContainerStyles()}">
                     ${this.escapeHtml(currentContent)}${this.typewriterEnabled && this.typewriterCurrentIndex < this.content.length ? '<span style="animation: blink 1s infinite;">|</span>' : ''}
                 </div>
             </div>
@@ -520,6 +619,30 @@ export class UIBubble {
             default:
                 // No tail for INFO, WARNING, SYSTEM types
                 return '';
+        }
+    }
+
+    /**
+     * Reflow current bubble for new viewport size
+     */
+    private reflowForViewport(): void {
+        // Recompute size using currently displayed content to avoid jumps in typewriter
+        const backupDisplayed = this.displayedContent;
+        const backupTypewriter = this.typewriterEnabled;
+
+        // If typewriter enabled, size to final content to ensure no cutoff after resize
+        if (backupTypewriter) {
+            this.displayedContent = this.content;
+        }
+        this.calculateAutoSize();
+        // Restore displayed content index
+        this.displayedContent = backupDisplayed;
+
+        if (this.htmlElement) {
+            this.htmlElement.width = this._width;
+            this.htmlElement.height = this._height;
+            // Re-render to apply CSS responsive layout
+            this.renderHTML();
         }
     }
 
@@ -716,32 +839,9 @@ export class UIBubble {
             animation: bubbleExit ${UIBubble.FADE_OUT_DURATION}ms ease-in forwards;
         ">
             <!-- Main bubble container -->
-            <div style="
-                position: relative;
-                width: 100%;
-                height: 100%;
-                background-color: ${this.backgroundColor};
-                border: 1px solid ${this.borderColor};
-                border-radius: ${this.getBorderRadius()};
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 8px 12px;
-                box-sizing: border-box;
-            ">
+            <div style="${this.getMainContainerStyles()}">
                 <!-- Text content -->
-                <div id="bubble-text-${this.id}" style="
-                    color: ${this.textColor};
-                    font-size: 12px;
-                    line-height: 1.4;
-                    text-align: center;
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                    max-width: 100%;
-                    max-height: 100%;
-                    overflow: hidden;
-                ">
+                <div id="bubble-text-${this.id}" style="${this.getTextContainerStyles()}">
                     ${this.escapeHtml(currentContent)}
                 </div>
             </div>
@@ -891,6 +991,28 @@ export class UIBubble {
             } catch (error: any) {
                 console.error(`Failed to extend duration: ${error.message}`);
             }
+        }
+
+        return this;
+    }
+
+    /**
+     * Enables Chinese mode for better Chinese character display
+     * @param heightMultiplier Optional height multiplier (default: 1.5)
+     * @param lineHeight Optional line height (default: 1.8)
+     */
+    public setChineseMode(heightMultiplier: number = 1.5, lineHeight: number = 1.8): UIBubble {
+        this.chineseModeEnabled = true;
+        this.chineseModeHeightMultiplier = heightMultiplier;
+        this.chineseModeLineHeight = lineHeight;
+
+        // Recalculate size with Chinese mode
+        this.calculateAutoSize();
+        
+        if (this.htmlElement) {
+            this.htmlElement.width = this._width;
+            this.htmlElement.height = this._height;
+            this.renderHTML(); // Re-render with Chinese mode styling
         }
 
         return this;

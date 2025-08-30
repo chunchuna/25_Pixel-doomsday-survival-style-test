@@ -16,7 +16,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
     RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly([
         ...new Apple().toItems(300),
-      
     ]);
     
     
