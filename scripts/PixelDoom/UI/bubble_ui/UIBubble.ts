@@ -108,6 +108,8 @@ export class UIBubble {
     private static instances: Map<string, UIBubble> = new Map();
     private static idCounter: number = 0;
     private static responsiveBound: boolean = false;
+    private static responsiveEnabled: boolean = false;
+    private static resizeHandler: any = null;
 
     private id: string;
     private htmlElement: any; // HTML element instance
@@ -192,15 +194,36 @@ export class UIBubble {
      * Binds a single window resize listener to reflow all bubbles
      */
     private static ensureResponsiveBinding(): void {
+        if (!UIBubble.responsiveEnabled) return;
         if (UIBubble.responsiveBound) return;
         try {
-            window.addEventListener("resize", () => {
-                // Reflow all existing bubbles on viewport change
-                UIBubble.instances.forEach((bubble) => bubble.reflowForViewport());
-            });
+            if (!UIBubble.resizeHandler) {
+                UIBubble.resizeHandler = () => {
+                    // Reflow all existing bubbles on viewport change
+                    UIBubble.instances.forEach((bubble) => bubble.reflowForViewport());
+                };
+            }
+            window.addEventListener("resize", UIBubble.resizeHandler);
             UIBubble.responsiveBound = true;
         } catch (_) {
             // Ignore if environment does not support window resize events
+        }
+    }
+
+    /**
+     * Enables or disables responsive behavior globally
+     */
+    public static SetResponsiveEnabled(enabled: boolean): void {
+        UIBubble.responsiveEnabled = enabled;
+        try {
+            if (!enabled && UIBubble.responsiveBound && UIBubble.resizeHandler) {
+                window.removeEventListener("resize", UIBubble.resizeHandler);
+                UIBubble.responsiveBound = false;
+            } else if (enabled && !UIBubble.responsiveBound) {
+                UIBubble.ensureResponsiveBinding();
+            }
+        } catch (_) {
+            // Ignore in non-browser context
         }
     }
 
@@ -330,55 +353,47 @@ export class UIBubble {
         const content = this.typewriterEnabled ? this.displayedContent : this.content;
         const contentLength = content.length;
 
-        // Viewport-aware constraints
-        let viewportWidth = 1280;
-        let viewportHeight = 720;
-        try {
-            viewportWidth = Math.max(320, Math.min(window.innerWidth || viewportWidth, 4096));
-            viewportHeight = Math.max(240, Math.min(window.innerHeight || viewportHeight, 2160));
-        } catch (_) { /* non-browser runtime */ }
-
-        // Base size calculation (use viewport fractions with caps)
-        let baseWidth = Math.min(Math.floor(viewportWidth * 0.45), 420);
+        // 固定宽度，不再根据窗口大小调整
+        let baseWidth = 400; // 固定宽度
         let baseHeight = 60;
 
-        // Estimate characters per line based on width (CJK wider, so fewer per line)
-        const charsPerLine = this.chineseModeEnabled ? Math.max(8, Math.floor(baseWidth / 12)) : Math.max(12, Math.floor(baseWidth / 8));
+        // 估计每行字符数（中文字符更宽，所以每行更少）
+        const charsPerLine = this.chineseModeEnabled ? Math.max(8, Math.floor(baseWidth / 18)) : Math.max(12, Math.floor(baseWidth / 10));
         const estimatedLines = Math.max(1, Math.ceil(contentLength / Math.max(1, charsPerLine)));
 
-        // Height based on estimated lines and line-height
-        const lineHeightPx = (this.chineseModeEnabled ? this.chineseModeLineHeight : 1.4) * 12; // font-size = 12px
-        baseHeight = Math.min(Math.floor(viewportHeight * 0.35), Math.max(50, Math.ceil(estimatedLines * lineHeightPx + 18)));
+        // 根据估计的行数和行高计算高度
+        const lineHeightPx = (this.chineseModeEnabled ? this.chineseModeLineHeight : 1.4) * 14; // 增大字体大小到14px
+        baseHeight = Math.max(60, Math.ceil(estimatedLines * lineHeightPx + 24)); // 增加内边距
 
-        // Adjust based on bubble type
+        // 根据气泡类型调整
         switch (this.type) {
             case BubbleType.THOUGHT:
-                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 20);
+                baseWidth += 20;
                 baseHeight += 10;
                 break;
             case BubbleType.INFO:
-                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 30);
+                baseWidth += 30;
                 break;
             case BubbleType.WARNING:
-                baseWidth = Math.min(Math.floor(viewportWidth * 0.5), baseWidth + 10);
+                baseWidth += 10;
                 baseHeight += 5;
                 break;
         }
 
-        // Apply Chinese mode adjustments
+        // 应用中文模式调整
         if (this.chineseModeEnabled) {
-            // Prefer wider layout on wide screens for CJK readability
-            baseWidth = Math.min(Math.floor(viewportWidth * 0.65), Math.max(baseWidth, Math.floor(viewportWidth * 0.38)));
-
-            // Recompute chars per line after width change
-            const cpl = Math.max(8, Math.floor(baseWidth / 12));
+            // 为中文增加固定宽度
+            baseWidth = Math.max(baseWidth, 420);
+            
+            // 重新计算中文每行字符数
+            const cpl = Math.max(8, Math.floor(baseWidth / 18));
             const lines = Math.max(1, Math.ceil(contentLength / cpl));
-            const lh = this.chineseModeLineHeight * 12;
-            baseHeight = Math.min(Math.floor(viewportHeight * 0.45), Math.max(90, Math.ceil(lines * lh + 20)));
+            const lh = this.chineseModeLineHeight * 14; // 增大字体大小
+            baseHeight = Math.max(90, Math.ceil(lines * lh + 28)); // 增加内边距
         }
 
         this._width = Math.max(100, Math.round(baseWidth));
-        this._height = Math.max(50, Math.round(baseHeight));
+        this._height = Math.max(60, Math.round(baseHeight));
     }
 
     /**
@@ -434,7 +449,7 @@ export class UIBubble {
     private getTextContainerStyles(): string {
         let styles = [
             `color: ${this.textColor}`,
-            `font-size: 12px`,
+            `font-size: ${this.chineseModeEnabled ? '14px' : '14px'}`,
             `line-height: ${this.chineseModeEnabled ? this.chineseModeLineHeight : 1.4}`,
             `word-wrap: break-word`,
             `overflow-wrap: break-word`,
@@ -448,16 +463,18 @@ export class UIBubble {
                 `text-align: left`,
                 `word-break: break-all`,
                 `overflow: hidden`,
-                `padding-top: 2px`,
+                `padding-top: 4px`,
                 `padding-bottom: 6px`,
-                `padding-left: 0px`,
+                `padding-left: 8px`,
+                `padding-right: 8px`,
                 `white-space: normal`,
                 `display: block`
             );
         } else {
             styles.push(
                 `text-align: center`,
-                `overflow: hidden`
+                `overflow: hidden`,
+                `padding: 4px 8px`
             );
         }
 
@@ -486,12 +503,12 @@ export class UIBubble {
         if (this.chineseModeEnabled) {
             styles.push(
                 `align-items: flex-start`,
-                `padding: 8px 10px 8px 4px`
+                `padding: 10px 12px 10px 8px`
             );
         } else {
             styles.push(
                 `align-items: center`,
-                `padding: 8px 12px`
+                `padding: 10px 12px`
             );
         }
 
@@ -626,22 +643,9 @@ export class UIBubble {
      * Reflow current bubble for new viewport size
      */
     private reflowForViewport(): void {
-        // Recompute size using currently displayed content to avoid jumps in typewriter
-        const backupDisplayed = this.displayedContent;
-        const backupTypewriter = this.typewriterEnabled;
-
-        // If typewriter enabled, size to final content to ensure no cutoff after resize
-        if (backupTypewriter) {
-            this.displayedContent = this.content;
-        }
-        this.calculateAutoSize();
-        // Restore displayed content index
-        this.displayedContent = backupDisplayed;
-
-        if (this.htmlElement) {
-            this.htmlElement.width = this._width;
-            this.htmlElement.height = this._height;
-            // Re-render to apply CSS responsive layout
+        // 在固定尺寸模式下，不需要根据视口大小调整气泡尺寸
+        // 仅重新渲染HTML以确保内容正确显示
+        if (this.htmlElement && this.htmlElement.setContent) {
             this.renderHTML();
         }
     }
@@ -745,20 +749,9 @@ export class UIBubble {
     private updateSizeForTypewriter(): void {
         if (!this.htmlElement) return;
 
-        // Recalculate size based on current displayed content
-        const oldWidth = this._width;
-        const oldHeight = this._height;
-
-        this.calculateAutoSize();
-
-        // Always update size to allow smooth growth
-        this.htmlElement.width = this._width;
-        this.htmlElement.height = this._height;
-
-        // Log size changes for debugging
-        if (Math.abs(this._width - oldWidth) > 5 || Math.abs(this._height - oldHeight) > 3) {
-            console.log(`Bubble ${this.id} resized: ${oldWidth}x${oldHeight} -> ${this._width}x${this._height} (chars: ${this.displayedContent.length})`);
-        }
+        // 在固定尺寸模式下，不需要根据当前显示内容调整气泡尺寸
+        // 只需更新内容即可，气泡大小在初始化时已经设置为足够容纳完整内容
+        this.renderHTML();
     }
 
     /**
