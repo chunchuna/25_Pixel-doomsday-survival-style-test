@@ -175,7 +175,7 @@
 			"name": "[Better Outline]",
 			"author": "skymen",
 			"bundled": true,
-			"version": "2.0.0.4"
+			"version": "2.1.0.1"
 		},
 		{
 			"type": "effect",
@@ -187,10 +187,7 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [
-			"Bus",
-			"FogEffect_c3"
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -217,7 +214,9 @@
 					"DaoDiNvHai",
 					"DaoDiNanRen",
 					"C3Ctimer",
-					"FogSprite"
+					"FogSprite",
+					"Bus",
+					"FogEffect_c3"
 				],
 				"subfolders": [],
 				"name": "Sprite"
@@ -554,6 +553,20 @@
 										}
 									],
 									"name": "Effect"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXItems.ts",
+											"type": "application/typescript",
+											"sid": 209528354990573,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "Inventory"
 								}
 							],
 							"name": "Group"
