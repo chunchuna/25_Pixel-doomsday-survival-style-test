@@ -216,7 +216,10 @@
 					"C3Ctimer",
 					"FogSprite",
 					"Bus",
-					"FogEffect_c3"
+					"FogEffect_c3",
+					"ChangJingLu",
+					"HeMa",
+					"HouZi"
 				],
 				"subfolders": [],
 				"name": "Sprite"
@@ -864,6 +867,14 @@
 											"name": "UIBubble.ts",
 											"type": "application/typescript",
 											"sid": 963848710099983,
+											"script-info": {
+												"purpose": "none"
+											}
+										},
+										{
+											"name": "UIAdvanceBubble.ts",
+											"type": "application/typescript",
+											"sid": 693214228260116,
 											"script-info": {
 												"purpose": "none"
 											}
