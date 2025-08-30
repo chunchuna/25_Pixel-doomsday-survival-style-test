@@ -26,6 +26,52 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .setChineseMode();
     });
 
+    // 添加测试短文本气泡的按钮
+    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Very Short Text", () => {
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+
+        UIBubble.ShowBubble("这是一条非常短的文本", 5, BubbleType.SPEECH)
+            .setPosition(PlayerInstance.x + UIBubble.PostionXOffset, PlayerInstance.y + UIBubble.PositionYOffset - 50)
+            .setChineseMode();
+    });
+
+    // 添加配置气泡大小的按钮
+    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Adjust Bubble Config", () => {
+        // 修改气泡大小配置
+        UIBubble.SetBubbleSizeConfig({
+            scrollThreshold: 80,  // 降低滚动阈值，更短的文本就会显示滚动条
+            shortTextLines: 3,    // 增加短文本的行数
+            minHeight: 70         // 增加最小高度
+        });
+        
+        // 显示一条消息确认配置已更改
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+        
+        UIBubble.ShowBubble("气泡大小配置已更新！", 3, BubbleType.INFO)
+            .setPosition(PlayerInstance.x, PlayerInstance.y - 100)
+            .setColors("#0f3460", "#16537e", "#e7f3ff");
+    });
+
+    // 添加恢复默认配置的按钮
+    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Reset Bubble Config", () => {
+        // 恢复默认配置
+        UIBubble.SetBubbleSizeConfig({
+            scrollThreshold: 100,
+            shortTextLines: 2,
+            minHeight: 60
+        });
+        
+        // 显示一条消息确认配置已重置
+        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        if (!PlayerInstance) return;
+        
+        UIBubble.ShowBubble("气泡大小配置已重置为默认值！", 3, BubbleType.INFO)
+            .setPosition(PlayerInstance.x, PlayerInstance.y - 100)
+            .setColors("#0f3460", "#16537e", "#e7f3ff");
+    });
+
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Multiline English", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
@@ -250,9 +296,39 @@ export class UIBubble {
     private chineseModeHeightMultiplier: number = 1.5;
     private chineseModeLineHeight: number = 1.8;
 
-    //  Postion OffSet 
+    // Postion OffSet 
     public static PositionYOffset: number = -250;
     public static PostionXOffset: number = -20;
+
+    // 气泡大小配置
+    public static BubbleSizeConfig = {
+        // 文本长度阈值，超过此长度才显示滚动条
+        scrollThreshold: 10,
+        // 最小宽度
+        minWidth: 180,
+        // 最小高度
+        minHeight: 80,
+        // 短文本宽度（中文）
+        shortTextWidthChinese: 240,
+        // 中等文本宽度（中文）
+        mediumTextWidthChinese: 300,
+        // 长文本宽度（中文）
+        longTextWidthChinese: 360,
+        // 短文本宽度（英文）
+        shortTextWidthEnglish: 220,
+        // 中等文本宽度（英文）
+        mediumTextWidthEnglish: 280,
+        // 长文本宽度（英文）
+        longTextWidthEnglish: 340,
+        // 短文本长度阈值
+        shortTextThreshold: 20,
+        // 中等文本长度阈值
+        mediumTextThreshold: 50,
+        // 可见行数（用于长文本）
+        visibleLines: 5,
+        // 短文本行数（用于自适应高度）
+        shortTextLines: 2
+    };
 
 
     private constructor(content: string, duration: number, type: BubbleType, layer: string = "html_c3") {
@@ -414,21 +490,21 @@ export class UIBubble {
         // 设置基础宽度 - 根据内容长度适当调整
         if (this.chineseModeEnabled) {
             // 中文模式下宽度
-            if (contentLength <= 20) {
-                baseWidth = 240; // 短文本使用较窄宽度
-            } else if (contentLength <= 50) {
-                baseWidth = 300; // 中等长度文本
+            if (contentLength <= UIBubble.BubbleSizeConfig.shortTextThreshold) {
+                baseWidth = UIBubble.BubbleSizeConfig.shortTextWidthChinese; // 短文本使用较窄宽度
+            } else if (contentLength <= UIBubble.BubbleSizeConfig.mediumTextThreshold) {
+                baseWidth = UIBubble.BubbleSizeConfig.mediumTextWidthChinese; // 中等长度文本
             } else {
-                baseWidth = 360; // 长文本使用较宽宽度
+                baseWidth = UIBubble.BubbleSizeConfig.longTextWidthChinese; // 长文本使用较宽宽度
             }
         } else {
             // 英文模式下宽度
-            if (contentLength <= 30) {
-                baseWidth = 220; // 短文本使用较窄宽度
-            } else if (contentLength <= 80) {
-                baseWidth = 280; // 中等长度文本
+            if (contentLength <= UIBubble.BubbleSizeConfig.shortTextThreshold * 1.5) {
+                baseWidth = UIBubble.BubbleSizeConfig.shortTextWidthEnglish; // 短文本使用较窄宽度
+            } else if (contentLength <= UIBubble.BubbleSizeConfig.mediumTextThreshold * 1.6) {
+                baseWidth = UIBubble.BubbleSizeConfig.mediumTextWidthEnglish; // 中等长度文本
             } else {
-                baseWidth = 340; // 长文本使用较宽宽度
+                baseWidth = UIBubble.BubbleSizeConfig.longTextWidthEnglish; // 长文本使用较宽宽度
             }
         }
         
@@ -437,10 +513,7 @@ export class UIBubble {
         const paddingHorizontal = 20; // 水平内边距
         const charsPerLine = Math.max(4, Math.floor((baseWidth - paddingHorizontal) / charWidth));
         
-        // 设置固定的可见行数
-        const visibleLines = 5; // 气泡中可见的行数
-        
-        // 估计总行数（用于决定是否需要滚动条）
+        // 估计总行数
         const totalLines = Math.ceil(contentLength / charsPerLine);
         
         // 根据估计的行数和行高计算高度
@@ -451,8 +524,14 @@ export class UIBubble {
         // 内边距
         const paddingVertical = this.chineseModeEnabled ? 20 : 16;
         
-        // 计算实际所需高度 - 固定为可见行数的高度
-        baseHeight = Math.ceil(visibleLines * lineHeightPx + paddingVertical);
+        // 短文本使用自适应高度，长文本使用固定高度
+        if (contentLength <= UIBubble.BubbleSizeConfig.scrollThreshold) {
+            // 短文本：根据实际行数计算高度（自适应）
+            baseHeight = Math.ceil(Math.min(totalLines, Math.max(UIBubble.BubbleSizeConfig.shortTextLines, totalLines)) * lineHeightPx + paddingVertical);
+        } else {
+            // 长文本：固定为可见行数的高度（使用滚动条）
+            baseHeight = Math.ceil(UIBubble.BubbleSizeConfig.visibleLines * lineHeightPx + paddingVertical);
+        }
         
         // 根据气泡类型调整
         switch (this.type) {
@@ -470,15 +549,17 @@ export class UIBubble {
                 break;
         }
         
-        // 为滚动条增加额外宽度
-        baseWidth += 10; // 为滚动条留出空间
+        // 只为长文本增加滚动条空间
+        if (contentLength > UIBubble.BubbleSizeConfig.scrollThreshold) {
+            baseWidth += 10; // 为滚动条留出空间
+        }
         
         // 确保最小尺寸
-        this._width = Math.max(180, Math.round(baseWidth));
-        this._height = Math.max(fontSize * 3 + paddingVertical, Math.round(baseHeight));
+        this._width = Math.max(UIBubble.BubbleSizeConfig.minWidth, Math.round(baseWidth));
+        this._height = Math.max(UIBubble.BubbleSizeConfig.minHeight, Math.round(baseHeight));
         
         // 调试信息
-        console.log(`Bubble size: ${this._width}x${this._height}, estimated ${totalLines} lines of text, showing ${visibleLines} lines`);
+        console.log(`Bubble size: ${this._width}x${this._height}, estimated ${totalLines} lines of text, content length: ${contentLength}`);
     }
 
     /**
@@ -535,6 +616,9 @@ export class UIBubble {
         const content = this.typewriterEnabled ? this.displayedContent : this.content;
         const contentLength = content.length;
         
+        // 确定是否需要滚动条
+        const needsScrollbar = contentLength > UIBubble.BubbleSizeConfig.scrollThreshold;
+        
         let styles = [
             `color: ${this.textColor}`,
             `font-size: ${this.chineseModeEnabled ? '14px' : '16px'}`,
@@ -545,28 +629,38 @@ export class UIBubble {
             `width: 100%`,
             `height: 100%`,
             `box-sizing: border-box`,
-            `overflow-y: auto`, // 启用垂直滚动
-            `overflow-x: hidden`, // 禁用水平滚动
             `white-space: normal`,
             `display: block`,
             `margin: 0`,
-            `scrollbar-width: thin`, // Firefox滚动条样式
-            `scrollbar-color: ${this.borderColor} rgba(0,0,0,0.1)`, // Firefox滚动条颜色
-            `pointer-events: auto`, // 确保可以接收鼠标事件
-            `user-select: text`, // 允许文本选择
             `cursor: default` // 默认鼠标样式
         ];
+
+        // 只有长文本才启用滚动条
+        if (needsScrollbar) {
+            styles.push(
+                `overflow-y: auto`, // 启用垂直滚动
+                `overflow-x: hidden`, // 禁用水平滚动
+                `scrollbar-width: thin`, // Firefox滚动条样式
+                `scrollbar-color: ${this.borderColor} rgba(0,0,0,0.1)`, // Firefox滚动条颜色
+                `pointer-events: auto` // 确保可以接收鼠标事件
+            );
+        } else {
+            styles.push(
+                `overflow: hidden`, // 短文本不需要滚动
+                `pointer-events: none` // 短文本不需要鼠标交互
+            );
+        }
 
         if (this.chineseModeEnabled) {
             styles.push(
                 `text-align: left`,
                 `word-break: break-all`,
-                `padding: 8px 12px 8px 10px` // 右侧增加内边距，为滚动条留出空间
+                `padding: 8px ${needsScrollbar ? '12px' : '8px'} 8px ${needsScrollbar ? '10px' : '8px'}` // 有滚动条时右侧增加内边距
             );
         } else {
             styles.push(
                 `text-align: ${contentLength > 60 ? 'left' : 'center'}`,
-                `padding: 6px 12px 6px 10px` // 右侧增加内边距，为滚动条留出空间
+                `padding: 6px ${needsScrollbar ? '12px' : '8px'} 6px ${needsScrollbar ? '10px' : '8px'}` // 有滚动条时右侧增加内边距
             );
         }
 
@@ -608,6 +702,8 @@ export class UIBubble {
     private generateBubbleHTML(): string {
         const tailHtml = this.generateTailHTML();
         const currentContent = this.typewriterEnabled ? this.displayedContent : this.content;
+        const contentLength = currentContent.length;
+        const needsScrollbar = contentLength > UIBubble.BubbleSizeConfig.scrollThreshold;
 
         // Only apply entrance animation if it hasn't been played yet
         const animationStyle = !this.hasPlayedEntranceAnimation ?
@@ -620,8 +716,8 @@ export class UIBubble {
         const textContainerId = `bubble-text-${this.id}`;
         const bubbleId = `bubble-${this.id}`;
         
-        // 添加滚动事件处理脚本
-        const scrollScript = `
+        // 添加滚动事件处理脚本，只有需要滚动条时才添加
+        const scrollScript = needsScrollbar ? `
             (function() {
                 // 等待DOM加载完成
                 setTimeout(function() {
@@ -725,7 +821,35 @@ export class UIBubble {
                     
                 }, 100);
             })();
-        `;
+        ` : '';
+
+        // 自定义滚动条样式，只有需要滚动条时才添加
+        const scrollbarStyles = needsScrollbar ? `
+            /* 自定义滚动条样式 - Webkit浏览器 */
+            .bubble-text-container::-webkit-scrollbar {
+                width: 8px; /* 增加滚动条宽度，更容易点击 */
+            }
+            
+            .bubble-text-container::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.1);
+                border-radius: 4px;
+            }
+            
+            .bubble-text-container::-webkit-scrollbar-thumb {
+                background-color: ${this.borderColor};
+                border-radius: 4px;
+                border: 1px solid ${this.backgroundColor};
+            }
+            
+            .bubble-text-container::-webkit-scrollbar-thumb:hover {
+                background-color: #555555;
+            }
+            
+            /* 确保滚动条始终可见 */
+            .bubble-text-container:hover::-webkit-scrollbar-thumb {
+                background-color: #666666;
+            }
+        ` : '';
 
         return `
         <div id="${bubbleId}" style="
@@ -735,7 +859,7 @@ export class UIBubble {
             opacity: 1;
             transform: scale(1) translateY(0);
             font-family: Arial, sans-serif;
-            pointer-events: auto; /* 启用指针事件以允许滚动 */
+            pointer-events: ${needsScrollbar ? 'auto' : 'none'}; /* 只有需要滚动时才启用指针事件 */
             box-sizing: border-box;
             overflow: hidden;
             transform-origin: center center;
@@ -782,30 +906,7 @@ export class UIBubble {
                 51%, 100% { opacity: 0; }
             }
             
-            /* 自定义滚动条样式 - Webkit浏览器 */
-            .bubble-text-container::-webkit-scrollbar {
-                width: 8px; /* 增加滚动条宽度，更容易点击 */
-            }
-            
-            .bubble-text-container::-webkit-scrollbar-track {
-                background: rgba(0,0,0,0.1);
-                border-radius: 4px;
-            }
-            
-            .bubble-text-container::-webkit-scrollbar-thumb {
-                background-color: ${this.borderColor};
-                border-radius: 4px;
-                border: 1px solid ${this.backgroundColor};
-            }
-            
-            .bubble-text-container::-webkit-scrollbar-thumb:hover {
-                background-color: #555555;
-            }
-            
-            /* 确保滚动条始终可见 */
-            .bubble-text-container:hover::-webkit-scrollbar-thumb {
-                background-color: #666666;
-            }
+            ${scrollbarStyles}
         </style>
         
         <script>
@@ -1071,6 +1172,9 @@ export class UIBubble {
 
             const exitSeconds = UIBubble.FADE_OUT_DURATION / 1000;
             exitTimer.behaviors.Timer.startTimer(exitSeconds, exitTag, "once");
+            
+            // 调试日志
+            console.log(`Bubble ${this.id} exit animation started, will destroy in ${exitSeconds}s`);
         } catch (error: any) {
             console.error(`Failed to create exit timer: ${error.message}`);
             // Fallback to immediate destruction
@@ -1280,6 +1384,39 @@ export class UIBubble {
     }
 
     /**
+     * 触发气泡的淡出效果
+     * @param fadeOutDuration 淡出时间(毫秒)，默认使用类设置的淡出时间
+     */
+    public fadeOut(fadeOutDuration: number = UIBubble.FADE_OUT_DURATION): UIBubble {
+        // 如果已经在淡出动画中，不重复触发
+        if (this.isAnimatingOut) return this;
+        
+        // 停止自动销毁计时器（如果有的话）
+        if (this.destroyTimer) {
+            try {
+                this.destroyTimer.behaviors.Timer.stopTimer(this.destroyTimerTag);
+                this.destroyTimer.destroy();
+                this.destroyTimer = null;
+            } catch (error: any) {
+                console.warn(`Error stopping destroy timer: ${error.message}`);
+            }
+        }
+        
+        // 自定义淡出时间（如果提供）
+        if (fadeOutDuration && fadeOutDuration !== UIBubble.FADE_OUT_DURATION) {
+            UIBubble.FADE_OUT_DURATION = fadeOutDuration;
+        }
+        
+        // 触发淡出动画
+        this.playExitAnimation();
+        
+        // 调试日志
+        console.log(`Bubble ${this.id} fadeOut called with duration ${UIBubble.FADE_OUT_DURATION}ms`);
+        
+        return this;
+    }
+
+    /**
      * Destroys the bubble immediately
      */
     public destroy(): void {
@@ -1361,5 +1498,33 @@ export class UIBubble {
             UIBubble.FADE_OUT_DURATION = fadeOutDuration;
         }
         console.log(`Set animation durations: fade-in=${UIBubble.FADE_IN_DURATION}ms, fade-out=${UIBubble.FADE_OUT_DURATION}ms`);
+    }
+
+    /**
+     * 设置气泡大小配置
+     * @param config 配置对象
+     */
+    public static SetBubbleSizeConfig(config: {
+        scrollThreshold?: number,
+        minWidth?: number,
+        minHeight?: number,
+        shortTextWidthChinese?: number,
+        mediumTextWidthChinese?: number,
+        longTextWidthChinese?: number,
+        shortTextWidthEnglish?: number,
+        mediumTextWidthEnglish?: number,
+        longTextWidthEnglish?: number,
+        shortTextThreshold?: number,
+        mediumTextThreshold?: number,
+        visibleLines?: number,
+        shortTextLines?: number
+    }): void {
+        // 更新配置，只更新提供的值
+        UIBubble.BubbleSizeConfig = {
+            ...UIBubble.BubbleSizeConfig,
+            ...config
+        };
+        
+        console.log("Bubble size configuration updated:", UIBubble.BubbleSizeConfig);
     }
 }

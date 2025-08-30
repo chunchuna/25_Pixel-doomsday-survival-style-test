@@ -96,6 +96,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
     // Rain needs to close rain particles and rain sound music
     if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
         _Audio.AudioStopAll()
+       
     }
 
     // Destroy dialogue panel related elements because it always blocks other panels 

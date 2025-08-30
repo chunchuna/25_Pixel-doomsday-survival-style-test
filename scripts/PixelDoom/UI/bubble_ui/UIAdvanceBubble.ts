@@ -19,16 +19,24 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     
     if(!ChangJingLuInstance || !HouziInstance || !HeMaInstance) return
 
-    var NPCChangJingLu = AdvanceBubble.SetNPC("ChangJingLu", ChangJingLuInstance.x, ChangJingLuInstance.y);
-    var NPCHouzi = AdvanceBubble.SetNPC("Houzi", HouziInstance.x, HouziInstance.y);
-    var NPCHeMa = AdvanceBubble.SetNPC("HeMa", HeMaInstance.x, HeMaInstance.y);
+    var NPCChangJingLu = 
+    AdvanceBubble.SetNPC("ChangJingLu", ChangJingLuInstance.x-50, ChangJingLuInstance.y+100);
+    var NPCHouzi = AdvanceBubble.SetNPC("Houzi", HouziInstance.x-50, HouziInstance.y+100);
+    var NPCHeMa = AdvanceBubble.SetNPC("HeMa", HeMaInstance.x-50, HeMaInstance.y+100);
 
     var TestDialogue = AdvanceBubble.CreateContinuousDialogue()
-    TestDialogue.AddContent(NPCChangJingLu,"你好，我是长颈鹿。",BubbleType.SPEECH,true,100)
-    TestDialogue.AddContent(NPCHouzi,"你好，我是狐狸。",BubbleType.SPEECH,true,100)
-    TestDialogue.AddContent(NPCHeMa,"你好，我是河马。",BubbleType.SPEECH,true,100)
+    TestDialogue
+    .AddContent(NPCChangJingLu,"你好，我是长颈鹿。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCChangJingLu,"你们都自我介绍一下自己吧。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCChangJingLu,"那个长得像猴子的你先来。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCHouzi,"你好，我是猴子。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCHouzi,"你好，我看起来真的很像猴子吗？。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCHouzi,"好吧其实我就是猴子哈哈哈哈。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCHeMa,"你好，我是河马。",BubbleType.SPEECH,true,100)
+    .AddContent(NPCHeMa,"你好，有人看看我吗？我是河马。",BubbleType.SPEECH,true,100)
 
-    var TestDialogueControl = AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetPressNext();
+    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetAutoNext().SetWaitTime(2);
+    
     
 })
 
@@ -195,7 +203,14 @@ export class AdvanceBubble {
         // 清除所有气泡
         dialogue.contents.forEach(content => {
             if (content.bubbleInstance) {
-                content.bubbleInstance.destroy();
+                // 使用fadeOut方法淡出气泡
+                try {
+                    content.bubbleInstance.fadeOut();
+                } catch (error: any) {
+                    console.warn(`Error fading out bubble: ${error.message}`);
+                    // 如果淡出失败，直接销毁
+                    content.bubbleInstance.destroy();
+                }
                 content.bubbleInstance = undefined;
             }
         });
@@ -296,17 +311,28 @@ export class AdvanceBubble {
             
             this.autoPlayTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.autoPlayTimerTag) {
-                    // 播放下一条内容
-                    this.playDialogueContent(dialogue, dialogue.currentIndex + 1);
+                    // 检查是否是最后一条内容
+                    const isLastContent = dialogue.currentIndex >= dialogue.contents.length - 1;
                     
-                    // 如果还有下一条，继续设置自动播放
-                    if (dialogue.currentIndex < dialogue.contents.length - 1) {
+                    if (isLastContent) {
+                        // 如果是最后一条内容，调用onDialogueComplete处理结束逻辑
+                        this.onDialogueComplete(dialogue);
+                    } else {
+                        // 否则播放下一条内容
+                        this.playDialogueContent(dialogue, dialogue.currentIndex + 1);
+                        
+                        // 继续设置自动播放
                         this.setupAutoPlay(dialogue);
                     }
                 }
             });
             
             this.autoPlayTimer.behaviors.Timer.startTimer(waitTime, this.autoPlayTimerTag, "once");
+            
+            // 调试日志
+            if (this.debugMode) {
+                console.log(`Auto play timer set for ${waitTime}s, current index: ${dialogue.currentIndex}/${dialogue.contents.length - 1}`);
+            }
         } catch (error: any) {
             console.error(`Failed to create auto play timer: ${error.message}`);
         }
@@ -459,13 +485,56 @@ export class AdvanceBubble {
      * @param dialogue 对话对象
      */
     private static onDialogueComplete(dialogue: IContinuousDialogue): void {
-        // 清除所有气泡
-        dialogue.contents.forEach(content => {
-            if (content.bubbleInstance) {
+        // 确保清除最后一个气泡
+        const lastIndex = dialogue.currentIndex;
+        if (lastIndex >= 0 && lastIndex < dialogue.contents.length) {
+            const lastContent = dialogue.contents[lastIndex];
+            if (lastContent.bubbleInstance) {
+                try {
+                    // 创建一个计时器，在淡出动画完成后销毁气泡
+                    const exitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+                    const exitTag = `exit_dialogue_${dialogue.id}_${Date.now()}`;
+                    
+                    exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
+                        if (e.tag === exitTag) {
+                            // 确保气泡被完全销毁
+                            if (lastContent.bubbleInstance) {
+                                lastContent.bubbleInstance.destroy();
+                                lastContent.bubbleInstance = undefined;
+                            }
+                            exitTimer.destroy();
+                        }
+                    });
+                    
+                    // 先触发淡出效果
+                    lastContent.bubbleInstance.fadeOut();
+                    
+                    // 设置计时器，等待淡出动画完成后销毁气泡
+                    // UIBubble.FADE_OUT_DURATION是毫秒，需要转换为秒
+                    const fadeOutDurationSeconds = 0.6; // 稍微比淡出动画长一点，确保动画完成
+                    exitTimer.behaviors.Timer.startTimer(fadeOutDurationSeconds, exitTag, "once");
+                } catch (error: any) {
+                    console.error(`Failed to create exit timer: ${error.message}`);
+                    // 如果创建计时器失败，直接销毁气泡
+                    if (lastContent.bubbleInstance) {
+                        lastContent.bubbleInstance.destroy();
+                        lastContent.bubbleInstance = undefined;
+                    }
+                }
+            }
+        }
+        
+        // 清除所有可能剩余的气泡
+        dialogue.contents.forEach((content, index) => {
+            if (index !== lastIndex && content.bubbleInstance) {
                 content.bubbleInstance.destroy();
                 content.bubbleInstance = undefined;
             }
         });
+        
+        // 清除所有计时器和监听器
+        this.clearAutoPlayTimer();
+        this.clearKeyPressListener();
         
         // 重置状态
         dialogue.isPlaying = false;
