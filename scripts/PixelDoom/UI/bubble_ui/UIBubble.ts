@@ -13,34 +13,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     // Test category for bubble system
     var bubble_system = IMGUIDebugButton.AddCategory("bubble_system");
 
-    // 添加测试按钮，验证气泡高度优化效果
-    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Optimized Short Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-        if (!PlayerInstance) return;
-
-        UIBubble.ShowBubble("短文本测试", 5, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x, PlayerInstance.y - 50)
-            .setChineseMode();
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Optimized Medium Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-        if (!PlayerInstance) return;
-
-        UIBubble.ShowBubble("这是一个中等长度的文本，用于测试气泡高度优化效果。", 5, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x, PlayerInstance.y - 100)
-            .setChineseMode();
-    });
-
-    IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Optimized Long Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-        if (!PlayerInstance) return;
-
-        UIBubble.ShowBubble("这是一个较长的文本，用于测试气泡高度优化效果。我们希望气泡的高度能够刚好容纳所有文本，不会有太多的空白区域。这样可以使界面看起来更加紧凑和美观。", 8, BubbleType.SPEECH)
-            .setPosition(PlayerInstance.x, PlayerInstance.y - 150)
-            .setChineseMode();
-    });
-
+   
     // 添加新的测试按钮，用于验证气泡大小调整效果
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Extreme Long Text", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
@@ -74,7 +47,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             .setChineseMode();
     });
 
-    // 添加新的测试按钮，使用英文名称
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Short Chinese Text", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
@@ -162,7 +134,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         UIBubble.DestroyAllBubbles();
     });
 
-    // 添加新的测试按钮
+    
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Narrow Bubble - Chinese", () => {
         var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
