@@ -14,7 +14,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
 
     var NPCDouMaoNanRen = AdvanceBubble.SetNPC("DouMaoNanRen", DouMaoNanRenInstance.x, DouMaoNanRenInstance.y);
     
-    var TestDialogue = AdvanceBubble.CreateContinuousDialogue().AddContent(NPCDouMaoNanRen,"你好，我是兜帽男人。",BubbleType.SPEECH,true,20)
+    var TestDialogue = AdvanceBubble.CreateContinuousDialogue()
+    .AddContent(NPCDouMaoNanRen,"你好，我是兜帽男人。",BubbleType.SPEECH,true,20)
+    .AddContent(NPCDouMaoNanRen,"这里是测试的连续对话",BubbleType.SPEECH,true,20)
+    .AddContent(NPCDouMaoNanRen,"欢迎来到营地",BubbleType.SPEECH,true,20);
 
     AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetPressNext()
     
