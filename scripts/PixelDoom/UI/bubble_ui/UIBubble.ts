@@ -271,7 +271,7 @@ export class UIBubble {
     private textColor: string = "#d0d0d0";
 
     // Animation properties
-    private static FADE_IN_DURATION: number = 300; // milliseconds
+    private static FADE_IN_DURATION: number = 500; // milliseconds
     private static FADE_OUT_DURATION: number = 500; // milliseconds
 
     // Typewriter effect properties
@@ -610,6 +610,17 @@ export class UIBubble {
     }
 
     /**
+     * 专门用于打字机效果的HTML渲染，不会重复应用淡入动画
+     * 解决打字机效果导致重复淡入动画的问题
+     */
+    private renderTypewriterHTML(): void {
+        if (!this.htmlElement || !this.htmlElement.setContent) return;
+
+        const bubbleHtml = this.generateBubbleHTMLForTypewriter();
+        this.htmlElement.setContent(bubbleHtml, "html");
+    }
+
+    /**
      * Generates text container styles for Chinese mode
      */
     private getTextContainerStyles(): string {
@@ -705,9 +716,7 @@ export class UIBubble {
         const contentLength = currentContent.length;
         const needsScrollbar = contentLength > UIBubble.BubbleSizeConfig.scrollThreshold;
 
-        // Only apply entrance animation if it hasn't been played yet
-        const animationStyle = !this.hasPlayedEntranceAnimation ?
-            `animation: bubbleEnter ${UIBubble.FADE_IN_DURATION}ms ease-out;` : '';
+        // Animation is now directly applied in the style attribute
 
         // 处理文本，确保不包含多余空格
         const trimmedContent = currentContent.trim();
@@ -856,21 +865,21 @@ export class UIBubble {
             position: relative;
             width: 100%;
             height: 100%;
-            opacity: 1;
-            transform: scale(1) translateY(0);
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
             font-family: Arial, sans-serif;
             pointer-events: ${needsScrollbar ? 'auto' : 'none'}; /* 只有需要滚动时才启用指针事件 */
             box-sizing: border-box;
             overflow: hidden;
             transform-origin: center center;
             cursor: default;
-            ${animationStyle}
+            animation: bubbleEnter ${UIBubble.FADE_IN_DURATION}ms ease-out forwards;
         ">
             <!-- Main bubble container -->
             <div style="${this.getMainContainerStyles()}">
                 <!-- Text content with scrollbar -->
                 <div id="${textContainerId}" class="bubble-text-container" style="${this.getTextContainerStyles()}">
-                    ${this.escapeHtml(trimmedContent)}${this.typewriterEnabled && this.typewriterCurrentIndex < this.content.length ? '<span style="animation: blink 1s infinite;">|</span>' : ''}
+                    ${this.escapeHtml(trimmedContent)}
                 </div>
             </div>
             
@@ -883,6 +892,10 @@ export class UIBubble {
                 0% { 
                     opacity: 0; 
                     transform: scale(0.8) translateY(10px); 
+                }
+                50% {
+                    opacity: 0.7;
+                    transform: scale(0.9) translateY(5px);
                 }
                 100% { 
                     opacity: 1; 
@@ -901,11 +914,127 @@ export class UIBubble {
                 }
             }
             
-            @keyframes blink {
-                0%, 50% { opacity: 1; }
-                51%, 100% { opacity: 0; }
+            ${scrollbarStyles}
+        </style>
+        
+        <script>
+            ${scrollScript}
+        </script>`;
+    }
+
+    /**
+     * 为打字机效果生成不包含淡入动画的HTML
+     */
+    private generateBubbleHTMLForTypewriter(): string {
+        const tailHtml = this.generateTailHTML();
+        const currentContent = this.displayedContent; // 使用当前打字机显示的内容
+        const contentLength = currentContent.length;
+        const needsScrollbar = contentLength > UIBubble.BubbleSizeConfig.scrollThreshold;
+
+        // 处理文本，确保不包含多余空格
+        const trimmedContent = currentContent.trim();
+        
+        // 生成唯一ID用于滚动操作
+        const textContainerId = `bubble-text-${this.id}`;
+        const bubbleId = `bubble-${this.id}`;
+        
+        // 添加滚动事件处理脚本，只有需要滚动条时才添加
+        const scrollScript = needsScrollbar ? `
+            (function() {
+                // 等待DOM加载完成
+                setTimeout(function() {
+                    var container = document.getElementById('${textContainerId}');
+                    var bubble = document.getElementById('${bubbleId}');
+                    
+                    if (!container || !bubble) return;
+                    
+                    // 使容器可交互
+                    container.style.pointerEvents = 'auto';
+                    bubble.style.pointerEvents = 'auto';
+                    
+                    // 添加鼠标滚轮事件 - 捕获阶段注册，确保事件能被处理
+                    container.addEventListener('wheel', function(e) {
+                        e.preventDefault();
+                        container.scrollTop += e.deltaY;
+                    }, { passive: false, capture: true });
+                    
+                    // 添加触摸滑动支持
+                    var touchStartY = 0;
+                    container.addEventListener('touchstart', function(e) {
+                        touchStartY = e.touches[0].clientY;
+                    }, { passive: false });
+                    
+                    container.addEventListener('touchmove', function(e) {
+                        e.preventDefault();
+                        var touchY = e.touches[0].clientY;
+                        var diff = touchStartY - touchY;
+                        container.scrollTop += diff;
+                        touchStartY = touchY;
+                    }, { passive: false });
+                    
+                    // 如果内容超出可见区域，显示滚动提示并设置更明显的光标
+                    if (container.scrollHeight > container.clientHeight) {
+                        container.style.cursor = 'pointer';
+                    }
+                }, 100);
+            })();
+        ` : '';
+
+        // 自定义滚动条样式，只有需要滚动条时才添加
+        const scrollbarStyles = needsScrollbar ? `
+            /* 自定义滚动条样式 - Webkit浏览器 */
+            .bubble-text-container::-webkit-scrollbar {
+                width: 8px; /* 增加滚动条宽度，更容易点击 */
             }
             
+            .bubble-text-container::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.1);
+                border-radius: 4px;
+            }
+            
+            .bubble-text-container::-webkit-scrollbar-thumb {
+                background-color: ${this.borderColor};
+                border-radius: 4px;
+                border: 1px solid ${this.backgroundColor};
+            }
+            
+            .bubble-text-container::-webkit-scrollbar-thumb:hover {
+                background-color: #555555;
+            }
+            
+            /* 确保滚动条始终可见 */
+            .bubble-text-container:hover::-webkit-scrollbar-thumb {
+                background-color: #666666;
+            }
+        ` : '';
+
+        return `
+        <div id="${bubbleId}" style="
+            position: relative;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            font-family: Arial, sans-serif;
+            pointer-events: ${needsScrollbar ? 'auto' : 'none'}; /* 只有需要滚动时才启用指针事件 */
+            box-sizing: border-box;
+            overflow: hidden;
+            transform-origin: center center;
+            cursor: default;
+        ">
+            <!-- Main bubble container -->
+            <div style="${this.getMainContainerStyles()}">
+                <!-- Text content with scrollbar -->
+                <div id="${textContainerId}" class="bubble-text-container" style="${this.getTextContainerStyles()}">
+                    ${this.escapeHtml(trimmedContent)}
+                </div>
+            </div>
+            
+            <!-- Bubble tail -->
+            ${tailHtml}
+        </div>
+        
+        <style>
             ${scrollbarStyles}
         </style>
         
@@ -1054,8 +1183,8 @@ export class UIBubble {
                             const speedSeconds = this.typewriterSpeed / 1000;
                             this.typewriterTimer.behaviors.Timer.startTimer(speedSeconds, this.typewriterTimerTag, "once");
                         } else {
-                            // Typewriter effect complete, remove cursor and cleanup
-                            this.updateTypewriterContent(false);
+                            // Typewriter effect complete, cleanup
+                            this.updateTypewriterContent();
                             this.typewriterTimer.destroy();
                             this.typewriterTimer = null;
                         }
@@ -1073,7 +1202,7 @@ export class UIBubble {
             this.displayedContent = this.content;
             this.typewriterCurrentIndex = this.content.length;
             this.updateSizeForTypewriter();
-            this.updateTypewriterContent(false);
+            this.updateTypewriterContent();
         }
     }
 
@@ -1085,16 +1214,16 @@ export class UIBubble {
 
         // 在固定尺寸模式下，不需要根据当前显示内容调整气泡尺寸
         // 只需更新内容即可，气泡大小在初始化时已经设置为足够容纳完整内容
-        this.renderHTML();
+        this.renderTypewriterHTML();
     }
 
     /**
      * Updates typewriter content
      */
-    private updateTypewriterContent(showCursor: boolean = true): void {
+    private updateTypewriterContent(): void {
         // Re-render the entire HTML instead of trying to manipulate DOM
         if (this.htmlElement && this.htmlElement.setContent) {
-            this.renderHTML();
+            this.renderTypewriterHTML();
             
             // 如果是最后一个字符，滚动到底部
             if (this.typewriterCurrentIndex >= this.content.length) {

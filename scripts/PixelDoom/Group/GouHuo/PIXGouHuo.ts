@@ -13,7 +13,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     //UICDTimer.DestroyAllTimersAndVariables();
 
     for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
-        GouHuo.ExtinguishedGouHuo(Gouhuos)
+        GouHuo.BurnGouHuo(Gouhuos)
     }
 
 })

@@ -58022,140 +58022,6 @@
 							"global": false
 						},
 						{
-							"name": "ZhuJue",
-							"overriden": 0,
-							"subLayers": [],
-							"instances": [
-								{
-									"type": "RedHairGirlSprite",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Animation 1",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 59,
-									"sid": 387535432856181,
-									"tags": "",
-									"instanceVariables": {
-										"GetYPosition": 0
-									},
-									"behaviors": {
-										"MoveFunction": {
-											"properties": {
-												"max-speed": 120,
-												"acceleration": 300,
-												"deceleration": 200,
-												"directions": "dir-8",
-												"set-angle": "no",
-												"allow-sliding": false,
-												"default-controls": true,
-												"enabled": true
-											}
-										},
-										"CameraLockFunction": {
-											"properties": {
-												"enabled": true
-											}
-										},
-										"正弦运动": {
-											"properties": {
-												"movement": "height",
-												"wave": "sine",
-												"period": 3,
-												"period-random": 0.25,
-												"period-offset": 0,
-												"period-offset-random": 0,
-												"magnitude": 3,
-												"magnitude-random": 0,
-												"enabled": true,
-												"live-preview": false
-											}
-										},
-										"CharacterWalkAnimtion": {
-											"properties": {
-												"movement": "angle",
-												"wave": "sine",
-												"period": 0.4,
-												"period-random": 0,
-												"period-offset": 0.23,
-												"period-offset-random": 0.23,
-												"magnitude": 3,
-												"magnitude-random": 0.25,
-												"enabled": false,
-												"live-preview": false
-											}
-										}
-									},
-									"effects": {
-										"像素化": {
-											"isEnabled": true,
-											"parameters": {
-												"size": 3
-											}
-										},
-										"灰度": {
-											"isEnabled": true,
-											"parameters": {
-												"intensity": 0.45
-											}
-										}
-									},
-									"instanceFolderItem": {
-										"sid": 387535432856181,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1608,
-										"y": 981,
-										"width": 76.6332526970211,
-										"height": 184.3987643022071,
-										"originX": 0.5104166666666666,
-										"originY": 1,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								}
-							],
-							"sid": 184809744098514,
-							"effectTypes": [],
-							"isInitiallyVisible": true,
-							"isInitiallyInteractive": true,
-							"isHTMLElementsLayer": false,
-							"color": [
-								1,
-								1,
-								1,
-								1
-							],
-							"backgroundColor": [
-								1,
-								1,
-								1,
-								1
-							],
-							"isTransparent": true,
-							"parallaxX": 1,
-							"parallaxY": 1,
-							"scaleRate": 1,
-							"forceOwnTexture": true,
-							"renderingMode": "3d",
-							"drawOrder": "z-order",
-							"useRenderCells": false,
-							"blendMode": "normal",
-							"zElevation": 0,
-							"global": false
-						},
-						{
 							"name": "Fog",
 							"overriden": 0,
 							"subLayers": [],
@@ -60054,6 +59920,140 @@
 							"parallaxY": 1,
 							"scaleRate": 1,
 							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
+							"name": "ZhuJue",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [
+								{
+									"type": "RedHairGirlSprite",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Animation 1",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 59,
+									"sid": 387535432856181,
+									"tags": "",
+									"instanceVariables": {
+										"GetYPosition": 0
+									},
+									"behaviors": {
+										"MoveFunction": {
+											"properties": {
+												"max-speed": 120,
+												"acceleration": 300,
+												"deceleration": 200,
+												"directions": "dir-8",
+												"set-angle": "no",
+												"allow-sliding": false,
+												"default-controls": true,
+												"enabled": true
+											}
+										},
+										"CameraLockFunction": {
+											"properties": {
+												"enabled": true
+											}
+										},
+										"正弦运动": {
+											"properties": {
+												"movement": "height",
+												"wave": "sine",
+												"period": 3,
+												"period-random": 0.25,
+												"period-offset": 0,
+												"period-offset-random": 0,
+												"magnitude": 3,
+												"magnitude-random": 0,
+												"enabled": true,
+												"live-preview": false
+											}
+										},
+										"CharacterWalkAnimtion": {
+											"properties": {
+												"movement": "angle",
+												"wave": "sine",
+												"period": 0.4,
+												"period-random": 0,
+												"period-offset": 0.23,
+												"period-offset-random": 0.23,
+												"magnitude": 3,
+												"magnitude-random": 0.25,
+												"enabled": false,
+												"live-preview": false
+											}
+										}
+									},
+									"effects": {
+										"像素化": {
+											"isEnabled": true,
+											"parameters": {
+												"size": 3
+											}
+										},
+										"灰度": {
+											"isEnabled": true,
+											"parameters": {
+												"intensity": 0.45
+											}
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 387535432856181,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 1608,
+										"y": 981,
+										"width": 76.6332526970211,
+										"height": 184.3987643022071,
+										"originX": 0.5104166666666666,
+										"originY": 1,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0,
+										"zElevation": 0
+									}
+								}
+							],
+							"sid": 184809744098514,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								1,
+								1,
+								1,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": true,
 							"renderingMode": "3d",
 							"drawOrder": "z-order",
 							"useRenderCells": false,

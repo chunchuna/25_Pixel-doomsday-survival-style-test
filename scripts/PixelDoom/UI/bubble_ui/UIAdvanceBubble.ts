@@ -10,14 +10,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
 
     var DouMaoNanRenInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
     .RUN_TIME_.objects.DouMaoNanRen.getFirstInstance();
-    if(!DouMaoNanRenInstance) return
 
+    var ShouJiNvRenInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
+    .RUN_TIME_.objects.ShouJiNvRen.getFirstInstance();
+    if(!DouMaoNanRenInstance || !ShouJiNvRenInstance) return
+    var NPCShouJiNvRen = AdvanceBubble.SetNPC("ShouJiNvRen", ShouJiNvRenInstance.x, ShouJiNvRenInstance.y);
     var NPCDouMaoNanRen = AdvanceBubble.SetNPC("DouMaoNanRen", DouMaoNanRenInstance.x, DouMaoNanRenInstance.y);
     
     var TestDialogue = AdvanceBubble.CreateContinuousDialogue()
     .AddContent(NPCDouMaoNanRen,"你好，我是兜帽男人。",BubbleType.SPEECH,true,20)
     .AddContent(NPCDouMaoNanRen,"这里是测试的连续对话",BubbleType.SPEECH,true,20)
-    .AddContent(NPCDouMaoNanRen,"欢迎来到营地",BubbleType.SPEECH,true,20);
+    .AddContent(NPCDouMaoNanRen,"欢迎来到营地",BubbleType.SPEECH,true,20)
+    .AddContent(NPCShouJiNvRen,"你好，我是手机女人。",BubbleType.SPEECH,true,20)
+    .AddContent(NPCShouJiNvRen,"这里信号不太好",BubbleType.SPEECH,true,20)
+    .AddContent(NPCShouJiNvRen,"我无法使用手机了",BubbleType.SPEECH,true,20);
 
     AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetPressNext()
     
@@ -166,7 +172,7 @@ export class AdvanceBubble {
                 };
             },
             SetPressNext: () => {
-                this.setupKeyPress(dialogue);
+                this.setupKeyPress(dialogue);21
                 return {
                     SetNextKey: (key: string) => {
                         this.setNextKey(key);
