@@ -195,7 +195,8 @@ export class AdvanceBubble {
         // 返回控制对象
         return {
             SetAutoNext: () => {
-                this.setupAutoPlay(dialogue);
+                // 确保第一句话也有足够的等待时间
+                this.setupAutoPlay(dialogue, true);
                 return {
                     SetWaitTime: (waitTime: number) => {
                         this.setAutoPlayWaitTime(dialogue, waitTime);
@@ -203,7 +204,7 @@ export class AdvanceBubble {
                 };
             },
             SetPressNext: () => {
-                this.setupKeyPress(dialogue);21
+                this.setupKeyPress(dialogue);
                 return {
                     SetNextKey: (key: string) => {
                         this.setNextKey(key);
@@ -308,8 +309,9 @@ export class AdvanceBubble {
     /**
      * 设置自动播放
      * @param dialogue 对话对象
+     * @param isFirstContent 是否是第一条内容
      */
-    private static setupAutoPlay(dialogue: IContinuousDialogue): void {
+    private static setupAutoPlay(dialogue: IContinuousDialogue, isFirstContent: boolean = false): void {
         // 清除之前的计时器和监听器
         this.clearAutoPlayTimer();
         this.clearKeyPressListener();
@@ -323,6 +325,11 @@ export class AdvanceBubble {
         // 如果启用了打字机效果，等待时间需要加上打字机效果的时间
         if (content.typewriterEnabled) {
             waitTime += (content.content.length * content.typewriterSpeed / 1000) + 0.5;
+        }
+        
+        // 如果是第一条内容，增加额外的等待时间，确保用户能够阅读
+        if (isFirstContent) {
+            waitTime += 1.0; // 增加1秒额外等待时间
         }
         
         // 创建计时器
