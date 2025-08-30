@@ -268,7 +268,8 @@
 			"PlantshakingSineAnimation",
 			"ClickObjectEntity",
 			"InventoryData",
-			"GouHuo"
+			"GouHuo",
+			"NPC"
 		],
 		"subfolders": []
 	},

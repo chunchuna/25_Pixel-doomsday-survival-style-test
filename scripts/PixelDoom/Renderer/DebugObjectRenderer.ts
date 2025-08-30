@@ -909,20 +909,30 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
 // Auto-initialize when module is loaded
 pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     
-    // DebugObjectRenderer.initialize();
+    DebugObjectRenderer.initialize();
 
-    // if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
+    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
 
-    // var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
-    // if (playerInstance) {
-    //     var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
-    // }
+    var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    if (playerInstance) {
+        var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
+    }
 
-    // var ClickObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity;
-    // ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
-    // if (playerInstance) {
-    //     var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
-    // }
+    var ClickObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity;
+    ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
+    if (playerInstance) {
+        var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
+    }
+
+    var NPCObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.NPC;
+    if (playerInstance) {
+        var NPCBox = DebugObjectRenderer.setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
+        var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
+    }
+
+    
+    
+
 
 
 

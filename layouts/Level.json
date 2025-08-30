@@ -61180,16 +61180,7 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [
-			{
-				"sid": 790823443242609,
-				"expanded": true
-			},
-			{
-				"sid": 253765266000129,
-				"expanded": true
-			}
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -65798,6 +65789,20 @@
 				],
 				"subfolders": [],
 				"name": "Bus"
+			},
+			{
+				"items": [
+					{
+						"sid": 790823443242609,
+						"expanded": true
+					},
+					{
+						"sid": 253765266000129,
+						"expanded": true
+					}
+				],
+				"subfolders": [],
+				"name": "GouHuoNPC"
 			}
 		]
 	},

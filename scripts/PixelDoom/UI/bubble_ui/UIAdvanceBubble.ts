@@ -57,8 +57,10 @@ function Dialogue_DouMaoNanRen_ShouJiNvRen() {
     .AddContent(NPCDouMaoNanRen,"我得去检查一下绳索，免得帐篷被风吹走。",BubbleType.SPEECH,true,20)
     .AddContent(NPCDouMaoNanRen,"你帮我看着点篝火，别让它熄灭了。",BubbleType.SPEECH,true,20);
 
-    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetAutoNext().SetWaitTime(3)
-
+    // 使用随机重复模式，对话结束后会随机从对话中选择一点继续，-1表示无限重复
+    // 设置等待时间为3秒
+    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetAutoNext().SetWaitTime(3).SetRandomRepeat(-1);
+    
 }
 
 // NPC对象接口定义
@@ -104,6 +106,9 @@ export class AdvanceBubble {
     // 用于自动播放的计时器
     private static autoPlayTimer: any = null;
     private static autoPlayTimerTag: string = "";
+    
+    // 随机重复对话设置
+    private static repeatSettings: Map<string, { count: number, current: number }> = new Map();
     
     // 用于按键监听
     private static keyPressListener: any = null;
@@ -176,8 +181,15 @@ export class AdvanceBubble {
      * @returns 播放控制对象
      */
     public static PlayContinuousDialogue(dialogue: IContinuousDialogue): {
-        SetAutoNext: () => { SetWaitTime: (waitTime: number) => void },
-        SetPressNext: () => { SetNextKey: (key: string) => void }
+        SetAutoNext: () => { 
+            SetWaitTime: (waitTime: number) => { SetRandomRepeat: (repeatCount: number) => void },
+            SetRandomRepeat: (repeatCount: number) => void
+        },
+        SetPressNext: () => { 
+            SetNextKey: (key: string) => { SetRandomRepeat: (repeatCount: number) => void },
+            SetRandomRepeat: (repeatCount: number) => void
+        },
+        SetRandomRepeat: (repeatCount: number) => void
     } {
         // 如果有正在播放的对话，先停止
         if (this.currentPlayingDialogueId) {
@@ -200,6 +212,14 @@ export class AdvanceBubble {
                 return {
                     SetWaitTime: (waitTime: number) => {
                         this.setAutoPlayWaitTime(dialogue, waitTime);
+                        return {
+                            SetRandomRepeat: (repeatCount: number) => {
+                                this.setupRandomRepeat(dialogue, repeatCount);
+                            }
+                        };
+                    },
+                    SetRandomRepeat: (repeatCount: number) => {
+                        this.setupRandomRepeat(dialogue, repeatCount);
                     }
                 };
             },
@@ -208,8 +228,19 @@ export class AdvanceBubble {
                 return {
                     SetNextKey: (key: string) => {
                         this.setNextKey(key);
+                        return {
+                            SetRandomRepeat: (repeatCount: number) => {
+                                this.setupRandomRepeat(dialogue, repeatCount);
+                            }
+                        };
+                    },
+                    SetRandomRepeat: (repeatCount: number) => {
+                        this.setupRandomRepeat(dialogue, repeatCount);
                     }
                 };
+            },
+            SetRandomRepeat: (repeatCount: number) => {
+                this.setupRandomRepeat(dialogue, repeatCount);
             }
         };
     }
@@ -247,6 +278,9 @@ export class AdvanceBubble {
         // 清除按键监听
         this.clearKeyPressListener();
         
+        // 清除随机重复设置
+        this.repeatSettings.delete(dialogueId);
+        
         // 清除当前播放ID
         if (this.currentPlayingDialogueId === dialogueId) {
             this.currentPlayingDialogueId = null;
@@ -259,51 +293,127 @@ export class AdvanceBubble {
      * @param index 内容索引
      */
     private static playDialogueContent(dialogue: IContinuousDialogue, index: number): void {
-        if (index >= dialogue.contents.length) {
-            // 对话结束
-            this.onDialogueComplete(dialogue);
+        if (!dialogue) {
+            console.error("Invalid dialogue object");
+            return;
+        }
+        
+        if (index < 0 || index >= dialogue.contents.length) {
+            console.error(`Invalid dialogue index: ${index}, max: ${dialogue.contents.length - 1}`);
+            // 如果索引超出范围，可能是对话结束了
+            if (index >= dialogue.contents.length) {
+                this.onDialogueComplete(dialogue);
+            }
             return;
         }
         
         // 获取当前内容
         const content = dialogue.contents[index];
+        if (!content) {
+            console.error(`No content found at index ${index}`);
+            return;
+        }
         
         // 更新当前索引
         dialogue.currentIndex = index;
         
-        // 清除上一个气泡
-        if (index > 0 && dialogue.contents[index - 1].bubbleInstance) {
-            dialogue.contents[index - 1].bubbleInstance?.destroy();
-            dialogue.contents[index - 1].bubbleInstance = undefined;
+        if (this.debugMode) {
+            console.log(`Starting to play dialogue content at index ${index}/${dialogue.contents.length - 1}`);
+        }
+        
+        // 清除所有可能存在的气泡，确保不会有多个气泡同时显示
+        dialogue.contents.forEach((c, i) => {
+            if (c.bubbleInstance && i !== index) {
+                try {
+                    c.bubbleInstance.destroy();
+                } catch (error: any) {
+                    console.warn(`Error destroying bubble at index ${i}: ${error.message}`);
+                }
+                c.bubbleInstance = undefined;
+            }
+        });
+        
+        // 如果当前内容已经有气泡，先销毁
+        if (content.bubbleInstance) {
+            try {
+                content.bubbleInstance.destroy();
+            } catch (error: any) {
+                console.warn(`Error destroying existing bubble at index ${index}: ${error.message}`);
+            }
+            content.bubbleInstance = undefined;
         }
         
         // 创建新气泡
-        const bubble = UIBubble.ShowBubble(
-            content.content,
-            0, // 持续时间设为0，由对话系统控制销毁
-            content.type
-        );
-        
-        // 设置位置
-        bubble.setPosition(content.npc.x, content.npc.y + UIBubble.PositionYOffset);
-        
-        // 设置打字机效果
-        if (content.typewriterEnabled) {
-            bubble.enableTypewriter(content.typewriterSpeed);
+        try {
+            if (!content.npc) {
+                console.error(`NPC not defined for dialogue content at index ${index}`);
+                return;
+            }
+            
+            const bubble = UIBubble.ShowBubble(
+                content.content,
+                0, // 持续时间设为0，由对话系统控制销毁
+                content.type
+            );
+            
+            if (!bubble) {
+                console.error(`Failed to create bubble for dialogue content at index ${index}`);
+                return;
+            }
+            
+            // 设置位置
+            bubble.setPosition(content.npc.x, content.npc.y + UIBubble.PositionYOffset);
+            
+            // 设置打字机效果
+            if (content.typewriterEnabled) {
+                bubble.enableTypewriter(content.typewriterSpeed);
+            }
+            
+            // 如果是中文内容，启用中文模式
+            if (/[\u4e00-\u9fa5]/.test(content.content)) {
+                bubble.setChineseMode();
+            }
+            
+            // 保存气泡实例
+            content.bubbleInstance = bubble;
+            
+            // 调试日志
+            if (this.debugMode) {
+                console.log(`Playing dialogue content ${index + 1}/${dialogue.contents.length}: "${content.content.substring(0, 20)}${content.content.length > 20 ? '...' : ''}" for NPC ${content.npc.name}`);
+            }
+        } catch (error: any) {
+            console.error(`Failed to create bubble for dialogue content at index ${index}: ${error.message}`);
+        }
+    }
+    
+    /**
+     * 检查对话是否可以继续
+     * @param dialogue 对话对象
+     * @param nextIndex 下一个索引
+     * @returns 是否可以继续
+     */
+    private static canContinueDialogue(dialogue: IContinuousDialogue, nextIndex: number): boolean {
+        if (!dialogue) {
+            return false;
         }
         
-        // 如果是中文内容，启用中文模式
-        if (/[\u4e00-\u9fa5]/.test(content.content)) {
-            bubble.setChineseMode();
+        // 检查对话是否仍在播放
+        if (!dialogue.isPlaying) {
+            if (this.debugMode) {
+                console.log("Dialogue is no longer playing");
+            }
+            return false;
         }
         
-        // 保存气泡实例
-        content.bubbleInstance = bubble;
-
-        // 调试日志
-        if (this.debugMode) {
-            console.log(`Playing dialogue content ${index + 1}/${dialogue.contents.length}: "${content.content}" for NPC ${content.npc.name}`);
+        // 检查索引是否有效
+        if (nextIndex < 0 || nextIndex >= dialogue.contents.length) {
+            if (this.debugMode) {
+                console.log(`Invalid next index: ${nextIndex}, max: ${dialogue.contents.length - 1}`);
+            }
+            return false;
         }
+        
+        return true;
     }
     
     /**
@@ -317,7 +427,17 @@ export class AdvanceBubble {
         this.clearKeyPressListener();
         
         // 获取当前内容
-        const content = dialogue.contents[dialogue.currentIndex];
+        const currentIndex = dialogue.currentIndex;
+        if (currentIndex < 0 || currentIndex >= dialogue.contents.length) {
+            console.error(`Invalid dialogue index: ${currentIndex}, max: ${dialogue.contents.length - 1}`);
+            return;
+        }
+        
+        const content = dialogue.contents[currentIndex];
+        if (!content) {
+            console.error(`No content found at index ${currentIndex}`);
+            return;
+        }
         
         // 计算等待时间
         let waitTime = this.defaultWaitTime;
@@ -329,37 +449,88 @@ export class AdvanceBubble {
         
         // 如果是第一条内容，增加额外的等待时间，确保用户能够阅读
         if (isFirstContent) {
-            waitTime += 1.0; // 增加1秒额外等待时间
+            waitTime += 2; // 增加2秒额外等待时间
         }
         
         // 创建计时器
         try {
-            this.autoPlayTimerTag = `auto_play_${dialogue.id}_${Date.now()}`;
+            // 生成唯一的计时器标签
+            const timerTag = `auto_play_${dialogue.id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            this.autoPlayTimerTag = timerTag;
+            
+            // 创建计时器实例
             this.autoPlayTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
             
-            this.autoPlayTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
-                if (e.tag === this.autoPlayTimerTag) {
+            if (!this.autoPlayTimer) {
+                console.error("Failed to create timer instance");
+                return;
+            }
+            
+            // 添加计时器事件监听
+            const timerHandler = (e: any) => {
+                if (e.tag === timerTag) {
+                    // 移除事件监听，避免重复触发
+                    if (this.autoPlayTimer) {
+                        try {
+                            this.autoPlayTimer.behaviors.Timer.removeEventListener("timer", timerHandler);
+                        } catch (error: any) {
+                            console.warn(`Error removing timer listener: ${error.message}`);
+                        }
+                    }
+                    
+                    // 检查对话是否仍在播放
+                    if (!dialogue.isPlaying) {
+                        console.log("Dialogue is no longer playing, skipping auto play");
+                        return;
+                    }
+                    
                     // 检查是否是最后一条内容
-                    const isLastContent = dialogue.currentIndex >= dialogue.contents.length - 1;
+                    const isLastContent = currentIndex >= dialogue.contents.length - 1;
                     
                     if (isLastContent) {
                         // 如果是最后一条内容，调用onDialogueComplete处理结束逻辑
+                        if (this.debugMode) {
+                            console.log(`Auto play reached last content (${currentIndex}/${dialogue.contents.length - 1}), completing dialogue`);
+                        }
                         this.onDialogueComplete(dialogue);
                     } else {
                         // 否则播放下一条内容
-                        this.playDialogueContent(dialogue, dialogue.currentIndex + 1);
+                        const nextIndex = currentIndex + 1;
                         
-                        // 继续设置自动播放
-                        this.setupAutoPlay(dialogue);
+                        // 检查是否可以继续对话
+                        if (this.canContinueDialogue(dialogue, nextIndex)) {
+                            if (this.debugMode) {
+                                console.log(`Auto play advancing from ${currentIndex} to ${nextIndex}`);
+                            }
+                            
+                            // 更新当前索引
+                            dialogue.currentIndex = nextIndex;
+                            
+                            // 播放下一条内容
+                            this.playDialogueContent(dialogue, nextIndex);
+                            
+                            // 继续设置自动播放
+                            setTimeout(() => {
+                                this.setupAutoPlay(dialogue);
+                            }, 50); // 短暂延迟，确保UI更新
+                        } else {
+                            if (this.debugMode) {
+                                console.log(`Cannot continue dialogue from index ${currentIndex} to ${nextIndex}`);
+                            }
+                        }
                     }
                 }
-            });
+            };
             
-            this.autoPlayTimer.behaviors.Timer.startTimer(waitTime, this.autoPlayTimerTag, "once");
+            // 添加事件监听
+            this.autoPlayTimer.behaviors.Timer.addEventListener("timer", timerHandler);
+            
+            // 启动计时器
+            this.autoPlayTimer.behaviors.Timer.startTimer(waitTime, timerTag, "once");
             
             // 调试日志
             if (this.debugMode) {
-                console.log(`Auto play timer set for ${waitTime}s, current index: ${dialogue.currentIndex}/${dialogue.contents.length - 1}`);
+                console.log(`Auto play timer set for ${waitTime}s, current index: ${currentIndex}/${dialogue.contents.length - 1}, tag: ${timerTag}`);
             }
         } catch (error: any) {
             console.error(`Failed to create auto play timer: ${error.message}`);
@@ -488,12 +659,26 @@ export class AdvanceBubble {
     private static clearAutoPlayTimer(): void {
         if (this.autoPlayTimer) {
             try {
-                this.autoPlayTimer.behaviors.Timer.stopTimer(this.autoPlayTimerTag);
+                // 尝试停止计时器
+                if (this.autoPlayTimerTag && this.autoPlayTimerTag.trim() !== "") {
+                    this.autoPlayTimer.behaviors.Timer.stopTimer(this.autoPlayTimerTag);
+                }
+                
+                // 销毁计时器实例
                 this.autoPlayTimer.destroy();
+                
+                if (this.debugMode) {
+                    console.log(`Auto play timer cleared (tag: ${this.autoPlayTimerTag})`);
+                }
             } catch (error: any) {
-                console.warn(`Error stopping auto play timer: ${error.message}`);
+                console.warn(`Error clearing auto play timer: ${error.message}`);
+            } finally {
+                // 无论是否发生错误，都重置计时器变量
+                this.autoPlayTimer = null;
+                this.autoPlayTimerTag = "";
             }
-            this.autoPlayTimer = null;
+        } else {
+            // 即使没有计时器实例，也重置计时器标签
             this.autoPlayTimerTag = "";
         }
     }
@@ -517,10 +702,96 @@ export class AdvanceBubble {
     }
     
     /**
+     * 设置随机重复对话
+     * @param dialogue 对话对象
+     * @param repeatCount 重复次数，-1表示无限重复
+     */
+    private static setupRandomRepeat(dialogue: IContinuousDialogue, repeatCount: number): void {
+        // 存储重复设置
+        this.repeatSettings.set(dialogue.id, {
+            count: repeatCount,
+            current: 0
+        });
+        
+        if (this.debugMode) {
+            console.log(`Random repeat set for dialogue ${dialogue.id}: ${repeatCount === -1 ? 'infinite' : repeatCount} times`);
+        }
+    }
+    
+    /**
      * 对话完成回调
      * @param dialogue 对话对象
      */
     private static onDialogueComplete(dialogue: IContinuousDialogue): void {
+        // 检查是否设置了随机重复
+        const repeatSetting = this.repeatSettings.get(dialogue.id);
+        
+        if (repeatSetting) {
+            // 检查是否需要继续重复
+            if (repeatSetting.count === -1 || repeatSetting.current < repeatSetting.count) {
+                // 增加当前重复次数计数
+                if (repeatSetting.count !== -1) {
+                    repeatSetting.current++;
+                }
+                
+                // 确保清除所有气泡
+                dialogue.contents.forEach(content => {
+                    if (content.bubbleInstance) {
+                        try {
+                            content.bubbleInstance.destroy();
+                        } catch (error: any) {
+                            console.warn(`Error destroying bubble: ${error.message}`);
+                        }
+                        content.bubbleInstance = undefined;
+                    }
+                });
+                
+                // 清除所有计时器和监听器
+                this.clearAutoPlayTimer();
+                this.clearKeyPressListener();
+                
+                // 随机选择一个索引作为起点（不包括第一条）
+                const minIndex = 1;
+                const maxIndex = dialogue.contents.length - 1;
+                const randomStartIndex = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
+                
+                if (this.debugMode) {
+                    console.log(`Random repeat: starting from index ${randomStartIndex}/${dialogue.contents.length - 1}`);
+                    if (repeatSetting.count !== -1) {
+                        console.log(`Repeat count: ${repeatSetting.current}/${repeatSetting.count}`);
+                    }
+                }
+                
+                // 重置对话状态
+                dialogue.isPlaying = true;
+                dialogue.currentIndex = randomStartIndex;
+                
+                // 延迟执行，确保之前的清理操作已完成
+                setTimeout(() => {
+                    // 播放随机选择的内容
+                    this.playDialogueContent(dialogue, randomStartIndex);
+                    
+                    // 再次延迟设置自动播放，确保内容已经完全加载
+                    setTimeout(() => {
+                        // 使用自动播放模式继续对话
+                        this.setupAutoPlay(dialogue);
+                        if (this.debugMode) {
+                            console.log(`Restarted auto play from random index ${randomStartIndex}`);
+                        }
+                    }, 300);
+                }, 200);
+                
+                return;
+            } else {
+                // 重复次数已达到上限，清除重复设置
+                this.repeatSettings.delete(dialogue.id);
+                
+                if (this.debugMode) {
+                    console.log(`Random repeat completed for dialogue ${dialogue.id}`);
+                }
+            }
+        }
+        
         // 确保清除最后一个气泡
         const lastIndex = dialogue.currentIndex;
         if (lastIndex >= 0 && lastIndex < dialogue.contents.length) {

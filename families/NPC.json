@@ -1,0 +1,14 @@
+{
+	"name": "NPC",
+	"plugin-id": "Sprite",
+	"sid": 618605293954528,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"members": [
+		"DaoDiNanRen",
+		"DouMaoNanRen",
+		"DaoDiNvHai",
+		"ShouJiNvRen"
+	]
+}
