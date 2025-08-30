@@ -300,6 +300,15 @@ export class UIBubble {
     public static PositionYOffset: number = -250;
     public static PostionXOffset: number = -20;
 
+    // 按键提示图标属性
+    private keyPromptEnabled: boolean = false;
+    private keyPromptKey: string = "Space";
+    private keyPromptColor: string = "#ffffff";
+    private keyPromptSize: number = 24;
+    private keyPromptOpacity: number = 0.8;
+    private keyPromptPulseSpeed: number = 1.5; // 动画速度，单位为秒
+    private static keyPromptUseHardwareAcceleration: boolean = true; // 使用硬件加速
+
     // 气泡大小配置
     public static BubbleSizeConfig = {
         // 文本长度阈值，超过此长度才显示滚动条
@@ -695,7 +704,11 @@ export class UIBubble {
             `box-sizing: border-box`,
             `transition: all 0.3s ease-out`,
             `overflow: hidden`, // 仅容器隐藏溢出，内部文本容器可滚动
-            `cursor: default` // 默认光标
+            `cursor: default`, // 默认光标
+            `transform: translateZ(0)`, // 硬件加速
+            `backface-visibility: hidden`,
+            `perspective: 1000px`,
+            `will-change: transform`
         ];
 
         // 中英文模式使用相同的内边距和对齐方式
@@ -715,8 +728,6 @@ export class UIBubble {
         const currentContent = this.typewriterEnabled ? this.displayedContent : this.content;
         const contentLength = currentContent.length;
         const needsScrollbar = contentLength > UIBubble.BubbleSizeConfig.scrollThreshold;
-
-        // Animation is now directly applied in the style attribute
 
         // 处理文本，确保不包含多余空格
         const trimmedContent = currentContent.trim();
@@ -860,20 +871,25 @@ export class UIBubble {
             }
         ` : '';
 
+        // 生成按键提示HTML
+        const keyPromptHtml = this.keyPromptEnabled ? this.generateKeyPromptHTML() : '';
+
         return `
         <div id="${bubbleId}" style="
             position: relative;
             width: 100%;
             height: 100%;
             opacity: 0;
-            transform: scale(0.8) translateY(10px);
+            transform: scale(0.8) translateY(10px) translateZ(0);
             font-family: Arial, sans-serif;
             pointer-events: ${needsScrollbar ? 'auto' : 'none'}; /* 只有需要滚动时才启用指针事件 */
             box-sizing: border-box;
             overflow: hidden;
             transform-origin: center center;
             cursor: default;
-            animation: bubbleEnter ${UIBubble.FADE_IN_DURATION}ms ease-out forwards;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            perspective: 1000px;
         ">
             <!-- Main bubble container -->
             <div style="${this.getMainContainerStyles()}">
@@ -885,32 +901,35 @@ export class UIBubble {
             
             <!-- Bubble tail -->
             ${tailHtml}
+
+            <!-- Key prompt icon -->
+            ${keyPromptHtml}
         </div>
         
         <style>
             @keyframes bubbleEnter {
                 0% { 
                     opacity: 0; 
-                    transform: scale(0.8) translateY(10px); 
+                    transform: scale(0.8) translateY(10px) translateZ(0); 
                 }
                 50% {
                     opacity: 0.7;
-                    transform: scale(0.9) translateY(5px);
+                    transform: scale(0.9) translateY(5px) translateZ(0);
                 }
                 100% { 
                     opacity: 1; 
-                    transform: scale(1) translateY(0); 
+                    transform: scale(1) translateY(0) translateZ(0); 
                 }
             }
             
             @keyframes bubbleExit {
                 0% { 
                     opacity: 1; 
-                    transform: scale(1) translateY(0); 
+                    transform: scale(1) translateY(0) translateZ(0); 
                 }
                 100% { 
                     opacity: 0; 
-                    transform: scale(0.8) translateY(-10px); 
+                    transform: scale(0.8) translateY(-10px) translateZ(0); 
                 }
             }
             
@@ -919,6 +938,41 @@ export class UIBubble {
         
         <script>
             ${scrollScript}
+            
+            // 使用requestAnimationFrame实现淡入动画
+            (function() {
+                const bubble = document.getElementById('${bubbleId}');
+                if (!bubble) return;
+                
+                let startTime = null;
+                const duration = ${UIBubble.FADE_IN_DURATION};
+                
+                function animateEnter(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // 使用缓动函数创建更平滑的动画
+                    const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                    
+                    // 计算当前的透明度和缩放值
+                    const opacity = easeOutProgress;
+                    const scale = 0.8 + (0.2 * easeOutProgress);
+                    const translateY = 10 * (1 - easeOutProgress);
+                    
+                    // 应用变换
+                    bubble.style.opacity = opacity;
+                    bubble.style.transform = \`scale(\${scale}) translateY(\${translateY}px) translateZ(0)\`;
+                    
+                    // 如果动画未完成，继续请求下一帧
+                    if (progress < 1) {
+                        requestAnimationFrame(animateEnter);
+                    }
+                }
+                
+                // 启动淡入动画
+                requestAnimationFrame(animateEnter);
+            })();
         </script>`;
     }
 
@@ -1008,19 +1062,25 @@ export class UIBubble {
             }
         ` : '';
 
+        // 生成按键提示HTML
+        const keyPromptHtml = this.keyPromptEnabled ? this.generateKeyPromptHTML() : '';
+
         return `
         <div id="${bubbleId}" style="
             position: relative;
             width: 100%;
             height: 100%;
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(1) translateY(0) translateZ(0);
             font-family: Arial, sans-serif;
             pointer-events: ${needsScrollbar ? 'auto' : 'none'}; /* 只有需要滚动时才启用指针事件 */
             box-sizing: border-box;
             overflow: hidden;
             transform-origin: center center;
             cursor: default;
+            will-change: transform;
+            backface-visibility: hidden;
+            perspective: 1000px;
         ">
             <!-- Main bubble container -->
             <div style="${this.getMainContainerStyles()}">
@@ -1032,9 +1092,14 @@ export class UIBubble {
             
             <!-- Bubble tail -->
             ${tailHtml}
+
+            <!-- Key prompt icon -->
+            ${keyPromptHtml}
         </div>
         
         <style>
+            ${scrollbarStyles}
+            
             ${scrollbarStyles}
         </style>
         
@@ -1318,19 +1383,27 @@ export class UIBubble {
         const tailHtml = this.generateTailHTML();
         const currentContent = this.typewriterEnabled ? this.displayedContent : this.content;
 
+        // 不再单独为按键提示创建淡出动画，而是让它随气泡一起淡出
+        const keyPromptHtml = this.keyPromptEnabled ? this.generateKeyPromptHTML() : '';
+        
+        // 生成唯一ID用于脚本操作
+        const bubbleId = `bubble-exit-${this.id}`;
+
         return `
-        <div id="bubble-${this.id}" style="
+        <div id="${bubbleId}" style="
             position: relative;
             width: 100%;
             height: 100%;
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(1) translateY(0) translateZ(0);
             font-family: Arial, sans-serif;
             pointer-events: none;
             box-sizing: border-box;
             overflow: visible;
             transform-origin: center center;
-            animation: bubbleExit ${UIBubble.FADE_OUT_DURATION}ms ease-in forwards;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            perspective: 1000px;
         ">
             <!-- Main bubble container -->
             <div style="${this.getMainContainerStyles()}">
@@ -1342,20 +1415,47 @@ export class UIBubble {
             
             <!-- Bubble tail -->
             ${tailHtml}
+
+            <!-- Key prompt icon -->
+            ${keyPromptHtml}
         </div>
         
-        <style>
-            @keyframes bubbleExit {
-                0% { 
-                    opacity: 1; 
-                    transform: scale(1) translateY(0); 
+        <script>
+            // 使用requestAnimationFrame实现淡出动画
+            (function() {
+                const bubble = document.getElementById('${bubbleId}');
+                if (!bubble) return;
+                
+                let startTime = null;
+                const duration = ${UIBubble.FADE_OUT_DURATION};
+                
+                function animateExit(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // 使用缓动函数创建更平滑的动画
+                    const easeInProgress = Math.pow(progress, 3);
+                    
+                    // 计算当前的透明度和缩放值
+                    const opacity = 1 - easeInProgress;
+                    const scale = 1 - (0.2 * easeInProgress);
+                    const translateY = -10 * easeInProgress;
+                    
+                    // 应用变换
+                    bubble.style.opacity = opacity;
+                    bubble.style.transform = \`scale(\${scale}) translateY(\${translateY}px) translateZ(0)\`;
+                    
+                    // 如果动画未完成，继续请求下一帧
+                    if (progress < 1) {
+                        requestAnimationFrame(animateExit);
+                    }
                 }
-                100% { 
-                    opacity: 0; 
-                    transform: scale(0.8) translateY(-10px); 
-                }
-            }
-        </style>`;
+                
+                // 启动淡出动画
+                requestAnimationFrame(animateExit);
+            })();
+        </script>`;
     }
 
     /**
@@ -1516,7 +1616,7 @@ export class UIBubble {
      * 触发气泡的淡出效果
      * @param fadeOutDuration 淡出时间(毫秒)，默认使用类设置的淡出时间
      */
-    public fadeOut(fadeOutDuration: number = UIBubble.FADE_OUT_DURATION): UIBubble {
+    public fadeOut(fadeOutDurationMs: number = UIBubble.FADE_OUT_DURATION): UIBubble {
         // 如果已经在淡出动画中，不重复触发
         if (this.isAnimatingOut) return this;
         
@@ -1532,8 +1632,8 @@ export class UIBubble {
         }
         
         // 自定义淡出时间（如果提供）
-        if (fadeOutDuration && fadeOutDuration !== UIBubble.FADE_OUT_DURATION) {
-            UIBubble.FADE_OUT_DURATION = fadeOutDuration;
+        if (fadeOutDurationMs && fadeOutDurationMs !== UIBubble.FADE_OUT_DURATION) {
+            UIBubble.FADE_OUT_DURATION = fadeOutDurationMs;
         }
         
         // 触发淡出动画
@@ -1655,5 +1755,149 @@ export class UIBubble {
         };
         
         console.log("Bubble size configuration updated:", UIBubble.BubbleSizeConfig);
+    }
+
+    /**
+     * 启用按键提示图标
+     * @param key 按键名称，如'Space'或'Enter'
+     * @param color 图标颜色
+     * @param size 图标大小
+     * @returns UIBubble实例（链式调用）
+     */
+    public enableKeyPrompt(key: string = "Space", color: string = "#ffffff", size: number = 24): UIBubble {
+        this.keyPromptEnabled = true;
+        this.keyPromptKey = key;
+        this.keyPromptColor = color;
+        this.keyPromptSize = size;
+        
+        // 如果气泡已经创建，更新HTML
+        if (this.htmlElement) {
+            if (this.typewriterEnabled) {
+                this.renderTypewriterHTML();
+            } else {
+                this.renderHTML();
+            }
+        }
+        
+        return this;
+    }
+
+    /**
+     * 禁用按键提示图标
+     * @returns UIBubble实例（链式调用）
+     */
+    public disableKeyPrompt(): UIBubble {
+        this.keyPromptEnabled = false;
+        
+        // 如果气泡已经创建，更新HTML
+        if (this.htmlElement) {
+            if (this.typewriterEnabled) {
+                this.renderTypewriterHTML();
+            } else {
+                this.renderHTML();
+            }
+        }
+        
+        return this;
+    }
+
+    /**
+     * 设置按键提示的动画速度
+     * @param speed 动画速度，单位为秒
+     * @returns UIBubble实例（链式调用）
+     */
+    public setKeyPromptAnimationSpeed(speed: number): UIBubble {
+        this.keyPromptPulseSpeed = speed;
+        
+        // 如果气泡已经创建，更新HTML
+        if (this.htmlElement) {
+            if (this.typewriterEnabled) {
+                this.renderTypewriterHTML();
+            } else {
+                this.renderHTML();
+            }
+        }
+        
+        return this;
+    }
+
+    /**
+     * Generates the HTML for the key prompt icon
+     */
+    private generateKeyPromptHTML(): string {
+        // 根据按键类型选择合适的图标
+        let keyIcon = '';
+        
+        switch (this.keyPromptKey.toLowerCase()) {
+            case 'space':
+                keyIcon = '⎵'; // 空格符号
+                break;
+            case 'enter':
+                keyIcon = '↵'; // 回车符号
+                break;
+            default:
+                keyIcon = this.keyPromptKey; // 使用按键本身
+        }
+        
+        // 生成唯一ID用于脚本操作
+        const keyPromptId = `key-prompt-${this.id}`;
+        
+        // 使用静态元素，通过JavaScript实现动画效果
+        return `
+        <div id="${keyPromptId}" class="key-prompt-icon" style="
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: ${this.keyPromptSize}px;
+            height: ${this.keyPromptSize}px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid ${this.keyPromptColor};
+            border-radius: 4px;
+            color: ${this.keyPromptColor};
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: ${this.keyPromptSize * 0.6}px;
+            font-weight: bold;
+            z-index: 10;
+            opacity: ${this.keyPromptOpacity};
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        ">${keyIcon}</div>
+        <script>
+            (function() {
+                // 使用requestAnimationFrame实现更高效的动画
+                const keyPrompt = document.getElementById('${keyPromptId}');
+                if (!keyPrompt) return;
+                
+                let startTime = null;
+                const duration = ${this.keyPromptPulseSpeed * 1000}; // 转换为毫秒
+                const minOpacity = ${this.keyPromptOpacity * 0.5};
+                const maxOpacity = ${this.keyPromptOpacity};
+                
+                function animateOpacity(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    
+                    // 计算当前动画进度
+                    const progress = (elapsed % duration) / duration;
+                    
+                    // 使用正弦函数创建平滑的淡入淡出效果
+                    const opacity = minOpacity + (maxOpacity - minOpacity) * Math.abs(Math.sin(progress * Math.PI));
+                    
+                    // 应用透明度
+                    if (keyPrompt) {
+                        keyPrompt.style.opacity = opacity;
+                    }
+                    
+                    // 继续动画循环
+                    requestAnimationFrame(animateOpacity);
+                }
+                
+                // 启动动画
+                requestAnimationFrame(animateOpacity);
+            })();
+        </script>`;
     }
 }

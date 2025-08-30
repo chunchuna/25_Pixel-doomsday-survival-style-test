@@ -57,9 +57,18 @@ function Dialogue_DouMaoNanRen_ShouJiNvRen() {
     .AddContent(NPCDouMaoNanRen,"我得去检查一下绳索，免得帐篷被风吹走。",BubbleType.SPEECH,true,20)
     .AddContent(NPCDouMaoNanRen,"你帮我看着点篝火，别让它熄灭了。",BubbleType.SPEECH,true,20);
 
-    // 使用随机重复模式，对话结束后会随机从对话中选择一点继续，-1表示无限重复
-    // 设置等待时间为3秒
-    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetAutoNext().SetWaitTime(3).SetRandomRepeat(-1);
+    // 使用SetPressNext模式，并启用按键提示图标
+    // AdvanceBubble.PlayContinuousDialogue(TestDialogue)
+    //     .SetPressNext()
+    //     .EnableKeyPrompt(true, "#ffffff", 20) // 启用白色按键提示，大小为20px
+    //     .SetRandomRepeat(-1);
+    
+    // 自动播放模式的代码，可以通过注释切换测试
+    
+    AdvanceBubble.PlayContinuousDialogue(TestDialogue)
+        .SetAutoNext()
+        .SetWaitTime(3)
+        .SetRandomRepeat(-1);
     
 }
 
@@ -119,6 +128,11 @@ export class AdvanceBubble {
 
     // 调试模式
     private static debugMode: boolean = true;
+    
+    // 按键提示设置
+    private static keyPromptEnabled: boolean = true; // 默认启用按键提示
+    private static keyPromptColor: string = "#ffffff"; // 按键提示颜色
+    private static keyPromptSize: number = 24; // 按键提示大小
 
     /**
      * 设置NPC对象
@@ -187,7 +201,8 @@ export class AdvanceBubble {
         },
         SetPressNext: () => { 
             SetNextKey: (key: string) => { SetRandomRepeat: (repeatCount: number) => void },
-            SetRandomRepeat: (repeatCount: number) => void
+            SetRandomRepeat: (repeatCount: number) => void,
+            EnableKeyPrompt: (enabled: boolean, color?: string, size?: number) => { SetRandomRepeat: (repeatCount: number) => void }
         },
         SetRandomRepeat: (repeatCount: number) => void
     } {
@@ -236,6 +251,15 @@ export class AdvanceBubble {
                     },
                     SetRandomRepeat: (repeatCount: number) => {
                         this.setupRandomRepeat(dialogue, repeatCount);
+                    },
+                    // 添加新的EnableKeyPrompt方法
+                    EnableKeyPrompt: (enabled: boolean = true, color: string = "#ffffff", size: number = 24) => {
+                        this.setKeyPrompt(dialogue, enabled, color, size);
+                        return {
+                            SetRandomRepeat: (repeatCount: number) => {
+                                this.setupRandomRepeat(dialogue, repeatCount);
+                            }
+                        };
                     }
                 };
             },
@@ -372,6 +396,15 @@ export class AdvanceBubble {
             // 如果是中文内容，启用中文模式
             if (/[\u4e00-\u9fa5]/.test(content.content)) {
                 bubble.setChineseMode();
+            }
+            
+            // 如果启用了按键提示且不是自动播放模式，添加按键提示
+            if (this.keyPromptEnabled && this.keyPressListener) {
+                bubble.enableKeyPrompt(
+                    this.nextKey === " " ? "Space" : this.nextKey,
+                    this.keyPromptColor,
+                    this.keyPromptSize
+                );
             }
             
             // 保存气泡实例
@@ -559,6 +592,15 @@ export class AdvanceBubble {
         try {
             // 获取当前内容
             const content = dialogue.contents[dialogue.currentIndex];
+            
+            // 如果启用了按键提示，为当前气泡添加按键提示图标
+            if (this.keyPromptEnabled && content.bubbleInstance) {
+                content.bubbleInstance.enableKeyPrompt(
+                    this.nextKey === " " ? "Space" : this.nextKey,
+                    this.keyPromptColor,
+                    this.keyPromptSize
+                );
+            }
             
             // 如果启用了打字机效果，需要等待打字机效果完成
             if (content.typewriterEnabled) {
@@ -813,6 +855,13 @@ export class AdvanceBubble {
                         }
                     });
                     
+                    // 先禁用按键提示，确保按键提示也会随气泡一起淡出
+                    // 但不要完全禁用按键提示，而是让它随气泡一起淡出
+                    if (this.keyPromptEnabled && lastContent.bubbleInstance) {
+                        // 不完全禁用，而是让它随气泡一起淡出
+                        // lastContent.bubbleInstance.disableKeyPrompt();
+                    }
+                    
                     // 先触发淡出效果
                     lastContent.bubbleInstance.fadeOut();
                     
@@ -834,6 +883,10 @@ export class AdvanceBubble {
         // 清除所有可能剩余的气泡
         dialogue.contents.forEach((content, index) => {
             if (index !== lastIndex && content.bubbleInstance) {
+                // 确保禁用按键提示
+                if (this.keyPromptEnabled && content.bubbleInstance) {
+                    content.bubbleInstance.disableKeyPrompt();
+                }
                 content.bubbleInstance.destroy();
                 content.bubbleInstance = undefined;
             }
@@ -903,5 +956,36 @@ export class AdvanceBubble {
      */
     public static GetAllDialogues(): IContinuousDialogue[] {
         return Array.from(this.dialogues.values());
+    }
+
+    /**
+     * 设置按键提示
+     * @param dialogue 对话对象
+     * @param enabled 是否启用按键提示
+     * @param color 按键提示颜色
+     * @param size 按键提示大小
+     */
+    private static setKeyPrompt(dialogue: IContinuousDialogue, enabled: boolean = true, color: string = "#ffffff", size: number = 24): void {
+        this.keyPromptEnabled = enabled;
+        this.keyPromptColor = color;
+        this.keyPromptSize = size;
+        
+        // 如果当前有显示的气泡，立即更新
+        const currentContent = dialogue.contents[dialogue.currentIndex];
+        if (currentContent && currentContent.bubbleInstance) {
+            if (enabled) {
+                currentContent.bubbleInstance.enableKeyPrompt(
+                    this.nextKey === " " ? "Space" : this.nextKey,
+                    color,
+                    size
+                );
+            } else {
+                currentContent.bubbleInstance.disableKeyPrompt();
+            }
+        }
+        
+        if (this.debugMode) {
+            console.log(`Key prompt ${enabled ? 'enabled' : 'disabled'} for dialogue ${dialogue.id}`);
+        }
     }
 }
