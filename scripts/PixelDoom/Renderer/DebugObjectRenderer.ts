@@ -925,8 +925,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     }
 
     var NPCObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.NPC;
+    var ShouJiNvRenInstance =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ShouJiNvRen.getFirstInstance();
     if (playerInstance) {
-        var NPCBox = DebugObjectRenderer.setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
+        var NPCBox = DebugObjectRenderer.setOffset(0,-50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
         var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
     }
 

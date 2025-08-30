@@ -1,7 +1,7 @@
 {
 	"name": "DouMaoNanRen",
 	"plugin-id": "Sprite",
-	"sid": 991746148925397,
+	"sid": 591155809102009,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
@@ -17,21 +17,43 @@
 			{
 				"frames": [
 					{
-						"width": 262,
-						"height": 600,
-						"originX": 0.38549618320610685,
-						"originY": 0.76,
+						"width": 264,
+						"height": 381,
+						"originX": 0.4734848484848485,
+						"originY": 0.6614173228346457,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 4752772,
+						"imageSpriteId": 5773164,
+						"collisionPoly": {
+							"points": [
+								0.42045454545454547,
+								0.007874015748031496,
+								0.5075757575757576,
+								0.028871391076115485,
+								0.8863636363636364,
+								0.36745406824146964,
+								0.9848484848484849,
+								0.5564304461942259,
+								0.9772727272727273,
+								0.6456692913385826,
+								0.9318181818181818,
+								0.6850393700787403,
+								0.35984848484848486,
+								0.700787401574803,
+								0.08712121212121213,
+								0.6745406824146981,
+								0.022727272727272728,
+								0.4960629921259841
+							]
+						},
 						"useCollisionPoly": true,
 						"duration": 1,
 						"tag": ""
 					}
 				],
-				"sid": 101464137539542,
+				"sid": 234151655855101,
 				"name": "Animation 1",
 				"isLooping": false,
 				"isPingPong": false,

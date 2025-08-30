@@ -58,17 +58,17 @@ function Dialogue_DouMaoNanRen_ShouJiNvRen() {
     .AddContent(NPCDouMaoNanRen,"你帮我看着点篝火，别让它熄灭了。",BubbleType.SPEECH,true,20);
 
     // 使用SetPressNext模式，并启用按键提示图标
-    // AdvanceBubble.PlayContinuousDialogue(TestDialogue)
-    //     .SetPressNext()
-    //     .EnableKeyPrompt(true, "#ffffff", 20) // 启用白色按键提示，大小为20px
-    //     .SetRandomRepeat(-1);
+    AdvanceBubble.PlayContinuousDialogue(TestDialogue)
+        .SetPressNext()
+        .EnableKeyPrompt(true, "#ffffff", 20) // 启用白色按键提示，大小为20px
+        .SetRandomRepeat(-1);
     
     // 自动播放模式的代码，可以通过注释切换测试
     
-    AdvanceBubble.PlayContinuousDialogue(TestDialogue)
-        .SetAutoNext()
-        .SetWaitTime(3)
-        .SetRandomRepeat(-1);
+    // AdvanceBubble.PlayContinuousDialogue(TestDialogue)
+    //     .SetAutoNext()
+    //     .SetWaitTime(3)
+    //     .SetRandomRepeat(-1);
     
 }
 

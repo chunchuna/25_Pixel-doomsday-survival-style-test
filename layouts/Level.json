@@ -59799,135 +59799,6 @@
 							"global": false
 						},
 						{
-							"name": "TestNPC",
-							"overriden": 0,
-							"subLayers": [],
-							"instances": [
-								{
-									"type": "DouMaoNanRen",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Animation 1",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 1213,
-									"sid": 790823443242609,
-									"tags": "",
-									"instanceVariables": {
-										"GetYPosition": 0
-									},
-									"behaviors": {},
-									"effects": {
-										"像素化": {
-											"isEnabled": true,
-											"parameters": {
-												"size": 5
-											}
-										}
-									},
-									"instanceFolderItem": {
-										"sid": 790823443242609,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1642,
-										"y": 887,
-										"width": 162.59295135194753,
-										"height": 372.35027027163557,
-										"originX": 0.38549618320610685,
-										"originY": 0.76,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								},
-								{
-									"type": "ShouJiNvRen",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Default",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 27,
-									"sid": 253765266000129,
-									"tags": "",
-									"instanceVariables": {
-										"GetYPosition": 0
-									},
-									"behaviors": {},
-									"effects": {
-										"像素化": {
-											"isEnabled": true,
-											"parameters": {
-												"size": 6
-											}
-										}
-									},
-									"instanceFolderItem": {
-										"sid": 253765266000129,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1432,
-										"y": 977,
-										"width": 131.12005244380526,
-										"height": 195.12652354196612,
-										"originX": 0.5402843601895735,
-										"originY": 0.8121019108280255,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								}
-							],
-							"sid": 325585355069528,
-							"effectTypes": [],
-							"isInitiallyVisible": true,
-							"isInitiallyInteractive": true,
-							"isHTMLElementsLayer": false,
-							"color": [
-								1,
-								1,
-								1,
-								1
-							],
-							"backgroundColor": [
-								0.3686274509803922,
-								0.3686274509803922,
-								0.3686274509803922,
-								1
-							],
-							"isTransparent": true,
-							"parallaxX": 1,
-							"parallaxY": 1,
-							"scaleRate": 1,
-							"forceOwnTexture": false,
-							"renderingMode": "3d",
-							"drawOrder": "z-order",
-							"useRenderCells": false,
-							"blendMode": "normal",
-							"zElevation": 0,
-							"global": false
-						},
-						{
 							"name": "ZhuJue",
 							"overriden": 0,
 							"subLayers": [],
@@ -60015,8 +59886,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1608,
-										"y": 981,
+										"x": 1579.797066190688,
+										"y": 1047.215539797126,
 										"width": 76.6332526970211,
 										"height": 184.3987643022071,
 										"originX": 0.5104166666666666,
@@ -60054,6 +59925,131 @@
 							"parallaxY": 1,
 							"scaleRate": 1,
 							"forceOwnTexture": true,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
+							"name": "TestNPC",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [
+								{
+									"type": "ShouJiNvRen",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Animation 1",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 28,
+									"sid": 429758556308184,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {},
+									"effects": {
+										"像素化": {
+											"isEnabled": true,
+											"parameters": {
+												"size": 6
+											}
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 429758556308184,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 1463.0322490528774,
+										"y": 1039.7768961393049,
+										"width": 124.43991699541488,
+										"height": 185.18546889365058,
+										"originX": 0.5734597156398105,
+										"originY": 0.7834394904458599,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0,
+										"zElevation": 0
+									}
+								},
+								{
+									"type": "DouMaoNanRen",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Animation 1",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 27,
+									"sid": 588485419939464,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {},
+									"effects": {
+										"像素化": {
+											"isEnabled": true,
+											"parameters": {
+												"size": 5.33331298828125
+											}
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 588485419939464,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 1673.204142098951,
+										"y": 874.0032293988529,
+										"width": 155.36699751461398,
+										"height": 224.22282595859065,
+										"originX": 0.4734848484848485,
+										"originY": 0.6614173228346457,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0.03683984049760847,
+										"zElevation": 0
+									}
+								}
+							],
+							"sid": 325585355069528,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
 							"renderingMode": "3d",
 							"drawOrder": "z-order",
 							"useRenderCells": false,
@@ -61180,7 +61176,16 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 429758556308184,
+				"expanded": true
+			},
+			{
+				"sid": 588485419939464,
+				"expanded": true
+			}
+		],
 		"subfolders": [
 			{
 				"items": [
@@ -65791,16 +65796,7 @@
 				"name": "Bus"
 			},
 			{
-				"items": [
-					{
-						"sid": 790823443242609,
-						"expanded": true
-					},
-					{
-						"sid": 253765266000129,
-						"expanded": true
-					}
-				],
+				"items": [],
 				"subfolders": [],
 				"name": "GouHuoNPC"
 			}

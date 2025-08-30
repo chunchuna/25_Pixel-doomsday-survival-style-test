@@ -1,7 +1,7 @@
 {
 	"name": "ShouJiNvRen",
 	"plugin-id": "Sprite",
-	"sid": 828436548716529,
+	"sid": 232995782997943,
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
@@ -19,23 +19,31 @@
 					{
 						"width": 211,
 						"height": 314,
-						"originX": 0.5402843601895735,
-						"originY": 0.8121019108280255,
+						"originX": 0.5734597156398105,
+						"originY": 0.7834394904458599,
 						"originalSource": "",
 						"exportFormat": "lossless",
 						"exportQuality": 0.8,
 						"fileType": "image/png",
-						"imageSpriteId": 7816332,
+						"imageSpriteId": 2807694,
 						"collisionPoly": {
 							"points": [
-								1,
-								1,
-								0,
-								1,
-								0,
-								0,
-								1,
-								0
+								0.8104265402843602,
+								0.10509554140127389,
+								0.9715639810426541,
+								0.7929936305732485,
+								0.7819905213270142,
+								0.8407643312101911,
+								0.042654028436018954,
+								0.821656050955414,
+								0.018957345971563955,
+								0.7229299363057324,
+								0.3696682464454977,
+								0.07006369426751592,
+								0.4312796208530806,
+								0.022292993630573247,
+								0.5071090047393365,
+								0.012738853503184714
 							]
 						},
 						"useCollisionPoly": true,
@@ -43,8 +51,8 @@
 						"tag": ""
 					}
 				],
-				"sid": 396089832755603,
-				"name": "Default",
+				"sid": 826253184694685,
+				"name": "Animation 1",
 				"isLooping": false,
 				"isPingPong": false,
 				"repeatCount": 1,
