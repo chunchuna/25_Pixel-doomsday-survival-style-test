@@ -8,34 +8,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
     // 初始化高级气泡系统
     //alert("UIAdvanceBubble init")
 
-    var ChangJingLuInstance =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
-    .RUN_TIME_.objects.ChangJingLu.getFirstInstance();
+    var DouMaoNanRenInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
+    .RUN_TIME_.objects.DouMaoNanRen.getFirstInstance();
+    if(!DouMaoNanRenInstance) return
 
-    var HouziInstance =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
-    .RUN_TIME_.objects.HouZi.getFirstInstance();
-
-    var HeMaInstance =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
-    .RUN_TIME_.objects.HeMa.getFirstInstance();
+    var NPCDouMaoNanRen = AdvanceBubble.SetNPC("DouMaoNanRen", DouMaoNanRenInstance.x, DouMaoNanRenInstance.y);
     
-    if(!ChangJingLuInstance || !HouziInstance || !HeMaInstance) return
+    var TestDialogue = AdvanceBubble.CreateContinuousDialogue().AddContent(NPCDouMaoNanRen,"你好，我是兜帽男人。",BubbleType.SPEECH,true,20)
 
-    var NPCChangJingLu = 
-    AdvanceBubble.SetNPC("ChangJingLu", ChangJingLuInstance.x-50, ChangJingLuInstance.y+100);
-    var NPCHouzi = AdvanceBubble.SetNPC("Houzi", HouziInstance.x-50, HouziInstance.y+100);
-    var NPCHeMa = AdvanceBubble.SetNPC("HeMa", HeMaInstance.x-50, HeMaInstance.y+100);
-
-    var TestDialogue = AdvanceBubble.CreateContinuousDialogue()
-    TestDialogue
-    .AddContent(NPCChangJingLu,"你好，我是长颈鹿。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCChangJingLu,"你们都自我介绍一下自己吧。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCChangJingLu,"那个长得像猴子的你先来。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCHouzi,"你好，我是猴子。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCHouzi,"你好，我看起来真的很像猴子吗？。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCHouzi,"好吧其实我就是猴子哈哈哈哈。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCHeMa,"你好，我是河马。",BubbleType.SPEECH,true,100)
-    .AddContent(NPCHeMa,"你好，有人看看我吗？我是河马。",BubbleType.SPEECH,true,100)
-
-    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetAutoNext().SetWaitTime(2);
+    AdvanceBubble.PlayContinuousDialogue(TestDialogue).SetPressNext()
     
     
 })

@@ -308,152 +308,6 @@
 					"overriden": 0,
 					"subLayers": [
 						{
-							"name": "TestNPC",
-							"overriden": 0,
-							"subLayers": [],
-							"instances": [
-								{
-									"type": "ChangJingLu",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Animation 1",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 1210,
-									"sid": 715086569428301,
-									"tags": "",
-									"instanceVariables": {},
-									"behaviors": {},
-									"instanceFolderItem": {
-										"sid": 715086569428301,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1107.9511319726528,
-										"y": 843.4972092378947,
-										"width": 52.28082059393321,
-										"height": 50.5085893873592,
-										"originX": 0.5,
-										"originY": 0.5,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								},
-								{
-									"type": "HeMa",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Animation 1",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 1211,
-									"sid": 185640124074223,
-									"tags": "",
-									"instanceVariables": {},
-									"behaviors": {},
-									"instanceFolderItem": {
-										"sid": 185640124074223,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1341.0597221053974,
-										"y": 885.9042686216972,
-										"width": 52.021373519424905,
-										"height": 53.90372585071988,
-										"originX": 0.5,
-										"originY": 0.5,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								},
-								{
-									"type": "HouZi",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Animation 1",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 1212,
-									"sid": 909396523491576,
-									"tags": "",
-									"instanceVariables": {},
-									"behaviors": {},
-									"instanceFolderItem": {
-										"sid": 909396523491576,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1212.1204923036578,
-										"y": 796.270584593412,
-										"width": 66.96245661815136,
-										"height": 57.435218811285765,
-										"originX": 0.5,
-										"originY": 0.5,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0
-									}
-								}
-							],
-							"sid": 325585355069528,
-							"effectTypes": [],
-							"isInitiallyVisible": true,
-							"isInitiallyInteractive": true,
-							"isHTMLElementsLayer": false,
-							"color": [
-								1,
-								1,
-								1,
-								1
-							],
-							"backgroundColor": [
-								0.3686274509803922,
-								0.3686274509803922,
-								0.3686274509803922,
-								1
-							],
-							"isTransparent": true,
-							"parallaxX": 1,
-							"parallaxY": 1,
-							"scaleRate": 1,
-							"forceOwnTexture": false,
-							"renderingMode": "3d",
-							"drawOrder": "z-order",
-							"useRenderCells": false,
-							"blendMode": "normal",
-							"zElevation": 0,
-							"global": false
-						},
-						{
 							"name": "Bus",
 							"overriden": 0,
 							"subLayers": [],
@@ -533,140 +387,6 @@
 							"subLayers": [],
 							"instances": [
 								{
-									"type": "LuYingYi",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Default",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 27,
-									"sid": 219055436918493,
-									"tags": "",
-									"instanceVariables": {
-										"GetYPosition": 0,
-										"ObjectName": "露营椅子",
-										"ID": "LuYingYiZi",
-										"Actions": "find{find}",
-										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
-									},
-									"behaviors": {},
-									"effects": {
-										"BetterOutline": {
-											"isEnabled": false,
-											"parameters": {
-												"color": [
-													1,
-													0,
-													0,
-													1
-												],
-												"width": 1,
-												"precision-step": 10,
-												"samples": 3,
-												"opacity": 1
-											}
-										},
-										"像素化": {
-											"isEnabled": true,
-											"parameters": {
-												"size": 2
-											}
-										}
-									},
-									"instanceFolderItem": {
-										"sid": 219055436918493,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1462.6566655323402,
-										"y": 957.1671301740253,
-										"width": 86.30491926640632,
-										"height": 86.30491926640632,
-										"originX": 0.46875,
-										"originY": 0.921875,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0,
-										"blendMode": "additive"
-									}
-								},
-								{
-									"type": "LuYingYi2",
-									"properties": {
-										"initially-visible": true,
-										"initial-animation": "Default",
-										"initial-frame": 0,
-										"enable-collisions": true,
-										"live-preview": false
-									},
-									"uid": 28,
-									"sid": 469125833392813,
-									"tags": "",
-									"instanceVariables": {
-										"GetYPosition": 0,
-										"ObjectName": "露营椅子",
-										"ID": "LuYingYiZi",
-										"Actions": "find{find}",
-										"CheckDescribe": "一把普通的露营椅，被雨水打湿了"
-									},
-									"behaviors": {},
-									"effects": {
-										"BetterOutline": {
-											"isEnabled": false,
-											"parameters": {
-												"color": [
-													1,
-													0,
-													0,
-													1
-												],
-												"width": 1,
-												"precision-step": 10,
-												"samples": 3,
-												"opacity": 1
-											}
-										},
-										"像素化": {
-											"isEnabled": true,
-											"parameters": {
-												"size": 3
-											}
-										}
-									},
-									"instanceFolderItem": {
-										"sid": 469125833392813,
-										"expanded": true
-									},
-									"showing": true,
-									"locked": false,
-									"world": {
-										"x": 1645.5992466974753,
-										"y": 883.5266963833677,
-										"width": 69.10877937818725,
-										"height": 84.58089416434856,
-										"originX": 0.4925373134328358,
-										"originY": 0.9390243902439024,
-										"color": [
-											1,
-											1,
-											1,
-											1
-										],
-										"angle": 0,
-										"zElevation": 0,
-										"blendMode": "additive"
-									}
-								},
-								{
 									"type": "ZhangPeng2",
 									"properties": {
 										"initially-visible": true,
@@ -712,10 +432,10 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1474.8161070068459,
-										"y": 793.5290259825574,
-										"width": 366.7158254301935,
-										"height": 249.17870189487502,
+										"x": 1501.1078211914764,
+										"y": 796.0940712688629,
+										"width": 316.6974423472378,
+										"height": 215.19185185132824,
 										"originX": 0.47435897435897434,
 										"originY": 0.9245283018867925,
 										"color": [
@@ -58389,10 +58109,10 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1241.8161070068459,
-										"y": 1015.5290259825574,
-										"width": 60.7088636824307,
-										"height": 146.08070323584894,
+										"x": 1251.1884998621476,
+										"y": 890,
+										"width": 76.6332526970211,
+										"height": 184.3987643022071,
 										"originX": 0.5104166666666666,
 										"originY": 1,
 										"color": [
@@ -61919,6 +61639,86 @@
 							"blendMode": "normal",
 							"zElevation": 0,
 							"global": false
+						},
+						{
+							"name": "TestNPC",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [
+								{
+									"type": "DouMaoNanRen",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Animation 1",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 1213,
+									"sid": 790823443242609,
+									"tags": "",
+									"instanceVariables": {},
+									"behaviors": {},
+									"effects": {
+										"像素化": {
+											"isEnabled": true,
+											"parameters": {
+												"size": 7
+											}
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 790823443242609,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 1590,
+										"y": 881,
+										"width": 162.59295135194753,
+										"height": 372.35027027163557,
+										"originX": 0.38549618320610685,
+										"originY": 0.76,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0,
+										"zElevation": 0
+									}
+								}
+							],
+							"sid": 325585355069528,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
 						}
 					],
 					"instances": [],
@@ -63041,15 +62841,7 @@
 	"scene-graphs-folder-root": {
 		"items": [
 			{
-				"sid": 715086569428301,
-				"expanded": true
-			},
-			{
-				"sid": 185640124074223,
-				"expanded": true
-			},
-			{
-				"sid": 909396523491576,
+				"sid": 790823443242609,
 				"expanded": true
 			}
 		],
@@ -67638,14 +67430,6 @@
 				"items": [
 					{
 						"sid": 484849145983661,
-						"expanded": true
-					},
-					{
-						"sid": 219055436918493,
-						"expanded": true
-					},
-					{
-						"sid": 469125833392813,
 						"expanded": true
 					},
 					{

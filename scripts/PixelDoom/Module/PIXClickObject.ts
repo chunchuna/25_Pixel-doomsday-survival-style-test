@@ -65,12 +65,12 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       //       ClickObjects.addChild(HuDongTishiInstance);
       // }
 
-      for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
+      // for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
 
-            var NameCard = UINameHintCard.CreateHintCardInstance(ClickObjects.instVars.ObjectName, ClickObjects.instVars.ID +
-                  String(ClickObjects.uid))
-                  .SetPosition(ClickObjects.getImagePointX(1), ClickObjects.getImagePointY(1))
-      }
+      //       var NameCard = UINameHintCard.CreateHintCardInstance(ClickObjects.instVars.ObjectName, ClickObjects.instVars.ID +
+      //             String(ClickObjects.uid))
+      //             .SetPosition(ClickObjects.getImagePointX(1), ClickObjects.getImagePointY(1))
+      // }
 })
 
 
