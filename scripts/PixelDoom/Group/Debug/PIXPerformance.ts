@@ -112,12 +112,40 @@ class MetricVisualizer {
 hf_engine.gl$_ubu_init(()=>{
     Performance.ShowPerformanceMetrics();
     // Performance.HidePerformanceMetrics();
+    
+    // 添加键盘快捷键来切换性能监视器的显示模式
+    document.addEventListener('keydown', (event) => {
+        // 按下 F9 键切换显示模式
+        if (event.key === 'F9') {
+            // 如果性能监视器已经显示，则切换显示模式
+            if (Performance['isRunning']) {
+                Performance.toggleDisplayMode();
+            }
+        }
+        
+        // 按下 F8 键切换性能监视器的显示/隐藏
+        // if (event.key === 'F8') {
+        //     if (Performance['isRunning']) {
+        //         Performance.HidePerformanceMetrics();
+        //     } else {
+        //         Performance.ShowPerformanceMetrics();
+        //     }
+        // }
+    });
+
 })
 
  class Performance {
     // 统一的性能显示面板
     private static performanceContainer: HTMLDivElement | null = null;
     private static visualizerContainer: HTMLDivElement | null = null;
+
+    // 显示模式
+    private static displayMode: 'both' | 'text-only' | 'chart-only' = 'text-only';
+    
+    // 图表更新频率控制
+    private static chartUpdateInterval: number = 500; // 每500ms更新一次图表
+    private static lastChartUpdateTime: number = 0;
 
     // FPS显示相关变量
     private static fpsDisplay: HTMLDivElement | null = null;
@@ -214,6 +242,51 @@ hf_engine.gl$_ubu_init(()=>{
         this.performanceContainer.appendChild(this.gpuDisplay);
         this.performanceContainer.appendChild(this.batteryDisplay);
         
+        // 创建切换显示模式的按钮
+        const modeToggleContainer = document.createElement('div');
+        modeToggleContainer.style.marginTop = '5px';
+        modeToggleContainer.style.borderTop = '1px solid #555';
+        modeToggleContainer.style.paddingTop = '3px';
+        modeToggleContainer.style.display = 'flex';
+        modeToggleContainer.style.justifyContent = 'space-between';
+        modeToggleContainer.style.pointerEvents = 'auto';
+        
+        const textModeBtn = document.createElement('button');
+        textModeBtn.textContent = 'Text';
+        textModeBtn.style.backgroundColor = '#333';
+        textModeBtn.style.color = '#fff';
+        textModeBtn.style.border = 'none';
+        textModeBtn.style.padding = '2px 5px';
+        textModeBtn.style.cursor = 'pointer';
+        textModeBtn.style.fontSize = '10px';
+        textModeBtn.onclick = () => this.setDisplayMode('text-only');
+        
+        const bothModeBtn = document.createElement('button');
+        bothModeBtn.textContent = 'Both';
+        bothModeBtn.style.backgroundColor = '#333';
+        bothModeBtn.style.color = '#fff';
+        bothModeBtn.style.border = 'none';
+        bothModeBtn.style.padding = '2px 5px';
+        bothModeBtn.style.cursor = 'pointer';
+        bothModeBtn.style.fontSize = '10px';
+        bothModeBtn.onclick = () => this.setDisplayMode('both');
+        
+        const chartModeBtn = document.createElement('button');
+        chartModeBtn.textContent = 'Chart';
+        chartModeBtn.style.backgroundColor = '#333';
+        chartModeBtn.style.color = '#fff';
+        chartModeBtn.style.border = 'none';
+        chartModeBtn.style.padding = '2px 5px';
+        chartModeBtn.style.cursor = 'pointer';
+        chartModeBtn.style.fontSize = '10px';
+        chartModeBtn.onclick = () => this.setDisplayMode('chart-only');
+        
+        modeToggleContainer.appendChild(textModeBtn);
+        modeToggleContainer.appendChild(bothModeBtn);
+        modeToggleContainer.appendChild(chartModeBtn);
+        
+        this.performanceContainer.appendChild(modeToggleContainer);
+        
         document.body.appendChild(this.performanceContainer);
 
         // 创建图表容器
@@ -300,17 +373,15 @@ hf_engine.gl$_ubu_init(()=>{
         this.visualizers = {};
         
         // 使用setTimeout确保DOM已经渲染
-        setTimeout(() => {
-            this.visualizers.ms = new MetricVisualizer('MS', 250, 50, msDiv);
-            this.visualizers.fps = new MetricVisualizer('FPS', 250, 50, fpsDiv);
-            this.visualizers.mem = new MetricVisualizer('Mem', 250, 50, memDiv);
-            this.visualizers.net = new MetricVisualizer('Net', 250, 50, netDiv);
-            this.visualizers.events = new MetricVisualizer('Events', 250, 50, eventsDiv);
-            this.visualizers.gpu = new MetricVisualizer('GPU', 250, 50, gpuDiv);
-            this.visualizers.battery = new MetricVisualizer('Battery', 250, 50, batteryDiv);
-            
-            console.log("All charts created:", Object.keys(this.visualizers));
-        }, 300);
+        this.visualizers.ms = new MetricVisualizer('MS', 250, 50, msDiv);
+        this.visualizers.fps = new MetricVisualizer('FPS', 250, 50, fpsDiv);
+        this.visualizers.mem = new MetricVisualizer('Mem', 250, 50, memDiv);
+        this.visualizers.net = new MetricVisualizer('Net', 250, 50, netDiv);
+        this.visualizers.events = new MetricVisualizer('Events', 250, 50, eventsDiv);
+        this.visualizers.gpu = new MetricVisualizer('GPU', 250, 50, gpuDiv);
+        this.visualizers.battery = new MetricVisualizer('Battery', 250, 50, batteryDiv);
+        
+        console.log("All charts created:", Object.keys(this.visualizers));
     
         this.lastFrameTime = performance.now();
         this.lastMsFrameTime = performance.now();
@@ -371,6 +442,44 @@ hf_engine.gl$_ubu_init(()=>{
 
         // 设置运行状态为false
         this.isRunning = false;
+    }
+
+    /**
+     * 设置性能监控的显示模式
+     * @param mode 显示模式：'both' (同时显示文本和图表), 'text-only' (仅显示文本), 'chart-only' (仅显示图表)
+     */
+    public static setDisplayMode(mode: 'both' | 'text-only' | 'chart-only'): void {
+        this.displayMode = mode;
+        
+        // 根据模式设置容器的可见性
+        if (this.performanceContainer) {
+            this.performanceContainer.style.display = (mode === 'both' || mode === 'text-only') ? 'block' : 'none';
+        }
+        
+        if (this.visualizerContainer) {
+            this.visualizerContainer.style.display = (mode === 'both' || mode === 'chart-only') ? 'flex' : 'none';
+        }
+        
+        console.log(`Performance display mode set to: ${mode}`);
+    }
+
+    /**
+     * 获取当前显示模式
+     * @returns 当前的显示模式
+     */
+    public static getDisplayMode(): 'both' | 'text-only' | 'chart-only' {
+        return this.displayMode;
+    }
+
+    /**
+     * 循环切换显示模式
+     * 顺序为: both -> text-only -> chart-only -> both
+     */
+    public static toggleDisplayMode(): void {
+        const modes: Array<'both' | 'text-only' | 'chart-only'> = ['both', 'text-only', 'chart-only'];
+        const currentIndex = modes.indexOf(this.displayMode);
+        const nextIndex = (currentIndex + 1) % modes.length;
+        this.setDisplayMode(modes[nextIndex]);
     }
 
     // 辅助函数，用于创建单个指标的DOM元素
@@ -505,10 +614,8 @@ hf_engine.gl$_ubu_init(()=>{
             this.lastMsFrameTime = now;
             
             // 更新MS图表和文本
-            if (this.visualizers.ms && this.msDisplay) {
-                this.visualizers.ms.addData(deltaTime);
+            if (this.msDisplay) {
                 const msText = `MS: ${deltaTime.toFixed(2)}`;
-                this.visualizers.ms.updateValue(msText);
                 this.msDisplay.textContent = msText;
                 
                 // 根据性能设置颜色
@@ -519,17 +626,21 @@ hf_engine.gl$_ubu_init(()=>{
                     color = '#ffff00'; // 黄色 (一般)
                 }
                 this.msDisplay.style.color = color;
+                
+                // 只在chart模式下且满足更新间隔时更新图表
+                if (this.displayMode !== 'text-only' && this.visualizers.ms) {
+                    this.visualizers.ms.addData(deltaTime);
+                    this.visualizers.ms.updateValue(msText);
+                }
             }
 
             // 每秒更新一次其他指标
             if (now >= this.lastFrameTime + 1000) {
                 const fps = this.frameCount;
                 
-                // 更新 FPS 图表和文本
-                if (this.visualizers.fps && this.fpsDisplay) {
-                    this.visualizers.fps.addData(fps);
+                // 更新 FPS 文本
+                if (this.fpsDisplay) {
                     const fpsText = `FPS: ${fps}`;
-                    this.visualizers.fps.updateValue(fpsText);
                     this.fpsDisplay.textContent = fpsText;
                     
                     // 根据性能设置颜色
@@ -540,24 +651,26 @@ hf_engine.gl$_ubu_init(()=>{
                         color = '#ffff00'; // 黄色 (一般)
                     }
                     this.fpsDisplay.style.color = color;
+                    
+                    // 只在chart模式下更新图表
+                    if (this.displayMode !== 'text-only' && this.visualizers.fps) {
+                        this.visualizers.fps.addData(fps);
+                        this.visualizers.fps.updateValue(fpsText);
+                    }
                 }
                 
                 // 更新内存占用 (如果浏览器支持)
                 try {
                     // @ts-ignore - Chrome特有的API，TypeScript不认识
-                    if (this.visualizers.mem && this.memDisplay && performance.memory) {
+                    if (this.memDisplay && performance.memory) {
                         // @ts-ignore
                         const memory = performance.memory;
                         const usedHeap = (memory.usedJSHeapSize / 1024 / 1024);
                         const totalHeap = (memory.jsHeapSizeLimit / 1024 / 1024);
                         
-                        // 更新图表数据 - 使用内存占比而不是绝对值
-                        const memPercentage = (usedHeap / totalHeap) * 100;
-                        this.visualizers.mem.addData(memPercentage);
-                        
                         // 更新显示文本 - 同时显示使用量、总量和百分比
+                        const memPercentage = (usedHeap / totalHeap) * 100;
                         const memText = `Mem: ${usedHeap.toFixed(1)}MB / ${totalHeap.toFixed(0)}MB (${memPercentage.toFixed(1)}%)`;
-                        this.visualizers.mem.updateValue(memText);
                         this.memDisplay.textContent = memText;
                         
                         // 根据使用比例设置颜色
@@ -568,13 +681,22 @@ hf_engine.gl$_ubu_init(()=>{
                             color = '#ffff00'; // 黄色 (警告)
                         }
                         this.memDisplay.style.color = color;
+                        
+                        // 只在chart模式下更新图表
+                        if (this.displayMode !== 'text-only' && this.visualizers.mem) {
+                            this.visualizers.mem.addData(memPercentage);
+                            this.visualizers.mem.updateValue(memText);
+                        }
                     }
                 } catch (e) {
-                    if (this.visualizers.mem && this.memDisplay) {
-                        this.visualizers.mem.addData(0);
-                        this.visualizers.mem.updateValue('Mem: N/A');
+                    if (this.memDisplay) {
                         this.memDisplay.textContent = 'Mem: N/A';
                         this.memDisplay.style.color = '#888888';
+                        
+                        if (this.displayMode !== 'text-only' && this.visualizers.mem) {
+                            this.visualizers.mem.addData(0);
+                            this.visualizers.mem.updateValue('Mem: N/A');
+                        }
                     }
                 }
 
@@ -586,12 +708,15 @@ hf_engine.gl$_ubu_init(()=>{
                 }
                 
                 // 更新网络请求数据
-                if (this.visualizers.net && this.networkDisplay) {
+                if (this.networkDisplay) {
                     const transferSizeMB = this.networkTransferSize / (1024 * 1024);
                     const netText = `Net: ${this.networkRequestsCount} req (${transferSizeMB.toFixed(2)} MB)`;
                     this.networkDisplay.textContent = netText;
-                    this.visualizers.net.addData(this.networkRequestsCount);
-                    this.visualizers.net.updateValue(netText);
+                    
+                    if (this.displayMode !== 'text-only' && this.visualizers.net) {
+                        this.visualizers.net.addData(this.networkRequestsCount);
+                        this.visualizers.net.updateValue(netText);
+                    }
                     
                     // 每次更新后重置计数，这样图表显示的是每秒的请求数
                     const requestsPerSecond = this.networkRequestsCount;
@@ -599,31 +724,40 @@ hf_engine.gl$_ubu_init(()=>{
                 }
                 
                 // 更新事件监听器计数
-                if (this.visualizers.events && this.eventListenersDisplay) {
+                if (this.eventListenersDisplay) {
                     const eventsCount = this.getEventListenersCount();
                     this.eventListenersCount = eventsCount;
                     const eventsText = `Events: ${eventsCount}`;
                     this.eventListenersDisplay.textContent = eventsText;
-                    this.visualizers.events.addData(eventsCount);
-                    this.visualizers.events.updateValue(eventsText);
+                    
+                    if (this.displayMode !== 'text-only' && this.visualizers.events) {
+                        this.visualizers.events.addData(eventsCount);
+                        this.visualizers.events.updateValue(eventsText);
+                    }
                 }
                 
                 // 更新GPU信息
-                if (this.visualizers.gpu && this.gpuDisplay) {
+                if (this.gpuDisplay) {
                     const gpuMemory = this.getGPUInfo();
                     this.gpuMemory = gpuMemory;
                     const gpuText = gpuMemory > 0 ? `GPU: ~${gpuMemory.toFixed(0)} MB` : 'GPU: N/A';
                     this.gpuDisplay.textContent = gpuText;
-                    this.visualizers.gpu.addData(gpuMemory);
-                    this.visualizers.gpu.updateValue(gpuText);
+                    
+                    if (this.displayMode !== 'text-only' && this.visualizers.gpu) {
+                        this.visualizers.gpu.addData(gpuMemory);
+                        this.visualizers.gpu.updateValue(gpuText);
+                    }
                 }
                 
                 // 更新电池信息
-                if (this.visualizers.battery && this.batteryDisplay) {
+                if (this.batteryDisplay) {
                     const batteryText = `Battery: ${this.batteryLevel.toFixed(0)}% ${this.batteryCharging ? '(charging)' : ''}`;
                     this.batteryDisplay.textContent = batteryText;
-                    this.visualizers.battery.addData(this.batteryLevel);
-                    this.visualizers.battery.updateValue(batteryText);
+                    
+                    if (this.displayMode !== 'text-only' && this.visualizers.battery) {
+                        this.visualizers.battery.addData(this.batteryLevel);
+                        this.visualizers.battery.updateValue(batteryText);
+                    }
                     
                     // 根据电池电量设置颜色
                     let color = '#00ff00'; // 绿色 (好)
@@ -639,9 +773,15 @@ hf_engine.gl$_ubu_init(()=>{
                 this.lastFrameTime = now;
             }
             
-            // 在动画帧中重绘所有图表
-            for (const key in this.visualizers) {
-                this.visualizers[key].draw();
+            // 只有在非文本模式下且达到更新间隔时才绘制图表
+            if (this.displayMode !== 'text-only' && now - this.lastChartUpdateTime >= this.chartUpdateInterval) {
+                // 在动画帧中重绘所有图表
+                for (const key in this.visualizers) {
+                    if (this.visualizers[key]) {
+                        this.visualizers[key].draw();
+                    }
+                }
+                this.lastChartUpdateTime = now;
             }
         } catch (e) {
             console.error("Performance monitoring error:", e);
