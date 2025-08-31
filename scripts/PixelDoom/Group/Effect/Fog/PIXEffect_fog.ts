@@ -266,7 +266,7 @@ export async function createFogAroundInstance(
                 runtime.objects.FogSprite.getAllInstances();
             const currentFogCount = currentFogInstances.length;
 
-            console.log(`Current fog count: ${currentFogCount}, Max fog count: ${MaxFogCount}`);
+           // console.log(`Current fog count: ${currentFogCount}, Max fog count: ${MaxFogCount}`);
 
             // 如果当前雾数量小于最大值，则补充雾实例
             if (currentFogCount < MaxFogCount && TargetInstance) {

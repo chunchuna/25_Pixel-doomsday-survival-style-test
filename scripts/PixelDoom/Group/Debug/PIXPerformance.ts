@@ -109,7 +109,7 @@ class MetricVisualizer {
 }
 
 hf_engine.gl$_ubu_init(()=>{
-    //Performance.ShowPerformanceMetrics();
+    Performance.ShowPerformanceMetrics();
     // Performance.HidePerformanceMetrics();
 })
 

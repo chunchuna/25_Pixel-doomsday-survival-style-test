@@ -13,7 +13,7 @@ hf_engine.gl$_ubu_init(() => {
     // Example: Set callbacks for campfire area
     GFLW__CampfireConversation.EnterExitAreaCallbacks();
     //Draw Area
-    DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.CYAN).setBoxThickness(2).RenderPolygonFromPoints(GFLW__CampfireConversation.TriggerArea);
+    DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.YELLOW).setBoxThickness(1).RenderPolygonFromPoints(GFLW__CampfireConversation.TriggerArea)
 })
 
 hf_engine.gl$_ubu_update(() => {
@@ -22,7 +22,7 @@ hf_engine.gl$_ubu_update(() => {
 
 class GFLW__CampfireConversation {
     static Player: InstanceType.RedHairGirlSprite | null = null
-    static TriggerArea: [number, number][] = [[1042, 849], [1267, 837], [1607, 733], [1614, 998]]
+    static TriggerArea: [number, number][] = [[1178, 662], [2064, 662], [1958,1025], [1391,1027]]
 
 
     static AREA_ID: string = "campfire_area"

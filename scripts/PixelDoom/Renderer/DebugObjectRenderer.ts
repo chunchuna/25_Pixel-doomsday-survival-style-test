@@ -1191,7 +1191,7 @@ hf_engine.gl$_ubu_init(() => {
     }
 
     // Example of polygon rendering
-    var testPolygon = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.CYAN).setBoxThickness(2).RenderPolygonFromPoints([[1042, 849], [1267, 837], [1607, 733], [1614, 998]]);
+    //var testPolygon = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.CYAN).setBoxThickness(2).RenderPolygonFromPoints([[1042, 849], [1267, 837], [1607, 733], [1614, 998]]);
     
 });
 
