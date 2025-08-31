@@ -393,12 +393,17 @@ export class DialogueSystem {
 }
 
 .blink {
-    animation: blink 1s infinite;
+    display: inline-block; /* 允许 transform */
+    animation: bounce 0.8s infinite ease-in-out;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+@keyframes bounce {
+    0%, 100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0.5);
+    }
 }
 
 .dialogue-resizer {

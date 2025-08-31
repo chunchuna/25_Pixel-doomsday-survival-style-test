@@ -4,7 +4,14 @@ import { AmbientLight } from "../Module/PIXAmbientLight.js";
 
 hf_engine.gl$_ubu_init(()=>{
     GFLW_Fog.initinstance();
-    GFLW_Fog.OnGetNight();
+
+    var AmbientGetNight =()=>{
+        GFLW_Fog.StartFog()
+        AmbientLight.removeNightStartListener(AmbientGetNight)
+        
+    }
+
+    AmbientLight.onNightStart(AmbientGetNight)
 
 })
 
@@ -19,12 +26,4 @@ class GFLW_Fog{
         createFogAroundInstance(this.Player,15,500,2,1000)
     }
 
-    static OnGetNight(){
-        var NightCallBaclk =()=>{
-            this.StartFog()
-            AmbientLight.removeNightStartListener(NightCallBaclk)
-            
-        }
-        AmbientLight.onNightStart(NightCallBaclk)
-    }
 }

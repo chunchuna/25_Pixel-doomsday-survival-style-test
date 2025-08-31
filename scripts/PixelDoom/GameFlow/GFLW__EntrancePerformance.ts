@@ -7,15 +7,15 @@ hf_engine.gl$_ubu_init(()=>{
     GFLW__EntrancePerformance.initinstance();
     //testplayermove()
 
-    if(IsNewGame){
-        GFLW__EntrancePerformance.gp_hideplayer();
-        GFLW__EntrancePerformance.ani__busentering();
-    }
+    // if(IsNewGame){
+    //     GFLW__EntrancePerformance.gp_hideplayer();
+    //     GFLW__EntrancePerformance.ani__busentering();
+    // }
     
-    GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived",()=>{
-        GFLW__EntrancePerformance.gp_showplayer();
-        hf_engine.runtime.globalVars.NewGame=false;
-    })
+    // GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived",()=>{
+    //     GFLW__EntrancePerformance.gp_showplayer();
+    //     hf_engine.runtime.globalVars.NewGame=false;
+    // })
 })
 
 async function  testplayermove(){
