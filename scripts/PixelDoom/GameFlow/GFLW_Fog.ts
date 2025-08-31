@@ -1,5 +1,5 @@
 import { hf_engine } from "../../engine.js";
-import { createFogAroundInstance } from "../Group/Effect/Fog/PIXEffect_fog.js";
+import { createFogAroundInstance, stopFogGeneration } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { AmbientLight } from "../Module/PIXAmbientLight.js";
 
 hf_engine.gl$_ubu_init(()=>{
@@ -11,7 +11,13 @@ hf_engine.gl$_ubu_init(()=>{
         
     }
 
+    var AmbientGetDay =()=>{
+        stopFogGeneration(3)
+        AmbientLight.removeDayStartListener(AmbientGetDay)
+    }
+
     AmbientLight.onNightStart(AmbientGetNight)
+    AmbientLight.onDayStart(AmbientGetDay)
 
 })
 

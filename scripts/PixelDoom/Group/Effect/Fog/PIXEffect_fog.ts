@@ -52,6 +52,9 @@ var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();
 // Add a Set to track fog instances that are already fading out
 var FogInstancesFadingOut: Set<number> = new Set();
 
+// 存储雾生成定时器的引用
+var FogGenerationTimer: any = null;
+
 //实时获取雾和实例的距离
 
 hf_engine.gl$_ubu_update(() => {
@@ -278,6 +281,9 @@ export async function createFogAroundInstance(
             }
         }
     })
+    
+    // 保存定时器引用以便后续停止
+    FogGenerationTimer = FogTimer;
 
     if (!targetInstance || fogCount <= 0) {
         console.log("Invalid parameters for fog creation");
@@ -358,6 +364,157 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
     }
 
     console.log(`Successfully created ${missingCount} replacement fog instances`);
+}
+
+/**
+ * Stop fog generation and fade out all existing fog instances
+ * This stops the timer that creates new fog and starts fade-out for all existing fog
+ * @param fadeOutTime - Time in seconds for fog to fade out (default: 1.5)
+ * @returns true if successfully stopped, false if no timer was running
+ */
+export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
+    // Stop the fog generation timer
+    if (FogGenerationTimer) {
+        try {
+            // Stop the timer that checks and creates new fog
+            if (FogGenerationTimer.behaviors && FogGenerationTimer.behaviors.Timer) {
+                FogGenerationTimer.behaviors.Timer.stopTimer("fog_check_timer");
+            }
+            
+            // Destroy the timer object
+            FogGenerationTimer.destroy();
+            
+            // Reset the timer reference
+            FogGenerationTimer = null;
+            
+            // Set MaxFogCount to 0 to prevent any new fog creation
+            MaxFogCount = 0;
+            
+            // Get all existing fog instances
+            const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
+            console.log(`Starting fade-out for ${fogInstances.length} existing fog instances`);
+            
+            // Start fade-out for all existing fog instances
+            fogInstances.forEach(fogInstance => {
+                if (!FogInstancesFadingOut.has(fogInstance.uid)) {
+                    // Mark this fog instance as fading out
+                    FogInstancesFadingOut.add(fogInstance.uid);
+                    
+                    try {
+                        const fadeBehavior = fogInstance.behaviors.Fade;
+                        if (fadeBehavior) {
+                            // Set fade-out parameters
+                            fadeBehavior.fadeInTime = 0;      // No fade in
+                            fadeBehavior.waitTime = 0;        // No wait time
+                            fadeBehavior.fadeOutTime = fadeOutTime;   // Fade out time
+                            
+                            // Start the fade effect
+                            fadeBehavior.startFade();
+                            console.log(`Started fade-out for fog instance UID: ${fogInstance.uid}`);
+                            
+                            // Clean up debug elements immediately when fade starts
+                            cleanupFogDebugElements(fogInstance.uid);
+                            
+                            // Set up a timer to destroy the fog instance after fade completes
+                            const cleanupTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                            
+                            if (cleanupTimer && cleanupTimer.behaviors.Timer) {
+                                cleanupTimer.behaviors.Timer.startTimer(fadeOutTime + 0.2, `cleanup_${fogInstance.uid}`, "once");
+                                cleanupTimer.behaviors.Timer.addEventListener("timer", (e) => {
+                                    if (e.tag === `cleanup_${fogInstance.uid}`) {
+                                        // Remove from tracking set and destroy fog instance after fade completes
+                                        FogInstancesFadingOut.delete(fogInstance.uid);
+                                        try {
+                                            // Simply try to destroy the instance without checking isDestroyed
+                                            fogInstance.destroy();
+                                        } catch (err) {
+                                            console.log(`Error destroying fog instance ${fogInstance.uid}: ${err}`);
+                                        }
+                                        // Destroy the cleanup timer
+                                        cleanupTimer.destroy();
+                                    }
+                                });
+                            }
+                        } else {
+                            // Fallback: if no Fade behavior, destroy directly
+                            console.log(`No Fade behavior found for fog UID: ${fogInstance.uid}, destroying directly`);
+                            cleanupFogDebugElements(fogInstance.uid);
+                            fogInstance.destroy();
+                            FogInstancesFadingOut.delete(fogInstance.uid);
+                        }
+                    } catch (error) {
+                        console.log(`Failed to start fade-out for fog UID ${fogInstance.uid}: ${error}`);
+                        // Fallback: destroy directly if fade fails
+                        cleanupFogDebugElements(fogInstance.uid);
+                        fogInstance.destroy();
+                        FogInstancesFadingOut.delete(fogInstance.uid);
+                    }
+                }
+            });
+            
+            console.log("Fog generation stopped and all fog instances are fading out.");
+            return true;
+        } catch (error) {
+            console.log(`Failed to stop fog generation: ${error}`);
+            return false;
+        }
+    } else {
+        console.log("No active fog generation timer found.");
+        
+        // Even if no timer is running, try to fade out any existing fog
+        const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
+        if (fogInstances.length > 0) {
+            console.log(`No timer found but fading out ${fogInstances.length} existing fog instances`);
+            
+            // Use the same fade-out logic as above
+            fogInstances.forEach(fogInstance => {
+                if (!FogInstancesFadingOut.has(fogInstance.uid)) {
+                    FogInstancesFadingOut.add(fogInstance.uid);
+                    
+                    try {
+                        const fadeBehavior = fogInstance.behaviors.Fade;
+                        if (fadeBehavior) {
+                            fadeBehavior.fadeInTime = 0;
+                            fadeBehavior.waitTime = 0;
+                            fadeBehavior.fadeOutTime = fadeOutTime;
+                            fadeBehavior.startFade();
+                            
+                            cleanupFogDebugElements(fogInstance.uid);
+                            
+                            const cleanupTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                            if (cleanupTimer && cleanupTimer.behaviors.Timer) {
+                                cleanupTimer.behaviors.Timer.startTimer(fadeOutTime + 0.2, `cleanup_${fogInstance.uid}`, "once");
+                                cleanupTimer.behaviors.Timer.addEventListener("timer", (e) => {
+                                    if (e.tag === `cleanup_${fogInstance.uid}`) {
+                                        FogInstancesFadingOut.delete(fogInstance.uid);
+                                        try {
+                                            // Simply try to destroy the instance without checking isDestroyed
+                                            fogInstance.destroy();
+                                        } catch (err) {
+                                            console.log(`Error destroying fog instance ${fogInstance.uid}: ${err}`);
+                                        }
+                                        cleanupTimer.destroy();
+                                    }
+                                });
+                            }
+                        } else {
+                            cleanupFogDebugElements(fogInstance.uid);
+                            fogInstance.destroy();
+                            FogInstancesFadingOut.delete(fogInstance.uid);
+                        }
+                    } catch (error) {
+                        cleanupFogDebugElements(fogInstance.uid);
+                        fogInstance.destroy();
+                        FogInstancesFadingOut.delete(fogInstance.uid);
+                    }
+                }
+            });
+            
+            return true;
+        }
+        
+        return false;
+    }
 }
 
 //==============================================
@@ -649,6 +806,16 @@ hf_engine.gl$_ubu_init(() => {
             console.log("Started automatic fog distance monitoring");
         },
         "Start persistent fog monitoring with auto-refresh"
+    );
+    
+    IMGUIDebugButton.AddButtonToCategory(
+        fogCategoryId,
+        "Stop Fog Generation",
+        () => {
+            stopFogGeneration();
+            console.log("Stopped fog generation, existing fog will dissipate naturally");
+        },
+        "Stop creating new fog instances but allow existing ones to dissipate naturally"
     );
 
     IMGUIDebugButton.AddColorButtonToCategory(
