@@ -42,19 +42,19 @@ export var DEBUG = {
 var isCreatDebugPanel = false;
 
 
-// pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-//     if (!isCreatDebugPanel) {
+hf_engine.gl$_ubu_init(() => {
+    if (!isCreatDebugPanel) {
 
-//         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('m')
-//         DEBUG.DebugMainUI.DoNotUseButtonPanel();
-//         DEBUG.DebugMainUI.InitConsoleCapture()
-//         isCreatDebugPanel = true
-//         //    } else {
-//         // 场景切换时检查并重新应用样式
-//         UIDebug.checkAndReapplyStyles();
-//     }
+        DEBUG.DebugMainUI = UIDebug.InitDebugPanel('f1')
+        //DEBUG.DebugMainUI.DoNotUseButtonPanel();
+        DEBUG.DebugMainUI?.InitConsoleCapture()
+        isCreatDebugPanel = true
+        //    } else {
+        // 场景切换时检查并重新应用样式
+        UIDebug.checkAndReapplyStyles();
+    }
 
-// })
+})
 
 interface DebugPanelInstance {
     DebuPanelAddButton(name: string, callback: () => void): DebugPanelInstance;

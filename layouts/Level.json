@@ -59972,7 +59972,9 @@
 									"uid": 28,
 									"sid": 429758556308184,
 									"tags": "",
-									"instanceVariables": {},
+									"instanceVariables": {
+										"GetYPosition": 0
+									},
 									"behaviors": {},
 									"effects": {
 										"像素化": {
@@ -60017,7 +60019,9 @@
 									"uid": 27,
 									"sid": 588485419939464,
 									"tags": "",
-									"instanceVariables": {},
+									"instanceVariables": {
+										"GetYPosition": 0
+									},
 									"behaviors": {},
 									"effects": {
 										"像素化": {
