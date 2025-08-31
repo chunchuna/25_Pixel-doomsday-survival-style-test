@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 
@@ -1020,7 +1020,7 @@ Available Positions:
 }
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     var Short = IMGUIDebugButton.AddCategory("Short")
     IMGUIDebugButton.AddButtonToCategory(Short, "Open Short Debug Window", () => {
         UIShortcutDebug.ToggleDebugWindow();
@@ -1036,8 +1036,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
+hf_engine.gl$_ubu_init(() => {
+    if (hf_engine.LayoutName !== "Level") return
 
     // First group - Player Base
     var PlayerShortBase = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
@@ -1053,7 +1053,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         .AddDescribe("控制");
 
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+    hf_engine.runtime
         .addEventListener("beforeanylayoutend", () => {
             UIShortcut.ClearAllGroups();
         })

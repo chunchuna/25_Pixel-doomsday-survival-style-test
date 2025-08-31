@@ -1,8 +1,8 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
   const font_style = document.createElement('style')
   font_style.innerHTML =

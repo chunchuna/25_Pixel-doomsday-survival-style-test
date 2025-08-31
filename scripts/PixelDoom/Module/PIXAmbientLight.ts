@@ -1,13 +1,13 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { Imgui_chunchun } from "../UI/imgui_lib/imgui.js";
 
 var isAmbientLightDebugButtonsBound = false;
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
     //@ts-ignore
-    AmbientLight.light_layer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer(AmbientLight.light_layer_name);
+    AmbientLight.light_layer = hf_engine.runtime.layout.getLayer(AmbientLight.light_layer_name);
     if (AmbientLight.light_layer == null) return
 
     // Test day-night cycle: start from current color
@@ -25,7 +25,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
     AmbientLight.updateColorTransition()
     AmbientLight.updateInfoWindow()
 })
@@ -113,7 +113,7 @@ export class AmbientLight {
     }
 
     static Simulat_edsunshine_cycle(Time: number, target_rgb: [number, number, number]) {
-        if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != this.Layout_allow_name) return
+        if (hf_engine.runtime.layout.name != this.Layout_allow_name) return
         if (!this.light_layer) return
         console.log("Starting color transition")
 

@@ -1,26 +1,26 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { CDType, UICDTimer } from "../../UI/time_cd_ui/UICd.js";
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (hf_engine.runtime.layout.name != "Level") return
 
     // Clean up any existing timers from previous scene loads
     console.log("Cleaning up existing timers before creating new ones");
     //UICDTimer.DestroyAllTimersAndVariables();
 
-    for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.GouHuo.instances()) {
+    for (var Gouhuos of hf_engine.runtime.objects.GouHuo.instances()) {
         GouHuo.BurnGouHuo(Gouhuos)
     }
 
 })
 
 // WHEN CREATED
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(() => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(() => {
+    hf_engine.runtime
         .objects.GouHuo.addEventListener("instancecreate", (e) => {
             GouHuo.GouHuoInitSetting(e.instance)
             GouHuo.ExtinguishedGouHuo(e.instance)
@@ -31,18 +31,18 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTR
 })
 
 // WHEN INIT
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.GouHuo.instances()
+hf_engine.gl$_ubu_init(() => {
+    for (var Gouhuos of hf_engine.
+        runtime.objects.GouHuo.instances()
     ) {
         GouHuo.GouHuoInitSetting(Gouhuos)
     }
 
     // WHEN LOAD
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.
+    hf_engine.runtime.
         addEventListener("load", () => {
-            for (var Gouhuos of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-                RUN_TIME_.objects.GouHuo.instances()
+            for (var Gouhuos of hf_engine.
+                runtime.objects.GouHuo.instances()
             ) {
                 GouHuo.GouHuoInitSetting(Gouhuos)
             }
@@ -52,8 +52,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+hf_engine.gl$_ubu_init(() => {
+    hf_engine.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
         var ButtonConetent_id: string = e.data.ButtonContent_;
         if (ButtonConetent_id == "burn") {
             //@ts-ignore
@@ -72,15 +72,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 })
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     var GouHuo = IMGUIDebugButton.AddCategory("GouHuo")
     IMGUIDebugButton.AddButtonToCategory(GouHuo, "Creat Gou Huo Near Player", () => {
-        var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-            RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance()
+        var playerInstance = hf_engine.
+            runtime.objects.RedHairGirlSprite.getFirstInstance()
         if (!playerInstance) return
 
-        var GouhuoNewCreated = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-            RUN_TIME_.objects.HuoYanm.createInstance("Object", playerInstance.x, playerInstance.y, true, "GouHuo")
+        var GouhuoNewCreated = hf_engine.
+            runtime.objects.HuoYanm.createInstance("Object", playerInstance.x, playerInstance.y, true, "GouHuo")
 
     })
 })
@@ -88,11 +88,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
 
 
-    var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
     if (!PlayerInstance) return
 
 
@@ -186,7 +186,7 @@ export class GouHuo {
         GouHuo.instVars.ZhengZaiRanShao = true;
 
         // Get layout and light layer first
-        const layout = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.getLayout("Level");
+        const layout = hf_engine.runtime.getLayout("Level");
         const lightLayer = layout.getLayer("LightAddtive");
         if (!lightLayer) return;
 

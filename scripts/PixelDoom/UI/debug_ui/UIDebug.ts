@@ -29,7 +29,7 @@
  * // 字体文件格式支持：.ttf, .otf, .woff, .woff2
  */
 
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
 import { UIConsole } from "./UIConsole.js";

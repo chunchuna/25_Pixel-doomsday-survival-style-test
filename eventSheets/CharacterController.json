@@ -16,6 +16,12 @@
 							"objectClass": "CharacterController",
 							"sid": 812290177951239,
 							"behaviorType": "MoveFunction"
+						},
+						{
+							"id": "is-moving",
+							"objectClass": "RedHairGirlSprite",
+							"sid": 587824850862537,
+							"behaviorType": "MoveTo"
 						}
 					],
 					"actions": [],
@@ -47,7 +53,8 @@
 							],
 							"sid": 541398674774390
 						}
-					]
+					],
+					"isOrBlock": true
 				},
 				{
 					"eventType": "block",
@@ -57,6 +64,13 @@
 							"objectClass": "CharacterController",
 							"sid": 212171776841982,
 							"behaviorType": "MoveFunction",
+							"isInverted": true
+						},
+						{
+							"id": "is-moving",
+							"objectClass": "RedHairGirlSprite",
+							"sid": 744378737737822,
+							"behaviorType": "MoveTo",
 							"isInverted": true
 						}
 					],
@@ -87,7 +101,8 @@
 							],
 							"sid": 730764024935847
 						}
-					]
+					],
+					"isOrBlock": true
 				}
 			],
 			"sid": 529792715363952

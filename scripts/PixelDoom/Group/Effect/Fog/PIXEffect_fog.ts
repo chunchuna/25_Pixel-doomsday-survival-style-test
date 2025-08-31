@@ -1,17 +1,17 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../../engine.js";
+import { hf_engine } from "../../../../engine.js";
 import { DebugObjectRenderer, DebugColors } from "../../../Renderer/DebugObjectRenderer.js";
 import { Imgui_chunchun } from "../../../UI/imgui_lib/imgui.js";
 import { IMGUIDebugButton } from "../../../UI/debug_ui/UIDbugButton.js";
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+    if (hf_engine.
         LayoutName !== "Level"
     ) return
-    var fogSprite = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.FogSprite.createInstance("Fog", 0, 0, false)
-    createFogAroundInstance(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.
+    var fogSprite = hf_engine.
+        runtime.objects.FogSprite.createInstance("Fog", 0, 0, false)
+    createFogAroundInstance(hf_engine.
+        runtime.objects.
         RedHairGirlSprite.getFirstInstance(), 50, 1000, 3, 1000)
 
 
@@ -54,19 +54,19 @@ var FogInstancesFadingOut: Set<number> = new Set();
 
 //实时获取雾和实例的距离
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
+    if (hf_engine.LayoutName !== "Level") return
     if (TargetInstance == null) return;
 
     // Get all fog instances
-    const fogInstances = Array.from(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.FogSprite.instances());
+    const fogInstances = Array.from(hf_engine.
+        runtime.objects.FogSprite.instances());
 
     for (var FogSprites of fogInstances) {
         if (FogSprites == null) continue;
 
-        FogSprites.instVars.DistanceFromInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
+        FogSprites.instVars.DistanceFromInstance = hf_engine.
             //@ts-ignore
             CalculateDistancehahaShitCode(TargetInstance.x,
                 //@ts-ignore
@@ -95,8 +95,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
                         cleanupFogDebugElements(FogSprites.uid);
 
                         // Set up a timer to clean up the tracking set after fade completes
-                        const cleanupTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-                            RUN_TIME_.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                        const cleanupTimer = hf_engine.
+                            runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
 
                         if (cleanupTimer && cleanupTimer.behaviors.Timer) {
                             cleanupTimer.behaviors.Timer.startTimer(1.2, `cleanup_${FogSprites.uid}`, "once");
@@ -173,8 +173,8 @@ function cleanupFogDebugElements(fogUID: number): void {
  */
 function createFogInstanceWithDebug(targetInstance: any, fogX: number, fogY: number, isReplacement: boolean = false): any {
     // Create fog instance at calculated position
-    const fogInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
+    const fogInstance = hf_engine.
+        runtime.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
 
     // Only add debug visualization if DebugRender is enabled
     if (DebugRender) {
@@ -248,8 +248,8 @@ export async function createFogAroundInstance(
     maxDistance: number = 500
 ): Promise<void> {
 
-    await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName !== "Level") return
+    await hf_engine.WAIT_TIME_FORM_PROMISE(1)
+    if (hf_engine.LayoutName !== "Level") return
 
     // Set global variables for your distance calculation system
     TargetInstance = targetInstance;
@@ -257,13 +257,13 @@ export async function createFogAroundInstance(
     MaxFogCount = fogCount; // 记录最大雾数量
     FogRadius = radius; // 记录雾半径
 
-    var FogTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100)
+    var FogTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100)
     FogTimer.behaviors.Timer.startTimer(checkInterval, "fog_check_timer", "regular")
     FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
         if (e.tag === "fog_check_timer") {
             // 检查当前雾实例数量
-            const currentFogInstances = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-                RUN_TIME_.objects.FogSprite.getAllInstances();
+            const currentFogInstances = hf_engine.
+                runtime.objects.FogSprite.getAllInstances();
             const currentFogCount = currentFogInstances.length;
 
             console.log(`Current fog count: ${currentFogCount}, Max fog count: ${MaxFogCount}`);
@@ -317,8 +317,8 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
     const centerY = targetInstance.y;
 
     // Get current fog instances to avoid overlapping positions
-    const currentFogInstances = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-        RUN_TIME_.objects.FogSprite.getAllInstances();
+    const currentFogInstances = hf_engine.
+        runtime.objects.FogSprite.getAllInstances();
 
     for (let i = 0; i < missingCount; i++) {
         // Find a suitable position that doesn't overlap with existing fog
@@ -371,7 +371,7 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
 export function showFogDistanceDebugWindow(): void {
     console.log("Opening Fog Distance ImGui Window...");
 
-    const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+    const runtime = hf_engine.runtime;
     if (!runtime) {
         console.log("Runtime not available for debug window");
         return;
@@ -593,7 +593,7 @@ export function showFogDistanceDebugWindow(): void {
 export function startFogDistanceMonitoring(): void {
     console.log("Starting persistent fog distance ImGui monitoring...");
 
-    const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+    const runtime = hf_engine.runtime;
     if (!runtime) {
         console.log("Runtime not available for monitoring");
         return;
@@ -625,7 +625,7 @@ export function startFogDistanceMonitoring(): void {
 }
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
     // Start the ImGui fog distance monit
 
@@ -656,7 +656,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         "Clear All Fog",
         [1.0, 0.3, 0.3, 1.0], // Red color for destructive action
         () => {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime) {
                 const fogInstances = runtime.objects.FogSprite.getAllInstances();
                 fogInstances.forEach(fog => {
@@ -674,7 +674,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         fogCategoryId,
         "Create Test Fog",
         () => {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime) {
                 const targetInstance = runtime.objects.RedHairGirlSprite.getFirstInstance();
                 if (targetInstance) {

@@ -1,11 +1,11 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 
 
 
 var isBindButtonIntoDebugPanel =false
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
 
     if (isBindButtonIntoDebugPanel) return
@@ -16,7 +16,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
    
     // 添加新的测试按钮，用于验证气泡大小调整效果
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Extreme Long Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         const extremeLongText = "这是一个超长的中文文本测试，用于验证气泡大小调整效果。我们需要确保即使是非常长的文本也能够完整显示，不会有任何字符被截断或隐藏。这段文本故意设计得非常长，以测试气泡框是否能够正确地扩展以容纳所有内容。在游戏中，有时候会需要显示大量的文本信息，比如角色对话、任务描述或者故事背景介绍等。如果气泡无法正确地调整大小，就会导致文本显示不完整，影响玩家体验。通过这个测试，我们希望确认气泡框能够根据文本内容的长度自动调整大小，确保所有文本都能够完整地显示出来。";
@@ -28,7 +28,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     // 添加测试短文本气泡的按钮
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Very Short Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一条非常短的文本", 5, BubbleType.SPEECH)
@@ -46,7 +46,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         });
         
         // 显示一条消息确认配置已更改
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
         
         UIBubble.ShowBubble("气泡大小配置已更新！", 3, BubbleType.INFO)
@@ -64,7 +64,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         });
         
         // 显示一条消息确认配置已重置
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
         
         UIBubble.ShowBubble("气泡大小配置已重置为默认值！", 3, BubbleType.INFO)
@@ -73,7 +73,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Multiline English", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         const longEnglishText = "This is a test for multiline English text display in the bubble UI. We need to ensure that long English text is properly wrapped and displayed completely within the bubble. The bubble should automatically adjust its size to accommodate all the text content without any truncation or overflow issues. This is important for game dialogues, instructions, and other text-heavy content that needs to be displayed to the player.";
@@ -83,7 +83,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Mixed Content", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         const mixedText = "This is a test for mixed content (English and Chinese) 这是中英文混合内容的测试 to ensure that bubbles can properly display text with different character sets. 确保气泡可以正确显示不同字符集的文本。 The bubble should adjust its size accordingly. 气泡应该相应地调整其大小。";
@@ -94,7 +94,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Short Chinese Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一条简短的中文测试信息。", 5, BubbleType.SPEECH)
@@ -103,7 +103,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Medium Chinese Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一条中等长度的中文测试信息。我们需要确保所有文本都能正确显示，不会被截断。中文字符应该完整可见。", 5, BubbleType.SPEECH)
@@ -112,7 +112,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Long Chinese Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一条非常长的中文测试信息。我们需要确保所有文本都能正确显示，不会被截断。中文字符应该完整可见。这条信息特别长，用于测试气泡在处理大量中文文本时的表现。我们希望即使是这么长的文本，也能够完整地显示出来，不会有任何字符被截断或隐藏。这对于游戏中的对话和提示信息非常重要。", 8, BubbleType.SPEECH)
@@ -121,7 +121,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Chinese Typewriter Effect", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一条带有打字机效果的中文测试信息。我们需要确保文本在逐字显示的过程中不会出现布局问题。所有字符应该在适当的位置显示，不会有任何跳跃或错位。", 8, BubbleType.SPEECH)
@@ -131,7 +131,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show simple bubble", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 3, BubbleType.SPEECH)
@@ -139,7 +139,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show typewriter bubble", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这里是一条中文测试信息。现在在测试信息的长度。这个信息足够的长。好的非常的长。现在正在测试气泡大小的自动适配。好的就是这样", 5, BubbleType.SPEECH)
@@ -148,7 +148,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show thought bubble", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("I'm thinking about something...", 4, BubbleType.SYSTEM)
@@ -157,7 +157,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show long typewriter text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         const longText = "This is a very long message that will appear with typewriter effect and the bubble will grow as the text appears!";
@@ -168,7 +168,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Show warning bubble", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("Warning: Danger ahead!", 2, BubbleType.WARNING)
@@ -182,7 +182,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
     
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Narrow Bubble - Chinese", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一个测试窄气泡的中文文本，用于验证在不同分辨率下气泡大小是否保持固定。", 6, BubbleType.SPEECH)
@@ -191,7 +191,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Narrow Bubble - English", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("This is a test for narrow bubble with English text to verify if the bubble size remains fixed across different resolutions.", 6, BubbleType.SPEECH)
@@ -199,7 +199,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test Long Text", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("这是一个非常长的中文文本，用于测试在窄气泡下文本是否能够正确换行并完整显示。我们希望无论窗口大小如何变化，气泡的大小和文本的显示效果都保持一致。这样可以确保在不同分辨率下用户体验的一致性。", 10, BubbleType.SPEECH)
@@ -208,7 +208,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test fixed typewriter", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("This should start small and grow as text appears!", 6, BubbleType.SPEECH)
@@ -217,7 +217,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test visibility fix", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("Visibility test - can you see me?", 4, BubbleType.SPEECH)
@@ -230,7 +230,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(bubble_system, "Test smooth typewriter", () => {
-        var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UIBubble.ShowBubble("This text should appear smoothly without flickering or transparency issues!", 7, BubbleType.SPEECH)
@@ -431,7 +431,7 @@ export class UIBubble {
 
         // Start typewriter effect after entrance animation using C3Timer
         try {
-            const delayTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const delayTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             const delayTag = `typewriter_delay_${this.id}_${Date.now()}`;
 
             delayTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -578,7 +578,7 @@ export class UIBubble {
         try {
             // Use player position as default if no position set
             if (this._x === 0 && this._y === 0) {
-                const PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+                const PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
                 if (PlayerInstance) {
                     this._x = PlayerInstance.x;
                     this._y = PlayerInstance.y - 100; // Above player by default
@@ -586,7 +586,7 @@ export class UIBubble {
             }
 
             // Create HTML element using HTML_c3 object
-            this.htmlElement = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.HTML_c3.createInstance(
+            this.htmlElement = hf_engine.runtime.objects.HTML_c3.createInstance(
                 this.layer,
                 this._x,
                 this._y
@@ -1229,7 +1229,7 @@ export class UIBubble {
 
         try {
             // Create C3 Timer for typewriter effect
-            this.typewriterTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.typewriterTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
 
             this.typewriterTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.typewriterTimerTag) {
@@ -1354,7 +1354,7 @@ export class UIBubble {
 
         // Destroy after animation completes using C3Timer
         try {
-            const exitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const exitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             const exitTag = `exit_${this.id}_${Date.now()}`;
 
             exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -1472,7 +1472,7 @@ export class UIBubble {
 
         try {
             // Create C3 Timer for auto-destroy
-            this.destroyTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.destroyTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
 
             this.destroyTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.destroyTimerTag) {

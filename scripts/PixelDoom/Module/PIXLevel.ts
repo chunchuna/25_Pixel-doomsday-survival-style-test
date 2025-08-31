@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
@@ -17,14 +17,14 @@ import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 var CameraZoomValue: number = 0.5;
 var CameraZoomTarget = 0.5;
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (hf_engine.runtime.layout.name != "Level") return
 
     // 初始化时设置初始值
     CameraZoomValue = 0.8;
     CameraZoomTarget = 0.35; // 确保两个值初始一致
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.scale = CameraZoomValue;
+    hf_engine.runtime.layout.scale = CameraZoomValue;
 
     // 添加键盘事件监听，用于调整缩放
     document.addEventListener('keydown', (e) => {
@@ -35,26 +35,26 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
         }
     });
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.scale = 1;
+    hf_engine.runtime.layout.scale = 1;
 
 
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
     //  平滑镜头缩放
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (hf_engine.runtime.layout.name != "Level") return
     // 使用更合适的插值系数(0.05)来实现平滑过渡
-    CameraZoomValue = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.Justlerp(CameraZoomValue, CameraZoomTarget, 0.05);
+    CameraZoomValue = hf_engine.Justlerp(CameraZoomValue, CameraZoomTarget, 0.05);
     //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.scale = CameraZoomValue;
+    hf_engine.runtime.layout.scale = CameraZoomValue;
 
 })
 
 // debug 相关
 var isBindButtonIntoDebugPanel = false;
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
@@ -64,7 +64,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
     if (level_cat) {
 
         IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
-            if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "MainMenu") return
+            if (hf_engine.runtime.layout.name == "MainMenu") return
             GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
         })
 
@@ -78,7 +78,7 @@ export class GAMEPLAY_LEVEL {
         //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
         // })
         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
+            hf_engine.runtime.goToLayout(LevelName)
         })
 
 
@@ -86,16 +86,18 @@ export class GAMEPLAY_LEVEL {
 }
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
+hf_engine.gl$_layout_end(() => {
 
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
+    if (hf_engine.gl$_getlayoutname() !== "Level") return
     // Close environment sound effects
     //_Audio.AudioStop("NiaoJiao")
 
     // Rain needs to close rain particles and rain sound music
     if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
         _Audio.AudioStopAll()
+        
+
        
     }
 
@@ -112,7 +114,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
         PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); // Unbind main inventory
     }
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(0.1)
+    hf_engine.WAIT_TIME_FORM_PROMISE(0.1)
 
     // Close interaction panel 
     UIInteractionPanelActionChooseMain.CloseChoosePanle();

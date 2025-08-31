@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 
@@ -46,7 +46,7 @@ interface ButtonData {
 }
 
 /** Initialization */
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
   initInteractionUI();
   //UIInteractionPanelActionChooseMain.ShowChoosePanle()
   // AddChooseButtonIntoPanel("a", 1)
@@ -140,7 +140,7 @@ function ensureClickHandling() {
         console.log('Global delegation captured click:', buttonName, 'ID:', buttonId);
         
         // Trigger event with button ID
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
+        hf_engine.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
         UIInteractionPanelActionChooseMain.CloseChoosePanle();
         
       }

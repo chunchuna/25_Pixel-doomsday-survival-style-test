@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { UIConsole } from "../../UI/debug_ui/UIConsole.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
@@ -16,7 +16,7 @@ export class dEBUG_MOD {
             VariableMonitoring.Toggle();
 
             IMGUIDebugButton.Toggle();
-            await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
+            await hf_engine.WAIT_TIME_FORM_PROMISE(1)
 
             UIConsole.Toggle();
 
@@ -29,7 +29,7 @@ export class dEBUG_MOD {
     }
 }
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     dEBUG_MOD.asynload();
 
 

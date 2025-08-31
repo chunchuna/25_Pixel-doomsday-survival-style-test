@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 import { UIWindowLib } from "../UI/window_lib_ui/UIWindowLib.js";
 
 export enum GAME_TYPE {
@@ -48,7 +48,7 @@ export function showImageWindow(
     return { windowElement, contentElement, close };
 }
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     //showImageWindow("Resource/Tree.png")
 
 })

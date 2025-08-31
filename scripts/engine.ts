@@ -9,12 +9,12 @@ enum GAME_STATES {
 
 }
 
-export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
+export class hf_engine {
 
 
     //The instance of the current runtime environment used to access the runtime API of the Construct 3 engine.
     //This variable will be initialized at engine startup through the ` CONSTRUCT3-INGINEENTERYPOINT `.
-    public static RUN_TIME_: IRuntime;
+    public static runtime: IRuntime;
 
     public static OBJECT: IConstructProjectObjects | any
 
@@ -39,7 +39,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): any { // Return C3Timer instance
         try {
             // Create C3 Timer instance for interval timing
-            const timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             const timerTag = `interval_${Date.now()}_${Math.random()}`;
 
             // Set up timer event listener
@@ -87,18 +87,18 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     }
 
     public static gl$_getlayoutname() {
-        return pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name;
+        return hf_engine.runtime.layout.name;
     }
 
     public static gl$_ubu_init = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.INIT, Function);
 
         });
     }
 
     public static gl$_ubu_init_before = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.INIT_BEFORE, Function);
 
         });
@@ -107,22 +107,22 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
     public static gl$_ubu_update = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.TICK, Function);
         });
     };
 
 
     public static gl$_layout_end = (Function: () => void) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.LAYOUT_END, Function)
         })
     }
 
     public static async gl$_call_eventhandle_(EventName: string, func: any,) {
         // @ts-ignore
-        await (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async (e) => {
-            if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) return;
+        await (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async (e) => {
+            if (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) return;
             func(e);
         });
     }
@@ -133,7 +133,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
         var event = new C3.Event(EventName, false,)
         event.data = parameter;
         //console.log(event)
-        var handler = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
+        var handler = hf_engine.runtime.objects.EventHandler.getFirstInstance();
         // @ts-ignore
         handler.dispatchEvent(event)
     }
@@ -142,13 +142,13 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
     public static UBU_CLIENT_DRAW_FRAME = {
 
         gl$_ubu_init: (Fcuntion: () => void) => {
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
                 runtime.addEventListener(GAME_STATES.INIT, Fcuntion);
             });
         },
 
         gl$_ubu_update: (Function: () => void) => {
-            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
                 runtime.addEventListener(GAME_STATES.TICK, Function);
             });
         },
@@ -176,7 +176,7 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
     public static TryGetHandlerAgainFuckThisHandler() {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
+        hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
     }
 }
 
@@ -198,8 +198,8 @@ export class pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.LayoutName = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name;
+hf_engine.gl$_ubu_init(() => {
+    hf_engine.LayoutName = hf_engine.runtime.layout.name;
 
 
 })
@@ -207,20 +207,20 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 // Engine here
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_ = runtime;
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.OBJECT = runtime.objects;
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.TryGetHandlerAgainFuckThisHandler();
+hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    hf_engine.runtime = runtime;
+    hf_engine.OBJECT = runtime.objects;
+    hf_engine.TryGetHandlerAgainFuckThisHandler();
 
 
 });
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     //@ts-ignore
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
-    console.log("[engine] handler" + pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE)
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.EventHandler.getFirstInstance();
+    hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
+    console.log("[engine] handler" + hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE)
+    if (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) {
+        hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
         console.log("[engine] try agagin get handler")
     }
 });

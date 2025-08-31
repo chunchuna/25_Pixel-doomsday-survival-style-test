@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { data, LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
 import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayoutTransition.js";
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
@@ -338,7 +338,7 @@ export class UIMainSaveWindow {
                 LayoutTransition.LeaveLayout(TransitionType.HOLE,2).onFinish(()=>{
                     SaveSetting.isUseDataEnterNewGame = true;
 
-                    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                    hf_engine.runtime.goToLayout("Level")
 
 
                 })
@@ -392,7 +392,7 @@ export class UIMainSaveWindow {
 }
 
 // Called when engine initializes
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     // Can add window startup logic here
     // For example: UIMainSaveWindow.getInstance().show();
     //UIMainSaveWindow.getInstance().Data = data;

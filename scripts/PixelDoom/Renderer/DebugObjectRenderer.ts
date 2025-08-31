@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 
 // Debug box render configuration interface
 interface DebugBoxConfig {
@@ -286,7 +286,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -339,7 +339,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -352,7 +352,7 @@ export class DebugObjectRenderer {
 
         // If no custom layer specified, try to get a default layer
         if (!customLayer) {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime && runtime.layout) {
                 const gameContentLayer = runtime.layout.getLayer("GameContent");
                 const layer0 = runtime.layout.getLayer(0);
@@ -402,7 +402,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified, otherwise use fromInstance's layer
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -684,7 +684,7 @@ export class DebugObjectRenderer {
     public static testRender(): void {
         console.log("[DebugObjectRenderer] Starting test render...");
 
-        const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+        const runtime = hf_engine.runtime;
         if (!runtime) {
             console.error("[DebugObjectRenderer] Runtime not available for test");
             return;
@@ -725,7 +725,7 @@ export class DebugObjectRenderer {
         }
 
         try {
-            const runtime = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_;
+            const runtime = hf_engine.runtime;
             if (!runtime) {
                 console.warn("[DebugObjectRenderer] Runtime not available for event binding");
                 return;
@@ -900,32 +900,32 @@ export class DebugObjectRenderer {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_layout_end(() => {
+hf_engine.gl$_layout_end(() => {
 
     DebugObjectRenderer.clearAll();
 
 })
 
 // Auto-initialize when module is loaded
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     
     DebugObjectRenderer.initialize();
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_getlayoutname() !== "Level") return
+    if (hf_engine.gl$_getlayoutname() !== "Level") return
 
-    var playerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+    var playerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
     }
 
-    var ClickObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity;
+    var ClickObject = hf_engine.runtime.objects.ClickObjectEntity;
     ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
     if (playerInstance) {
         var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
     }
 
-    var NPCObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.NPC;
-    var ShouJiNvRenInstance =pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ShouJiNvRen.getFirstInstance();
+    var NPCObject = hf_engine.runtime.objects.NPC;
+    var ShouJiNvRenInstance =hf_engine.runtime.objects.ShouJiNvRen.getFirstInstance();
     if (playerInstance) {
         var NPCBox = DebugObjectRenderer.setOffset(0,-50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
         var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)

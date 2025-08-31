@@ -1,8 +1,8 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 
 
 var DialogueMainController:DialogueSystem;
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+hf_engine.gl$_ubu_init(()=>{
     // 任何初始化的时候 都注册一下
     // if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     (window as any).DialogueMainController = new DialogueSystem();

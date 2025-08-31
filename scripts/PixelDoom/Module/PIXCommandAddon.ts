@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 
 
 export class GL_COMMAND_ {
@@ -10,13 +10,13 @@ export class GL_COMMAND_ {
 
     static ACTION_OPEN_() {
         //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Open();
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleOpen")
+        hf_engine.runtime.callFunction("ConsoleOpen")
         GL_COMMAND_.COMMAND_OPEN = true;
     }
 
     static ACTION_CLOSE_() {
         // GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Close();
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleClose")
+        hf_engine.runtime.callFunction("ConsoleClose")
         GL_COMMAND_.COMMAND_OPEN = false;
     }
 
@@ -42,18 +42,18 @@ export class GL_COMMAND_ {
             `[color=#FFD700][${hours}:${minutes}:${seconds}][/color] » ${cont}`;
         // 金色时间标签 + 三角箭头分隔符
 
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_
+        hf_engine.runtime
             .callFunction("ConsolePrint", content_add_timetag);
     }
 
     static _REGISTER_COMMAND_(command: string, par: string, des: string, help: string) {
         //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._lastAction._acts.RegisterCommand()
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleBindEvent", command, par, des, help)
+        hf_engine.runtime.callFunction("ConsoleBindEvent", command, par, des, help)
     }
 
     public static _CLEAR_ALL_CONTENT_FROM_COMMAND() {
         //GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE._acts.Clear();
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("ConsoleClear");
+        hf_engine.runtime.callFunction("ConsoleClear");
     }
 
     public static _TRY_ACTION_UPDATE(ActionName: string, Fcuntion: () => void) {
@@ -86,22 +86,22 @@ export class GL_COMMAND_ {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     console.log(" [GL_COMMAND] console init")
     //GL_COMMAND_.ACTION_OPEN_();
 
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.InGameConsole.getFirstInstance();
+hf_engine.gl$_ubu_init(() => {
+    GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE = hf_engine.runtime.objects.InGameConsole.getFirstInstance();
     // GL_COMMAND_.ACTION_OPEN_()
     // GL_COMMAND_._draw("Draw")
     //console.log(GL_COMMAND_.IN_GAME_CONSOLE_INSTANCE)
 
 })
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.UBU_CLIENT_DRAW_FRAME.gl$_ubu_update(() => {
+hf_engine.UBU_CLIENT_DRAW_FRAME.gl$_ubu_update(() => {
 
     // GL_COMMAND_._TRY_ACTION_UPDATE("m_setting", () => {
     //     alert("try action")

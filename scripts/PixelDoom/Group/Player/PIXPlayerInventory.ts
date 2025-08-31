@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { DeserializeItemsOnly, inventoryManager, ItemLevel, SerializeItemsOnly, type Item } from "../../UI/inventory_ui/UIInventory.js";
 import { Apple, MainInventory } from "../Inventory/PIXItems.js";
 export var PLAYER_INVENTORY_ITEMS: Item[];
@@ -10,11 +10,11 @@ export var PLAYER_MAIN_INVENTORY_LEVEL = {
 }
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     
     // 玩家的初始库存  写在这里
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.
-    RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly([
+    hf_engine.
+    runtime.globalVars.PlayerInventory = SerializeItemsOnly([
         ...new Apple().toItems(300),
     ]);
     
@@ -23,15 +23,15 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (hf_engine.runtime.layout.name != "Level") return
 
     // Get initial inventory data
-    const initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
+    const initialItems = DeserializeItemsOnly(hf_engine.runtime.globalVars.PlayerInventory);
     // Create update function to update global variables after inventory operations
     const updatePlayerInventory = (items: Item[]) => {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory = SerializeItemsOnly(items);
+        hf_engine.runtime.globalVars.PlayerInventory = SerializeItemsOnly(items);
     };
     
     // Bind main inventory and get the returned control object
@@ -57,11 +57,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 // Handle data saving 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     //@ts-ignore
     var initialItems
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load", (e:any) => {
-        initialItems = DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory);
+    hf_engine.runtime.addEventListener("load", (e:any) => {
+        initialItems = DeserializeItemsOnly(hf_engine.runtime.globalVars.PlayerInventory);
         // Re-bind inventory UI to ensure UI is synchronized with data
         if (inventoryManager) {
             // Give a short delay to ensure UI system is ready
@@ -69,7 +69,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
                 // Reset and re-bind inventory
                 //@ts-ignore
                 const control = inventoryManager.BindPlayerMainInventory(
-                    DeserializeItemsOnly(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.PlayerInventory), 
+                    DeserializeItemsOnly(hf_engine.runtime.globalVars.PlayerInventory), 
                     30, 
                     6, 
                     "Tab"

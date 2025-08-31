@@ -1,9 +1,9 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { BubbleType, UIBubble } from "./UIBubble.js";
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+hf_engine.gl$_ubu_init(()=>{
  
-    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.GameType!="Level") return
+    if(hf_engine.runtime.globalVars.GameType!="Level") return
     
     // 初始化高级气泡系统
     //alert("UIAdvanceBubble init")
@@ -16,11 +16,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
 
 function Dialogue_DouMaoNanRen_ShouJiNvRen() {
     
-    var DouMaoNanRenInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
-    .RUN_TIME_.objects.DouMaoNanRen.getFirstInstance();
+    var DouMaoNanRenInstance = hf_engine
+    .runtime.objects.DouMaoNanRen.getFirstInstance();
 
-    var ShouJiNvRenInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit
-    .RUN_TIME_.objects.ShouJiNvRen.getFirstInstance();
+    var ShouJiNvRenInstance = hf_engine
+    .runtime.objects.ShouJiNvRen.getFirstInstance();
     if(!DouMaoNanRenInstance || !ShouJiNvRenInstance) return
     var NPCShouJiNvRen = AdvanceBubble.SetNPC("ShouJiNvRen", ShouJiNvRenInstance.x-100, ShouJiNvRenInstance.y);
     var NPCDouMaoNanRen = AdvanceBubble.SetNPC("DouMaoNanRen", DouMaoNanRenInstance.x-100, DouMaoNanRenInstance.y);
@@ -491,7 +491,7 @@ export class AdvanceBubble {
             this.autoPlayTimerTag = timerTag;
             
             // 创建计时器实例
-            this.autoPlayTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.autoPlayTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             
             if (!this.autoPlayTimer) {
                 console.error("Failed to create timer instance");
@@ -607,7 +607,7 @@ export class AdvanceBubble {
                 
                 // 创建等待计时器
                 const waitTimerTag = `wait_typewriter_${dialogue.id}_${Date.now()}`;
-                const waitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const waitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                 
                 waitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                     if (e.tag === waitTimerTag) {
@@ -839,7 +839,7 @@ export class AdvanceBubble {
             if (lastContent.bubbleInstance) {
                 try {
                     // 创建一个计时器，在淡出动画完成后销毁气泡
-                    const exitTimer = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+                    const exitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                     const exitTag = `exit_dialogue_${dialogue.id}_${Date.now()}`;
                     
                     exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {

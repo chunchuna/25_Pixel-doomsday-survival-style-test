@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
@@ -12,12 +12,12 @@ import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayo
 
 
 var IsInitGameMainMenu = false
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
+    if (hf_engine.runtime.layout.name != "MainMenu") return
     // 强行修改图层是否透明
     //@ts-ignore
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.getLayer("background").isTransparent = true
+    hf_engine.runtime.layout.getLayer("background").isTransparent = true
 
     initGameMainScene();
 
@@ -149,7 +149,7 @@ class UIMainMenu {
                         //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
                         // })
                         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
-                            pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
+                            hf_engine.runtime.goToLayout("Level")
                         })
                     })
                 });

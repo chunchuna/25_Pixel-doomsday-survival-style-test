@@ -327,7 +327,19 @@
 									"instanceVariables": {
 										"GetYPosition": 0
 									},
-									"behaviors": {},
+									"behaviors": {
+										"moveto": {
+											"properties": {
+												"max-speed": 200,
+												"acceleration": 600,
+												"deceleration": 600,
+												"rotate-speed": 0,
+												"set-angle": true,
+												"stop-on-solids": false,
+												"enabled": true
+											}
+										}
+									},
 									"instanceFolderItem": {
 										"sid": 452727044732776,
 										"expanded": true
@@ -335,8 +347,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 640,
-										"y": 2318,
+										"x": 741.6666501235352,
+										"y": 2344,
 										"width": 1070.187823002234,
 										"height": 356.72927433407796,
 										"originX": 0.5064102564102564,
@@ -434,7 +446,7 @@
 									"world": {
 										"x": 1496,
 										"y": 793,
-										"width": 316.6974423472378,
+										"width": 316.6974423472379,
 										"height": 215.19185185132824,
 										"originX": 0.47435897435897434,
 										"originY": 0.9245283018867925,
@@ -59863,6 +59875,17 @@
 												"enabled": false,
 												"live-preview": false
 											}
+										},
+										"MoveTo": {
+											"properties": {
+												"max-speed": 200,
+												"acceleration": 600,
+												"deceleration": 600,
+												"rotate-speed": 0,
+												"set-angle": false,
+												"stop-on-solids": false,
+												"enabled": true
+											}
 										}
 									},
 									"effects": {
@@ -59968,7 +59991,7 @@
 									"world": {
 										"x": 1463.0322490528774,
 										"y": 1039.7768961393049,
-										"width": 124.43991699541488,
+										"width": 124.43991699541489,
 										"height": 185.18546889365058,
 										"originX": 0.5734597156398105,
 										"originY": 0.7834394904458599,

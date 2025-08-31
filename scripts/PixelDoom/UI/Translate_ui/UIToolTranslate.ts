@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     console.log("开始初始化翻译工具");
-    if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="MainMenu") return
+    if(hf_engine.runtime.layout.name!="MainMenu") return
     createTranslateUI();
     ShowArrowPointLanague();
     

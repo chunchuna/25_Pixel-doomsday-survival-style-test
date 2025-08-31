@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { ImGuiFontManager } from "./FontManager.js";
 
 // Declare global ImGui objects
@@ -620,7 +620,7 @@ export class Imgui_chunchun {
 }
 
 // Initialize hook
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () => {
+hf_engine.gl$_ubu_init(async () => {
     try {
         await Imgui_chunchun.Initialize();
         //Imgui_chunchun.CreateExampleWindow();
@@ -631,6 +631,6 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(async () 
 });
 
 // Update hook
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
     Imgui_chunchun.Render();
 });

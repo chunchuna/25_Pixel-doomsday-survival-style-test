@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { DEBUG, UIDebug } from "../../UI/debug_ui/UIDebug.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
@@ -14,12 +14,12 @@ export let SaveSetting = {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     // 玩家可以通过使用 数据进入游戏
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
+    if (hf_engine.runtime.layout.name != "Level") return
 
     if (SaveSetting.isUseDataEnterNewGame) {
-        if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name == "Level") {
+        if (hf_engine.runtime.layout.name == "Level") {
             if (data.LevelGameData) {
                 MixC3Save.LoadGameFromJson(data.LevelGameData)
                 UISubtitleMain.ShowSubtitles("从data.LevelGameData 加载存档数据", 5)
@@ -30,8 +30,8 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 })
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "MainMenu") return
+hf_engine.gl$_ubu_init(() => {
+    if (hf_engine.runtime.layout.name != "MainMenu") return
     data.RunGameTiems = Number(localStorage.getItem("run_game_times"))
     data.RunGameTiems += 1;
     console.log("run game times:" + data.RunGameTiems)
@@ -43,10 +43,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("Save:SavetoJson", async () => {
-        await pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.WAIT_TIME_FORM_PROMISE(1)
-        data.LevelGameData = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.LastestSaveGameJson;
+hf_engine.gl$_ubu_init(() => {
+    hf_engine.gl$_call_eventhandle_("Save:SavetoJson", async () => {
+        await hf_engine.WAIT_TIME_FORM_PROMISE(1)
+        data.LevelGameData = hf_engine.runtime.globalVars.LastestSaveGameJson;
         localStorage.setItem("level_data", data.LevelGameData)
         localStorage.setItem("run_game_times", String(data.RunGameTiems))
         console.log(data)
@@ -57,17 +57,17 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("save", (e) => {
+hf_engine.gl$_ubu_init(() => {
+    hf_engine.runtime.addEventListener("save", (e) => {
         UISubtitleMain.ShowSubtitles("正在储存游戏..", 5)
     })
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.addEventListener("load", (e) => {
+    hf_engine.runtime.addEventListener("load", (e) => {
         UISubtitleMain.ShowSubtitles("正在从数据载入游戏..", 5)
     })
 })
 
 var isBindButtonIntoDebugPanel = false;
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
     //DEBUG 面板绘制 
@@ -235,16 +235,16 @@ export class LocalSave {
 
 export class MixC3Save {
     static SaveGame(Slot: string) {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("SaveGame", Slot)
-        return pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.globalVars.LastestSaveGameJson;
+        hf_engine.runtime.callFunction("SaveGame", Slot)
+        return hf_engine.runtime.globalVars.LastestSaveGameJson;
 
     }
     static LoadGame(Slot: string) {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("LoadGame", Slot)
+        hf_engine.runtime.callFunction("LoadGame", Slot)
     }
 
     static LoadGameFromJson(Json: string) {
-        pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.callFunction("LoadGameByJson", Json)
+        hf_engine.runtime.callFunction("LoadGameByJson", Json)
 
     }
 

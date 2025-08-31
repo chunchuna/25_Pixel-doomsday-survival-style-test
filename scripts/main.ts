@@ -74,6 +74,11 @@ import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
 import "./PixelDoom/Group/Effect/Fog/FogEffectDebug.js"
 import "./PixelDoom/UI/name_hint_card_ui/UINameHintCard.js"
 
+
+// GAME FLOW
+
+import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"
+
 runOnStartup(async runtime => {
     // Code to run on the loading screen.
     // Note layouts, objects etc. are not yet available.

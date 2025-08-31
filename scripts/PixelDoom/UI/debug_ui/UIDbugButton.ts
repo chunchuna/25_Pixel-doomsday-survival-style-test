@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
@@ -1289,7 +1289,7 @@ interface Category {
 }
 
 // Initialize IMGUI Debug Button Panel
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
     // 使用延时添加按钮，确保初始化完成后再添加
     setTimeout(() => {

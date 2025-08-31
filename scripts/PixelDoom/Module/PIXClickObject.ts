@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 import { UIInteractionPanelActionChooseMain_imgui } from "../UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { OnMainInventoryClose, OnMainInventoryOpen, OnOtherInventoryClose, OnOtherInventoryOpen } from "../UI/inventory_ui/UIInventory.js";
@@ -12,7 +12,7 @@ export var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后�
 
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
       console.log("[ClickObject] init")
 })
 
@@ -21,7 +21,7 @@ var MainInventoryOpen = false
 var OtherInventoryOpen = false
 var DialogueOpen = false;
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
       OnMainInventoryOpen(() => {
             MainInventoryOpen = true;
 
@@ -52,10 +52,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
       })
 })
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
 
-      if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name != "Level") return
-      if (pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.getFirstInstance() == null) return
+      if (hf_engine.runtime.layout.name != "Level") return
+      if (hf_engine.runtime.objects.ClickObjectEntity.getFirstInstance() == null) return
 
 
       // for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
@@ -74,9 +74,9 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 })
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
       // 鼠标悬浮在交互物体上
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseOverObject", (e: any) => {
+      hf_engine.gl$_call_eventhandle_("ClickObject:MouseOverObject", (e: any) => {
             //console.log("[ClickObject] Mouse Over Object")
             var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
             ClickObject.EnableOutLine(GetChooseObject, true)
@@ -86,10 +86,10 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
       // 鼠标离开交互物体
 
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseOverObject-none", (e: any) => {
+      hf_engine.gl$_call_eventhandle_("ClickObject:MouseOverObject-none", (e: any) => {
             //console.log("[ClickObject] Mouse Over Object -NONE")
             var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
-            for (var ALLClickObject of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
+            for (var ALLClickObject of hf_engine.runtime.objects.ClickObjectEntity.instances()) {
                   ClickObject.EnableOutLine(ALLClickObject, false)
             }
             document.documentElement.style.cursor = "default"
@@ -97,7 +97,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
       //点击对象 
-      pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
+      hf_engine.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
             if (ClickObject.is_OEPN_interaction_UI) return
 
             //console.log("点击了交互物")
@@ -119,11 +119,11 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
             // if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0) return
 
             /** 呼出UI */
-            var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+            var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
             if (PlayerInstance == null) return
             var GetLastestObject = LastestChooseObject;
             if (GetLastestObject == null) return
-            var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(
+            var DistanceFromLastestObject = hf_engine.CalculateDistancehahaShitCode(
                   GetLastestObject.x,
                   GetLastestObject.y,
                   PlayerInstance.x,
@@ -169,7 +169,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 
 
 /** 玩家在移动的时候 关闭UI面板 */
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
 
       // var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
       // if (PlayerInstance == null) return
@@ -182,7 +182,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
 
 /**玩家距离 超过和互动物的互动距离时 关闭UI面板 */
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
+hf_engine.gl$_ubu_update(() => {
       // 获取面板元素
       var UIpanel = document.getElementById('interaction_panel_action_choose_ui');
       // 如果面板不存在或已经隐藏，则不继续执行
@@ -200,13 +200,13 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
 
       var InteractionMaxDistance = ClickObject.ClickObjectClickMaxDistance;
 
-      var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
+      var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
       if (PlayerInstance == null) return
 
       /** 获取 最新的互动物 */
       var GetLastestObject = LastestChooseObject;
       if (GetLastestObject == null) return
-      var DistanceFromLastestObject = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.CalculateDistancehahaShitCode(
+      var DistanceFromLastestObject = hf_engine.CalculateDistancehahaShitCode(
             GetLastestObject.x,
             GetLastestObject.y,
             PlayerInstance.x,
@@ -219,7 +219,7 @@ pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_update(() => {
       }
 })
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
       // 玩家在交互的时候 就不用继续处理点击事件了
       UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
             ClickObject.is_OEPN_interaction_UI = true;

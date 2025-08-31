@@ -40,6 +40,16 @@
 			"isStatic": false,
 			"isConstant": false,
 			"sid": 502587503804581
+		},
+		{
+			"eventType": "variable",
+			"name": "NewGame",
+			"type": "boolean",
+			"initialValue": "true",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 731000868956328
 		}
 	],
 	"sid": 510648612448094

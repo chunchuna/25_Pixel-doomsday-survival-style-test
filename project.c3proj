@@ -94,6 +94,13 @@
 		},
 		{
 			"type": "behavior",
+			"id": "MoveTo",
+			"name": "移动到",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
 			"id": "NoSave",
 			"name": "不存档",
 			"author": "Scirra",
@@ -952,6 +959,28 @@
 							],
 							"subfolders": [],
 							"name": "Renderer"
+						},
+						{
+							"items": [
+								{
+									"name": "GFLW__EntrancePerformance.ts",
+									"type": "application/typescript",
+									"sid": 911230060504799,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "GFLW__CampfireConversation.ts",
+									"type": "application/typescript",
+									"sid": 619070058392816,
+									"script-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "GameFlow"
 						}
 					],
 					"name": "PixelDoom"

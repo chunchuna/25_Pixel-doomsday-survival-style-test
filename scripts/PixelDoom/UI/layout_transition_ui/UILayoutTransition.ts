@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 
 /**
  * Transition type enumeration
@@ -335,7 +335,7 @@ export class LayoutTransition {
     private static createTransitionTimer(duration: number): void {
         try {
             // Create C3 Timer instance
-            LayoutTransition.timerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.C3Ctimer.createInstance("Other", -100, -100);
+            LayoutTransition.timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             LayoutTransition.timerTag = `layout_transition_${Date.now()}_${Math.random()}`;
             
             // Set up completion timer
@@ -499,7 +499,7 @@ export class LayoutTransition {
     }
 }
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(()=>{
+hf_engine.gl$_ubu_init(()=>{
     //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
     LayoutTransition.EnterLayout(TransitionType.HOLE,1)
 })

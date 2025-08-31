@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../engine.js";
+import { hf_engine } from "../../engine.js";
 
 
 
@@ -6,28 +6,28 @@ var GAME$_CHARACTER_SINE_ANIMATION: InstanceType.CharacterSineAnimation;
 var GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
 
 
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     console.log("typescript test34234")
     //@ts-ignore
-    GAME$_CHARACTER_SINE_ANIMATION = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.CharacterSineAnimation.getFirstInstance();
+    GAME$_CHARACTER_SINE_ANIMATION = hf_engine.runtime.objects.CharacterSineAnimation.getFirstInstance();
 
     if (GAME$_CHARACTER_CONTROLLER == null) {
 
         //@ts-ignore
-        GAME$_CHARACTER_CONTROLLER = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.CharacterController.getFirstInstance();
+        GAME$_CHARACTER_CONTROLLER = hf_engine.runtime.objects.CharacterController.getFirstInstance();
         //console.log(GAME$_CHARACTER_CONTROLLER)
 
     }
     if (GAME$_CHARACTER_SINE_ANIMATION == null) return
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("CharacterControllerMoveFunctionISMoving", () => {
+    hf_engine.gl$_call_eventhandle_("CharacterControllerMoveFunctionISMoving", () => {
 
         if (GAME$_CHARACTER_SINE_ANIMATION == null) return
         GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = true;
 
     })
 
-    pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_call_eventhandle_("CharacterControllerMoveFunctionNotMoving", () => {
+    hf_engine.gl$_call_eventhandle_("CharacterControllerMoveFunctionNotMoving", () => {
 
         if (GAME$_CHARACTER_SINE_ANIMATION == null) return
         GAME$_CHARACTER_SINE_ANIMATION.behaviors.CharacterWalkAnimtion.isEnabled = false;

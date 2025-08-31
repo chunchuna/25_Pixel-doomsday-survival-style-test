@@ -1,4 +1,4 @@
-import { pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit } from "../../../engine.js";
+import { hf_engine } from "../../../engine.js";
 
 /**
  * 窗口库 - 提供创建自定义窗口的静态方法
@@ -746,7 +746,7 @@ export class UIWindowLib {
 }
 
 // 引擎初始化时调用
-pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
+hf_engine.gl$_ubu_init(() => {
     // 启动主窗口
     //UIWindowLib.showExampleWindow();
 })

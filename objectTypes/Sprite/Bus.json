@@ -5,7 +5,13 @@
 	"isGlobal": false,
 	"editorNewInstanceIsReplica": true,
 	"instanceVariables": [],
-	"behaviorTypes": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "MoveTo",
+			"name": "moveto",
+			"sid": 330104090160138
+		}
+	],
 	"effectTypes": [],
 	"animations": {
 		"items": [
