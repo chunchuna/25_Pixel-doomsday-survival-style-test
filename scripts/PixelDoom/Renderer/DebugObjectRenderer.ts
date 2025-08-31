@@ -24,6 +24,17 @@ interface DebugLineConfig {
     updateCallback?: () => { startX: number; startY: number; endX: number; endY: number }; // Optional update callback for dynamic positioning
 }
 
+// Debug polygon render configuration interface
+interface DebugPolygonConfig {
+    points: Array<{x: number, y: number}>;
+    color: { r: number; g: number; b: number; a: number };
+    thickness: number;
+    enabled: boolean;
+    customLayer?: ILayer; // Optional custom layer for rendering
+    closed: boolean; // Whether to close the polygon by connecting last point to first
+    updateCallback?: () => Array<{x: number, y: number}>; // Optional update callback for dynamic positioning
+}
+
 // Common color presets for debug rendering
 export enum DebugColors {
     RED = "RED",
@@ -41,6 +52,7 @@ export enum DebugColors {
 export class DebugObjectRenderer {
     public static debugBoxes: Map<string, DebugBoxConfig> = new Map();
     public static debugLines: Map<string, DebugLineConfig> = new Map();
+    public static debugPolygons: Map<string, DebugPolygonConfig> = new Map();
     private static isInitialized: boolean = false;
     private static currentColor: { r: number; g: number; b: number; a: number } = { r: 1, g: 0, b: 0, a: 1 }; // Default red
     private static currentThickness: number = 2; // Default thickness
@@ -52,6 +64,8 @@ export class DebugObjectRenderer {
     public static renderCount: number = 0; // Track render calls - made public for external access
     private static lastRenderTime: number = 0;
     private static lineIdCounter: number = 0; // Counter for generating unique line IDs
+    private static polygonIdCounter: number = 0; // Counter for generating unique polygon IDs
+    private static currentClosed: boolean = true; // Whether to close the polygon by connecting last point to first
 
     // Color preset mapping
     private static colorPresets: Map<DebugColors, { r: number; g: number; b: number }> = new Map([
@@ -120,6 +134,7 @@ export class DebugObjectRenderer {
             console.log(`[DebugObjectRenderer] 🎨 Render call #${this.renderCount} on layer: ${layer.name || 'unnamed'}`);
             console.log(`[DebugObjectRenderer] Total debug boxes to check: ${this.debugBoxes.size}`);
             console.log(`[DebugObjectRenderer] Total debug lines to check: ${this.debugLines.size}`);
+            console.log(`[DebugObjectRenderer] Total debug polygons to check: ${this.debugPolygons.size}`);
         }
 
         // Render debug boxes that belong to this specific layer (either custom layer or instance layer)
@@ -151,6 +166,28 @@ export class DebugObjectRenderer {
                         renderedOnThisLayer++;
                     } catch (error: any) {
                         console.error(`[DebugObjectRenderer] Error rendering debug line for ${key}: ${error.message}`);
+                    }
+                }
+            }
+        });
+
+        // Render debug polygons that belong to this specific layer
+        this.debugPolygons.forEach((config, key) => {
+            if (config.enabled) {
+                // Use custom layer if specified, otherwise use default layer (first available)
+                const targetLayer = config.customLayer || layer;
+
+                if (targetLayer === layer) {
+                    try {
+                        // Update points if callback exists
+                        if (config.updateCallback) {
+                            config.points = config.updateCallback();
+                        }
+                        
+                        this.renderDebugPolygon(renderer, config);
+                        renderedOnThisLayer++;
+                    } catch (error: any) {
+                        console.error(`[DebugObjectRenderer] Error rendering debug polygon for ${key}: ${error.message}`);
                     }
                 }
             }
@@ -276,6 +313,42 @@ export class DebugObjectRenderer {
 
         } catch (error: any) {
             console.error(`[DebugObjectRenderer] Error in renderDebugLine: ${error.message}`);
+        }
+    }
+
+    // Render a single debug polygon
+    private static renderDebugPolygon(renderer: IRenderer, config: DebugPolygonConfig): void {
+        const { points, color, thickness } = config;
+        const { r, g, b, a } = color;
+
+        try {
+            if (!points || points.length < 2) {
+                console.warn(`[DebugObjectRenderer] Not enough points to render polygon`);
+                return;
+            }
+
+            // Set color fill mode for drawing lines
+            renderer.setColorFillMode();
+            renderer.setColorRgba(r, g, b, a);
+
+            // Set line width
+            renderer.pushLineWidth(thickness);
+
+            // Draw lines between points
+            for (let i = 0; i < points.length - 1; i++) {
+                renderer.line(points[i].x, points[i].y, points[i+1].x, points[i+1].y);
+            }
+
+            // Close the polygon if requested
+            if (config.closed && points.length > 2) {
+                renderer.line(points[points.length-1].x, points[points.length-1].y, points[0].x, points[0].y);
+            }
+
+            // Restore line width
+            renderer.popLineWidth();
+
+        } catch (error: any) {
+            console.error(`[DebugObjectRenderer] Error in renderDebugPolygon: ${error.message}`);
         }
     }
 
@@ -452,6 +525,75 @@ export class DebugObjectRenderer {
         return key; // Return the key for later reference
     }
 
+    // Main function to render polygon from array of points
+    public static RenderPolygonFromPoints(points: Array<[number, number]> | Array<{x: number, y: number}>): string {
+        this.polygonIdCounter++;
+        const key = `polygon_${this.polygonIdCounter}`;
+
+        // Get custom layer if specified
+        let customLayer: ILayer | undefined = undefined;
+        if (this.currentLayer) {
+            const runtime = hf_engine.runtime;
+            if (runtime && runtime.layout) {
+                customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
+                if (customLayer) {
+                    console.log(`[DebugObjectRenderer] Using custom layer: ${this.currentLayer}`);
+                } else {
+                    console.warn(`[DebugObjectRenderer] Custom layer "${this.currentLayer}" not found, using default layer`);
+                }
+            }
+        }
+
+        // If no custom layer specified, try to get a default layer
+        if (!customLayer) {
+            const runtime = hf_engine.runtime;
+            if (runtime && runtime.layout) {
+                const gameContentLayer = runtime.layout.getLayer("GameContent");
+                const layer0 = runtime.layout.getLayer(0);
+                customLayer = (gameContentLayer || layer0) as ILayer | undefined;
+            }
+        }
+
+        // Convert array of [x,y] to array of {x,y} if needed
+        const formattedPoints = points.map(point => {
+            if (Array.isArray(point)) {
+                return { x: point[0], y: point[1] };
+            }
+            return point;
+        });
+
+        const config: DebugPolygonConfig = {
+            points: formattedPoints,
+            color: { ...this.currentColor },
+            thickness: this.currentThickness,
+            enabled: true,
+            customLayer: customLayer,
+            closed: this.currentClosed, // Use the current closed setting
+            updateCallback: this.currentUpdateCallback as any || undefined
+        };
+
+        this.debugPolygons.set(key, config);
+        console.log(`[DebugObjectRenderer] Added debug polygon: ${key} with ${points.length} points, closed: ${this.currentClosed}`);
+
+        if (this.currentUpdateCallback) {
+            console.log(`[DebugObjectRenderer] Polygon ${key} will update dynamically using callback`);
+        }
+
+        // Automatically bind afterdraw event to the target layer
+        if (customLayer) {
+            console.log(`[DebugObjectRenderer] Debug polygon will render on layer: ${customLayer.name || 'unnamed'}`);
+            this.ensureLayerEventBinding(customLayer);
+        }
+
+        // Reset current layer after use
+        this.currentLayer = null;
+
+        // Reset current update callback after use
+        this.currentUpdateCallback = null;
+
+        return key; // Return the key for later reference
+    }
+
     // Set color for the next debug box
     public static setColor(r: number, g: number, b: number, a: number = 1): typeof DebugObjectRenderer {
         this.currentColor = { r, g, b, a };
@@ -598,7 +740,8 @@ export class DebugObjectRenderer {
     public static clearAll(): void {
         this.debugBoxes.clear();
         this.debugLines.clear();
-        console.log("[DebugObjectRenderer] Cleared all debug boxes and lines");
+        this.debugPolygons.clear();
+        console.log("[DebugObjectRenderer] Cleared all debug boxes, lines and polygons");
     }
 
     // Generate unique key for instance
@@ -616,9 +759,14 @@ export class DebugObjectRenderer {
         return this.debugLines.size;
     }
 
-    // Get total debug object count (boxes + lines)
+    // Get current debug polygon count
+    public static getDebugPolygonCount(): number {
+        return this.debugPolygons.size;
+    }
+
+    // Get total debug object count (boxes + lines + polygons)
     public static getTotalDebugObjectCount(): number {
-        return this.debugBoxes.size + this.debugLines.size;
+        return this.debugBoxes.size + this.debugLines.size + this.debugPolygons.size;
     }
 
     // Check if instance has debug box
@@ -632,8 +780,10 @@ export class DebugObjectRenderer {
         const info = {
             totalDebugBoxes: this.debugBoxes.size,
             totalDebugLines: this.debugLines.size,
+            totalDebugPolygons: this.debugPolygons.size,
             enabledDebugBoxes: Array.from(this.debugBoxes.values()).filter(config => config.enabled).length,
             enabledDebugLines: Array.from(this.debugLines.values()).filter(config => config.enabled).length,
+            enabledDebugPolygons: Array.from(this.debugPolygons.values()).filter(config => config.enabled).length,
             renderCount: this.renderCount,
             lastRenderTime: this.lastRenderTime,
             timeSinceLastRender: Date.now() - this.lastRenderTime,
@@ -642,7 +792,8 @@ export class DebugObjectRenderer {
             currentThickness: this.currentThickness,
             currentOffset: this.currentOffset,
             debugBoxesByLayer: new Map(),
-            debugLinesByLayer: new Map()
+            debugLinesByLayer: new Map(),
+            debugPolygonsByLayer: new Map()
         };
 
         // Group debug boxes by layer
@@ -674,6 +825,22 @@ export class DebugObjectRenderer {
                 endPoint: { x: config.endX, y: config.endY },
                 color: config.color,
                 thickness: config.thickness
+            });
+        });
+
+        // Group debug polygons by layer
+        this.debugPolygons.forEach((config, key) => {
+            const layerName = config.customLayer?.name || 'default';
+            if (!info.debugPolygonsByLayer.has(layerName)) {
+                info.debugPolygonsByLayer.set(layerName, []);
+            }
+            info.debugPolygonsByLayer.get(layerName).push({
+                key,
+                enabled: config.enabled,
+                points: config.points,
+                color: config.color,
+                thickness: config.thickness,
+                closed: config.closed
             });
         });
 
@@ -896,6 +1063,98 @@ export class DebugObjectRenderer {
 
         return keys; // Return all keys for later reference
     }
+
+    // Set closed/open mode for polygon
+    public static setClosed(closed: boolean = true): typeof DebugObjectRenderer {
+        this.currentClosed = closed;
+        console.log(`[DebugObjectRenderer] Set polygon to ${closed ? 'CLOSED' : 'OPEN'} mode`);
+        return this;
+    }
+
+    // Clear all debug polygons only
+    public static clearAllPolygons(): void {
+        this.debugPolygons.clear();
+        console.log("[DebugObjectRenderer] Cleared all debug polygons");
+    }
+
+    // Update debug polygon enable/disable state
+    public static updatePolygon(polygonKey: string, enable: boolean = true): void {
+        const config = this.debugPolygons.get(polygonKey);
+        if (config) {
+            config.enabled = enable;
+            console.log(`[DebugObjectRenderer] ${enable ? 'Enabled' : 'Disabled'} debug polygon: ${polygonKey}`);
+        } else {
+            console.warn(`[DebugObjectRenderer] ⚠️ Debug polygon not found for update: ${polygonKey}`);
+        }
+    }
+
+    // Remove debug polygon by key
+    public static removeDebugPolygon(polygonKey: string): void {
+        if (this.debugPolygons.delete(polygonKey)) {
+            console.log(`[DebugObjectRenderer] Removed debug polygon: ${polygonKey}`);
+        }
+    }
+
+    // Draw debug polygons for all instances of a given object type or from a single instance
+    public static DrawPolygonsForAllInstances(instanceOrObjectType: IWorldInstance | any): string[] {
+        const keys: string[] = [];
+
+        try {
+            // Preserve current settings before the loop
+            const savedColor = { ...this.currentColor };
+            const savedThickness = this.currentThickness;
+            const savedLayer = this.currentLayer;
+            const savedClosed = this.currentClosed;
+            const savedUpdateCallback = this.currentUpdateCallback;
+
+            let objectType: any;
+            let instances: IWorldInstance[];
+
+            // Check if input is an instance or object type
+            if (instanceOrObjectType && 'objectType' in instanceOrObjectType) {
+                // It's an instance, get its object type
+                objectType = instanceOrObjectType.objectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing polygons for all instances of ${objectType.name} (detected from instance)`);
+            } else {
+                // It's an object type
+                objectType = instanceOrObjectType;
+                instances = Array.from(objectType.instances());
+                console.log(`[DebugObjectRenderer] Drawing polygons for all instances of ${objectType.name} (direct object type)`);
+            }
+
+            // Draw polygon for each instance
+            instances.forEach((instance: IWorldInstance, index: number) => {
+                // Restore settings before each call since RenderPolygonFromPoints resets them
+                this.currentColor = { ...savedColor };
+                this.currentThickness = savedThickness;
+                this.currentLayer = savedLayer;
+                this.currentClosed = savedClosed;
+                this.currentUpdateCallback = savedUpdateCallback;
+
+                // For polygons, we need to provide an array of points.
+                // This function is designed for lines, so we'll pass a dummy array or a single point.
+                // A more robust implementation would involve getting instance bounds or specific points.
+                // For now, let's assume a simple square for testing.
+                const dummyPoints: Array<[number, number]> = [
+                    [instance.x - instance.width / 2, instance.y - instance.height / 2],
+                    [instance.x + instance.width / 2, instance.y - instance.height / 2],
+                    [instance.x + instance.width / 2, instance.y + instance.height / 2],
+                    [instance.x - instance.width / 2, instance.y + instance.height / 2]
+                ];
+                const key = this.RenderPolygonFromPoints(dummyPoints);
+                keys.push(key);
+                console.log(`[DebugObjectRenderer] Drew polygon ${index + 1}/${instances.length} for ${objectType.name} instance at (${instance.x.toFixed(1)}, ${instance.y.toFixed(1)})`);
+            });
+
+            console.log(`[DebugObjectRenderer] ✅ Successfully drew ${instances.length} debug polygons for ${objectType.name}`);
+
+        } catch (error: any) {
+            console.error(`[DebugObjectRenderer] ❌ Error in DrawPolygonsForAllInstances: ${error.message}`);
+        }
+
+        return keys; // Return all keys for later reference
+    }
 }
 
 
@@ -931,13 +1190,9 @@ hf_engine.gl$_ubu_init(() => {
         var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
     }
 
+    // Example of polygon rendering
+    var testPolygon = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.CYAN).setBoxThickness(2).RenderPolygonFromPoints([[1042, 849], [1267, 837], [1607, 733], [1614, 998]]);
     
-    
-
-
-
-
-
 });
 
 // Usage Examples:

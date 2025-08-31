@@ -79,6 +79,7 @@ import "./PixelDoom/Group/Debug/PIXPerformance.js"
 
 import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"
 import "./PixelDoom/GameFlow/GFLW_Fog.js"
+import "./PixelDoom/GameFlow/GFLW__CampfireConversation.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.

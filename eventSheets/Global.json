@@ -42,6 +42,10 @@
 			"sid": 502587503804581
 		},
 		{
+			"eventType": "comment",
+			"text": "GFLW"
+		},
+		{
 			"eventType": "variable",
 			"name": "NewGame",
 			"type": "boolean",
@@ -50,6 +54,16 @@
 			"isStatic": false,
 			"isConstant": false,
 			"sid": 731000868956328
+		},
+		{
+			"eventType": "variable",
+			"name": "CampFireConversition",
+			"type": "boolean",
+			"initialValue": "false",
+			"comment": "",
+			"isStatic": false,
+			"isConstant": false,
+			"sid": 736835538198373
 		}
 	],
 	"sid": 510648612448094

@@ -436,6 +436,14 @@
 									"script-info": {
 										"purpose": "none"
 									}
+								},
+								{
+									"name": "PIXArea.ts",
+									"type": "application/typescript",
+									"sid": 992705919040834,
+									"script-info": {
+										"purpose": "none"
+									}
 								}
 							],
 							"subfolders": [],
