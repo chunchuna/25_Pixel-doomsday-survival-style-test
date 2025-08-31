@@ -61,7 +61,6 @@ function Dialogue_DouMaoNanRen_ShouJiNvRen() {
     AdvanceBubble.PlayContinuousDialogue(TestDialogue)
         .SetPressNext()
         .EnableKeyPrompt(true, "#ffffff", 20) // 启用白色按键提示，大小为20px
-        .SetRandomRepeat(-1);
     
     // 自动播放模式的代码，可以通过注释切换测试
     
@@ -649,8 +648,7 @@ export class AdvanceBubble {
                     }
                     
                     // 检查是否是最后一条对话
-                    const isLastContent = dialogue.currentIndex >= dialogue.contents.length - 1;
-                    
+                    const isLastContent = dialogue.currentIndex >= dialogue.contents.length-1;
                     if (isLastContent) {
                         // 如果是最后一条内容，调用onDialogueComplete处理结束逻辑
                         this.onDialogueComplete(dialogue);
@@ -658,10 +656,9 @@ export class AdvanceBubble {
                         // 否则播放下一条内容
                         this.playDialogueContent(dialogue, dialogue.currentIndex + 1);
                         
-                        // 如果还有下一条，继续设置按键监听
-                        if (dialogue.currentIndex < dialogue.contents.length - 1) {
-                            this.setupKeyPress(dialogue);
-                        }
+                        // 一直设置监听
+                        this.setupKeyPress(dialogue);
+                        
                     }
                     
                     // 移除当前监听器
@@ -771,6 +768,7 @@ export class AdvanceBubble {
         if (repeatSetting) {
             // 检查是否需要继续重复
             if (repeatSetting.count === -1 || repeatSetting.current < repeatSetting.count) {
+                alert("需要重复对话")
                 // 增加当前重复次数计数
                 if (repeatSetting.count !== -1) {
                     repeatSetting.current++;
