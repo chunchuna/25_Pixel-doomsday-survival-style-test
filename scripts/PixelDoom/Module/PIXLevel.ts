@@ -14,24 +14,39 @@ import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 
 
 
-var CameraZoomValue: number = 0.5;
-var CameraZoomTarget = 0.5;
+export class LevelMain {
+    static CameraZoomValue: number = 0.5;
+    static CameraZoomTarget: number = 0.5;
+    
+    static async JumpOtehrLayoutFromLevel(LevelName: string) {
+
+        // UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
+        //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
+        // })
+        LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
+            hf_engine.runtime.goToLayout(LevelName)
+        })
+
+
+    }
+}
+
 
 hf_engine.gl$_ubu_init(() => {
 
     if (hf_engine.runtime.layout.name != "Level") return
 
     // 初始化时设置初始值
-    CameraZoomValue = 0.8;
-    CameraZoomTarget = 0.35; // 确保两个值初始一致
-    hf_engine.runtime.layout.scale = CameraZoomValue;
+    LevelMain.CameraZoomValue = 0.8;
+    LevelMain.CameraZoomTarget = 0.35; // 确保两个值初始一致
+    hf_engine.runtime.layout.scale = LevelMain.CameraZoomValue;
 
     // 添加键盘事件监听，用于调整缩放
     document.addEventListener('keydown', (e) => {
         if (e.key === '+' || e.key === '=') {
-            CameraZoomTarget = Math.min(CameraZoomTarget + 0.1, 2.0);
+            LevelMain.CameraZoomTarget = Math.min(LevelMain.CameraZoomTarget + 0.1, 2.0);
         } else if (e.key === '-' || e.key === '_') {
-            CameraZoomTarget = Math.max(CameraZoomTarget - 0.1, 0.35);
+            LevelMain.CameraZoomTarget = Math.max(LevelMain.CameraZoomTarget - 0.1, 0.35);
         }
     });
 
@@ -46,9 +61,9 @@ hf_engine.gl$_ubu_update(() => {
 
     if (hf_engine.runtime.layout.name != "Level") return
     // 使用更合适的插值系数(0.05)来实现平滑过渡
-    CameraZoomValue = hf_engine.Justlerp(CameraZoomValue, CameraZoomTarget, 0.05);
+    LevelMain.CameraZoomValue = hf_engine.Justlerp(LevelMain.CameraZoomValue, LevelMain.CameraZoomTarget, 0.05);
     //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
-    hf_engine.runtime.layout.scale = CameraZoomValue;
+    hf_engine.runtime.layout.scale = LevelMain.CameraZoomValue;
 
 })
 
@@ -65,25 +80,11 @@ hf_engine.gl$_ubu_init(() => {
 
         IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
             if (hf_engine.runtime.layout.name == "MainMenu") return
-            GAMEPLAY_LEVEL.JumpOtehrLayoutFromLevel("MainMenu")
+            LevelMain.JumpOtehrLayoutFromLevel("MainMenu")
         })
 
     }
 })
-
-export class GAMEPLAY_LEVEL {
-    static async JumpOtehrLayoutFromLevel(LevelName: string) {
-
-        // UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
-        //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
-        // })
-        LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
-            hf_engine.runtime.goToLayout(LevelName)
-        })
-
-
-    }
-}
 
 
 hf_engine.gl$_layout_end(() => {
@@ -97,6 +98,7 @@ hf_engine.gl$_layout_end(() => {
     if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
         _Audio.AudioStopAll()
         
+
 
        
     }

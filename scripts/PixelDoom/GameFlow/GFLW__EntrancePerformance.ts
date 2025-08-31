@@ -1,4 +1,5 @@
 import { hf_engine } from "../../engine.js";
+import { LevelMain } from "../Module/PIXLevel.js";
 
 
 
@@ -12,7 +13,7 @@ hf_engine.gl$_ubu_init(() => {
 
     if (!hf_engine.runtime
         .objects.LevelVars.getFirstInstance()
-        ?.instVars.Bus==true) {
+        ?.instVars.Bus == true) {
 
         GFLW__EntrancePerformance.gp_hideplayer();
         GFLW__EntrancePerformance.ani__busentering();
@@ -21,7 +22,7 @@ hf_engine.gl$_ubu_init(() => {
     GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived", () => {
         GFLW__EntrancePerformance.gp_showplayer();
         const levelVarsInstance = hf_engine.runtime
-        .objects.LevelVars.getFirstInstance();
+            .objects.LevelVars.getFirstInstance();
         if (levelVarsInstance) {
             levelVarsInstance.instVars.Bus = true;;
         }
@@ -44,6 +45,7 @@ class GFLW__EntrancePerformance {
     }
 
     static ani__busentering() {
+        LevelMain.CameraZoomTarget = 0.65;
         this.bus = hf_engine.runtime.objects.Bus.getFirstInstance();
         if (this.bus == null) return;
         this.bus.x = -334
@@ -93,7 +95,11 @@ class GFLW__EntrancePerformance {
 
         //this.player.behaviors.MoveFunction.simulateControl("up")
         this.player.behaviors.MoveTo.moveToPosition(688, 1955)
-        this.player.behaviors.MoveFunction.isIgnoringInput = false;
+        this.player.behaviors.MoveTo.addEventListener("arrived", () => {
+            this.player!.behaviors.MoveFunction.isIgnoringInput = false;
+            LevelMain.CameraZoomTarget = 0.35;
+
+        });
 
 
 
