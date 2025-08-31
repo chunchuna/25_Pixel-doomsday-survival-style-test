@@ -59909,8 +59909,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1579.797066190688,
-										"y": 1047.215539797126,
+										"x": 2345,
+										"y": 2060,
 										"width": 76.6332526970211,
 										"height": 184.3987643022071,
 										"originX": 0.5104166666666666,
@@ -60124,449 +60124,10 @@
 							"overriden": 0,
 							"subLayers": [
 								{
-									"name": "Light",
-									"overriden": 0,
-									"subLayers": [],
-									"instances": [
-										{
-											"type": "GouHouGuang",
-											"properties": {
-												"initially-visible": true,
-												"initial-animation": "Default",
-												"initial-frame": 0,
-												"enable-collisions": true,
-												"live-preview": false
-											},
-											"uid": 102,
-											"sid": 275472409377643,
-											"tags": "",
-											"instanceVariables": {},
-											"behaviors": {
-												"正弦运动": {
-													"properties": {
-														"movement": "size",
-														"wave": "sine",
-														"period": 0.25,
-														"period-random": 0,
-														"period-offset": 0,
-														"period-offset-random": 0,
-														"magnitude": 32,
-														"magnitude-random": 0,
-														"enabled": true,
-														"live-preview": false
-													}
-												}
-											},
-											"sceneGraphData": {
-												"parent-uid": null,
-												"uid": 102,
-												"flags": {
-													"x": true,
-													"y": true,
-													"z": true,
-													"w": true,
-													"h": true,
-													"a": true,
-													"o": false,
-													"v": false,
-													"d": true,
-													"sm": "normal"
-												},
-												"preview": {
-													"transformX": 0,
-													"transformY": 0,
-													"transformZElevation": 0,
-													"transformW": 0,
-													"transformH": 0,
-													"transformA": 0,
-													"transformSX": 0,
-													"transformSY": 0,
-													"transformO": 0,
-													"previewSceneGraph": false
-												}
-											},
-											"instanceFolderItem": {
-												"sid": 275472409377643,
-												"expanded": true
-											},
-											"showing": true,
-											"locked": true,
-											"world": {
-												"x": 2603,
-												"y": 2205,
-												"width": 1065.2101204413166,
-												"height": 524.4833092594095,
-												"originX": 0.5,
-												"originY": 0.5,
-												"color": [
-													0.47058823529411764,
-													0.47058823529411764,
-													0.47058823529411764,
-													1
-												],
-												"angle": 0.00003548993858748517,
-												"zElevation": 0,
-												"blendMode": "additive"
-											}
-										},
-										{
-											"type": "GouHouGuang",
-											"properties": {
-												"initially-visible": true,
-												"initial-animation": "Default",
-												"initial-frame": 0,
-												"enable-collisions": true,
-												"live-preview": false
-											},
-											"uid": 552,
-											"sid": 320411111131851,
-											"tags": "",
-											"instanceVariables": {},
-											"behaviors": {
-												"正弦运动": {
-													"properties": {
-														"movement": "size",
-														"wave": "sine",
-														"period": 0.25,
-														"period-random": 0,
-														"period-offset": 0,
-														"period-offset-random": 0,
-														"magnitude": 32,
-														"magnitude-random": 0,
-														"enabled": true,
-														"live-preview": false
-													}
-												}
-											},
-											"sceneGraphData": {
-												"parent-uid": null,
-												"uid": 552,
-												"flags": {
-													"x": true,
-													"y": true,
-													"z": true,
-													"w": true,
-													"h": true,
-													"a": true,
-													"o": false,
-													"v": false,
-													"d": true,
-													"sm": "normal"
-												},
-												"preview": {
-													"transformX": 0,
-													"transformY": 0,
-													"transformZElevation": 0,
-													"transformW": 0,
-													"transformH": 0,
-													"transformA": 0,
-													"transformSX": 0,
-													"transformSY": 0,
-													"transformO": 0,
-													"previewSceneGraph": false
-												}
-											},
-											"instanceFolderItem": {
-												"sid": 320411111131851,
-												"expanded": true
-											},
-											"showing": true,
-											"locked": true,
-											"world": {
-												"x": 2541,
-												"y": 2220,
-												"width": 1065.2101204413166,
-												"height": 524.4833092594095,
-												"originX": 0.5,
-												"originY": 0.5,
-												"color": [
-													0.47058823529411764,
-													0.47058823529411764,
-													0.47058823529411764,
-													1
-												],
-												"angle": 0.00003548993858748517,
-												"zElevation": 0,
-												"blendMode": "additive"
-											}
-										},
-										{
-											"type": "GouHouGuang",
-											"properties": {
-												"initially-visible": true,
-												"initial-animation": "Default",
-												"initial-frame": 0,
-												"enable-collisions": true,
-												"live-preview": false
-											},
-											"uid": 553,
-											"sid": 803795163920955,
-											"tags": "",
-											"instanceVariables": {},
-											"behaviors": {
-												"正弦运动": {
-													"properties": {
-														"movement": "size",
-														"wave": "sine",
-														"period": 0.25,
-														"period-random": 0,
-														"period-offset": 0,
-														"period-offset-random": 0,
-														"magnitude": 32,
-														"magnitude-random": 0,
-														"enabled": true,
-														"live-preview": false
-													}
-												}
-											},
-											"sceneGraphData": {
-												"parent-uid": null,
-												"uid": 553,
-												"flags": {
-													"x": true,
-													"y": true,
-													"z": true,
-													"w": true,
-													"h": true,
-													"a": true,
-													"o": false,
-													"v": false,
-													"d": true,
-													"sm": "normal"
-												},
-												"preview": {
-													"transformX": 0,
-													"transformY": 0,
-													"transformZElevation": 0,
-													"transformW": 0,
-													"transformH": 0,
-													"transformA": 0,
-													"transformSX": 0,
-													"transformSY": 0,
-													"transformO": 0,
-													"previewSceneGraph": false
-												}
-											},
-											"instanceFolderItem": {
-												"sid": 803795163920955,
-												"expanded": true
-											},
-											"showing": true,
-											"locked": true,
-											"world": {
-												"x": 2468,
-												"y": 2183,
-												"width": 1065.2101204413166,
-												"height": 524.4833092594095,
-												"originX": 0.5,
-												"originY": 0.5,
-												"color": [
-													0.47058823529411764,
-													0.47058823529411764,
-													0.47058823529411764,
-													1
-												],
-												"angle": 0.00003548993858748517,
-												"zElevation": 0,
-												"blendMode": "additive"
-											}
-										}
-									],
-									"sid": 563022056340464,
-									"effectTypes": [],
-									"isInitiallyVisible": true,
-									"isInitiallyInteractive": true,
-									"isHTMLElementsLayer": false,
-									"color": [
-										1,
-										1,
-										1,
-										1
-									],
-									"backgroundColor": [
-										0.3686274509803922,
-										0.3686274509803922,
-										0.3686274509803922,
-										1
-									],
-									"isTransparent": true,
-									"parallaxX": 1,
-									"parallaxY": 1,
-									"scaleRate": 1,
-									"forceOwnTexture": false,
-									"renderingMode": "3d",
-									"drawOrder": "z-order",
-									"useRenderCells": false,
-									"blendMode": "normal",
-									"zElevation": 0,
-									"global": false
-								},
-								{
 									"name": "LightAddtive",
 									"overriden": 0,
 									"subLayers": [],
-									"instances": [
-										{
-											"type": "GouHouGuang",
-											"properties": {
-												"initially-visible": true,
-												"initial-animation": "Default",
-												"initial-frame": 0,
-												"enable-collisions": true,
-												"live-preview": false
-											},
-											"uid": 551,
-											"sid": 382208431254244,
-											"tags": "",
-											"instanceVariables": {},
-											"behaviors": {
-												"正弦运动": {
-													"properties": {
-														"movement": "size",
-														"wave": "sine",
-														"period": 0.25,
-														"period-random": 0,
-														"period-offset": 0,
-														"period-offset-random": 0,
-														"magnitude": 32,
-														"magnitude-random": 0,
-														"enabled": true,
-														"live-preview": false
-													}
-												}
-											},
-											"sceneGraphData": {
-												"parent-uid": null,
-												"uid": 551,
-												"flags": {
-													"x": true,
-													"y": true,
-													"z": true,
-													"w": true,
-													"h": true,
-													"a": true,
-													"o": false,
-													"v": false,
-													"d": true,
-													"sm": "normal"
-												},
-												"preview": {
-													"transformX": 0,
-													"transformY": 0,
-													"transformZElevation": 0,
-													"transformW": 0,
-													"transformH": 0,
-													"transformA": 0,
-													"transformSX": 0,
-													"transformSY": 0,
-													"transformO": 0,
-													"previewSceneGraph": false
-												}
-											},
-											"instanceFolderItem": {
-												"sid": 382208431254244,
-												"expanded": true
-											},
-											"showing": true,
-											"locked": true,
-											"world": {
-												"x": 2785,
-												"y": 2182,
-												"width": 125.19844484350558,
-												"height": 134.51503751010947,
-												"originX": 0.5,
-												"originY": 0.5,
-												"color": [
-													0.47058823529411764,
-													0.47058823529411764,
-													0.47058823529411764,
-													0.6
-												],
-												"angle": 0.00003548993858748517,
-												"zElevation": 0
-											}
-										},
-										{
-											"type": "GouHouGuang",
-											"properties": {
-												"initially-visible": true,
-												"initial-animation": "Default",
-												"initial-frame": 0,
-												"enable-collisions": true,
-												"live-preview": false
-											},
-											"uid": 554,
-											"sid": 709050392751958,
-											"tags": "",
-											"instanceVariables": {},
-											"behaviors": {
-												"正弦运动": {
-													"properties": {
-														"movement": "size",
-														"wave": "sine",
-														"period": 0.25,
-														"period-random": 0,
-														"period-offset": 0,
-														"period-offset-random": 0,
-														"magnitude": 3,
-														"magnitude-random": 0,
-														"enabled": true,
-														"live-preview": false
-													}
-												}
-											},
-											"sceneGraphData": {
-												"parent-uid": null,
-												"uid": 554,
-												"flags": {
-													"x": true,
-													"y": true,
-													"z": true,
-													"w": true,
-													"h": true,
-													"a": true,
-													"o": false,
-													"v": false,
-													"d": true,
-													"sm": "normal"
-												},
-												"preview": {
-													"transformX": 0,
-													"transformY": 0,
-													"transformZElevation": 0,
-													"transformW": 0,
-													"transformH": 0,
-													"transformA": 0,
-													"transformSX": 0,
-													"transformSY": 0,
-													"transformO": 0,
-													"previewSceneGraph": false
-												}
-											},
-											"instanceFolderItem": {
-												"sid": 709050392751958,
-												"expanded": true
-											},
-											"showing": true,
-											"locked": true,
-											"world": {
-												"x": 2784,
-												"y": 2183,
-												"width": 125.19844484350558,
-												"height": 134.51503751010947,
-												"originX": 0.5,
-												"originY": 0.5,
-												"color": [
-													0.47058823529411764,
-													0.47058823529411764,
-													0.47058823529411764,
-													1
-												],
-												"angle": 0.00003548993858748517,
-												"zElevation": 0
-											}
-										}
-									],
+									"instances": [],
 									"sid": 123547765295700,
 									"effectTypes": [],
 									"isInitiallyVisible": true,
@@ -60593,6 +60154,40 @@
 									"drawOrder": "z-order",
 									"useRenderCells": false,
 									"blendMode": "additive",
+									"zElevation": 0,
+									"global": false
+								},
+								{
+									"name": "Light",
+									"overriden": 0,
+									"subLayers": [],
+									"instances": [],
+									"sid": 563022056340464,
+									"effectTypes": [],
+									"isInitiallyVisible": true,
+									"isInitiallyInteractive": true,
+									"isHTMLElementsLayer": false,
+									"color": [
+										1,
+										1,
+										1,
+										1
+									],
+									"backgroundColor": [
+										0.3686274509803922,
+										0.3686274509803922,
+										0.3686274509803922,
+										1
+									],
+									"isTransparent": true,
+									"parallaxX": 1,
+									"parallaxY": 1,
+									"scaleRate": 1,
+									"forceOwnTexture": false,
+									"renderingMode": "3d",
+									"drawOrder": "z-order",
+									"useRenderCells": false,
+									"blendMode": "normal",
 									"zElevation": 0,
 									"global": false
 								}
@@ -60650,9 +60245,9 @@
 								1
 							],
 							"backgroundColor": [
-								0.8117647058823529,
-								0.8,
-								0.8980392156862745,
+								0.6509803921568628,
+								0.6470588235294118,
+								0.9333333333333333,
 								1
 							],
 							"isTransparent": false,
@@ -65700,30 +65295,9 @@
 				"name": "ZhiWu"
 			},
 			{
-				"items": [
-					{
-						"sid": 275472409377643,
-						"expanded": true
-					},
-					{
-						"sid": 320411111131851,
-						"expanded": true
-					},
-					{
-						"sid": 803795163920955,
-						"expanded": true
-					},
-					{
-						"sid": 382208431254244,
-						"expanded": true
-					},
-					{
-						"sid": 709050392751958,
-						"expanded": true
-					}
-				],
+				"items": [],
 				"subfolders": [],
-				"name": "GouHuoGuang"
+				"name": "JingCheCheDengGuang"
 			},
 			{
 				"items": [
