@@ -520,6 +520,14 @@
 											"script-info": {
 												"purpose": "none"
 											}
+										},
+										{
+											"name": "PIXPerformance.ts",
+											"type": "application/typescript",
+											"sid": 522706287096520,
+											"script-info": {
+												"purpose": "none"
+											}
 										}
 									],
 									"subfolders": [],

@@ -40,9 +40,7 @@ export var DEBUG = {
 
 
 var isCreatDebugPanel = false;
-hf_engine.gl$_ubu_init(()=>{
-    UIDebug.ShowFPS();
-})
+
 
 // pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.gl$_ubu_init(() => {
 //     if (!isCreatDebugPanel) {
@@ -116,11 +114,6 @@ export class UIDebug {
     private static fontFamilyName: string = 'DebugUIFont'; // 字体族名称
     private static isFontLoaded: boolean = false; // 字体是否已加载
 
-    // 新增：FPS显示相关变量
-    private static fpsDisplay: HTMLDivElement | null = null;
-    private static lastFrameTime: number = 0;
-    private static frameCount: number = 0;
-
     // 新增：子菜单系统相关变量
     private static menuItems: Map<string, MenuItemData> = new Map(); // 菜单项数据
     private static currentOpenSubmenus: Set<string> = new Set(); // 当前打开的子菜单
@@ -163,9 +156,7 @@ export class UIDebug {
         // 创建变量监控窗口
         this.createVariableMonitorWindow();
 
-        // 显示FPS
-        this.ShowFPS();
-        alert("绘制 fps")
+
 
         // 添加鼠标移动事件监听，记录鼠标位置
         document.addEventListener('mousemove', (event) => {
@@ -2931,57 +2922,6 @@ export class UIDebug {
         }
     }
 
-    /**
-     * 显示实时FPS
-     */
-    public static ShowFPS(): void {
-        if (this.fpsDisplay) {
-            return;
-        }
-
-        // 创建FPS显示元素
-        this.fpsDisplay = document.createElement('div');
-        this.fpsDisplay.id = 'debug-fps-display';
-        this.fpsDisplay.style.position = 'fixed';
-        this.fpsDisplay.style.top = '10px';
-        this.fpsDisplay.style.right = '10px';
-        this.fpsDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        this.fpsDisplay.style.color = '#00ff00';
-        this.fpsDisplay.style.padding = '5px 10px';
-        this.fpsDisplay.style.borderRadius = '3px';
-        this.fpsDisplay.style.zIndex = '9999999999999';
-        this.fpsDisplay.style.fontFamily = `'${this.fontFamilyName}', monospace`;
-        this.fpsDisplay.style.fontSize = '14px';
-        this.fpsDisplay.style.pointerEvents = 'none';
-
-        document.body.appendChild(this.fpsDisplay);
-
-        this.lastFrameTime = performance.now();
-        this.updateFPS();
-    }
-
-    private static updateFPS(): void {
-        const now = performance.now();
-        this.frameCount++;
-
-        if (now >= this.lastFrameTime + 1000) {
-            if (this.fpsDisplay) {
-                const fps = this.frameCount;
-                this.fpsDisplay.textContent = `FPS: ${fps}`;
-                if (fps < 30) {
-                    this.fpsDisplay.style.color = '#ff0000';
-                } else if (fps < 50) {
-                    this.fpsDisplay.style.color = '#ffff00';
-                } else {
-                    this.fpsDisplay.style.color = '#00ff00';
-                }
-            }
-            this.frameCount = 0;
-            this.lastFrameTime = now;
-        }
-
-        requestAnimationFrame(() => this.updateFPS());
-    }
 }
 
 // 菜单项数据结构

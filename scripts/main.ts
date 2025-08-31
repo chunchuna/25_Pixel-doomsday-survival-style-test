@@ -73,6 +73,7 @@ import "./PixelDoom/UI/bubble_ui/UIAdvanceBubble.js"
 import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
 import "./PixelDoom/UI/name_hint_card_ui/UINameHintCard.js"
 
+import "./PixelDoom/Group/Debug/PIXPerformance.js" 
 
 // GAME FLOW
 
