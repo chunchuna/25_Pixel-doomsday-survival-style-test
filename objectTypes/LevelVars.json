@@ -1,0 +1,55 @@
+{
+	"name": "LevelVars",
+	"plugin-id": "Sprite",
+	"sid": 642837127708003,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [
+		{
+			"name": "Bus",
+			"type": "boolean",
+			"desc": "",
+			"show": true,
+			"sid": 422784676276157
+		},
+		{
+			"name": "CampFireConverstion",
+			"type": "boolean",
+			"desc": "",
+			"show": true,
+			"sid": 369535241953009
+		}
+	],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 250,
+						"height": 250,
+						"originX": 0.5,
+						"originY": 0.5,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 4116736,
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 183026267449108,
+				"name": "Animation 1",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}

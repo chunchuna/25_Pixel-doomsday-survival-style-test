@@ -125,6 +125,9 @@ export class UIDebug {
     // 新增：控制台文本折叠相关变量
     private static consoleTextCollapseThreshold: number = 200; // 控制台文本折叠阈值
 
+    // 在类的静态变量区域添加新变量 (大约在第86行附近)
+    private static consoleScale: number = 1.25; // 控制台整体缩放比例
+
     /**
      * 初始化调试面板
      * @param toggleKey 用于显示/隐藏面板的按键
@@ -348,6 +351,9 @@ export class UIDebug {
         // 更新CSS变量
         this.consoleContainer.style.setProperty('--backplate-color', this.consoleBackplateColor);
         this.consoleContainer.style.setProperty('--backplate-opacity', this.consoleBackplateOpacity.toString());
+        // 添加下面这行
+        this.consoleContainer.style.transform = `scale(${this.consoleScale})`;
+        this.consoleContainer.style.transformOrigin = 'top left';
     }
 
     /**
@@ -2920,6 +2926,15 @@ export class UIDebug {
             this.collapseAllVariables();
             event.preventDefault();
         }
+    }
+
+    /**
+     * 设置控制台整体缩放比例
+     * @param scale 缩放比例，1.0为原始大小
+     */
+    public static SetConsoleScale(scale: number): void {
+        this.consoleScale = Math.max(0.5, Math.min(5.0, scale));
+        this.updateConsoleStyles();
     }
 
 }

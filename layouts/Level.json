@@ -5,7 +5,48 @@
 			"name": "Other",
 			"overriden": 0,
 			"subLayers": [],
-			"instances": [],
+			"instances": [
+				{
+					"type": "LevelVars",
+					"properties": {
+						"initially-visible": true,
+						"initial-animation": "Animation 1",
+						"initial-frame": 0,
+						"enable-collisions": true,
+						"live-preview": false
+					},
+					"uid": 102,
+					"sid": 390336276420851,
+					"tags": "",
+					"instanceVariables": {
+						"Bus": false,
+						"CampFireConverstion": false
+					},
+					"behaviors": {},
+					"instanceFolderItem": {
+						"sid": 390336276420851,
+						"expanded": true
+					},
+					"showing": true,
+					"locked": false,
+					"world": {
+						"x": -57,
+						"y": 101,
+						"width": 57.746130848220155,
+						"height": 57.746130848220155,
+						"originX": 0.5,
+						"originY": 0.5,
+						"color": [
+							1,
+							1,
+							1,
+							1
+						],
+						"angle": 0,
+						"zElevation": 0
+					}
+				}
+			],
 			"sid": 904343592756893,
 			"effectTypes": [],
 			"isInitiallyVisible": true,
@@ -60798,7 +60839,12 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 390336276420851,
+				"expanded": true
+			}
+		],
 		"subfolders": [
 			{
 				"items": [

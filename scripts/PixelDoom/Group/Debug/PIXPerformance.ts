@@ -50,6 +50,7 @@ class MetricVisualizer {
         const height = this.canvas.height;
 
         // 1. 清理画布
+        ctx.clearRect(0, 0, width, height);
         ctx.fillStyle = 'rgba(20, 20, 20, 0.8)';
         ctx.fillRect(0, 0, width, height);
 
@@ -160,6 +161,9 @@ hf_engine.gl$_ubu_init(()=>{
 
     // 是否正在运行性能监控
     private static isRunning: boolean = false;
+    
+    // 动画帧ID
+    private static _animationFrameId: number | null = null;
 
     public static ShowPerformanceMetrics() {
         if (this.performanceContainer) {
@@ -174,7 +178,7 @@ hf_engine.gl$_ubu_init(()=>{
         this.performanceContainer.style.right = '50px';
         this.performanceContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
         this.performanceContainer.style.borderRadius = '3px';
-        this.performanceContainer.style.zIndex = '9999999999999';
+        this.performanceContainer.style.zIndex = '9000';
         this.performanceContainer.style.fontFamily = `'${this.fontFamilyName}', monospace`;
         this.performanceContainer.style.fontSize = '14px';
         this.performanceContainer.style.pointerEvents = 'none';
@@ -217,8 +221,8 @@ hf_engine.gl$_ubu_init(()=>{
         this.visualizerContainer.id = 'debug-visualizer-container';
         this.visualizerContainer.style.position = 'fixed';
         this.visualizerContainer.style.top = '2px'; // 放在文本面板下方，增加高度以适应更多指标
-        this.visualizerContainer.style.right = '20--*9px'; // 与文本面板右对齐
-        this.visualizerContainer.style.zIndex = '9999999999999';
+        this.visualizerContainer.style.right = '20px'; // 与文本面板右对齐
+        this.visualizerContainer.style.zIndex = '9000';
         this.visualizerContainer.style.display = 'flex';
         this.visualizerContainer.style.flexDirection = 'row';
         this.visualizerContainer.style.gap = '2px';
@@ -306,7 +310,7 @@ hf_engine.gl$_ubu_init(()=>{
             this.visualizers.battery = new MetricVisualizer('Battery', 250, 50, batteryDiv);
             
             console.log("All charts created:", Object.keys(this.visualizers));
-        }, 100);
+        }, 300);
     
         this.lastFrameTime = performance.now();
         this.lastMsFrameTime = performance.now();
@@ -348,6 +352,12 @@ hf_engine.gl$_ubu_init(()=>{
 
         // 清空图表实例
         this.visualizers = {};
+        
+        // 取消动画帧请求
+        if (this._animationFrameId) {
+            cancelAnimationFrame(this._animationFrameId);
+            this._animationFrameId = null;
+        }
 
         // 重置显示元素引用
         this.fpsDisplay = null;
@@ -637,7 +647,7 @@ hf_engine.gl$_ubu_init(()=>{
             console.error("Performance monitoring error:", e);
         }
     
-        requestAnimationFrame(() => this.UpdatePerformanceMetrics());
+        this._animationFrameId = requestAnimationFrame(() => this.UpdatePerformanceMetrics());
     }
 }
 

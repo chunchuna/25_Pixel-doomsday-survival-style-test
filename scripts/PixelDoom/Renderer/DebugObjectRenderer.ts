@@ -26,13 +26,13 @@ interface DebugLineConfig {
 
 // Debug polygon render configuration interface
 interface DebugPolygonConfig {
-    points: Array<{x: number, y: number}>;
+    points: Array<{ x: number, y: number }>;
     color: { r: number; g: number; b: number; a: number };
     thickness: number;
     enabled: boolean;
     customLayer?: ILayer; // Optional custom layer for rendering
     closed: boolean; // Whether to close the polygon by connecting last point to first
-    updateCallback?: () => Array<{x: number, y: number}>; // Optional update callback for dynamic positioning
+    updateCallback?: () => Array<{ x: number, y: number }>; // Optional update callback for dynamic positioning
 }
 
 // Common color presets for debug rendering
@@ -183,7 +183,7 @@ export class DebugObjectRenderer {
                         if (config.updateCallback) {
                             config.points = config.updateCallback();
                         }
-                        
+
                         this.renderDebugPolygon(renderer, config);
                         renderedOnThisLayer++;
                     } catch (error: any) {
@@ -336,12 +336,12 @@ export class DebugObjectRenderer {
 
             // Draw lines between points
             for (let i = 0; i < points.length - 1; i++) {
-                renderer.line(points[i].x, points[i].y, points[i+1].x, points[i+1].y);
+                renderer.line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
             }
 
             // Close the polygon if requested
             if (config.closed && points.length > 2) {
-                renderer.line(points[points.length-1].x, points[points.length-1].y, points[0].x, points[0].y);
+                renderer.line(points[points.length - 1].x, points[points.length - 1].y, points[0].x, points[0].y);
             }
 
             // Restore line width
@@ -526,7 +526,12 @@ export class DebugObjectRenderer {
     }
 
     // Main function to render polygon from array of points
-    public static RenderPolygonFromPoints(points: Array<[number, number]> | Array<{x: number, y: number}>): string {
+    //     第一个点：左上角
+    // 第二个点：右上角
+    // 第三个点： 右下角
+    // 第四个点：右下角
+    
+    public static RenderPolygonFromPoints(points: Array<[number, number]> | Array<{ x: number, y: number }>): string {
         this.polygonIdCounter++;
         const key = `polygon_${this.polygonIdCounter}`;
 
@@ -1167,7 +1172,7 @@ hf_engine.gl$_layout_end(() => {
 
 // Auto-initialize when module is loaded
 hf_engine.gl$_ubu_init(() => {
-    
+
     DebugObjectRenderer.initialize();
 
     if (hf_engine.gl$_getlayoutname() !== "Level") return
@@ -1184,15 +1189,15 @@ hf_engine.gl$_ubu_init(() => {
     }
 
     var NPCObject = hf_engine.runtime.objects.NPC;
-    var ShouJiNvRenInstance =hf_engine.runtime.objects.ShouJiNvRen.getFirstInstance();
+    var ShouJiNvRenInstance = hf_engine.runtime.objects.ShouJiNvRen.getFirstInstance();
     if (playerInstance) {
-        var NPCBox = DebugObjectRenderer.setLayer("GameContent").setOffset(0,-50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
+        var NPCBox = DebugObjectRenderer.setLayer("GameContent").setOffset(0, -50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
         var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
     }
 
     // Example of polygon rendering
     //var testPolygon = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.CYAN).setBoxThickness(2).RenderPolygonFromPoints([[1042, 849], [1267, 837], [1607, 733], [1614, 998]]);
-    
+
 });
 
 // Usage Examples:

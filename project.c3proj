@@ -194,7 +194,9 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [],
+		"items": [
+			"LevelVars"
+		],
 		"subfolders": [
 			{
 				"items": [

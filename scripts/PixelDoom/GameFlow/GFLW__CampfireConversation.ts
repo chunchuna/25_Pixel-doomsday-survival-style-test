@@ -53,9 +53,13 @@ class GFLW__CampfireConversation {
         PIXArea.SetEnterCallback(this.AREA_ID, () => {
             console.log("Player enter campfire area");
 
-            if (!hf_engine.runtime.globalVars.CampFireConversition) {
+            if (!hf_engine.runtime.objects.LevelVars.getFirstInstance()?.instVars.CampFireConverstion) {
                 this.Dialogue_DouMaoNanRen_ShouJiNvRen();
-                hf_engine.runtime.globalVars.CampFireConversition = true;
+                //@ts-ignore
+                const levelVarsInstance = hf_engine.runtime.objects.LevelVars.getFirstInstance();
+                if (levelVarsInstance) {
+                    levelVarsInstance.instVars.CampFireConverstion = true;
+                }
             }
 
         });

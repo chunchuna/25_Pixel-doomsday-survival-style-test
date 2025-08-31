@@ -12,8 +12,8 @@ hf_engine.gl$_ubu_init(() => {
 
     // Test day-night cycle: start from current color
     AmbientLight.simulat_day_night_cycle(
-        20,                    // Day to night transition 10 seconds
-        300,                    // Night to day transition 10 seconds
+        150,                  
+        160,                   
         AmbientLight.dya_light_rgb,          // Day color (slightly yellow)
         AmbientLight.night_light_rgb,      // Night color (deep blue)
         "current"              // Start from current color, automatically determine if closer to day or night
