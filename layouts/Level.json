@@ -60646,9 +60646,9 @@
 								1
 							],
 							"backgroundColor": [
-								0.3568627450980392,
-								0.30196078431372547,
-								0.7803921568627451,
+								0.8117647058823529,
+								0.8,
+								0.8980392156862745,
 								1
 							],
 							"isTransparent": false,
@@ -61199,16 +61199,7 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [
-			{
-				"sid": 429758556308184,
-				"expanded": true
-			},
-			{
-				"sid": 588485419939464,
-				"expanded": true
-			}
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -65819,7 +65810,16 @@
 				"name": "Bus"
 			},
 			{
-				"items": [],
+				"items": [
+					{
+						"sid": 429758556308184,
+						"expanded": true
+					},
+					{
+						"sid": 588485419939464,
+						"expanded": true
+					}
+				],
 				"subfolders": [],
 				"name": "GouHuoNPC"
 			}

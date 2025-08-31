@@ -10,9 +10,9 @@ hf_engine.gl$_ubu_init(() => {
     ) return
     var fogSprite = hf_engine.
         runtime.objects.FogSprite.createInstance("Fog", 0, 0, false)
-    createFogAroundInstance(hf_engine.
-        runtime.objects.
-        RedHairGirlSprite.getFirstInstance(), 50, 1000, 3, 1000)
+    // createFogAroundInstance(hf_engine.
+    //     runtime.objects.
+    //     RedHairGirlSprite.getFirstInstance(), 50, 1000, 3, 1000)
 
 
 

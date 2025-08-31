@@ -46,12 +46,12 @@ class GFLW__EntrancePerformance{
         this.bus =hf_engine.runtime.objects.Bus.getFirstInstance();
         if(this.bus==null) return;
         this.bus.x=-334
-        this.bus.y=2344;
+        this.bus.y=2450;
 
         // do move bus 
         this.bus.behaviors.moveto.speed=200;
        
-        this.bus.behaviors.moveto.moveToPosition(741,2334)
+        this.bus.behaviors.moveto.moveToPosition(741,2450)
         
 
 
@@ -66,7 +66,7 @@ class GFLW__EntrancePerformance{
 
         this.player.isVisible=false;
         this.player.x=this.bus?.x;
-        this.player.y=this.bus?.y
+        this.player.y=this.bus?.y-this.player.height;
         
         this.bus?.addChild(this.player,
             {"transformX":true,"transformY":true});
@@ -85,8 +85,8 @@ class GFLW__EntrancePerformance{
         await hf_engine.WAIT_TIME_FORM_PROMISE(2)
 
         this.player.isVisible=true;
-        this.player.x=688;
-        this.player.y=2130;
+        // this.player.x=688;
+        // this.player.y=2130;
 
         await hf_engine.WAIT_TIME_FORM_PROMISE(1)
          

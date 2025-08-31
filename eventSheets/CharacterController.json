@@ -67,11 +67,10 @@
 							"isInverted": true
 						},
 						{
-							"id": "is-moving",
+							"id": "on-arrived",
 							"objectClass": "RedHairGirlSprite",
-							"sid": 744378737737822,
-							"behaviorType": "MoveTo",
-							"isInverted": true
+							"sid": 406298268169073,
+							"behaviorType": "MoveTo"
 						}
 					],
 					"actions": [],

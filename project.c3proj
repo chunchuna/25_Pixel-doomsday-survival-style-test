@@ -551,14 +551,6 @@
 													"script-info": {
 														"purpose": "none"
 													}
-												},
-												{
-													"name": "FogEffectDebug.ts",
-													"type": "application/typescript",
-													"sid": 682258433839990,
-													"script-info": {
-														"purpose": "none"
-													}
 												}
 											],
 											"subfolders": [],
@@ -974,6 +966,14 @@
 									"name": "GFLW__CampfireConversation.ts",
 									"type": "application/typescript",
 									"sid": 619070058392816,
+									"script-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "GFLW_Fog.ts",
+									"type": "application/typescript",
+									"sid": 719204614828398,
 									"script-info": {
 										"purpose": "none"
 									}

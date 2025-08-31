@@ -71,13 +71,13 @@ import "./PixelDoom/UI/bubble_ui/UIBubble.js"
 import "./PixelDoom/UI/bubble_ui/UIAdvanceBubble.js"
 
 import "./PixelDoom/Group/Effect/Fog/PIXEffect_fog.js"
-import "./PixelDoom/Group/Effect/Fog/FogEffectDebug.js"
 import "./PixelDoom/UI/name_hint_card_ui/UINameHintCard.js"
 
 
 // GAME FLOW
 
 import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"
+import "./PixelDoom/GameFlow/GFLW_Fog.js"
 
 runOnStartup(async runtime => {
     // Code to run on the loading screen.

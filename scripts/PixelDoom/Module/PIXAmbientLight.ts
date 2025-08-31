@@ -12,7 +12,7 @@ hf_engine.gl$_ubu_init(() => {
 
     // Test day-night cycle: start from current color
     AmbientLight.simulat_day_night_cycle(
-        150,                    // Day to night transition 10 seconds
+        20,                    // Day to night transition 10 seconds
         300,                    // Night to day transition 10 seconds
         AmbientLight.dya_light_rgb,          // Day color (slightly yellow)
         AmbientLight.night_light_rgb,      // Night color (deep blue)
@@ -49,6 +49,64 @@ export class AmbientLight {
         dayColor: [1, 1, 1] as [number, number, number],
         nightColor: [0, 0, 0] as [number, number, number],
         cycleTimer: null as number | null
+    }
+
+    // Event listeners for day-night transitions
+    private static dayStartListeners: Array<() => void> = [];
+    private static nightStartListeners: Array<() => void> = [];
+
+    // Register listener for day start event
+    public static onDayStart(callback: () => void): void {
+        this.dayStartListeners.push(callback);
+        console.log("Day start listener registered");
+    }
+
+    // Register listener for night start event
+    public static onNightStart(callback: () => void): void {
+        this.nightStartListeners.push(callback);
+        console.log("Night start listener registered");
+    }
+
+    // Remove listener for day start event
+    public static removeDayStartListener(callback: () => void): void {
+        const index = this.dayStartListeners.indexOf(callback);
+        if (index !== -1) {
+            this.dayStartListeners.splice(index, 1);
+            console.log("Day start listener removed");
+        }
+    }
+
+    // Remove listener for night start event
+    public static removeNightStartListener(callback: () => void): void {
+        const index = this.nightStartListeners.indexOf(callback);
+        if (index !== -1) {
+            this.nightStartListeners.splice(index, 1);
+            console.log("Night start listener removed");
+        }
+    }
+
+    // Trigger day start event
+    private static triggerDayStart(): void {
+        console.log("Day has started, notifying listeners");
+        this.dayStartListeners.forEach(callback => {
+            try {
+                callback();
+            } catch (error) {
+                console.error("Error in day start listener:", error);
+            }
+        });
+    }
+
+    // Trigger night start event
+    private static triggerNightStart(): void {
+        console.log("Night has started, notifying listeners");
+        this.nightStartListeners.forEach(callback => {
+            try {
+                callback();
+            } catch (error) {
+                console.error("Error in night start listener:", error);
+            }
+        });
     }
 
     public static transition = {
@@ -196,7 +254,16 @@ export class AmbientLight {
 
         // Set next switch
         this.dayNightCycle.cycleTimer = window.setTimeout(() => {
+            // Update current phase
             this.dayNightCycle.currentPhase = nextPhase;
+            
+            // Trigger appropriate event
+            if (nextPhase === "day") {
+                this.triggerDayStart();
+            } else {
+                this.triggerNightStart();
+            }
+            
             this.runDayNightCycle(); // Recursive call to continue cycle
         }, transitionDuration * 1000);
     }
