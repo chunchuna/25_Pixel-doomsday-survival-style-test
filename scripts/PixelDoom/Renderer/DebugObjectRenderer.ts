@@ -921,14 +921,14 @@ hf_engine.gl$_ubu_init(() => {
     var ClickObject = hf_engine.runtime.objects.ClickObjectEntity;
     ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
     if (playerInstance) {
-        var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
+        var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
     }
 
     var NPCObject = hf_engine.runtime.objects.NPC;
     var ShouJiNvRenInstance =hf_engine.runtime.objects.ShouJiNvRen.getFirstInstance();
     if (playerInstance) {
-        var NPCBox = DebugObjectRenderer.setOffset(0,-50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
-        var ObjectLine = DebugObjectRenderer.setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
+        var NPCBox = DebugObjectRenderer.setLayer("GameContent").setOffset(0,-50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
+        var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)
     }
 
     
