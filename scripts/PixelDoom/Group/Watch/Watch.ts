@@ -42,10 +42,13 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
-hf_engine.gl$_layout_end(()=>{
+hf_engine.gl$_layout_end(() => {
     if (hf_engine.runtime.layout.name !== "Level") return
     Watch.hide();
+    AmbientLight.removeDayStartListener(Watch.updateWatchFace)
+    AmbientLight.removeNightStartListener(Watch.updateWatchFace)
     
+
 })
 
 hf_engine.gl$_ubu_update(() => {
