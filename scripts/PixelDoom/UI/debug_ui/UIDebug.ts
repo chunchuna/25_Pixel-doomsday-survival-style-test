@@ -1,34 +1,3 @@
-/**
- * Debug UI System
- * 提供游戏内调试面板功能
- * 
- * 使用示例：
- * 
- * // 基本用法
- * DEBUG.DebugMainUI.AddValue(someVariable);
- * 
- * // 实时变量监控（推荐用于会变化的变量）
- * let gameScore = 0;
- * DEBUG.DebugMainUI.AddValueByReference(() => gameScore, '游戏分数');
- * 
- * // 监控对象属性
- * const player = { x: 0, y: 0, health: 100 };
- * DEBUG.DebugMainUI.AddValueByReference(() => player, '玩家对象');
- * DEBUG.DebugMainUI.AddValueByReference(() => player.x, '玩家X坐标');
- * DEBUG.DebugMainUI.AddValueByReference(() => player.health, '玩家血量');
- * 
- * // 监控计算值
- * DEBUG.DebugMainUI.AddValueByReference(() => new Date().toLocaleTimeString(), '当前时间');
- * DEBUG.DebugMainUI.AddValueByReference(() => Math.floor(Math.random() * 100), '随机数');
- * 
- * // 自定义字体设置
- * // 设置自定义字体路径（默认为 'Font/Roboto-Medium.ttf'）
- * UIDebug.SetCustomFontPath('Font/MyCustomFont.ttf');
- * 
- * // 注意：确保字体文件路径相对于项目根目录是正确的
- * // 字体文件格式支持：.ttf, .otf, .woff, .woff2
- */
-
 import { hf_engine } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
@@ -50,7 +19,6 @@ hf_engine.gl$_ubu_init(() => {
         DEBUG.DebugMainUI?.InitConsoleCapture()
         isCreatDebugPanel = true
         //    } else {
-        // 场景切换时检查并重新应用样式
         UIDebug.checkAndReapplyStyles();
     }
 
@@ -79,9 +47,9 @@ export class UIDebug {
     private static originalConsole: any = {};
     private static isConsoleEnabled: boolean = false;
     private static alwaysShowConsole: boolean = true; // 控制台始终显示的标志
-    private static consolePosition: 'top' | 'bottom' = 'top'; // 控制台位置
+    private static consolePosition: 'top' | 'bottom' | 'right-bottom' = 'right-bottom'; // 控制台位置，添加right-bottom选项
     private static consoleFontSize: number = 10; // 控制台字体大小
-    private static consoleUseBackplate: boolean = true; // 是否使用底板样式
+    private static consoleUseBackplate: boolean = false; // 是否使用底板样式
     private static consoleBackplateColor: string = '74, 74, 74'; // 底板颜色（RGB）
     private static consoleBackplateOpacity: number = 0     // 底板透明度
     private static mouseX: number = 0; // 记录鼠标X位置
@@ -329,13 +297,40 @@ export class UIDebug {
     private static updateConsoleStyles(): void {
         if (!this.consoleContainer) return;
 
+        // 设置基础样式
+        this.consoleContainer.style.position = 'fixed';
+        this.consoleContainer.style.zIndex = '9999';
+        this.consoleContainer.style.maxHeight = '30vh';
+        this.consoleContainer.style.overflowY = 'auto';
+        this.consoleContainer.style.padding = '5px';
+        this.consoleContainer.style.fontFamily = 'monospace';
+        this.consoleContainer.style.lineHeight = '1.2';
+        this.consoleContainer.style.whiteSpace = 'pre-wrap';
+        this.consoleContainer.style.wordBreak = 'break-all';
+        this.consoleContainer.style.width = '100%';
+
         // 更新位置
         if (this.consolePosition === 'top') {
             this.consoleContainer.style.bottom = 'auto';
             this.consoleContainer.style.top = '0';
-        } else {
+            this.consoleContainer.style.left = '0';
+            this.consoleContainer.style.right = 'auto';
+            this.consoleContainer.style.width = '100%';
+            this.consoleContainer.style.transformOrigin = 'top left';
+        } else if (this.consolePosition === 'bottom') {
             this.consoleContainer.style.top = 'auto';
             this.consoleContainer.style.bottom = '0';
+            this.consoleContainer.style.left = '0';
+            this.consoleContainer.style.right = 'auto';
+            this.consoleContainer.style.width = '100%';
+            this.consoleContainer.style.transformOrigin = 'bottom left';
+        } else if (this.consolePosition === 'right-bottom') {
+            this.consoleContainer.style.top = 'auto';
+            this.consoleContainer.style.bottom = '0';
+            this.consoleContainer.style.left = 'auto';
+            this.consoleContainer.style.right = '0';
+            this.consoleContainer.style.width = '20%'; // 减小宽度，使控制台更靠右侧
+            this.consoleContainer.style.transformOrigin = 'bottom right';
         }
 
         // 更新字体大小
@@ -353,7 +348,6 @@ export class UIDebug {
         this.consoleContainer.style.setProperty('--backplate-opacity', this.consoleBackplateOpacity.toString());
         // 添加下面这行
         this.consoleContainer.style.transform = `scale(${this.consoleScale})`;
-        this.consoleContainer.style.transformOrigin = 'top left';
     }
 
     /**
@@ -373,17 +367,24 @@ export class UIDebug {
             if (!this.consoleContainer || !this.alwaysShowConsole) return;
 
             // 根据控制台位置判断滚动区域
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const mouseX = event.clientX;
             const mouseY = event.clientY;
-            const threshold = viewportHeight * 0.3; // 30%的区域
+            const verticalThreshold = viewportHeight * 0.3; // 30%的区域
+            const horizontalThreshold = viewportWidth * 0.3; // 30%的区域
 
             let shouldScroll = false;
             if (this.consolePosition === 'bottom') {
                 // 底部时，鼠标在屏幕底部30%区域时响应
-                shouldScroll = mouseY > (viewportHeight - threshold);
-            } else {
+                shouldScroll = mouseY > (viewportHeight - verticalThreshold);
+            } else if (this.consolePosition === 'top') {
                 // 顶部时，鼠标在屏幕顶部30%区域时响应
-                shouldScroll = mouseY < threshold;
+                shouldScroll = mouseY < verticalThreshold;
+            } else if (this.consolePosition === 'right-bottom') {
+                // 右下角时，鼠标在屏幕右下角区域时响应
+                shouldScroll = mouseY > (viewportHeight - verticalThreshold) && 
+                               mouseX > (viewportWidth - horizontalThreshold);
             }
 
             if (shouldScroll) {

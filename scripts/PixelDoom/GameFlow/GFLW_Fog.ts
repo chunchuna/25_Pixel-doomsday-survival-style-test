@@ -4,15 +4,13 @@ import { AmbientLight } from "../Module/PIXAmbientLight.js";
 
 hf_engine.gl$_ubu_init(() => {
     GFLW_Fog.initinstance();
-
+    // 监听白天黑夜 用于生成和销毁雾
     var AmbientGetNight = () => {
         GFLW_Fog.StartFog()
     }
-
     var AmbientGetDay = () => {
         GFLW_Fog.StopFogGeneration()
     }
-
     AmbientLight.onNightStart(AmbientGetNight)
     AmbientLight.onDayStart(AmbientGetDay)
 
@@ -20,7 +18,6 @@ hf_engine.gl$_ubu_init(() => {
 
 class GFLW_Fog {
     static Player: InstanceType.RedHairGirlSprite | null = null
-
     static initinstance() {
         this.Player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
     }
@@ -28,7 +25,6 @@ class GFLW_Fog {
         if (this.Player == null) return;
         createFogAroundInstance(this.Player, 15, 500, 2, 1000)
     }
-
     static StopFogGeneration() {
         stopFogGeneration(3)
 
