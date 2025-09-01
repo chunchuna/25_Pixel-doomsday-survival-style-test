@@ -11,13 +11,8 @@ hf_engine.gl$_ubu_init(() => {
     GFLW__EntrancePerformance.initinstance();
     //testplayermove()
 
-    if (!hf_engine.runtime
-        .objects.LevelVars.getFirstInstance()
-        ?.instVars.Bus == true) {
-
-        GFLW__EntrancePerformance.gp_hideplayer();
-        GFLW__EntrancePerformance.ani__busentering();
-    }
+   
+    GFLW__EntrancePerformance.BusFullShow();
 
     GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived", () => {
         GFLW__EntrancePerformance.gp_showplayer();
@@ -46,6 +41,7 @@ class GFLW__EntrancePerformance {
 
     static ani__busentering() {
         LevelMain.CameraZoomTarget = 0.65;
+     
         this.bus = hf_engine.runtime.objects.Bus.getFirstInstance();
         if (this.bus == null) return;
         this.bus.x = -334
@@ -101,7 +97,17 @@ class GFLW__EntrancePerformance {
 
         });
 
+    }
 
+     static async BusFullShow(){
+        await hf_engine.WAIT_TIME_FORM_PROMISE(0.05)
+        if (hf_engine.runtime
+            .objects.LevelVars.getFirstInstance()
+            ?.instVars.Bus == false) {
+    
+            GFLW__EntrancePerformance.gp_hideplayer();
+            GFLW__EntrancePerformance.ani__busentering();
+        }
 
 
     }

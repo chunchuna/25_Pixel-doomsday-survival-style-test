@@ -12,8 +12,8 @@ import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 
 export class LevelMain {
-    static CameraZoomValue: number = 0.5;
-    static CameraZoomTarget: number = 0.5;
+    static CameraZoomValue: number = 0.35;
+    static CameraZoomTarget: number = 0.35;
     
     static async JumpOtehrLayoutFromLevel(LevelName: string) {
 
@@ -31,7 +31,7 @@ hf_engine.gl$_ubu_init(() => {
     if (hf_engine.runtime.layout.name != "Level") return
 
     // 初始化时设置初始值
-    LevelMain.CameraZoomValue = 0.8;
+    LevelMain.CameraZoomValue = 0.35;
     LevelMain.CameraZoomTarget = 0.35; // 确保两个值初始一致
     hf_engine.runtime.layout.scale = LevelMain.CameraZoomValue;
 
@@ -44,9 +44,8 @@ hf_engine.gl$_ubu_init(() => {
         }
     });
 
-    hf_engine.runtime.layout.scale = 1;
+    hf_engine.runtime.layout.scale = LevelMain.CameraZoomTarget;
     
-
 
 })
 

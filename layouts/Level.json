@@ -60839,12 +60839,7 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [
-			{
-				"sid": 390336276420851,
-				"expanded": true
-			}
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -65385,6 +65380,10 @@
 				"items": [
 					{
 						"sid": 734396087363382,
+						"expanded": true
+					},
+					{
+						"sid": 390336276420851,
 						"expanded": true
 					}
 				],
