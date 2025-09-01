@@ -15,7 +15,7 @@ hf_engine.gl$_ubu_init(() => {
     // 玩家的初始库存  写在这里
     hf_engine.
     runtime.globalVars.PlayerInventory = SerializeItemsOnly([
-        ...new Apple().toItems(300),
+        ...new Apple().toItems(10),
     ]);
     
     
