@@ -250,7 +250,8 @@
 				"items": [
 					"interaction_panel_action_choose_ui",
 					"hudongtishi_ui",
-					"MainMenuHTML"
+					"MainMenuHTML",
+					"IntroHTML"
 				],
 				"subfolders": [],
 				"name": "UI"
@@ -285,7 +286,8 @@
 	"layouts": {
 		"items": [
 			"Level",
-			"MainMenu"
+			"MainMenu",
+			"Intro"
 		],
 		"subfolders": [
 			{
@@ -321,7 +323,8 @@
 			"ClickObject",
 			"MainMenu",
 			"Save",
-			"Gouhuo"
+			"Gouhuo",
+			"Intro"
 		],
 		"subfolders": []
 	},
@@ -1270,6 +1273,20 @@
 										}
 									],
 									"name": "lib"
+								},
+								{
+									"items": [
+										{
+											"name": "MainMenu.html",
+											"type": "text/html",
+											"sid": 259428966962947,
+											"file-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "html"
 								}
 							],
 							"name": "script"
@@ -1497,5 +1514,5 @@
 	},
 	"viewportWidth": 640,
 	"viewportHeight": 480,
-	"firstLayout": "MainMenu"
+	"firstLayout": "Intro"
 }

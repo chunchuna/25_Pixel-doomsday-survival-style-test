@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chunchun Studio - Simple Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 16px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="loading">Loading...</div>
+
+    <!-- Import Three.js and addons as ES modules -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+        import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.2/+esm';
+
+        // CONFIGURATION - Game window settings
+        const CONFIG = {
+            // Set your game's aspect ratio here (width/height)
+            gameAspectRatio: 4/3, // 4:3 aspect ratio
+            
+            // Default dimensions (used for initial setup and calculations)
+            gameWidth: 640,  // Width in pixels
+            gameHeight: 480, // Height in pixels
+            
+            // Use fixed dimensions instead of aspect ratio
+            useFixedDimensions: false,
+            
+            // Text scale factor (adjust if text appears too large/small)
+            textScaleFactor: 1.0,
+            
+            // Maintain aspect ratio when resizing
+            maintainAspectRatio: true
+        };
+
+        // Scene setup
+        const container = document.getElementById('container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff); // White background
+        
+        // Global variables for text management
+        let textGroup; // Group to hold all letter meshes
+        let textWidth = 0; // Total width of text
+        let textHeight = 0; // Total height of text
+        
+        // Camera setup with game aspect ratio
+        const camera = new THREE.PerspectiveCamera(
+            45, 
+            CONFIG.useFixedDimensions ? CONFIG.gameWidth / CONFIG.gameHeight : CONFIG.gameAspectRatio, 
+            0.1, 
+            1000
+        );
+        camera.position.set(0, 0, 50);
+        camera.lookAt(0, 0, 0);
+        
+        // Renderer setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        // Set renderer size based on configuration
+        function updateRendererSize() {
+            if (CONFIG.useFixedDimensions) {
+                // Use fixed dimensions
+                renderer.setSize(CONFIG.gameWidth, CONFIG.gameHeight);
+                container.style.width = CONFIG.gameWidth + 'px';
+                container.style.height = CONFIG.gameHeight + 'px';
+                
+                // Center the renderer in the window
+                container.style.position = 'absolute';
+                container.style.left = '50%';
+                container.style.top = '50%';
+                container.style.transform = 'translate(-50%, -50%)';
+            } else if (CONFIG.maintainAspectRatio) {
+                // Maintain aspect ratio while filling available space
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                let width, height;
+                
+                // Calculate dimensions that maintain aspect ratio
+                const windowRatio = windowWidth / windowHeight;
+                const gameRatio = CONFIG.gameAspectRatio;
+                
+                if (windowRatio > gameRatio) {
+                    // Window is wider than game ratio
+                    height = windowHeight;
+                    width = height * gameRatio;
+                } else {
+                    // Window is taller than game ratio
+                    width = windowWidth;
+                    height = width / gameRatio;
+                }
+                
+                // Apply calculated dimensions
+                renderer.setSize(width, height);
+                container.style.width = width + 'px';
+                container.style.height = height + 'px';
+                
+                // Center the renderer in the window
+                container.style.position = 'absolute';
+                container.style.left = '50%';
+                container.style.top = '50%';
+                container.style.transform = 'translate(-50%, -50%)';
+                
+                // Update camera aspect ratio
+                camera.aspect = gameRatio;
+                camera.updateProjectionMatrix();
+            } else {
+                // Fill entire window without maintaining aspect ratio
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // Initial size setup
+        updateRendererSize();
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+        
+        // Lighting for interior scene
+        function setupLighting() {
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            // Directional light (like sunlight through windows)
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 100;
+            directionalLight.shadow.camera.left = -20;
+            directionalLight.shadow.camera.right = 20;
+            directionalLight.shadow.camera.top = 20;
+            directionalLight.shadow.camera.bottom = -20;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Point light
+            const pointLight = new THREE.PointLight(0xffffff, 0.5);
+            pointLight.position.set(-10, 5, 10);
+            scene.add(pointLight);
+        }
+        
+        // Create interior environment
+        function createInterior() {
+            // Floor
+            const floorGeometry = new THREE.PlaneGeometry(200, 200);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0xf5f5f5,
+                roughness: 0.1,
+                metalness: 0.1
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -10;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // No grid, as requested
+            
+            // Subtle fog for depth
+            scene.fog = new THREE.Fog(0xffffff, 70, 200);
+        }
+        
+        // Create letters for "Chunchun Studio"
+        function createLetters(font) {
+            const letters = [];
+            const text = "Chunchun Studio";
+            
+            // Create a group to hold all letters
+            textGroup = new THREE.Group();
+            scene.add(textGroup);
+            
+            // Apply scale factor to text
+            const baseSize = 3 * CONFIG.textScaleFactor;
+            const largeSize = 4 * CONFIG.textScaleFactor;
+            
+            // Common material for all letters
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0x2b5797,
+                metalness: 0.7,
+                roughness: 0.2,
+                reflectivity: 0.8,
+                clearcoat: 0.5,
+                clearcoatRoughness: 0.3
+            });
+            
+            // Create individual letters
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === ' ') continue; // Skip spaces
+                
+                const letterGeometry = new TextGeometry(text[i], {
+                    font: font,
+                    size: text[i] === 'S' ? largeSize : baseSize, // Make first letter of Studio larger
+                    height: 1 * CONFIG.textScaleFactor,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.2 * CONFIG.textScaleFactor,
+                    bevelSize: 0.1 * CONFIG.textScaleFactor,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                });
+                
+                letterGeometry.computeBoundingBox();
+                
+                const letter = new THREE.Mesh(letterGeometry, material);
+                letter.castShadow = true;
+                letter.receiveShadow = true;
+                
+                // Set initial random position far away
+                const distance = 100 + Math.random() * 50;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                
+                letter.position.x = distance * Math.sin(phi) * Math.cos(theta);
+                letter.position.y = distance * Math.sin(phi) * Math.sin(theta);
+                letter.position.z = distance * Math.cos(phi);
+                
+                // Random rotation
+                letter.rotation.x = Math.random() * Math.PI;
+                letter.rotation.y = Math.random() * Math.PI;
+                letter.rotation.z = Math.random() * Math.PI;
+                
+                // Store original character and index for positioning
+                letter.userData = {
+                    char: text[i],
+                    index: i,
+                    isSpace: false
+                };
+                
+                textGroup.add(letter);
+                letters.push(letter);
+            }
+            
+            return letters;
+        }
+        
+        // Calculate final positions for letters
+        function calculateFinalPositions(letters) {
+            // First, measure total width of text
+            let totalWidth = 0;
+            let maxHeight = 0;
+            let letterWidths = [];
+            
+            letters.forEach(letter => {
+                const width = letter.geometry.boundingBox.max.x - letter.geometry.boundingBox.min.x;
+                const height = letter.geometry.boundingBox.max.y - letter.geometry.boundingBox.min.y;
+                letterWidths.push(width);
+                totalWidth += width;
+                maxHeight = Math.max(maxHeight, height);
+            });
+            
+            // Add spacing between letters
+            const letterSpacing = 2.2 * CONFIG.textScaleFactor;
+            totalWidth += (letters.length - 1) * letterSpacing;
+            
+            // Add extra space for the space between "Chunchun" and "Studio"
+            const wordSpacing = 6 * CONFIG.textScaleFactor;
+            totalWidth += wordSpacing;
+            
+            // Store text dimensions for responsive adjustments
+            textWidth = totalWidth;
+            textHeight = maxHeight;
+            
+            // Calculate starting X position to center the entire text
+            let currentX = -totalWidth / 2;
+            
+            // Position each letter
+            let letterIndex = 0;
+            for (let i = 0; i < letters.length; i++) {
+                const letter = letters[i];
+                const width = letterWidths[i];
+                
+                // Set target position
+                letter.userData.targetPosition = {
+                    x: currentX + width / 2,
+                    y: 0,
+                    z: 0
+                };
+                
+                letter.userData.targetRotation = {
+                    x: 0,
+                    y: 0,
+                    z: 0
+                };
+                
+                // Update current X position
+                currentX += width + letterSpacing;
+                
+                // Add extra space after "Chunchun"
+                if (letter.userData.char === 'n' && letter.userData.index === 7) {
+                    currentX += wordSpacing;
+                }
+                
+                letterIndex++;
+            }
+        }
+        
+        // Animate letters flying in
+        function animateLetters(letters) {
+            letters.forEach((letter, index) => {
+                const delay = index * 0.15; // Stagger the animations
+                const duration = 2.0 + Math.random() * 0.5; // Slightly random durations
+                
+                // Position animation
+                gsap.to(letter.position, {
+                    x: letter.userData.targetPosition.x,
+                    y: letter.userData.targetPosition.y,
+                    z: letter.userData.targetPosition.z,
+                    duration: duration,
+                    delay: delay,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        // Store original position for reference as soon as letter arrives
+                        letter.userData.originalPosition = {
+                            x: letter.position.x,
+                            y: letter.position.y,
+                            z: letter.position.z
+                        };
+                        
+                        // Start floating immediately when letter arrives at position
+                        startFloatingAnimation(letter);
+                    }
+                });
+                
+                // Rotation animation
+                gsap.to(letter.rotation, {
+                    x: letter.userData.targetRotation.x,
+                    y: letter.userData.targetRotation.y,
+                    z: letter.userData.targetRotation.z,
+                    duration: duration * 0.8,
+                    delay: delay + duration * 0.2, // Start rotating a bit after movement begins
+                    ease: "power1.out"
+                });
+            });
+            
+            // After all letters have arrived, emit completion event
+            const maxDelay = letters.length * 0.15;
+            const maxDuration = 2.5;
+            const totalTime = maxDelay + maxDuration + 0.5; // Add a little buffer
+            
+            setTimeout(() => {
+                // Emit completion event directly (no bounce effect)
+                const event = new Event('animationCompleted');
+                document.dispatchEvent(event);
+            }, totalTime * 1000);
+        }
+        
+        // Add continuous floating animation
+        function startFloatingAnimation(letter) {
+            // Generate random values for this letter's animation
+            const floatAmplitude = (0.15 + Math.random() * 0.1) * CONFIG.textScaleFactor;
+            const floatSpeed = 1.0 + Math.random() * 0.5;
+            const rotateAmplitude = 0.03 + Math.random() * 0.02;
+            
+            // Vertical floating animation
+            gsap.to(letter.position, {
+                y: letter.userData.originalPosition.y + floatAmplitude,
+                duration: floatSpeed,
+                ease: "sine.inOut",
+                yoyo: true,
+                repeat: -1 // Infinite repeat
+            });
+            
+            // Very subtle rotation animation
+            gsap.to(letter.rotation, {
+                x: letter.userData.targetRotation.x + rotateAmplitude,
+                y: letter.userData.targetRotation.y + rotateAmplitude,
+                duration: floatSpeed * 1.2,
+                ease: "sine.inOut",
+                yoyo: true,
+                repeat: -1 // Infinite repeat
+            });
+            
+            // Extremely subtle horizontal movement
+            if (Math.random() > 0.5) {
+                gsap.to(letter.position, {
+                    x: letter.userData.originalPosition.x + floatAmplitude * 0.3,
+                    duration: floatSpeed * 1.5,
+                    ease: "sine.inOut",
+                    yoyo: true,
+                    repeat: -1 // Infinite repeat
+                });
+            }
+        }
+        
+        // Camera movement
+        function setupCameraAnimation() {
+            // Initial position looking at the scene from a distance
+            camera.position.set(0, 10, 80);
+            camera.lookAt(0, 0, 0);
+            
+            // Animate camera to final position
+            gsap.to(camera.position, {
+                x: 0,
+                y: 5,
+                z: calculateIdealCameraDistance(),
+                duration: 4,
+                ease: "power2.inOut"
+            });
+        }
+        
+        // Calculate ideal camera distance based on text size and game aspect ratio
+        function calculateIdealCameraDistance() {
+            // Get aspect ratio from configuration
+            const aspect = CONFIG.useFixedDimensions 
+                ? CONFIG.gameWidth / CONFIG.gameHeight 
+                : CONFIG.gameAspectRatio;
+            
+            // Calculate field of view in radians
+            const fovRadians = camera.fov * (Math.PI / 180);
+            
+            // Calculate distances needed to fit width and height
+            const distanceForWidth = (textWidth / 2) / Math.tan(fovRadians / 2) / aspect;
+            const distanceForHeight = (textHeight / 2) / Math.tan(fovRadians / 2);
+            
+            // Use the larger of the two distances to ensure text fits completely
+            // Add padding factor for safety margin
+            const padding = 1.3; // Increased padding for 4:3 ratio
+            return Math.max(distanceForWidth, distanceForHeight) * padding;
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            if (!CONFIG.useFixedDimensions) {
+                // Update renderer size
+                updateRendererSize();
+                
+                // Adjust camera distance to ensure text remains visible
+                if (textGroup) {
+                    // Calculate new ideal distance
+                    const newDistance = calculateIdealCameraDistance();
+                    
+                    // Update camera position
+                    gsap.to(camera.position, {
+                        z: newDistance,
+                        duration: 0.5,
+                        ease: "power1.out"
+                    });
+                }
+            }
+        }
+        
+        window.addEventListener('resize', onWindowResize, false);
+        
+        // Initialize the scene
+        function init() {
+            setupLighting();
+            createInterior();
+            
+            const fontLoader = new FontLoader();
+            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', function(font) {
+                const letters = createLetters(font);
+                calculateFinalPositions(letters);
+                
+                // Hide loading message
+                document.getElementById('loading').classList.add('hidden');
+                
+                // Start animations
+                setupCameraAnimation();
+                animateLetters(letters);
+            });
+            
+            animate();
+        }
+        
+        // Listen for animation completion
+        document.addEventListener('animationCompleted', function() {
+            console.log('Animation completed - ready to transition to game');
+            // Here you can add code to transition to the game's main menu
+        });
+        
+        // Start initialization
+        init();
+    </script>
+</body>
+</html>
