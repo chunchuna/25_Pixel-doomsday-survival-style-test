@@ -75,9 +75,10 @@ class GFLW__CampfireConversation {
     static Dialogue_DouMaoNanRen_ShouJiNvRen() {
         var DouMaoNanRenInstance = hf_engine
             .runtime.objects.DouMaoNanRen.getFirstInstance();
-
         var ShouJiNvRenInstance = hf_engine
             .runtime.objects.ShouJiNvRen.getFirstInstance();
+
+            
         if (!DouMaoNanRenInstance || !ShouJiNvRenInstance) return
         var NPCShouJiNvRen = AdvanceBubble.SetNPC("ShouJiNvRen", ShouJiNvRenInstance.x - 100, ShouJiNvRenInstance.y);
         var NPCDouMaoNanRen = AdvanceBubble.SetNPC("DouMaoNanRen", DouMaoNanRenInstance.x - 100, DouMaoNanRenInstance.y);
