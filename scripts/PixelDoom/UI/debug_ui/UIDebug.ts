@@ -329,7 +329,7 @@ export class UIDebug {
             this.consoleContainer.style.bottom = '0';
             this.consoleContainer.style.left = 'auto';
             this.consoleContainer.style.right = '0';
-            this.consoleContainer.style.width = '20%'; // 减小宽度，使控制台更靠右侧
+            this.consoleContainer.style.width = '30%'; // 减小宽度，使控制台更靠右侧
             this.consoleContainer.style.transformOrigin = 'bottom right';
         }
 

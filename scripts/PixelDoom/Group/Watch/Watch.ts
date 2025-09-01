@@ -11,6 +11,11 @@ let ctx: CanvasRenderingContext2D | null = null;
 // Watch visibility state
 let isWatchVisible: boolean = false;
 
+// Watch face image
+let watchFaceImage: HTMLImageElement | null = null;
+let isWatchFaceImageLoaded: boolean = false;
+let useWatchFaceImage: boolean = true; // 控制是否使用图片作为表盘
+
 // Game time settings
 const GAME_DAY_START = 7; // 7 AM
 const GAME_NIGHT_START = 19; // 7 PM
@@ -59,9 +64,16 @@ hf_engine.gl$_ubu_update(() => {
 })
 
 class Watch {
-    // Watch dimensions
-    private static readonly WATCH_SIZE = 100;
-    private static readonly WATCH_RADIUS = Watch.WATCH_SIZE / 2;
+    // Watch dimensions 
+    // 这个是整个表的 比例 默认为1 也就是100
+    private static watchSize: number = 200;
+    private static get WATCH_SIZE(): number { return this.watchSize; }
+    private static get WATCH_RADIUS(): number { return this.watchSize / 2; }
+    
+    // 自定义图片尺寸
+    // 如果需要导入自定义的表盘 才需要填写这个值  这个是必须和图片大小绑定的
+    private static watchImageWidth: number = 400;
+    private static watchImageHeight: number = 600;
 
     // Watch colors - now configurable
     private static watchFaceColor: string = "rgba(179,181,250,0.96)";
@@ -72,10 +84,14 @@ class Watch {
     private static hourMarksColor: string = "#333333";
     private static textColor: string = "#333333";
 
-    // Watch hand lengths
-    private static readonly HOUR_HAND_LENGTH = Watch.WATCH_RADIUS * 0.5;
-    private static readonly MINUTE_HAND_LENGTH = Watch.WATCH_RADIUS * 0.7;
-    private static readonly SECOND_HAND_LENGTH = Watch.WATCH_RADIUS * 0.8;
+    // Watch hand lengths - now configurable
+    private static hourHandRatio: number = 0.3;
+    private static minuteHandRatio: number = 0.5;
+    private static secondHandRatio: number = 0.8;
+    
+    private static get HOUR_HAND_LENGTH(): number { return this.WATCH_RADIUS * this.hourHandRatio; }
+    private static get MINUTE_HAND_LENGTH(): number { return this.WATCH_RADIUS * this.minuteHandRatio; }
+    private static get SECOND_HAND_LENGTH(): number { return this.WATCH_RADIUS * this.secondHandRatio; }
 
     /**
      * Initialize the watch display
@@ -104,11 +120,117 @@ class Watch {
         // Get canvas context for drawing
         ctx = watchCanvas.getContext("2d");
 
+        // Load watch face image if enabled
+        if (useWatchFaceImage) {
+            this.loadWatchFaceImage();
+        }
+
         console.log("Watch initialized");
 
         // Hide watch by default
         watchElement.style.display = "none";
         isWatchVisible = false;
+    }
+
+    /**
+     * 设置表盘整体大小
+     * @param size 表盘大小（像素）
+     */
+    public static setWatchSize(size: number): void {
+        if (size <= 0) {
+            console.log("Invalid watch size");
+            return;
+        }
+        
+        this.watchSize = size;
+        
+        // 更新画布大小
+        if (watchCanvas) {
+            watchCanvas.width = size;
+            watchCanvas.height = size;
+        }
+        
+        console.log(`Watch size set to: ${size}px`);
+        
+        // 更新表盘显示
+        if (isWatchVisible) {
+            this.updateWatchFace();
+        }
+    }
+    
+    /**
+     * 设置指针长度比例
+     * @param hourRatio 时针长度比例（相对于表盘半径）
+     * @param minuteRatio 分针长度比例（相对于表盘半径）
+     * @param secondRatio 秒针长度比例（相对于表盘半径，可选）
+     */
+    public static setHandLengthRatios(hourRatio: number, minuteRatio: number, secondRatio?: number): void {
+        if (hourRatio > 0) this.hourHandRatio = hourRatio;
+        if (minuteRatio > 0) this.minuteHandRatio = minuteRatio;
+        if (secondRatio !== undefined && secondRatio > 0) this.secondHandRatio = secondRatio;
+        
+        console.log(`Watch hand ratios set to: hour=${this.hourHandRatio}, minute=${this.minuteHandRatio}, second=${this.secondHandRatio}`);
+        
+        // 更新表盘显示
+        if (isWatchVisible) {
+            this.updateWatchFace();
+        }
+    }
+
+    /**
+     * 设置是否使用图片作为表盘
+     * @param use 是否使用图片
+     */
+    public static setUseWatchFaceImage(use: boolean): void {
+        useWatchFaceImage = use;
+        
+        // 如果切换到使用图片且图片尚未加载，则加载图片
+        if (use && !watchFaceImage && !isWatchFaceImageLoaded) {
+            this.loadWatchFaceImage();
+        }
+        
+        // 更新表盘显示
+        if (isWatchVisible) {
+            this.updateWatchFace();
+        }
+        
+        console.log("Watch face image usage set to: " + use);
+    }
+    
+    /**
+     * 设置表盘图片尺寸
+     * @param width 图片宽度
+     * @param height 图片高度
+     */
+    public static setWatchImageSize(width: number, height: number): void {
+        this.watchImageWidth = width;
+        this.watchImageHeight = height;
+        
+        console.log(`Watch image size set to: ${width}x${height}`);
+        
+        // 如果图片已加载且表盘可见，则更新显示
+        if (isWatchFaceImageLoaded && isWatchVisible) {
+            this.updateWatchFace();
+        }
+    }
+
+    /**
+     * Load the watch face image
+     */
+    private static loadWatchFaceImage(): void {
+        watchFaceImage = new Image();
+        watchFaceImage.onload = () => {
+            isWatchFaceImageLoaded = true;
+            console.log("Watch face image loaded");
+            if (isWatchVisible) {
+                this.updateWatchFace();
+            }
+        };
+        watchFaceImage.onerror = () => {
+            console.log("Failed to load watch face image");
+            isWatchFaceImageLoaded = false;
+        };
+        watchFaceImage.src = "Resource/Art/Watch.png";
     }
 
     /**
@@ -219,8 +341,47 @@ class Watch {
         const gameTime = this.calculateGameTime();
 
         // Draw watch components
-        this.drawWatchFace(ctx);
+        if (useWatchFaceImage && isWatchFaceImageLoaded && watchFaceImage) {
+            // Draw the watch face image
+            this.drawWatchFaceImage(ctx);
+        } else {
+            // Fallback to drawing the watch face manually
+            this.drawWatchFace(ctx);
+        }
+        
         this.drawWatchHands(ctx, gameTime);
+    }
+
+    /**
+     * Draw the watch face image
+     */
+    private static drawWatchFaceImage(ctx: CanvasRenderingContext2D): void {
+        if (!watchFaceImage) return;
+        
+        // Get image dimensions - use custom dimensions if set
+        const imgWidth = this.watchImageWidth;
+        const imgHeight = this.watchImageHeight;
+        
+        // Calculate scaling and positioning to maintain aspect ratio
+        const scale = Math.min(
+            Watch.WATCH_SIZE / imgWidth,
+            Watch.WATCH_SIZE / imgHeight
+        );
+        
+        // Calculate centered position
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
+        const offsetX = (Watch.WATCH_SIZE - scaledWidth) / 2;
+        const offsetY = (Watch.WATCH_SIZE - scaledHeight) / 2;
+        
+        // Draw the image centered on the canvas with proper scaling
+        ctx.drawImage(
+            watchFaceImage,
+            offsetX,
+            offsetY,
+            scaledWidth,
+            scaledHeight
+        );
     }
 
     /**
@@ -388,10 +549,10 @@ class Watch {
         const isDaytime = hours >= GAME_DAY_START && hours < GAME_NIGHT_START;
         const indicatorY = Watch.WATCH_SIZE - 20;
 
-        ctx.font = "10px Arial";
-        ctx.fillStyle = this.textColor;
-        ctx.textAlign = "center";
-        ctx.fillText(isDaytime ? "DAY" : "NIGHT", Watch.WATCH_SIZE / 2, indicatorY);
+        // ctx.font = "10px Arial";
+        // ctx.fillStyle = this.textColor;
+        // ctx.textAlign = "center";
+        // ctx.fillText(isDaytime ? "DAY" : "NIGHT", Watch.WATCH_SIZE / 2, indicatorY);
     }
 
     /**

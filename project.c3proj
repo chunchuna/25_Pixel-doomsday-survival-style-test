@@ -1238,16 +1238,7 @@
 					"name": "UI"
 				},
 				{
-					"items": [
-						{
-							"name": "Tree.png",
-							"type": "image/png",
-							"sid": 374567787382291,
-							"file-info": {
-								"purpose": "none"
-							}
-						}
-					],
+					"items": [],
 					"subfolders": [
 						{
 							"items": [],
@@ -1282,6 +1273,28 @@
 								}
 							],
 							"name": "script"
+						},
+						{
+							"items": [
+								{
+									"name": "Tree.png",
+									"type": "image/png",
+									"sid": 374567787382291,
+									"file-info": {
+										"purpose": "none"
+									}
+								},
+								{
+									"name": "Watch.png",
+									"type": "image/png",
+									"sid": 379167420680067,
+									"file-info": {
+										"purpose": "none"
+									}
+								}
+							],
+							"subfolders": [],
+							"name": "Art"
 						}
 					],
 					"name": "Resource"
@@ -1441,7 +1454,7 @@
 		"zAxisScale": "normalized",
 		"fov": 0.7853981633974483,
 		"useLoaderLayout": false,
-		"fullscreenMode": "scale-inner",
+		"fullscreenMode": "letterbox-scale",
 		"fullscreenQuality": "high",
 		"viewportFit": "auto",
 		"backgroundColor": [
