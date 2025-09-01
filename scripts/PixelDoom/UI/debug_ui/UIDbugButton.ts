@@ -332,105 +332,23 @@ export class IMGUIDebugButton {
     private static renderDebugButtonWindow(): void {
         const ImGui = globalThis.ImGui;
 
+        // Set window style for cleaner interface
+        ImGui.PushStyleVar(ImGui.StyleVar.FrameRounding, 4.0);
+        ImGui.PushStyleVar(ImGui.StyleVar.ItemSpacing, new ImGui.ImVec2(8, 6));
+        ImGui.PushStyleColor(ImGui.Col.Header, new ImGui.ImVec4(0.2, 0.4, 0.6, 0.7));
+        ImGui.PushStyleColor(ImGui.Col.HeaderHovered, new ImGui.ImVec4(0.3, 0.5, 0.7, 0.8));
+        ImGui.PushStyleColor(ImGui.Col.HeaderActive, new ImGui.ImVec4(0.4, 0.6, 0.8, 1.0));
+
         // Set window content area
         const contentAvail = ImGui.GetContentRegionAvail();
 
         // === Search Section ===
-        ImGui.Text("Search:");
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(contentAvail.x - 60);
-        
-        // Use the correct InputText callback pattern like other examples
-        if (ImGui.InputText("##search_input", (value = this.inputTextValue) => {
-            this.inputTextValue = value;
-            return this.inputTextValue;
-        })) {
-            this.searchBuffer = this.inputTextValue;
-            this.searchFilter = this.searchBuffer.toLowerCase();
-            console.log("Search updated:", this.searchFilter);
-        }
-
-        // Clear button
-        ImGui.SameLine();
-        if (ImGui.Button("X##clear")) {
-            this.inputTextValue = "";
-            this.searchBuffer = "";
-            this.searchFilter = "";
-        }
-
+        this.renderSearchBar(contentAvail);
         ImGui.Separator();
 
-        // === Page Navigation Section ===
+        // === Navigation Section ===
         this.updatePageData();
-        
-        if (this.pageNames.length > 0) {
-            // Handle keyboard shortcuts for page navigation
-            const io = ImGui.GetIO();
-            if (io.KeysDown && ImGui.IsWindowFocused()) {
-                // Left arrow or A key for previous page
-                if (io.KeysDown[ImGui.Key.LeftArrow] || io.KeysDown[ImGui.Key.A]) {
-                    this.currentPageIndex = Math.max(0, this.currentPageIndex - 1);
-                }
-                // Right arrow or D key for next page
-                if (io.KeysDown[ImGui.Key.RightArrow] || io.KeysDown[ImGui.Key.D]) {
-                    this.currentPageIndex = Math.min(this.pageNames.length - 1, this.currentPageIndex + 1);
-                }
-            }
-            
-            // Previous button
-            if (ImGui.Button("<<##prev") || ImGui.IsKeyPressed(ImGui.Key.LeftArrow)) {
-                this.currentPageIndex = Math.max(0, this.currentPageIndex - 1);
-            }
-            
-            // Add tooltip
-            if (ImGui.IsItemHovered()) {
-                ImGui.BeginTooltip();
-                ImGui.Text("Previous page (Left Arrow / A)");
-                ImGui.EndTooltip();
-            }
-            
-            ImGui.SameLine();
-            
-            // Current page info with more details
-            const currentPageName = this.pageNames[this.currentPageIndex] || "Unknown";
-            const currentPageButtons = this.pageButtons.get(currentPageName) || [];
-            const pageInfo = `${this.currentPageIndex + 1}/${this.pageNames.length}: ${currentPageName} (${currentPageButtons.length} buttons)`;
-            ImGui.Text(pageInfo);
-            
-            ImGui.SameLine();
-            
-            // Next button
-            if (ImGui.Button(">>##next") || ImGui.IsKeyPressed(ImGui.Key.RightArrow)) {
-                this.currentPageIndex = Math.min(this.pageNames.length - 1, this.currentPageIndex + 1);
-            }
-            
-            // Add tooltip
-            if (ImGui.IsItemHovered()) {
-                ImGui.BeginTooltip();
-                ImGui.Text("Next page (Right Arrow / D)");
-                ImGui.EndTooltip();
-            }
-            
-            // Add page selector dropdown for quick access
-            ImGui.SameLine();
-            ImGui.Text("Quick:");
-            ImGui.SameLine();
-            if (ImGui.BeginCombo("##page_selector", currentPageName)) {
-                for (let i = 0; i < this.pageNames.length; i++) {
-                    const pageName = this.pageNames[i];
-                    const isSelected = i === this.currentPageIndex;
-                    if (ImGui.Selectable(pageName, isSelected)) {
-                        this.currentPageIndex = i;
-                    }
-                    if (isSelected) {
-                        ImGui.SetItemDefaultFocus();
-                    }
-                }
-                ImGui.EndCombo();
-            }
-            
-            ImGui.Separator();
-        }
+        this.renderNavigationBar();
 
         // === Content Section ===
         if (this.searchFilter) {
@@ -441,22 +359,105 @@ export class IMGUIDebugButton {
             // Show current page content
             this.renderCurrentPage();
         }
+
+        // Restore window style
+        ImGui.PopStyleColor(3);
+        ImGui.PopStyleVar(2);
     }
 
     /**
-     * Render uncategorized buttons
+     * Render search bar
+     * @param contentAvail Available content area
      * @private
      */
-    private static renderUncategorizedButtons(): void {
+    private static renderSearchBar(contentAvail: any): void {
         const ImGui = globalThis.ImGui;
 
-        // Get uncategorized buttons
-        const uncategorizedButtons = this.buttons.filter(btn => !btn.categoryId);
+        // Search icon
+        ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 1.0, 1.0), "S");  // Use S for search
+        ImGui.SameLine();
+        
+        // Search input
+        ImGui.SetNextItemWidth(contentAvail.x - 60);
+        if (ImGui.InputText("##search_input", (value = this.inputTextValue) => {
+            this.inputTextValue = value;
+            return this.inputTextValue;
+        }, ImGui.InputTextFlags.AutoSelectAll)) {
+            this.searchBuffer = this.inputTextValue;
+            this.searchFilter = this.searchBuffer.toLowerCase();
+        }
 
-        // Render uncategorized buttons with category suffix
-        uncategorizedButtons.forEach(button => {
-            this.renderButton(button, "_general");
-        });
+        // Clear button
+        ImGui.SameLine();
+        if (ImGui.Button("X##clear")) {
+            this.inputTextValue = "";
+            this.searchBuffer = "";
+            this.searchFilter = "";
+        }
+    }
+
+    /**
+     * Render navigation bar
+     * @private
+     */
+    private static renderNavigationBar(): void {
+        const ImGui = globalThis.ImGui;
+        
+        if (this.pageNames.length > 0) {
+            // Create horizontal navigation bar
+            ImGui.BeginGroup();
+            
+            // Previous page button
+            if (ImGui.Button("<##prev")) {
+                this.currentPageIndex = Math.max(0, this.currentPageIndex - 1);
+            }
+            if (ImGui.IsItemHovered()) {
+                ImGui.BeginTooltip();
+                ImGui.Text("Previous (Left / A)");
+                ImGui.EndTooltip();
+            }
+            
+            ImGui.SameLine();
+            
+            // Current page info
+            const currentPageName = this.pageNames[this.currentPageIndex] || "Unknown";
+            const currentPageButtons = this.pageButtons.get(currentPageName) || [];
+            ImGui.PushStyleColor(ImGui.Col.Text, new ImGui.ImVec4(1.0, 1.0, 0.7, 1.0));
+            ImGui.Text(`${currentPageName} (${currentPageButtons.length})`);
+            ImGui.PopStyleColor();
+            
+            ImGui.SameLine();
+            
+            // Next page button
+            if (ImGui.Button(">##next")) {
+                this.currentPageIndex = Math.min(this.pageNames.length - 1, this.currentPageIndex + 1);
+            }
+            if (ImGui.IsItemHovered()) {
+                ImGui.BeginTooltip();
+                ImGui.Text("Next (Right / D)");
+                ImGui.EndTooltip();
+            }
+            
+            // Add page selector dropdown
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetWindowWidth() - 80);
+            if (ImGui.BeginCombo("##page_selector", "Pages")) {
+                for (let i = 0; i < this.pageNames.length; i++) {
+                    const pageName = this.pageNames[i];
+                    const isSelected = i === this.currentPageIndex;
+                    if (ImGui.Selectable(`${pageName}##page${i}`, isSelected)) {
+                        this.currentPageIndex = i;
+                    }
+                    if (isSelected) {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+            
+            ImGui.EndGroup();
+            ImGui.Separator();
+        }
     }
 
     /**
@@ -468,6 +469,9 @@ export class IMGUIDebugButton {
     private static renderButton(button: DebugButton, idSuffix: string = ""): void {
         const ImGui = globalThis.ImGui;
 
+        // Create a group to contain the entire button row
+        ImGui.BeginGroup();
+        
         // Button row - favorite star + button + tooltip
         const buttonWidth = ImGui.GetContentRegionAvail().x - 30; // Leave space for star
 
@@ -477,8 +481,8 @@ export class IMGUIDebugButton {
 
         // Favorite star button
         const isFavorite = this.favoriteButtons.has(button.id);
-        const starText = isFavorite ? "F" : "f";
-        const starColor = isFavorite ? [1.0, 1.0, 0.0, 1.0] : [0.5, 0.5, 0.5, 1.0];
+        const starText = isFavorite ? "*" : "o";  // Star/circle
+        const starColor = isFavorite ? [1.0, 0.9, 0.0, 1.0] : [0.6, 0.6, 0.6, 0.8];
         
         ImGui.PushStyleColor(ImGui.Col.Text, new ImGui.ImVec4(...starColor));
         if (ImGui.SmallButton(starText + "##" + starId)) {
@@ -526,6 +530,11 @@ export class IMGUIDebugButton {
                 ImGui.Col.ButtonActive,
                 new ImGui.ImVec4(...activeColor)
             );
+        } else {
+            // Set default style for normal buttons
+            ImGui.PushStyleColor(ImGui.Col.Button, new ImGui.ImVec4(0.2, 0.3, 0.4, 0.8));
+            ImGui.PushStyleColor(ImGui.Col.ButtonHovered, new ImGui.ImVec4(0.3, 0.4, 0.5, 0.9));
+            ImGui.PushStyleColor(ImGui.Col.ButtonActive, new ImGui.ImVec4(0.4, 0.5, 0.6, 1.0));
         }
 
         // Render button with unique ID
@@ -559,19 +568,10 @@ export class IMGUIDebugButton {
             ImGui.EndTooltip();
         }
 
-        // If has custom color, restore style
-        if (button.color) {
-            ImGui.PopStyleColor(3);
-        }
-
-        // Show source script as small text below button
-        if (button.sourceScript) {
-            ImGui.PushStyleColor(ImGui.Col.Text, new ImGui.ImVec4(0.6, 0.6, 0.6, 1.0));
-            ImGui.Indent(30); // Align with button (after star)
-            ImGui.TextWrapped(`[${button.sourceScript}]`);
-            ImGui.Unindent(30);
-            ImGui.PopStyleColor(1);
-        }
+        // Restore style
+        ImGui.PopStyleColor(3);
+        
+        ImGui.EndGroup();
     }
 
     /**
@@ -1034,10 +1034,33 @@ export class IMGUIDebugButton {
     private static renderSearchResults(buttons: DebugButton[], categories: Map<string, Category>): void {
         const ImGui = globalThis.ImGui;
 
-        // Render each button with search suffix
+        if (buttons.length === 0) {
+            ImGui.TextColored(
+                new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
+                `No matches found for "${this.searchFilter}"`
+            );
+            return;
+        }
+
+        ImGui.TextColored(
+            new ImGui.ImVec4(0.7, 1.0, 0.7, 1.0),
+            `Found ${buttons.length} matching results:`
+        );
+        
+        // Create grid layout
+        const windowWidth = ImGui.GetWindowContentRegionWidth();
+        const buttonWidth = 150; // Button width
+        const columnsCount = Math.max(1, Math.floor(windowWidth / buttonWidth));
+        
+        ImGui.Columns(columnsCount, "search_columns", false);
+        
+        // Render each button
         buttons.forEach(button => {
             this.renderButton(button, "_search");
+            ImGui.NextColumn();
         });
+        
+        ImGui.Columns(1);
     }
 
     /**
@@ -1160,7 +1183,7 @@ export class IMGUIDebugButton {
     }
 
     /**
-     * Render quick access section
+     * Render quick access area
      * @private
      */
     private static renderQuickAccess(): void {
@@ -1178,23 +1201,44 @@ export class IMGUIDebugButton {
 
         let hasQuickAccess = false;
 
-        // Render favorites with unique suffix
+        // Create collapsing sections, default open
         if (favoriteButtonsList.length > 0) {
             hasQuickAccess = true;
-            ImGui.TextColored(new ImGui.ImVec4(1.0, 1.0, 0.0, 1.0), "Favorites:");
-            favoriteButtonsList.forEach(button => {
-                this.renderButton(button, "_favorite");
-            });
+            if (ImGui.CollapsingHeader("Favorites", ImGui.TreeNodeFlags.DefaultOpen)) {
+                // Create grid layout
+                const windowWidth = ImGui.GetWindowContentRegionWidth();
+                const buttonWidth = 150; // Button width
+                const columnsCount = Math.max(1, Math.floor(windowWidth / buttonWidth));
+                
+                ImGui.Columns(columnsCount, "favorite_columns", false);
+                
+                favoriteButtonsList.forEach((button, index) => {
+                    this.renderButton(button, "_favorite");
+                    ImGui.NextColumn();
+                });
+                
+                ImGui.Columns(1);
+            }
         }
 
-        // Render recent with unique suffix
+        // Render recent buttons
         if (recentButtonsList.length > 0) {
-            if (hasQuickAccess) ImGui.Spacing();
             hasQuickAccess = true;
-            ImGui.TextColored(new ImGui.ImVec4(0.7, 0.7, 1.0, 1.0), "Recent:");
-            recentButtonsList.forEach(button => {
-                this.renderButton(button, "_recent");
-            });
+            if (ImGui.CollapsingHeader("Recent", ImGui.TreeNodeFlags.DefaultOpen)) {
+                // Create grid layout
+                const windowWidth = ImGui.GetWindowContentRegionWidth();
+                const buttonWidth = 150; // Button width
+                const columnsCount = Math.max(1, Math.floor(windowWidth / buttonWidth));
+                
+                ImGui.Columns(columnsCount, "recent_columns", false);
+                
+                recentButtonsList.forEach((button, index) => {
+                    this.renderButton(button, "_recent");
+                    ImGui.NextColumn();
+                });
+                
+                ImGui.Columns(1);
+            }
         }
 
         if (hasQuickAccess) {
@@ -1256,18 +1300,55 @@ export class IMGUIDebugButton {
 
         // Render current page buttons
         if (currentPageButtons.length > 0) {
+            // Create grid layout
+            const windowWidth = ImGui.GetWindowContentRegionWidth();
+            const buttonWidth = 150; // Button width
+            const columnsCount = Math.max(1, Math.floor(windowWidth / buttonWidth));
+            
             ImGui.TextColored(new ImGui.ImVec4(0.8, 0.8, 1.0, 1.0), `${currentPageName}:`);
+            
+            ImGui.Columns(columnsCount, "page_columns", false);
+            
             currentPageButtons.forEach(button => {
                 // Use page name as suffix to ensure uniqueness
                 const pageSuffix = `_page_${currentPageName.toLowerCase().replace(/\s+/g, '_')}`;
                 this.renderButton(button, pageSuffix);
+                ImGui.NextColumn();
             });
+            
+            ImGui.Columns(1);
         } else {
             ImGui.TextColored(
                 new ImGui.ImVec4(0.7, 0.7, 0.7, 1.0),
                 `No buttons in ${currentPageName} category`
             );
         }
+    }
+
+    /**
+     * Render uncategorized buttons
+     * @private
+     */
+    private static renderUncategorizedButtons(): void {
+        const ImGui = globalThis.ImGui;
+
+        // Get uncategorized buttons
+        const uncategorizedButtons = this.buttons.filter(btn => !btn.categoryId);
+        
+        // Create grid layout
+        const windowWidth = ImGui.GetWindowContentRegionWidth();
+        const buttonWidth = 150; // Button width
+        const columnsCount = Math.max(1, Math.floor(windowWidth / buttonWidth));
+        
+        ImGui.Columns(columnsCount, "general_columns", false);
+        
+        // Render uncategorized buttons
+        uncategorizedButtons.forEach(button => {
+            this.renderButton(button, "_general");
+            ImGui.NextColumn();
+        });
+        
+        ImGui.Columns(1);
     }
 }
 

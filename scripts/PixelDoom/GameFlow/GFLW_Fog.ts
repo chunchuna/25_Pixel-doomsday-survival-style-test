@@ -23,7 +23,6 @@ hf_engine.gl$_layout_end(() => {
     if (GFLW_Fog.AmbientGetDay && GFLW_Fog.AmbientGetNight) {
         AmbientLight.removeDayStartListener(GFLW_Fog.AmbientGetDay)
         AmbientLight.removeNightStartListener(GFLW_Fog.AmbientGetNight)
-        alert("清理白天黑夜的监听")
 
 
     }
