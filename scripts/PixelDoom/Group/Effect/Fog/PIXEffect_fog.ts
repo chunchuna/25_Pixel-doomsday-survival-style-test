@@ -46,6 +46,9 @@ var MaxFogCount = 0; // 记录最大雾数量
 var FogRadius = 100; // 记录雾的半径
 var DebugRender = false;
 
+// 新增：标记雾生成系统是否已经在运行
+var IsFogSystemActive = false;
+
 // 新增：存储雾实例与debug元素的映射关系
 var FogDebugMap: Map<number, { boxKey: string; lineKey: string }> = new Map();
 
@@ -253,12 +256,27 @@ export async function createFogAroundInstance(
 
     await hf_engine.WAIT_TIME_FORM_PROMISE(1)
     if (hf_engine.LayoutName !== "Level") return
+    
+    // 检查是否已有雾系统在运行，如果有则先停止
+    if (IsFogSystemActive) {
+        console.log("Fog system already active. Stopping current system before creating a new one.");
+        stopFogGeneration(0.5); // 快速淡出现有雾
+        await hf_engine.WAIT_TIME_FORM_PROMISE(0.7); // 等待淡出完成
+    }
+    
+    // 标记雾系统为活动状态
+    IsFogSystemActive = true;
+    console.log(`Starting new fog system with ${fogCount} instances`);
 
     // Set global variables for your distance calculation system
     TargetInstance = targetInstance;
     MaxDsitance = maxDistance;
     MaxFogCount = fogCount; // 记录最大雾数量
     FogRadius = radius; // 记录雾半径
+    
+    // Clear any existing fading out tracking to prevent issues with new fog generation
+    FogInstancesFadingOut.clear();
+    console.log("Cleared fog tracking for new fog generation cycle");
 
     var FogTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100)
     FogTimer.behaviors.Timer.startTimer(checkInterval, "fog_check_timer", "regular")
@@ -387,8 +405,29 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
             // Reset the timer reference
             FogGenerationTimer = null;
             
-            // Set MaxFogCount to 0 to prevent any new fog creation
+            // 标记雾系统为非活动状态
+            IsFogSystemActive = false;
+            console.log("Fog system marked as inactive");
+            
+            // Temporarily set MaxFogCount to 0 to prevent new fog creation during this cycle
+            // We don't permanently reset it to allow fog generation in future nights
+            const originalMaxFogCount = MaxFogCount;
             MaxFogCount = 0;
+            
+            // Create a timer to restore MaxFogCount after all fog has faded out
+            const restoreTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -300, -300, false);
+            if (restoreTimer && restoreTimer.behaviors.Timer) {
+                // Wait a bit longer than fadeOutTime to ensure all fog is gone
+                restoreTimer.behaviors.Timer.startTimer(fadeOutTime + 1.0, "restore_fog_count", "once");
+                restoreTimer.behaviors.Timer.addEventListener("timer", (e) => {
+                    if (e.tag === "restore_fog_count") {
+                        // Restore the original MaxFogCount value
+                        MaxFogCount = originalMaxFogCount;
+                        console.log(`Restored MaxFogCount to ${MaxFogCount} for future fog generation`);
+                        restoreTimer.destroy();
+                    }
+                });
+            }
             
             // Get all existing fog instances
             const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
@@ -425,8 +464,12 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
                                         // Remove from tracking set and destroy fog instance after fade completes
                                         FogInstancesFadingOut.delete(fogInstance.uid);
                                         try {
-                                            // Simply try to destroy the instance without checking isDestroyed
-                                            fogInstance.destroy();
+                                            // Check if the instance still exists and is valid before destroying
+                                            if (fogInstance && typeof fogInstance.destroy === 'function') {
+                                                fogInstance.destroy();
+                                            } else {
+                                                console.log(`Fog instance ${fogInstance.uid} already destroyed or invalid`);
+                                            }
                                         } catch (err) {
                                             console.log(`Error destroying fog instance ${fogInstance.uid}: ${err}`);
                                         }
@@ -461,6 +504,9 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
     } else {
         console.log("No active fog generation timer found.");
         
+        // 标记雾系统为非活动状态
+        IsFogSystemActive = false;
+        
         // Even if no timer is running, try to fade out any existing fog
         const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
         if (fogInstances.length > 0) {
@@ -488,8 +534,12 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
                                     if (e.tag === `cleanup_${fogInstance.uid}`) {
                                         FogInstancesFadingOut.delete(fogInstance.uid);
                                         try {
-                                            // Simply try to destroy the instance without checking isDestroyed
-                                            fogInstance.destroy();
+                                            // Check if the instance still exists and is valid before destroying
+                                            if (fogInstance && typeof fogInstance.destroy === 'function') {
+                                                fogInstance.destroy();
+                                            } else {
+                                                console.log(`Fog instance ${fogInstance.uid} already destroyed or invalid`);
+                                            }
                                         } catch (err) {
                                             console.log(`Error destroying fog instance ${fogInstance.uid}: ${err}`);
                                         }

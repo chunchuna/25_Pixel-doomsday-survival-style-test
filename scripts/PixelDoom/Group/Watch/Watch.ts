@@ -8,6 +8,9 @@ let watchCanvas: HTMLCanvasElement | null = null;
 // Canvas context for drawing
 let ctx: CanvasRenderingContext2D | null = null;
 
+// Watch visibility state
+let isWatchVisible: boolean = false;
+
 // Game time settings
 const GAME_DAY_START = 7; // 7 AM
 const GAME_NIGHT_START = 19; // 7 PM
@@ -29,11 +32,15 @@ hf_engine.gl$_ubu_init(() => {
         // Update watch to show night time
         Watch.updateWatchFace();
     });
+
+    Watch.show();
 })
 
 hf_engine.gl$_ubu_update(() => {
-    // Update the watch every frame
-    Watch.updateWatchFace();
+    // Update the watch every frame if visible
+    if (isWatchVisible) {
+        Watch.updateWatchFace();
+    }
 })
 
 class Watch {
@@ -41,13 +48,14 @@ class Watch {
     private static readonly WATCH_SIZE = 100;
     private static readonly WATCH_RADIUS = Watch.WATCH_SIZE / 2;
     
-    // Watch colors
-    private static readonly WATCH_FACE_COLOR = "#f5f5f5";
-    private static readonly WATCH_BORDER_COLOR = "#333333";
-    private static readonly HOUR_HAND_COLOR = "#333333";
-    private static readonly MINUTE_HAND_COLOR = "#555555";
-    private static readonly SECOND_HAND_COLOR = "#ff0000";
-    private static readonly HOUR_MARKS_COLOR = "#333333";
+    // Watch colors - now configurable
+    private static watchFaceColor: string = "rgba(179,181,250,0.96)";
+    private static watchBorderColor: string = "#333333";
+    private static hourHandColor: string = "#333333";
+    private static minuteHandColor: string = "#555555";
+    private static secondHandColor: string = "#ff0000";
+    private static hourMarksColor: string = "#333333";
+    private static textColor: string = "#333333";
     
     // Watch hand lengths
     private static readonly HOUR_HAND_LENGTH = Watch.WATCH_RADIUS * 0.5;
@@ -62,8 +70,8 @@ class Watch {
         watchElement = document.createElement("div");
         watchElement.id = "game-watch";
         watchElement.style.position = "fixed";
-        watchElement.style.left = "300px";
-        watchElement.style.bottom = "500px";
+        watchElement.style.left = "10px";
+        watchElement.style.top = "10px";
         watchElement.style.zIndex = "1000";
         
         // Create canvas for the watch face
@@ -83,8 +91,104 @@ class Watch {
         
         console.log("Watch initialized");
         
-        // Initial draw
-        this.updateWatchFace();
+        // Hide watch by default
+        watchElement.style.display = "none";
+        isWatchVisible = false;
+    }
+    
+    /**
+     * Show the watch
+     */
+    public static show(): void {
+        if (!watchElement) {
+            this.initialize();
+        }
+        
+        if (watchElement) {
+            watchElement.style.display = "block";
+            isWatchVisible = true;
+            console.log("Watch shown");
+            
+            // Initial draw
+            this.updateWatchFace();
+        }
+    }
+    
+    /**
+     * Hide the watch
+     */
+    public static hide(): void {
+        if (watchElement) {
+            watchElement.style.display = "none";
+            isWatchVisible = false;
+            console.log("Watch hidden");
+        }
+    }
+    
+    /**
+     * Toggle watch visibility
+     */
+    public static toggle(): void {
+        if (isWatchVisible) {
+            this.hide();
+        } else {
+            this.show();
+        }
+    }
+    
+    /**
+     * Check if watch is currently visible
+     */
+    public static isVisible(): boolean {
+        return isWatchVisible;
+    }
+    
+    /**
+     * Set watch colors
+     */
+    public static setColors(options: {
+        faceColor?: string,
+        borderColor?: string,
+        hourHandColor?: string,
+        minuteHandColor?: string,
+        secondHandColor?: string,
+        hourMarksColor?: string,
+        textColor?: string
+    }): void {
+        if (options.faceColor) this.watchFaceColor = options.faceColor;
+        if (options.borderColor) this.watchBorderColor = options.borderColor;
+        if (options.hourHandColor) this.hourHandColor = options.hourHandColor;
+        if (options.minuteHandColor) this.minuteHandColor = options.minuteHandColor;
+        if (options.secondHandColor) this.secondHandColor = options.secondHandColor;
+        if (options.hourMarksColor) this.hourMarksColor = options.hourMarksColor;
+        if (options.textColor) this.textColor = options.textColor;
+        
+        console.log("Watch colors updated");
+        
+        // Update the watch face if visible
+        if (isWatchVisible) {
+            this.updateWatchFace();
+        }
+    }
+    
+    /**
+     * Reset colors to default
+     */
+    public static resetColors(): void {
+        this.watchFaceColor = "#f5f5f5";
+        this.watchBorderColor = "#333333";
+        this.hourHandColor = "#333333";
+        this.minuteHandColor = "#555555";
+        this.secondHandColor = "#ff0000";
+        this.hourMarksColor = "#333333";
+        this.textColor = "#333333";
+        
+        console.log("Watch colors reset to default");
+        
+        // Update the watch face if visible
+        if (isWatchVisible) {
+            this.updateWatchFace();
+        }
     }
     
     /**
@@ -171,12 +275,12 @@ class Watch {
         // Draw watch face (circle)
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fillStyle = Watch.WATCH_FACE_COLOR;
+        ctx.fillStyle = this.watchFaceColor;
         ctx.fill();
         
         // Draw watch border
         ctx.lineWidth = 2;
-        ctx.strokeStyle = Watch.WATCH_BORDER_COLOR;
+        ctx.strokeStyle = this.watchBorderColor;
         ctx.stroke();
         
         // Draw hour marks
@@ -197,7 +301,7 @@ class Watch {
             ctx.moveTo(startX, startY);
             ctx.lineTo(endX, endY);
             ctx.lineWidth = isMainHour ? 2 : 1;
-            ctx.strokeStyle = Watch.HOUR_MARKS_COLOR;
+            ctx.strokeStyle = this.hourMarksColor;
             ctx.stroke();
         }
     }
@@ -220,15 +324,15 @@ class Watch {
         const minuteAngle = (minutes / 60) * Math.PI * 2 - Math.PI / 2;
         
         // Draw hour hand
-        this.drawHand(ctx, centerX, centerY, hourAngle, Watch.HOUR_HAND_LENGTH, 4, Watch.HOUR_HAND_COLOR);
+        this.drawHand(ctx, centerX, centerY, hourAngle, Watch.HOUR_HAND_LENGTH, 4, this.hourHandColor);
         
         // Draw minute hand
-        this.drawHand(ctx, centerX, centerY, minuteAngle, Watch.MINUTE_HAND_LENGTH, 2, Watch.MINUTE_HAND_COLOR);
+        this.drawHand(ctx, centerX, centerY, minuteAngle, Watch.MINUTE_HAND_LENGTH, 2, this.minuteHandColor);
         
         // Draw center circle
         ctx.beginPath();
         ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
-        ctx.fillStyle = Watch.HOUR_HAND_COLOR;
+        ctx.fillStyle = this.hourHandColor;
         ctx.fill();
         
         // Add day/night indicator
@@ -270,7 +374,7 @@ class Watch {
         const indicatorY = Watch.WATCH_SIZE - 20;
         
         ctx.font = "10px Arial";
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = this.textColor;
         ctx.textAlign = "center";
         ctx.fillText(isDaytime ? "DAY" : "NIGHT", Watch.WATCH_SIZE / 2, indicatorY);
     }
@@ -283,7 +387,7 @@ class Watch {
         const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         
         ctx.font = "10px Arial";
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = this.textColor;
         ctx.textAlign = "center";
         ctx.fillText(timeString, Watch.WATCH_SIZE / 2, Watch.WATCH_SIZE / 2 + 20);
     }

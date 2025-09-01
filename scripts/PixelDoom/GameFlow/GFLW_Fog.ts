@@ -7,13 +7,10 @@ hf_engine.gl$_ubu_init(() => {
 
     var AmbientGetNight = () => {
         GFLW_Fog.StartFog()
-        AmbientLight.removeNightStartListener(AmbientGetNight)
-
     }
 
     var AmbientGetDay = () => {
         GFLW_Fog.StopFogGeneration()
-        AmbientLight.removeDayStartListener(AmbientGetDay)
     }
 
     AmbientLight.onNightStart(AmbientGetNight)
