@@ -246,6 +246,8 @@ export class ClickObject {
 
       }
 
+      
+
 
       /** 通过 UI 生成按钮列表 */
       static GenerateInstructionsBy_interactionpanelactionchoose(Content: string, WindowName: string) {

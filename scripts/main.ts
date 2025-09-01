@@ -75,6 +75,8 @@ import "./PixelDoom/UI/name_hint_card_ui/UINameHintCard.js"
 
 import "./PixelDoom/Group/Debug/PIXPerformance.js" 
 
+import "./PixelDoom/Module/PIXAreaTools.js"
+
 // GAME FLOW
 
 import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"

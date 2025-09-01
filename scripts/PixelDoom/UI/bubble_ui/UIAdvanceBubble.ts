@@ -13,9 +13,6 @@ hf_engine.gl$_ubu_init(()=>{
     
 })
 
-
-
-
 // NPC对象接口定义
 interface INPC {
     name: string;
@@ -489,7 +486,7 @@ export class AdvanceBubble {
                             // 继续设置自动播放
                             setTimeout(() => {
                                 this.setupAutoPlay(dialogue);
-                            }, 50); // 短暂延迟，确保UI更新
+                            }, 10); // 短暂延迟，确保UI更新
                         } else {
                             if (this.debugMode) {
                                 console.log(`Cannot continue dialogue from index ${currentIndex} to ${nextIndex}`);

@@ -11,9 +11,6 @@ import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UISc
 import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 
-
-
-
 export class LevelMain {
     static CameraZoomValue: number = 0.5;
     static CameraZoomTarget: number = 0.5;
@@ -26,11 +23,8 @@ export class LevelMain {
         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
             hf_engine.runtime.goToLayout(LevelName)
         })
-
-
     }
 }
-
 
 hf_engine.gl$_ubu_init(() => {
 
@@ -51,10 +45,10 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     hf_engine.runtime.layout.scale = 1;
+    
 
 
 })
-
 
 hf_engine.gl$_ubu_update(() => {
     //  平滑镜头缩放
@@ -86,9 +80,7 @@ hf_engine.gl$_ubu_init(() => {
     }
 })
 
-
 hf_engine.gl$_layout_end(() => {
-
 
     if (hf_engine.gl$_getlayoutname() !== "Level") return
     // Close environment sound effects
@@ -97,10 +89,7 @@ hf_engine.gl$_layout_end(() => {
     // Rain needs to close rain particles and rain sound music
     if (WeatherState.CurrentWeather = WEATHER_TYPE.RAIN) {
         _Audio.AudioStopAll()
-        
 
-
-       
     }
 
     // Destroy dialogue panel related elements because it always blocks other panels 

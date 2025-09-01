@@ -22,7 +22,7 @@ hf_engine.gl$_ubu_update(() => {
 
 class GFLW__CampfireConversation {
     static Player: InstanceType.RedHairGirlSprite | null = null
-    static TriggerArea: [number, number][] = [[1178, 662], [2064, 662], [1958,1025], [1391,1027]]
+    static TriggerArea: [number, number][] = [[1157,686],[1848,657],[1898,1042],[1168,1021]]
 
 
     static AREA_ID: string = "campfire_area"
