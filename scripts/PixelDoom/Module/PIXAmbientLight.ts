@@ -25,6 +25,12 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
+hf_engine.gl$_layout_end(()=>{
+    // 停止所有光照效果，无论当前场景是什么
+    if(hf_engine.runtime.layout.name!=="Level") return
+    AmbientLight.stopAllLightEffects();
+})
+
 hf_engine.gl$_ubu_update(() => {
     AmbientLight.updateColorTransition()
     AmbientLight.updateInfoWindow()
@@ -276,6 +282,21 @@ export class AmbientLight {
             this.dayNightCycle.cycleTimer = null;
         }
         console.log("Day-night cycle stopped");
+    }
+
+    // 停止颜色过渡
+    static stopColorTransition() {
+        if (this.transition.isActive) {
+            this.transition.isActive = false;
+            console.log("Color transition stopped manually");
+        }
+    }
+
+    // 停止所有光照效果
+    static stopAllLightEffects() {
+        this.stopDayNightCycle();
+        this.stopColorTransition();
+        console.log("All light effects stopped due to layout change");
     }
 
     static initializeDebugButtons() {

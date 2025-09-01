@@ -5,18 +5,35 @@ import { AmbientLight } from "../Module/PIXAmbientLight.js";
 hf_engine.gl$_ubu_init(() => {
     GFLW_Fog.initinstance();
     // 监听白天黑夜 用于生成和销毁雾
-    var AmbientGetNight = () => {
+    GFLW_Fog.AmbientGetNight = () => {
         GFLW_Fog.StartFog()
     }
-    var AmbientGetDay = () => {
+    GFLW_Fog.AmbientGetDay = () => {
         GFLW_Fog.StopFogGeneration()
     }
-    AmbientLight.onNightStart(AmbientGetNight)
-    AmbientLight.onDayStart(AmbientGetDay)
+    AmbientLight.onNightStart(GFLW_Fog.AmbientGetNight)
+    AmbientLight.onDayStart(GFLW_Fog.AmbientGetDay)
 
 })
 
+hf_engine.gl$_layout_end(() => {
+    if (hf_engine.runtime.layout.name !== "Level") return
+
+  
+    if (GFLW_Fog.AmbientGetDay && GFLW_Fog.AmbientGetNight) {
+        AmbientLight.removeDayStartListener(GFLW_Fog.AmbientGetDay)
+        AmbientLight.removeNightStartListener(GFLW_Fog.AmbientGetNight)
+        alert("清理白天黑夜的监听")
+
+
+    }
+})
+
 class GFLW_Fog {
+
+    static AmbientGetNight: any;
+    static AmbientGetDay: any;
+
     static Player: InstanceType.RedHairGirlSprite | null = null
     static initinstance() {
         this.Player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
