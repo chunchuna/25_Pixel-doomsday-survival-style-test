@@ -3,17 +3,22 @@ import { UIConsole } from "../../UI/debug_ui/UIConsole.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { startFogDistanceMonitoring } from "../Effect/Fog/PIXEffect_fog.js";
+import { data } from "../Save/PIXSave.js";
 
 export class dEBUG_MOD {
-    static isEnable = false
-    static isRunMod = false;
+
+    // 打开这个后会自动打开配置好的debug调试窗口 
+    static AllowDebugMod = true
+
+    // 判断是否已经呼出各种debug 窗口
+    static DebugModAlreadRunning = false;
 
 
-    static async asynload() {
-        if (dEBUG_MOD.isRunMod) return
-        if (dEBUG_MOD.isEnable) {
+    static async DirectRunDebugWindow() {
+        if (dEBUG_MOD.DebugModAlreadRunning) return
+        if (dEBUG_MOD.AllowDebugMod) {
 
-            VariableMonitoring.Toggle();
+            //VariableMonitoring.Toggle();
 
             IMGUIDebugButton.Toggle();
             await hf_engine.WAIT_TIME_FORM_PROMISE(1)
@@ -21,7 +26,7 @@ export class dEBUG_MOD {
             UIConsole.Toggle();
 
 
-            dEBUG_MOD.isRunMod = true;
+            dEBUG_MOD.DebugModAlreadRunning = true;
             startFogDistanceMonitoring();
 
         }
@@ -30,7 +35,7 @@ export class dEBUG_MOD {
 }
 
 hf_engine.gl$_ubu_init(() => {
-    dEBUG_MOD.asynload();
+    dEBUG_MOD.DirectRunDebugWindow();
 
 
 })

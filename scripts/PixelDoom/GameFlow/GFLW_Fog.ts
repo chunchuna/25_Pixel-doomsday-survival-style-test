@@ -39,7 +39,7 @@ class GFLW_Fog {
     }
     static StartFog() {
         if (this.Player == null) return;
-        createFogAroundInstance(this.Player, 15, 500, 2, 1000)
+        createFogAroundInstance(this.Player, 15, 1000, 2, 1000)
     }
     static StopFogGeneration() {
         stopFogGeneration(3)
