@@ -36,7 +36,7 @@ hf_engine.gl$_ubu_init(() => {
     
     // Bind main inventory and get the returned control object
     const inventoryControl = inventoryManager.BindPlayerMainInventory(initialItems, 30, 5, "Tab");
-    
+    //inventoryControl.oneline();
     // Save reference to ensure unbind function is available
     PLAYER_MAIN_INVENTORY_LEVEL.MAIN = inventoryControl;
     

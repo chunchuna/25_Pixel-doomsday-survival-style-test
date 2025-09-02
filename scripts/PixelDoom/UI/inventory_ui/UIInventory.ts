@@ -3946,7 +3946,7 @@ hf_engine.gl$_ubu_init(() => {
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();
     inventoryManager.bind_QuickCloseInventoryWindow("Escape")
-    inventoryManager.ForceOnelineMode();
+    //inventoryManager.ForceOnelineMode();
 
 });
 
