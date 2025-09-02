@@ -1,13 +1,13 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { Imgui_chunchun } from "../UI/imgui_lib/imgui.js";
 
 var isAmbientLightDebugButtonsBound = false;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     //@ts-ignore
-    AmbientLight.light_layer = hf_engine.runtime.layout.getLayer(AmbientLight.light_layer_name);
+    AmbientLight.light_layer = Unreal__.runtime.layout.getLayer(AmbientLight.light_layer_name);
     if (AmbientLight.light_layer == null) return
 
     // Test day-night cycle: start from current color
@@ -25,13 +25,13 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
-hf_engine.gl$_layout_end(()=>{
+Unreal__.GameEnd(()=>{
     // 停止所有光照效果，无论当前场景是什么
-    if(hf_engine.runtime.layout.name!=="Level") return
+    if(Unreal__.runtime.layout.name!=="Level") return
     AmbientLight.stopAllLightEffects();
 })
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
     AmbientLight.updateColorTransition()
     AmbientLight.updateInfoWindow()
 })
@@ -177,7 +177,7 @@ export class AmbientLight {
     }
 
     static Simulat_edsunshine_cycle(Time: number, target_rgb: [number, number, number]) {
-        if (hf_engine.runtime.layout.name != this.Layout_allow_name) return
+        if (Unreal__.runtime.layout.name != this.Layout_allow_name) return
         if (!this.light_layer) return
         console.log("Starting color transition")
 

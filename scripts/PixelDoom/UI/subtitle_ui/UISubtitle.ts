@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 interface SubtitleItem {
     element: HTMLElement;
@@ -10,7 +10,7 @@ var MAX_SUBTITLES = 5;
 var subtitleItems: SubtitleItem[] = [];
 var container: HTMLElement;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     console.log("[UISubtitle] init")
     
     // 创建字幕容器
@@ -59,7 +59,7 @@ hf_engine.gl$_ubu_init(() => {
     // UISubtitleMain.ShowSubtitles("测试字幕")
     // UISubtitleMain.ShowSubtitles("测试字幕2", 3)
 
-    hf_engine.runtime.addEventListener("load",(e)=>{
+    Unreal__.runtime.addEventListener("load",(e)=>{
         console.log(container)
     })
     
@@ -101,7 +101,7 @@ export class UISubtitleMain {
         // 如果有设置时间，设置C3Timer
         if (time && time > 0) {
             try {
-                const timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const timerInstance = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                 const timerTag = `subtitle_${Date.now()}_${Math.random()}`;
                 
                 timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {

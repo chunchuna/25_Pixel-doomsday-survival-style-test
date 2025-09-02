@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { DEBUG, UIDebug } from "../../UI/debug_ui/UIDebug.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
@@ -21,16 +21,16 @@ export let SaveSetting = {
 // =============================================
 export class MixC3Save {
     static SaveGame(Slot: string) {
-        hf_engine.runtime.callFunction("SaveGame", Slot)
-        return hf_engine.runtime.globalVars.LastestSaveGameJson;
+        Unreal__.runtime.callFunction("SaveGame", Slot)
+        return Unreal__.runtime.globalVars.LastestSaveGameJson;
     }
     
     static LoadGame(Slot: string) {
-        hf_engine.runtime.callFunction("LoadGame", Slot)
+        Unreal__.runtime.callFunction("LoadGame", Slot)
     }
 
     static LoadGameFromJson(Json: string) {
-        hf_engine.runtime.callFunction("LoadGameByJson", Json)
+        Unreal__.runtime.callFunction("LoadGameByJson", Json)
     }
 }
 
@@ -105,11 +105,11 @@ export class LocalSave {
 // =============================================
 
 // 从存档数据加载游戏
-hf_engine.gl$_ubu_init(() => {
-    if (hf_engine.runtime.layout.name != "Level") return
+Unreal__.GameBegin(() => {
+    if (Unreal__.runtime.layout.name != "Level") return
 
     if (SaveSetting.isUseDataEnterNewGame) {
-        if (hf_engine.runtime.layout.name == "Level") {
+        if (Unreal__.runtime.layout.name == "Level") {
             if (data.LevelGameData) {
                 MixC3Save.LoadGameFromJson(data.LevelGameData)
                 UISubtitleMain.ShowSubtitles("从data.LevelGameData 加载存档数据", 5)
@@ -120,8 +120,8 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 // 主菜单初始化
-hf_engine.gl$_ubu_init(() => {
-    if (hf_engine.runtime.layout.name != "MainMenu") return
+Unreal__.GameBegin(() => {
+    if (Unreal__.runtime.layout.name != "MainMenu") return
     const storedTimes = localStorage.getItem("run_game_times")
     data.RunGameTiems = storedTimes ? Number(storedTimes) : 0
     data.RunGameTiems += 1;
@@ -133,10 +133,10 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 // 保存JSON数据事件处理
-hf_engine.gl$_ubu_init(() => {
-    hf_engine.gl$_call_eventhandle_("Save:SavetoJson", async () => {
-        await hf_engine.WAIT_TIME_FORM_PROMISE(1)
-        data.LevelGameData = hf_engine.runtime.globalVars.LastestSaveGameJson;
+Unreal__.GameBegin(() => {
+    Unreal__.GetEvent("Save:SavetoJson", async () => {
+        await Unreal__.WAIT_TIME_FORM_PROMISE(1)
+        data.LevelGameData = Unreal__.runtime.globalVars.LastestSaveGameJson;
         localStorage.setItem("level_data", data.LevelGameData)
         localStorage.setItem("run_game_times", String(data.RunGameTiems))
         console.log(data)
@@ -146,11 +146,11 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 // 保存和加载事件监听
-hf_engine.gl$_ubu_init(() => {
-    hf_engine.runtime.addEventListener("save", (e) => {
+Unreal__.GameBegin(() => {
+    Unreal__.runtime.addEventListener("save", (e) => {
         UISubtitleMain.ShowSubtitles("正在储存游戏..", 5)
     })
-    hf_engine.runtime.addEventListener("load", (e) => {
+    Unreal__.runtime.addEventListener("load", (e) => {
         UISubtitleMain.ShowSubtitles("正在从数据载入游戏..", 5)
     })
 })
@@ -159,7 +159,7 @@ hf_engine.gl$_ubu_init(() => {
 // 调试面板设置
 // =============================================
 var isBindButtonIntoDebugPanel = false;
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
 

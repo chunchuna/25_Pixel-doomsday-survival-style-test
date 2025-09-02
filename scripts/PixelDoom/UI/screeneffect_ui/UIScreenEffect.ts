@@ -3,7 +3,7 @@
  * 提供各种屏幕过渡、受击和恐怖效果
  */
 
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayoutTransition.js";
 
 
@@ -949,7 +949,7 @@ export class UIScreenEffect {
 }
 
 // 初始化代码
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // 初始化屏幕效果系统
     // 系统会在第一次调用效果时自动初始化，所以这里不需要额外操作
     //UIScreenEffect.ShowTransition(500, 500, 1000, TransitionEffectType.WIPE_LEFT);

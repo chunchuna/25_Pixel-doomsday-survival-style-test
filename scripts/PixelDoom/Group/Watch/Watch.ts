@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { AmbientLight } from "../../Module/PIXAmbientLight.js";
 
 // DOM element for the watch
@@ -21,10 +21,10 @@ const GAME_DAY_START = 7; // 7 AM
 const GAME_NIGHT_START = 19; // 7 PM
 const HOURS_PER_DAY = 24;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
 
-    if (hf_engine.runtime.layout.name !== "Level") return
+    if (Unreal__.runtime.layout.name !== "Level") return
     // Initialize the watch when the game starts
     Watch.initialize();
     // Register for day/night events from AmbientLight
@@ -43,8 +43,8 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
-hf_engine.gl$_layout_end(() => {
-    if (hf_engine.runtime.layout.name !== "Level") return
+Unreal__.GameEnd(() => {
+    if (Unreal__.runtime.layout.name !== "Level") return
     Watch.hide();
     AmbientLight.removeDayStartListener(Watch.updateWatchFace)
     AmbientLight.removeNightStartListener(Watch.updateWatchFace)
@@ -52,7 +52,7 @@ hf_engine.gl$_layout_end(() => {
 
 })
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
     // Update the watch every frame if visible
     if (isWatchVisible) {
         Watch.updateWatchFace();

@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 declare global {
     var ImGui: any;

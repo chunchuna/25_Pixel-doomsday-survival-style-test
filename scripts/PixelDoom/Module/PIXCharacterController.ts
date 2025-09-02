@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { GAME_TYPE } from "../Global/PIXGlobal.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 
@@ -14,7 +14,7 @@ import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_acti
 // })
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     console.log("[CharacterController] init")
 })
 
@@ -24,25 +24,25 @@ var GAME$_KEYBOARD_INSTAHCE: IConstructProjectObjects.Keyboard;
 //@ts-ignore
 var GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    if (hf_engine.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
+    if (Unreal__.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
 
 
 
     //@ts-ignore
-    GAME$_KEYBOARD_INSTAHCE = hf_engine.runtime.objects.Keyboard;
+    GAME$_KEYBOARD_INSTAHCE = Unreal__.runtime.objects.Keyboard;
     console.log(GAME$_KEYBOARD_INSTAHCE)
 
 
     //@ts-ignore
-    GAME$_CHARACTER_CONTROLLER = hf_engine.runtime.objects.CharacterController.getFirstInstance();
+    GAME$_CHARACTER_CONTROLLER = Unreal__.runtime.objects.CharacterController.getFirstInstance();
     console.log(GAME$_CHARACTER_CONTROLLER)
 
 })
 
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
     if (GAME$_CHARACTER_CONTROLLER == null) return;
 
     //console.log(GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX)
@@ -61,8 +61,8 @@ hf_engine.gl$_ubu_update(() => {
 })
 
 
-hf_engine.gl$_ubu_update(() => {
-    if (hf_engine.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
+Unreal__.GameUpdate(() => {
+    if (Unreal__.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
     if (GAME$_KEYBOARD_INSTAHCE == null) return
     if (GAME$_CHARACTER_CONTROLLER == null) return
 
@@ -81,7 +81,7 @@ hf_engine.gl$_ubu_update(() => {
 })
 
 // Disable player movement when interaction is active
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
         // First stop the player completely, then disable movement
         GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();

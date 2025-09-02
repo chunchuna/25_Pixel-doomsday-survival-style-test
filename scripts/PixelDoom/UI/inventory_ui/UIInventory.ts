@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 // 物品等级枚举
 enum ItemLevel {
@@ -3941,7 +3941,7 @@ export type { Item }
 export { ItemLevel }
 export let inventoryManager: UIInventory;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     // 导出一个单例实例
     inventoryManager = UIInventory.getInstance();

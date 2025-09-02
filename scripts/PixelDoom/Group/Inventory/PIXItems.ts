@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { DeserializeItemsOnly, inventoryManager, ItemLevel, SerializeItemsOnly, type Item } from "../../UI/inventory_ui/UIInventory.js";
 
 
@@ -70,7 +70,7 @@ export class MainInventory {
     public static addItem(itemData: ItemData, count: number = 1): void {
         // Get current inventory
         const currentItems = DeserializeItemsOnly(
-            hf_engine.runtime.globalVars.PlayerInventory
+            Unreal__.runtime.globalVars.PlayerInventory
         );
         
         // Add new items
@@ -80,7 +80,7 @@ export class MainInventory {
         }
         
         // Update global inventory data
-        hf_engine.runtime.globalVars.PlayerInventory = 
+        Unreal__.runtime.globalVars.PlayerInventory = 
             SerializeItemsOnly(currentItems);
         
         console.log(`Added ${count}x ${itemData.itemName} to inventory`);
@@ -94,7 +94,7 @@ export class MainInventory {
     public static removeItem(itemData: ItemData, count: number = 1): void {
         // Get current inventory
         const currentItems = DeserializeItemsOnly(
-            hf_engine.runtime.globalVars.PlayerInventory
+            Unreal__.runtime.globalVars.PlayerInventory
         );
         
         // Remove items
@@ -107,7 +107,7 @@ export class MainInventory {
         }
         
         // Update global inventory data
-        hf_engine.runtime.globalVars.PlayerInventory = 
+        Unreal__.runtime.globalVars.PlayerInventory = 
             SerializeItemsOnly(currentItems);
         
         console.log(`Removed ${removedCount}x ${itemData.itemName} from inventory`);
@@ -120,7 +120,7 @@ export class MainInventory {
      */
     public static getItemCount(itemData: ItemData): number {
         const currentItems = DeserializeItemsOnly(
-            hf_engine.runtime.globalVars.PlayerInventory
+            Unreal__.runtime.globalVars.PlayerInventory
         );
         
         return currentItems.filter(item => item.itemName === itemData.itemName).length;

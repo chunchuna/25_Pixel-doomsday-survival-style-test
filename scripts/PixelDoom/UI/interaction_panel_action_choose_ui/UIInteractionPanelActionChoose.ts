@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { UIWindowLib } from "../window_lib_ui/UIWindowLib.js";
 
@@ -46,7 +46,7 @@ interface ButtonData {
 }
 
 /** Initialization */
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
   initInteractionUI();
   //UIInteractionPanelActionChooseMain.ShowChoosePanle()
   // AddChooseButtonIntoPanel("a", 1)
@@ -140,7 +140,7 @@ function ensureClickHandling() {
         console.log('Global delegation captured click:', buttonName, 'ID:', buttonId);
         
         // Trigger event with button ID
-        hf_engine.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
+        Unreal__.SendEvent("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonId });
         UIInteractionPanelActionChooseMain.CloseChoosePanle();
         
       }

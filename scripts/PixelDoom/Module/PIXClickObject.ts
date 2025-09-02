@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { UIInteractionPanelActionChooseMain_imgui } from "../UI/interaction_panel_action_choose_ui/UIInteractionPane_imgui.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
 import { OnMainInventoryClose, OnMainInventoryOpen, OnOtherInventoryClose, OnOtherInventoryOpen } from "../UI/inventory_ui/UIInventory.js";
@@ -12,7 +12,7 @@ export var LastestChooseObject: InstanceType.ClickObjectEntity // 玩家最后�
 
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
       console.log("[ClickObject] init")
 })
 
@@ -21,7 +21,7 @@ var MainInventoryOpen = false
 var OtherInventoryOpen = false
 var DialogueOpen = false;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
       OnMainInventoryOpen(() => {
             MainInventoryOpen = true;
 
@@ -52,10 +52,10 @@ hf_engine.gl$_ubu_init(() => {
       })
 })
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-      if (hf_engine.runtime.layout.name != "Level") return
-      if (hf_engine.runtime.objects.ClickObjectEntity.getFirstInstance() == null) return
+      if (Unreal__.runtime.layout.name != "Level") return
+      if (Unreal__.runtime.objects.ClickObjectEntity.getFirstInstance() == null) return
 
 
       // for (var ClickObjects of pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.ClickObjectEntity.instances()) {
@@ -74,9 +74,9 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
       // 鼠标悬浮在交互物体上
-      hf_engine.gl$_call_eventhandle_("ClickObject:MouseOverObject", (e: any) => {
+      Unreal__.GetEvent("ClickObject:MouseOverObject", (e: any) => {
             //console.log("[ClickObject] Mouse Over Object")
             var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
             ClickObject.EnableOutLine(GetChooseObject, true)
@@ -86,10 +86,10 @@ hf_engine.gl$_ubu_init(() => {
 
       // 鼠标离开交互物体
 
-      hf_engine.gl$_call_eventhandle_("ClickObject:MouseOverObject-none", (e: any) => {
+      Unreal__.GetEvent("ClickObject:MouseOverObject-none", (e: any) => {
             //console.log("[ClickObject] Mouse Over Object -NONE")
             var GetChooseObject: InstanceType.ClickObjectEntity = e.data.object;
-            for (var ALLClickObject of hf_engine.runtime.objects.ClickObjectEntity.instances()) {
+            for (var ALLClickObject of Unreal__.runtime.objects.ClickObjectEntity.instances()) {
                   ClickObject.EnableOutLine(ALLClickObject, false)
             }
             document.documentElement.style.cursor = "default"
@@ -97,7 +97,7 @@ hf_engine.gl$_ubu_init(() => {
 
 
       //点击对象 
-      hf_engine.gl$_call_eventhandle_("ClickObject:MouseClickObject", (e: any) => {
+      Unreal__.GetEvent("ClickObject:MouseClickObject", (e: any) => {
             if (ClickObject.is_OEPN_interaction_UI) return
 
             //console.log("点击了交互物")
@@ -119,11 +119,11 @@ hf_engine.gl$_ubu_init(() => {
             // if (PlayerInstance.behaviors.MoveFunction.vectorX > 0 || PlayerInstance.behaviors.MoveFunction.vectorY > 0) return
 
             /** 呼出UI */
-            var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+            var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
             if (PlayerInstance == null) return
             var GetLastestObject = LastestChooseObject;
             if (GetLastestObject == null) return
-            var DistanceFromLastestObject = hf_engine.CalculateDistancehahaShitCode(
+            var DistanceFromLastestObject = Unreal__.CalculateDistancehahaShitCode(
                   GetLastestObject.x,
                   GetLastestObject.y,
                   PlayerInstance.x,
@@ -169,7 +169,7 @@ hf_engine.gl$_ubu_init(() => {
 
 
 /** 玩家在移动的时候 关闭UI面板 */
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
 
       // var PlayerInstance = pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.objects.RedHairGirlSprite.getFirstInstance();
       // if (PlayerInstance == null) return
@@ -182,7 +182,7 @@ hf_engine.gl$_ubu_update(() => {
 
 
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
   
       var UIpanel = document.getElementById('interaction_panel_action_choose_ui');
    
@@ -199,13 +199,13 @@ hf_engine.gl$_ubu_update(() => {
 
       var InteractionMaxDistance = ClickObject.ClickObjectClickMaxDistance;
 
-      var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+      var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
       if (PlayerInstance == null) return
 
     
       var GetLastestObject = LastestChooseObject;
       if (GetLastestObject == null) return
-      var DistanceFromLastestObject = hf_engine.CalculateDistancehahaShitCode(
+      var DistanceFromLastestObject = Unreal__.CalculateDistancehahaShitCode(
             GetLastestObject.x,
             GetLastestObject.y,
             PlayerInstance.x,
@@ -218,7 +218,7 @@ hf_engine.gl$_ubu_update(() => {
       }
 })
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
       // 玩家在交互的时候 就不用继续处理点击事件了
       UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
             ClickObject.is_OEPN_interaction_UI = true;

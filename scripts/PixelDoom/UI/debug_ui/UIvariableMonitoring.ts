@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 import { IMGUIDebugButton } from "./UIDbugButton.js";
 
@@ -838,7 +838,7 @@ export class VariableMonitoring {
 
 var isBindButtonIntoDebugPanel = false;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     VariableMonitoring.EnableHighPerformanceMode();
 

@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { GL_COMMAND_ } from "../../Module/PIXCommandAddon.js";
 
@@ -12,18 +12,18 @@ import { DeserializeItemsOnly, inventoryManager, ItemLevel, type Item, Serialize
 
 var PlayerInstance: InstanceType.RedHairGirlSprite;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // @ts-ignore
-    PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+    PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
 })
 
 
 /** 使用 UI 交互 */
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // 用于存储当前打开的库存关闭函数
 
 
-    hf_engine.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+    Unreal__.GetEvent("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
         var ButtonConetent_id: string = e.data.ButtonContent_;
         if (ButtonConetent_id == "use") {
@@ -62,7 +62,7 @@ hf_engine.gl$_ubu_init(() => {
 
 
 /** 使用GL_COMMAND 的交互 */
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
 
     GL_COMMAND_._TRY_ACTION_UPDATE("use", () => {
         if (LastestChooseObject == null) return

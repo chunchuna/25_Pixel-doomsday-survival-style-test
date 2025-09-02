@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
@@ -23,7 +23,7 @@ import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 var isBindButtonIntoDebugPanel = false
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // for Test
 
 
@@ -34,7 +34,7 @@ hf_engine.gl$_ubu_init(() => {
 
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "show 'CD' on player position", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance()
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance()
         if (!PlayerInstance) return
 
 
@@ -47,21 +47,21 @@ hf_engine.gl$_ubu_init(() => {
 
     // Add more test buttons for each type
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test CIRCLE_DRAIN effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
         UICDTimer.CreateCD(5, CDType.CIRCLE_DRAIN, "test2", PlayerInstance.x, PlayerInstance.y)
             .OnTimeArrive(() => console.warn("CIRCLE_DRAIN test completed"));
     })
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test CIRCLE_CLOCKWISE effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
         UICDTimer.CreateCD(5, CDType.CIRCLE_CLOCKWISE, "test3", PlayerInstance.x, PlayerInstance.y)
             .OnTimeArrive(() => console.warn("CIRCLE_CLOCKWISE test completed"));
     })
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test PROGRESS_BAR effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
         UICDTimer.CreateCD(5, CDType.PROGRESS_BAR, "test4", PlayerInstance.x, PlayerInstance.y)
             .OnTimeArrive(() => console.warn("PROGRESS_BAR test completed"));
@@ -69,7 +69,7 @@ hf_engine.gl$_ubu_init(() => {
 
     // Add quick test button for fade effect with short duration
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test fade effect (0.3s)", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
 
         // Create multiple short-duration timers to test fade effect
@@ -103,7 +103,7 @@ hf_engine.gl$_ubu_init(() => {
     })
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test variable UI - Circle Fill", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
 
         // Reset test variable
@@ -121,7 +121,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Test variable UI - Progress Bar", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
 
         // Reset test variable
@@ -139,7 +139,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(cd_system, "Auto-changing variable test", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return
 
         // Create auto-changing variable
@@ -173,7 +173,7 @@ hf_engine.gl$_ubu_init(() => {
 
             // Use C3Timer instead of setTimeout for better integration
             try {
-                const updateTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const updateTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                 const updateTag = `auto_update_${Date.now()}_${Math.random()}`;
 
                 updateTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -271,7 +271,7 @@ export class UICDTimer {
 
         // Use player position if coordinates not provided
         if (x === undefined || y === undefined) {
-            const PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+            const PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
             if (PlayerInstance) {
                 posX = PlayerInstance.x;
                 posY = PlayerInstance.y;
@@ -287,14 +287,14 @@ export class UICDTimer {
         try {
             // Try to use HTML_c3 object first
             try {
-                this.htmlElement = hf_engine.runtime.objects.HTML_c3.createInstance(layer, posX, posY);
+                this.htmlElement = Unreal__.runtime.objects.HTML_c3.createInstance(layer, posX, posY);
                 console.log(`Created HTML_c3 element successfully`);
             } catch (htmlError: any) {
                 console.warn(`HTML_c3 object not available: ${htmlError.message}`);
 
                 // Try alternative: use hudongtishi_ui as a fallback
                 try {
-                    this.htmlElement = hf_engine.runtime.objects.hudongtishi_ui.createInstance(layer, posX, posY, true);
+                    this.htmlElement = Unreal__.runtime.objects.hudongtishi_ui.createInstance(layer, posX, posY, true);
                     console.log(`Created hudongtishi_ui element as fallback`);
                 } catch (fallbackError: any) {
                     console.error(`No suitable UI object found for timer display: ${fallbackError.message}`);
@@ -361,7 +361,7 @@ export class UICDTimer {
     private createTimerInstance(): void {
         try {
             // Create C3 Timer instance using full runtime path
-            this.timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.timerInstance = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
 
             // Listen for timer events
             this.timerInstance.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -804,7 +804,7 @@ export class UICDTimer {
             this.htmlElement.destroy();
 
             // Create new instance on the specified layer using full runtime path
-            this.htmlElement = hf_engine.runtime.objects.HTML_c3.createInstance(layer, x, y);
+            this.htmlElement = Unreal__.runtime.objects.HTML_c3.createInstance(layer, x, y);
             this.layer = layer;
 
             // Re-render HTML

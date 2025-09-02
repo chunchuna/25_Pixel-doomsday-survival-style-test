@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 import { IMGUIDebugButton } from "./UIDbugButton.js";
 
@@ -1127,7 +1127,7 @@ export class UIConsole {
 }
 
 // // Modify initialization process to ensure console works correctly
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // Check if console is already initialized to avoid duplicates
     if (!UIConsole.IsInitialized()) {
         console.log("Initializing IMGUI console...");
@@ -1271,7 +1271,7 @@ hf_engine.gl$_ubu_init(() => {
 
 var isBindButtonIntoDebugPanel = false;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true

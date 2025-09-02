@@ -1,8 +1,8 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 
 var DialogueMainController:DialogueSystem;
-hf_engine.gl$_ubu_init(()=>{
+Unreal__.GameBegin(()=>{
     // 任何初始化的时候 都注册一下
     // if(pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.layout.name!="Level") return
     (window as any).DialogueMainController = new DialogueSystem();

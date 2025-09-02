@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 /**
  * Transition type enumeration
@@ -335,7 +335,7 @@ export class LayoutTransition {
     private static createTransitionTimer(duration: number): void {
         try {
             // Create C3 Timer instance
-            LayoutTransition.timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            LayoutTransition.timerInstance = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             LayoutTransition.timerTag = `layout_transition_${Date.now()}_${Math.random()}`;
             
             // Set up completion timer
@@ -499,7 +499,7 @@ export class LayoutTransition {
     }
 }
 
-hf_engine.gl$_ubu_init(()=>{
+Unreal__.GameBegin(()=>{
     //UIScreenEffect.FadeIn(800,TransitionEffectType.FADE,undefined)
     LayoutTransition.EnterLayout(TransitionType.HOLE,1)
 })

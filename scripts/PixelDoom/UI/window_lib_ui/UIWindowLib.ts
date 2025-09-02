@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 /**
  * 窗口库 - 提供创建自定义窗口的静态方法
@@ -746,7 +746,7 @@ export class UIWindowLib {
 }
 
 // 引擎初始化时调用
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     // 启动主窗口
     //UIWindowLib.showExampleWindow();
 })

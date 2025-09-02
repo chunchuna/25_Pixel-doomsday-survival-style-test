@@ -1,9 +1,9 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { PIXLevel } from "../../Module/PIXLevel.js";
 import { LayoutTransition, TransitionType } from "../../UI/layout_transition_ui/UILayoutTransition.js";
 
-hf_engine.gl$_ubu_init(() => {
-    if (hf_engine.runtime.layout.name == "Intro") {
+Unreal__.GameBegin(() => {
+    if (Unreal__.runtime.layout.name == "Intro") {
         Intro.PlayIntroAnimation();
     }
 })
@@ -12,7 +12,7 @@ class Intro {
     static async PlayIntroAnimation() {
         await IntroAnimation.PlayAnimation();
         // 等待动画播放完毕之后 
-        await hf_engine.WAIT_TIME_FORM_PROMISE(5)
+        await Unreal__.WAIT_TIME_FORM_PROMISE(5)
         Intro.JumpMinMenuLayout();
     }
 
@@ -21,7 +21,7 @@ class Intro {
             //Hole 动画结束的时候再销毁这个 IntroAnimation
             IntroAnimation.destroyAnimation();
             // 在跳转
-            hf_engine.runtime.goToLayout("MainMenu")
+            Unreal__.runtime.goToLayout("MainMenu")
         })
     }
 }

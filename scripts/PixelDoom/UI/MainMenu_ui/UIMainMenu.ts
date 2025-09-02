@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { LocalSave, SaveSetting } from "../../Group/Save/PIXSave.js";
 import { TransitionEffectType, UIScreenEffect } from "../screeneffect_ui/UIScreenEffect.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
@@ -12,12 +12,12 @@ import { LayoutTransition, TransitionType } from "../layout_transition_ui/UILayo
 
 
 var IsInitGameMainMenu = false
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    if (hf_engine.runtime.layout.name != "MainMenu") return
+    if (Unreal__.runtime.layout.name != "MainMenu") return
     // 强行修改图层是否透明
     //@ts-ignore
-    hf_engine.runtime.layout.getLayer("background").isTransparent = true
+    Unreal__.runtime.layout.getLayer("background").isTransparent = true
 
     initGameMainScene();
 
@@ -148,7 +148,7 @@ class UIMainMenu {
                         //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout("Level")
                         // })
                         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
-                            hf_engine.runtime.goToLayout("Level")
+                            Unreal__.runtime.goToLayout("Level")
                         })
                     })
                 });

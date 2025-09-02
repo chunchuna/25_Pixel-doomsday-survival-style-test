@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { AdvanceBubble } from "../UI/bubble_ui/UIAdvanceBubble.js";
 import { BubbleType } from "../UI/bubble_ui/UIBubble.js";
 import { PIXArea } from "../Module/PIXArea.js";
@@ -6,7 +6,7 @@ import { DebugColors, DebugObjectRenderer } from "../Renderer/DebugObjectRendere
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     GFLW__CampfireConversation.InitInstance();
     GFLW__CampfireConversation.InitArea();
 
@@ -16,7 +16,7 @@ hf_engine.gl$_ubu_init(() => {
     DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.YELLOW).setBoxThickness(1).RenderPolygonFromPoints(GFLW__CampfireConversation.TriggerArea)
 })
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
     GFLW__CampfireConversation.UpdateArea();
 })
 
@@ -28,7 +28,7 @@ class GFLW__CampfireConversation {
     static AREA_ID: string = "campfire_area"
 
     static InitInstance() {
-        this.Player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        this.Player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
 
 
     }
@@ -53,10 +53,10 @@ class GFLW__CampfireConversation {
         PIXArea.SetEnterCallback(this.AREA_ID, () => {
             console.log("Player enter campfire area");
 
-            if (!hf_engine.runtime.objects.LevelVars.getFirstInstance()?.instVars.CampFireConverstion) {
+            if (!Unreal__.runtime.objects.LevelVars.getFirstInstance()?.instVars.CampFireConverstion) {
                 this.Dialogue_DouMaoNanRen_ShouJiNvRen();
                 //@ts-ignore
-                const levelVarsInstance = hf_engine.runtime.objects.LevelVars.getFirstInstance();
+                const levelVarsInstance = Unreal__.runtime.objects.LevelVars.getFirstInstance();
                 if (levelVarsInstance) {
                     levelVarsInstance.instVars.CampFireConverstion = true;
                 }
@@ -73,9 +73,9 @@ class GFLW__CampfireConversation {
     }
 
     static Dialogue_DouMaoNanRen_ShouJiNvRen() {
-        var DouMaoNanRenInstance = hf_engine
+        var DouMaoNanRenInstance = Unreal__
             .runtime.objects.DouMaoNanRen.getFirstInstance();
-        var ShouJiNvRenInstance = hf_engine
+        var ShouJiNvRenInstance = Unreal__
             .runtime.objects.ShouJiNvRen.getFirstInstance();
 
             

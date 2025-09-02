@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { UIConsole } from "../../UI/debug_ui/UIConsole.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
@@ -21,7 +21,7 @@ export class dEBUG_MOD {
             //VariableMonitoring.Toggle();
 
             IMGUIDebugButton.Toggle();
-            await hf_engine.WAIT_TIME_FORM_PROMISE(1)
+            await Unreal__.WAIT_TIME_FORM_PROMISE(1)
 
             UIConsole.Toggle();
 
@@ -34,7 +34,7 @@ export class dEBUG_MOD {
     }
 }
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     dEBUG_MOD.DirectRunDebugWindow();
 
 

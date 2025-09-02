@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { PLAYER_MAIN_INVENTORY_LEVEL } from "../Group/Player/PIXPlayerInventory.js";
 import { IMGUIDebugButton } from "../UI/debug_ui/UIDbugButton.js";
 import { DEBUG } from "../UI/debug_ui/UIDebug.js";
@@ -14,28 +14,28 @@ import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 export class PIXLevel {
     static async GoToLayoutByTransitionEffect(LevelName: string) {
         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
-            hf_engine.runtime.goToLayout(LevelName)
+            Unreal__.runtime.goToLayout(LevelName)
         })
     }
 }
 
 // 相机相关 
 
-hf_engine.gl$_ubu_init(()=>{Level2DCamera.CameraInit();Level2DCamera.ShortKey()})
-hf_engine.gl$_ubu_update(()=>{Level2DCamera.UpdateCamera()})
+Unreal__.GameBegin(()=>{Level2DCamera.CameraInit();Level2DCamera.ShortKey()})
+Unreal__.GameUpdate(()=>{Level2DCamera.UpdateCamera()})
 export class Level2DCamera {
 
     
     static CameraZoomValue: number = 0.35;
     static CameraZoomTarget: number = 0.35;
     static CameraInit() {
-        if (hf_engine.runtime.layout.name != "Level") return
+        if (Unreal__.runtime.layout.name != "Level") return
         // 初始化时设置初始值
         Level2DCamera.CameraZoomValue = 0.35;
         Level2DCamera.CameraZoomTarget = 0.35; // 确保两个值初始一致
-        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomValue;
+        Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomValue;
 
-        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomTarget;
+        Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomTarget;
     }
 
     static ShortKey() {
@@ -51,10 +51,10 @@ export class Level2DCamera {
     }
 
     static UpdateCamera(){
-        if (hf_engine.runtime.layout.name != "Level") return
-        Level2DCamera.CameraZoomValue = hf_engine.Justlerp(Level2DCamera.CameraZoomValue, Level2DCamera.CameraZoomTarget, 0.05);
+        if (Unreal__.runtime.layout.name != "Level") return
+        Level2DCamera.CameraZoomValue = Unreal__.Justlerp(Level2DCamera.CameraZoomValue, Level2DCamera.CameraZoomTarget, 0.05);
         //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
-        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomValue;
+        Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomValue;
 
     }
 
@@ -63,9 +63,9 @@ export class Level2DCamera {
 
 
 // 离开Level
-hf_engine.gl$_layout_end(() => {
+Unreal__.GameEnd(() => {
 
-    if (hf_engine.gl$_getlayoutname() !== "Level") return
+    if (Unreal__.GetGameCurrentLayoutName() !== "Level") return
     // Close environment sound effects
     //_Audio.AudioStop("NiaoJiao")
 
@@ -88,7 +88,7 @@ hf_engine.gl$_layout_end(() => {
         PLAYER_MAIN_INVENTORY_LEVEL.MAIN.unbind(); // Unbind main inventory
     }
 
-    hf_engine.WAIT_TIME_FORM_PROMISE(0.1)
+    Unreal__.WAIT_TIME_FORM_PROMISE(0.1)
 
     // Close interaction panel 
     UIInteractionPanelActionChooseMain.CloseChoosePanle();
@@ -100,7 +100,7 @@ hf_engine.gl$_layout_end(() => {
 // ================================================================
 // debug 相关
 var isBindButtonIntoDebugPanel = false;
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     if (isBindButtonIntoDebugPanel) return
     isBindButtonIntoDebugPanel = true
@@ -110,7 +110,7 @@ hf_engine.gl$_ubu_init(() => {
     if (level_cat) {
 
         IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
-            if (hf_engine.runtime.layout.name == "MainMenu") return
+            if (Unreal__.runtime.layout.name == "MainMenu") return
             PIXLevel.GoToLayoutByTransitionEffect("MainMenu")
         })
 

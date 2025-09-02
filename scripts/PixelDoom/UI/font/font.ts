@@ -1,8 +1,8 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
   const font_style = document.createElement('style')
   font_style.innerHTML =

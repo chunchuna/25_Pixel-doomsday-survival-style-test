@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js"
+import { Unreal__ } from "../../../engine.js"
 import { DialogueSystem } from "./UIDialogue.js"
 
 export var DIA_CONTENT_test001 = `左->篝火余烬中飘起一缕青烟
@@ -67,7 +67,7 @@ async function code_goto_testscript_002() {
 		DialogueMainController.CloseDialogue()
 		
 		// 等待DOM更新和动画完成
-		await hf_engine.WAIT_TIME_FORM_PROMISE(0.5)
+		await Unreal__.WAIT_TIME_FORM_PROMISE(0.5)
 		
 		// 强制DOM刷新 - 在不同的浏览器中可能有效率差异
 		void document.body.offsetHeight;
@@ -87,7 +87,7 @@ async function code_goto_testscript_001() {
 		DialogueMainController.CloseDialogue()
 		
 		// 等待DOM更新和动画完成
-		await hf_engine.WAIT_TIME_FORM_PROMISE(0.5)
+		await Unreal__.WAIT_TIME_FORM_PROMISE(0.5)
 		
 		// 强制DOM刷新 - 在不同的浏览器中可能有效率差异
 		void document.body.offsetHeight;
@@ -100,7 +100,7 @@ async function code_goto_testscript_001() {
 	}
 }
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 	(window as any).code_goto_testscript_002 = code_goto_testscript_002;
 	(window as any).code_goto_testscript_001 = code_goto_testscript_001;
 })

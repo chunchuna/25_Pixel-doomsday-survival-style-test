@@ -1,26 +1,26 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { IMGUIDebugButton } from "../../UI/debug_ui/UIDbugButton.js";
 import { VariableMonitoring } from "../../UI/debug_ui/UIvariableMonitoring.js";
 import { CDType, UICDTimer } from "../../UI/time_cd_ui/UICd.js";
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    if (hf_engine.runtime.layout.name != "Level") return
+    if (Unreal__.runtime.layout.name != "Level") return
 
     // Clean up any existing timers from previous scene loads
     console.log("Cleaning up existing timers before creating new ones");
     //UICDTimer.DestroyAllTimersAndVariables();
 
-    for (var Gouhuos of hf_engine.runtime.objects.GouHuo.instances()) {
+    for (var Gouhuos of Unreal__.runtime.objects.GouHuo.instances()) {
         GouHuo.BurnGouHuo(Gouhuos)
     }
 
 })
 
 // WHEN CREATED
-hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(() => {
-    hf_engine.runtime
+Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(() => {
+    Unreal__.runtime
         .objects.GouHuo.addEventListener("instancecreate", (e) => {
             GouHuo.GouHuoInitSetting(e.instance)
             GouHuo.ExtinguishedGouHuo(e.instance)
@@ -31,17 +31,17 @@ hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(() => {
 })
 
 // WHEN INIT
-hf_engine.gl$_ubu_init(() => {
-    for (var Gouhuos of hf_engine.
+Unreal__.GameBegin(() => {
+    for (var Gouhuos of Unreal__.
         runtime.objects.GouHuo.instances()
     ) {
         GouHuo.GouHuoInitSetting(Gouhuos)
     }
 
     // WHEN LOAD
-    hf_engine.runtime.
+    Unreal__.runtime.
         addEventListener("load", () => {
-            for (var Gouhuos of hf_engine.
+            for (var Gouhuos of Unreal__.
                 runtime.objects.GouHuo.instances()
             ) {
                 GouHuo.GouHuoInitSetting(Gouhuos)
@@ -52,8 +52,8 @@ hf_engine.gl$_ubu_init(() => {
 
 
 
-hf_engine.gl$_ubu_init(() => {
-    hf_engine.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+Unreal__.GameBegin(() => {
+    Unreal__.GetEvent("ChoosePanleButtonClick:ClickButton", (e: any) => {
         var ButtonConetent_id: string = e.data.ButtonContent_;
         if (ButtonConetent_id == "burn") {
             //@ts-ignore
@@ -72,14 +72,14 @@ hf_engine.gl$_ubu_init(() => {
 
 })
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     var GouHuo = IMGUIDebugButton.AddCategory("GouHuo")
     IMGUIDebugButton.AddButtonToCategory(GouHuo, "Creat Gou Huo Near Player", () => {
-        var playerInstance = hf_engine.
+        var playerInstance = Unreal__.
             runtime.objects.RedHairGirlSprite.getFirstInstance()
         if (!playerInstance) return
 
-        var GouhuoNewCreated = hf_engine.
+        var GouhuoNewCreated = Unreal__.
             runtime.objects.HuoYanm.createInstance("Object", playerInstance.x, playerInstance.y, true, "GouHuo")
 
     })
@@ -88,11 +88,11 @@ hf_engine.gl$_ubu_init(() => {
 
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
 
 
-    var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+    var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
     if (!PlayerInstance) return
 
 
@@ -186,7 +186,7 @@ export class GouHuo {
         GouHuo.instVars.ZhengZaiRanShao = true;
 
         // Get layout and light layer first
-        const layout = hf_engine.runtime.getLayout("Level");
+        const layout = Unreal__.runtime.getLayout("Level");
         const lightLayer = layout.getLayer("LightAddtive");
         if (!lightLayer) return;
 

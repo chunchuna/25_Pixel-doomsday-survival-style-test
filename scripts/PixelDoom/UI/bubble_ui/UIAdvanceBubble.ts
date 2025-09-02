@@ -1,9 +1,9 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { BubbleType, UIBubble } from "./UIBubble.js";
 
-hf_engine.gl$_ubu_init(()=>{
+Unreal__.GameBegin(()=>{
  
-    if(hf_engine.runtime.globalVars.GameType!="Level") return
+    if(Unreal__.runtime.globalVars.GameType!="Level") return
     
     // 初始化高级气泡系统
     //alert("UIAdvanceBubble init")
@@ -433,7 +433,7 @@ export class AdvanceBubble {
             this.autoPlayTimerTag = timerTag;
             
             // 创建计时器实例
-            this.autoPlayTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.autoPlayTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             
             if (!this.autoPlayTimer) {
                 console.error("Failed to create timer instance");
@@ -549,7 +549,7 @@ export class AdvanceBubble {
                 
                 // 创建等待计时器
                 const waitTimerTag = `wait_typewriter_${dialogue.id}_${Date.now()}`;
-                const waitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+                const waitTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                 
                 waitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                     if (e.tag === waitTimerTag) {
@@ -781,7 +781,7 @@ export class AdvanceBubble {
             if (lastContent.bubbleInstance) {
                 try {
                     // 创建一个计时器，在淡出动画完成后销毁气泡
-                    const exitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+                    const exitTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
                     const exitTag = `exit_dialogue_${dialogue.id}_${Date.now()}`;
                     
                     exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {

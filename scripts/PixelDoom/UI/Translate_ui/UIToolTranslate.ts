@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     console.log("开始初始化翻译工具");
-    if(hf_engine.runtime.layout.name!="MainMenu") return
+    if(Unreal__.runtime.layout.name!="MainMenu") return
     createTranslateUI();
     ShowArrowPointLanague();
     

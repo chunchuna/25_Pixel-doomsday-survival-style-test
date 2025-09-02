@@ -1,23 +1,23 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 
 
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
 
-	if(hf_engine.runtime.objects.SpriteAutoYsort.instances==null) return
-	if(hf_engine.runtime.layout.name!="Level") return
+	if(Unreal__.runtime.objects.SpriteAutoYsort.instances==null) return
+	if(Unreal__.runtime.layout.name!="Level") return
 
 
-	for (var SortObjects of hf_engine.OBJECT.SpriteAutoYsort.instances()) {
+	for (var SortObjects of Unreal__.OBJECT.SpriteAutoYsort.instances()) {
 		SortObjects.instVars.GetYPosition = SortObjects.y
 	}
 
-	var SortObjectInstancesClass = hf_engine.OBJECT.SpriteAutoYsort.instances();
+	var SortObjectInstancesClass = Unreal__.OBJECT.SpriteAutoYsort.instances();
 	//console.log(SortObjectInstancesClass)
 	//@ts-ignore
-	hf_engine.runtime.sortZOrder(SortObjectInstancesClass, (a: InstanceType.SpriteAutoYsort, b: InstanceType.SpriteAutoYsort) => a.instVars.GetYPosition - b.instVars.GetYPosition)
+	Unreal__.runtime.sortZOrder(SortObjectInstancesClass, (a: InstanceType.SpriteAutoYsort, b: InstanceType.SpriteAutoYsort) => a.instVars.GetYPosition - b.instVars.GetYPosition)
 })
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 })
 

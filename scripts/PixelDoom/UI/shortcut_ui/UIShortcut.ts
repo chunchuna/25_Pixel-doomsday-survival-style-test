@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 
@@ -1020,7 +1020,7 @@ Available Positions:
 }
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     var Short = IMGUIDebugButton.AddCategory("Short")
     IMGUIDebugButton.AddButtonToCategory(Short, "Open Short Debug Window", () => {
         UIShortcutDebug.ToggleDebugWindow();
@@ -1036,8 +1036,8 @@ hf_engine.gl$_ubu_init(() => {
 })
 
 
-hf_engine.gl$_ubu_init(() => {
-    if (hf_engine.LayoutName !== "Level") return
+Unreal__.GameBegin(() => {
+    if (Unreal__.LayoutName !== "Level") return
 
     // First group - Player Base
     var PlayerShortBase = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
@@ -1053,7 +1053,7 @@ hf_engine.gl$_ubu_init(() => {
         .AddDescribe("控制");
 
 
-    hf_engine.runtime
+    Unreal__.runtime
         .addEventListener("beforeanylayoutend", () => {
             UIShortcut.ClearAllGroups();
         })

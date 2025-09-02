@@ -1,9 +1,9 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 
 var isBindButtonIntoDebugPanel = false;
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     if (isBindButtonIntoDebugPanel) return;
     isBindButtonIntoDebugPanel = true;
     
@@ -11,7 +11,7 @@ hf_engine.gl$_ubu_init(() => {
     var hint_card_system = IMGUIDebugButton.AddCategory("hint_card_system");
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Show simple hint card", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Mysterious Item")
@@ -20,7 +20,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Show long name card", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Ancient Sword of the Forgotten Realm")
@@ -29,7 +29,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Show custom size card", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Custom Size Item")
@@ -39,7 +39,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test HTML element return", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         // Test the new CreateHintCard that returns HTML element
@@ -52,7 +52,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test scale functionality", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         // Test different scales
@@ -74,7 +74,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test flash effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Flashing Item")
@@ -83,7 +83,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test conspicuous effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Conspicuous Item")
@@ -92,7 +92,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test GOOD quality effect", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         UINameHintCard.CreateHintCardInstance("Legendary Artifact")
@@ -102,7 +102,7 @@ hf_engine.gl$_ubu_init(() => {
     });
 
     IMGUIDebugButton.AddButtonToCategory(hint_card_system, "Test combined effects", () => {
-        var PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        var PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (!PlayerInstance) return;
 
         // Flash + Good quality
@@ -336,7 +336,7 @@ export class UINameHintCard {
         try {
             // Use player position as default if no position set
             if (this._x === 0 && this._y === 0) {
-                const PlayerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+                const PlayerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
                 if (PlayerInstance) {
                     this._x = PlayerInstance.x;
                     this._y = PlayerInstance.y - 60; // Above player by default
@@ -344,7 +344,7 @@ export class UINameHintCard {
             }
 
             // Create HTML element using HTML_c3 object
-            this.htmlElement = hf_engine.runtime.objects.HTML_c3.createInstance(
+            this.htmlElement = Unreal__.runtime.objects.HTML_c3.createInstance(
                 this.layer,
                 this._x,
                 this._y
@@ -572,7 +572,7 @@ export class UINameHintCard {
 
         // Destroy after animation completes using C3Timer
         try {
-            const exitTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const exitTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             const exitTag = `exit_${this.id}_${Date.now()}`;
 
             exitTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
@@ -831,7 +831,7 @@ export class UINameHintCard {
             this.stopEffectTimer();
 
             // Create C3 Timer for conspicuous effect
-            this.effectTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            this.effectTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
 
             this.effectTimer.behaviors.Timer.addEventListener("timer", (e: any) => {
                 if (e.tag === this.effectTimerTag && this.isConspicuous) {

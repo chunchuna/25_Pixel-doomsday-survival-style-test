@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { _Audio } from "./PIXAudio.js";
 
 export enum WEATHER_TYPE {
@@ -27,16 +27,16 @@ var FogTimerEventListenerAdded: boolean = false;
 // Track fog state to prevent multiple calls
 let isFogEnabled: boolean = false;
 
-hf_engine.gl$_ubu_init(() => {
-    if (hf_engine.runtime.layout.name != "Level") return
+Unreal__.GameBegin(() => {
+    if (Unreal__.runtime.layout.name != "Level") return
 
-    WeatherC3Timer = hf_engine.runtime.objects.C3Ctimer.createInstance("Rain", -100, -100)
+    WeatherC3Timer = Unreal__.runtime.objects.C3Ctimer.createInstance("Rain", -100, -100)
     handleWeather();
 })
 
 async function handleWeather() {
     Normal();
-    await hf_engine.WAIT_TIME_FORM_PROMISE(0.5)
+    await Unreal__.WAIT_TIME_FORM_PROMISE(0.5)
     Rain();
 
 }
@@ -46,7 +46,7 @@ async function Rain() {
     if (WeatherC3Timer == null) return
     WeatherState.CurrentWeather = WEATHER_TYPE.RAIN;
 
-    if (hf_engine.runtime.layout.name != "Level") return
+    if (Unreal__.runtime.layout.name != "Level") return
 
     // Don't clean up fog when switching to rain - fog is independent
 
@@ -56,19 +56,19 @@ async function Rain() {
 
     _Audio.AudioPlayCycle("Rain", -10, 1, "Rain");
 
-    var RainDropSpriteClass = hf_engine.runtime.objects.Raindrop;
-    var GameLayoutdth = hf_engine.runtime.layout.width;
-    var GameLayoutHeight = hf_engine.runtime.layout.height;
+    var RainDropSpriteClass = Unreal__.runtime.objects.Raindrop;
+    var GameLayoutdth = Unreal__.runtime.layout.width;
+    var GameLayoutHeight = Unreal__.runtime.layout.height;
 
 
     WeatherC3Timer.behaviors.Timer.startTimer(0.5, "rain", "regular")
     WeatherC3Timer.behaviors.Timer.addEventListener("timer", () => {
         for (let i = 0; i < 50; i++) {
-            if (hf_engine.runtime.layout.name != "Level") return
+            if (Unreal__.runtime.layout.name != "Level") return
             RainDropSpriteClass.createInstance(
                 "Rain",
-                hf_engine.GetRandomNumber(-100, GameLayoutdth),
-                hf_engine.GetRandomNumber(0, 20),
+                Unreal__.GetRandomNumber(-100, GameLayoutdth),
+                Unreal__.GetRandomNumber(0, 20),
                 false
             );
         }
@@ -89,10 +89,10 @@ async function Normal() {
 }
 
 
-hf_engine.gl$_ubu_init(() => {
-    var RainDropSpriteClass = hf_engine.runtime.objects.Raindrop;
+Unreal__.GameBegin(() => {
+    var RainDropSpriteClass = Unreal__.runtime.objects.Raindrop;
     RainDropSpriteClass.addEventListener("instancecreate", (e) => {
-        e.instance.angleDegrees = hf_engine.GetRandomNumber(68, 70)
+        e.instance.angleDegrees = Unreal__.GetRandomNumber(68, 70)
         //console.log(e.instance.angleDegrees)
         e.instance.behaviors.Timer.startTimer(5, "DestroyTimer", "once")
         e.instance.behaviors.Timer.addEventListener("timer", (e) => {

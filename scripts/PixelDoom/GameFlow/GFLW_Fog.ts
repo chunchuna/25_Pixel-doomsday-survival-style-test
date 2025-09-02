@@ -1,8 +1,8 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { createFogAroundInstance, stopFogGeneration } from "../Group/Effect/Fog/PIXEffect_fog.js";
 import { AmbientLight } from "../Module/PIXAmbientLight.js";
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     GFLW_Fog.initinstance();
     // 监听白天黑夜 用于生成和销毁雾
     GFLW_Fog.AmbientGetNight = () => {
@@ -16,8 +16,8 @@ hf_engine.gl$_ubu_init(() => {
 
 })
 
-hf_engine.gl$_layout_end(() => {
-    if (hf_engine.runtime.layout.name !== "Level") return
+Unreal__.GameEnd(() => {
+    if (Unreal__.runtime.layout.name !== "Level") return
 
   
     if (GFLW_Fog.AmbientGetDay && GFLW_Fog.AmbientGetNight) {
@@ -35,7 +35,7 @@ class GFLW_Fog {
 
     static Player: InstanceType.RedHairGirlSprite | null = null
     static initinstance() {
-        this.Player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        this.Player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
     }
     static StartFog() {
         if (this.Player == null) return;

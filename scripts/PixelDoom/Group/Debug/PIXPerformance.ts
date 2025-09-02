@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 
 /**
  * 负责为单个指标创建和绘制实时折线图
@@ -109,7 +109,7 @@ class MetricVisualizer {
     }
 }
 
-hf_engine.gl$_ubu_init(()=>{
+Unreal__.GameBegin(()=>{
     Performance.ShowPerformanceMetrics();
 })
 

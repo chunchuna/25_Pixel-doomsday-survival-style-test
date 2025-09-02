@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { Imgui_chunchun } from "./imgui.js";
 
 declare global {

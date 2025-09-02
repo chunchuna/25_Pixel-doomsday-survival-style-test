@@ -9,16 +9,13 @@ enum GAME_STATES {
 
 }
 
-export class hf_engine {
+export class Unreal__ {
 
 
     //The instance of the current runtime environment used to access the runtime API of the Construct 3 engine.
     //This variable will be initialized at engine startup through the ` CONSTRUCT3-INGINEENTERYPOINT `.
     public static runtime: IRuntime;
-
     public static OBJECT: IConstructProjectObjects | any
-
-
     public static LayoutName: string;
 
     //The entry point function of Construct 3 engine, used to register callbacks at startup.
@@ -39,7 +36,7 @@ export class hf_engine {
     public static WAIT_TIME_FROM_PROMIS_ERVYSECOND(callback: () => void, intervalSeconds: number): any { // Return C3Timer instance
         try {
             // Create C3 Timer instance for interval timing
-            const timerInstance = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
+            const timerInstance = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100);
             const timerTag = `interval_${Date.now()}_${Math.random()}`;
 
             // Set up timer event listener
@@ -86,19 +83,19 @@ export class hf_engine {
         }
     }
 
-    public static gl$_getlayoutname() {
-        return hf_engine.runtime.layout.name;
+    public static GetGameCurrentLayoutName() {
+        return Unreal__.runtime.layout.name;
     }
 
-    public static gl$_ubu_init = (Function: () => void) => {
-        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    public static GameBegin = (Function: () => void) => {
+        Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.INIT, Function);
 
         });
     }
 
-    public static gl$_ubu_init_before = (Function: () => void) => {
-        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    public static GameBeginBefore = (Function: () => void) => {
+        Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.INIT_BEFORE, Function);
 
         });
@@ -106,34 +103,34 @@ export class hf_engine {
 
 
 
-    public static gl$_ubu_update = (Function: () => void) => {
-        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    public static GameUpdate = (Function: () => void) => {
+        Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.TICK, Function);
         });
     };
 
 
-    public static gl$_layout_end = (Function: () => void) => {
-        hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    public static GameEnd = (Function: () => void) => {
+        Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
             runtime.addEventListener(GAME_STATES.LAYOUT_END, Function)
         })
     }
 
-    public static async gl$_call_eventhandle_(EventName: string, func: any,) {
+    public static async GetEvent(EventName: string, func: any,) {
         // @ts-ignore
-        await (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async (e) => {
-            if (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) return;
+        await (Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE.addEventListener as any)(EventName, async (e) => {
+            if (Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) return;
             func(e);
         });
     }
 
 
-    public static gl$_run_eventhandle_(EventName: string, parameter: any) {
+    public static SendEvent(EventName: string, parameter: any) {
         // @ts-ignore
         var event = new C3.Event(EventName, false,)
         event.data = parameter;
         //console.log(event)
-        var handler = hf_engine.runtime.objects.EventHandler.getFirstInstance();
+        var handler = Unreal__.runtime.objects.EventHandler.getFirstInstance();
         // @ts-ignore
         handler.dispatchEvent(event)
     }
@@ -142,13 +139,13 @@ export class hf_engine {
     public static UBU_CLIENT_DRAW_FRAME = {
 
         gl$_ubu_init: (Fcuntion: () => void) => {
-            hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
                 runtime.addEventListener(GAME_STATES.INIT, Fcuntion);
             });
         },
 
         gl$_ubu_update: (Function: () => void) => {
-            hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+            Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
                 runtime.addEventListener(GAME_STATES.TICK, Function);
             });
         },
@@ -176,7 +173,7 @@ export class hf_engine {
 
 
     public static TryGetHandlerAgainFuckThisHandler() {
-        hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
+        Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = Unreal__.runtime.objects.EventHandler.getFirstInstance();
     }
 }
 
@@ -198,8 +195,8 @@ export class hf_engine {
 
 
 
-hf_engine.gl$_ubu_init(() => {
-    hf_engine.LayoutName = hf_engine.runtime.layout.name;
+Unreal__.GameBegin(() => {
+    Unreal__.LayoutName = Unreal__.runtime.layout.name;
 
 
 })
@@ -207,20 +204,20 @@ hf_engine.gl$_ubu_init(() => {
 
 // Engine here
 
-hf_engine.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
-    hf_engine.runtime = runtime;
-    hf_engine.OBJECT = runtime.objects;
-    hf_engine.TryGetHandlerAgainFuckThisHandler();
+Unreal__.CONSTRUCT3_ENGINE_ENTRY_POINT(async runtime => {
+    Unreal__.runtime = runtime;
+    Unreal__.OBJECT = runtime.objects;
+    Unreal__.TryGetHandlerAgainFuckThisHandler();
 
 
 });
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     //@ts-ignore
-    hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
-    console.log("[engine] handler" + hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE)
-    if (hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) {
-        hf_engine.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = hf_engine.runtime.objects.EventHandler.getFirstInstance();
+    Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = Unreal__.runtime.objects.EventHandler.getFirstInstance();
+    console.log("[engine] handler" + Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE)
+    if (Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE == null) {
+        Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = Unreal__.runtime.objects.EventHandler.getFirstInstance();
         console.log("[engine] try agagin get handler")
     }
 });

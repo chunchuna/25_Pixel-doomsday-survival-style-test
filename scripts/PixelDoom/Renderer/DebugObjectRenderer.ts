@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 
 // Debug box render configuration interface
 interface DebugBoxConfig {
@@ -359,7 +359,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -412,7 +412,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -425,7 +425,7 @@ export class DebugObjectRenderer {
 
         // If no custom layer specified, try to get a default layer
         if (!customLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 const gameContentLayer = runtime.layout.getLayer("GameContent");
                 const layer0 = runtime.layout.getLayer(0);
@@ -475,7 +475,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified, otherwise use fromInstance's layer
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -538,7 +538,7 @@ export class DebugObjectRenderer {
         // Get custom layer if specified
         let customLayer: ILayer | undefined = undefined;
         if (this.currentLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 customLayer = runtime.layout.getLayer(this.currentLayer) || undefined;
                 if (customLayer) {
@@ -551,7 +551,7 @@ export class DebugObjectRenderer {
 
         // If no custom layer specified, try to get a default layer
         if (!customLayer) {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime && runtime.layout) {
                 const gameContentLayer = runtime.layout.getLayer("GameContent");
                 const layer0 = runtime.layout.getLayer(0);
@@ -856,7 +856,7 @@ export class DebugObjectRenderer {
     public static testRender(): void {
         console.log("[DebugObjectRenderer] Starting test render...");
 
-        const runtime = hf_engine.runtime;
+        const runtime = Unreal__.runtime;
         if (!runtime) {
             console.error("[DebugObjectRenderer] Runtime not available for test");
             return;
@@ -897,7 +897,7 @@ export class DebugObjectRenderer {
         }
 
         try {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (!runtime) {
                 console.warn("[DebugObjectRenderer] Runtime not available for event binding");
                 return;
@@ -1164,32 +1164,32 @@ export class DebugObjectRenderer {
 
 
 
-hf_engine.gl$_layout_end(() => {
+Unreal__.GameEnd(() => {
 
     DebugObjectRenderer.clearAll();
 
 })
 
 // Auto-initialize when module is loaded
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     DebugObjectRenderer.initialize();
 
-    if (hf_engine.gl$_getlayoutname() !== "Level") return
+    if (Unreal__.GetGameCurrentLayoutName() !== "Level") return
 
-    var playerInstance = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+    var playerInstance = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
     if (playerInstance) {
         var playerBox = DebugObjectRenderer.setColor(1, 0, 1, 1).setOffset(0, -70).setBoxThickness(2).setHollow().setLayer("GameContent").RenderBoxtoInstance(playerInstance);
     }
 
-    var ClickObject = hf_engine.runtime.objects.ClickObjectEntity;
+    var ClickObject = Unreal__.runtime.objects.ClickObjectEntity;
     ///var GouHuoBox = DebugObjectRenderer.setColorPreset(DebugColors.GREEN).setBoxThickness(2).setLayer("GameContent").DrawBoxesForAllInstances(ClickObject);
     if (playerInstance) {
         var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, ClickObject)
     }
 
-    var NPCObject = hf_engine.runtime.objects.NPC;
-    var ShouJiNvRenInstance = hf_engine.runtime.objects.ShouJiNvRen.getFirstInstance();
+    var NPCObject = Unreal__.runtime.objects.NPC;
+    var ShouJiNvRenInstance = Unreal__.runtime.objects.ShouJiNvRen.getFirstInstance();
     if (playerInstance) {
         var NPCBox = DebugObjectRenderer.setLayer("GameContent").setOffset(0, -50).setBoxThickness(2).setColorPreset(DebugColors.PURPLE).DrawBoxesForAllInstances(NPCObject)
         var ObjectLine = DebugObjectRenderer.setLayer("GameContent").setColorPreset(DebugColors.ORANGE).setBoxThickness(2).DrawLineConenctPlayerForAllInstacne(playerInstance, NPCObject)

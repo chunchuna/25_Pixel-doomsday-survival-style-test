@@ -1,11 +1,11 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { Level2DCamera, PIXLevel } from "../Module/PIXLevel.js";
 
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    if (hf_engine.runtime.globalVars.GameType != "Level") return
+    if (Unreal__.runtime.globalVars.GameType != "Level") return
 
 
     GFLW__EntrancePerformance.initinstance();
@@ -16,7 +16,7 @@ hf_engine.gl$_ubu_init(() => {
 
     GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived", () => {
         GFLW__EntrancePerformance.gp_showplayer();
-        const levelVarsInstance = hf_engine.runtime
+        const levelVarsInstance = Unreal__.runtime
             .objects.LevelVars.getFirstInstance();
         if (levelVarsInstance) {
             levelVarsInstance.instVars.Bus = true;;
@@ -35,14 +35,14 @@ class GFLW__EntrancePerformance {
 
 
     static async initinstance() {
-        this.bus = hf_engine.runtime.objects.Bus.getFirstInstance();
-        this.player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        this.bus = Unreal__.runtime.objects.Bus.getFirstInstance();
+        this.player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
     }
 
     static ani__busentering() {
         Level2DCamera.CameraZoomTarget = 0.65;
      
-        this.bus = hf_engine.runtime.objects.Bus.getFirstInstance();
+        this.bus = Unreal__.runtime.objects.Bus.getFirstInstance();
         if (this.bus == null) return;
         this.bus.x = -334
         this.bus.y = 2450;
@@ -58,7 +58,7 @@ class GFLW__EntrancePerformance {
     }
 
     static gp_hideplayer() {
-        this.player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        this.player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (this.player == null) return;
         if (this.bus == null) return;
         this.player.behaviors.MoveFunction.isIgnoringInput = true;
@@ -74,20 +74,20 @@ class GFLW__EntrancePerformance {
     }
 
     static async gp_showplayer() {
-        this.bus = hf_engine.runtime.objects.Bus.getFirstInstance();
-        this.player = hf_engine.runtime.objects.RedHairGirlSprite.getFirstInstance();
+        this.bus = Unreal__.runtime.objects.Bus.getFirstInstance();
+        this.player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
         if (this.player == null) return;
         if (this.bus == null) return;
 
         this.bus.removeChild(this.player)
 
-        await hf_engine.WAIT_TIME_FORM_PROMISE(2)
+        await Unreal__.WAIT_TIME_FORM_PROMISE(2)
 
         this.player.isVisible = true;
         // this.player.x=688;
         // this.player.y=2130;
 
-        await hf_engine.WAIT_TIME_FORM_PROMISE(1)
+        await Unreal__.WAIT_TIME_FORM_PROMISE(1)
 
         //this.player.behaviors.MoveFunction.simulateControl("up")
         this.player.behaviors.MoveTo.moveToPosition(688, 1955)
@@ -100,8 +100,8 @@ class GFLW__EntrancePerformance {
     }
 
      static async BusFullShow(){
-        await hf_engine.WAIT_TIME_FORM_PROMISE(0.05)
-        if (hf_engine.runtime
+        await Unreal__.WAIT_TIME_FORM_PROMISE(0.05)
+        if (Unreal__.runtime
             .objects.LevelVars.getFirstInstance()
             ?.instVars.Bus == false) {
     

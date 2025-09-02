@@ -1,4 +1,4 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { UIWindowLib } from "../UI/window_lib_ui/UIWindowLib.js";
 
 export enum GAME_TYPE {
@@ -48,7 +48,7 @@ export function showImageWindow(
     return { windowElement, contentElement, close };
 }
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     //showImageWindow("Resource/Tree.png")
 
 })

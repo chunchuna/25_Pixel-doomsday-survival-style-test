@@ -1,10 +1,10 @@
-import { hf_engine } from "../../../engine.js"
+import { Unreal__ } from "../../../engine.js"
 import { LastestChooseObject } from "../../Module/PIXClickObject.js"
 import { GL_COMMAND_ } from "../../Module/PIXCommandAddon.js"
 import { UISubtitleMain } from "../../UI/subtitle_ui/UISubtitle.js"
 
 // Common Actions   
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
 
     /** 已移除 */
     // GL_COMMAND_._TRY_ACTION_UPDATE("check", () => {
@@ -16,9 +16,9 @@ hf_engine.gl$_ubu_update(() => {
 })
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    hf_engine.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+    Unreal__.GetEvent("ChoosePanleButtonClick:ClickButton", (e: any) => {
         var ButtonConetent_id: string = e.data.ButtonContent_;
         if (ButtonConetent_id == "check") {
             //GL_COMMAND_.ACTION_OPEN_();

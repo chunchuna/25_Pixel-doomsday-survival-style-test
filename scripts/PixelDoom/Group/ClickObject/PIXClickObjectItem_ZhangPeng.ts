@@ -1,9 +1,9 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { DeserializeItemsOnly, inventoryManager, type InventoryUpdateCallback } from "../../UI/inventory_ui/UIInventory.js";
 
-hf_engine.gl$_ubu_init(() => {
-    hf_engine.gl$_call_eventhandle_("ChoosePanleButtonClick:ClickButton", (e: any) => {
+Unreal__.GameBegin(() => {
+    Unreal__.GetEvent("ChoosePanleButtonClick:ClickButton", (e: any) => {
 
         var ButtonConetent_id: string = e.data.ButtonContent_;
         if (ButtonConetent_id == "inventory") {
@@ -76,7 +76,7 @@ export function DIA_temp_InventoryFindFunction() {
     ).oneline();
 }
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     (window as any).DIA_temp_InventoryFindFunction = DIA_temp_InventoryFindFunction;
 
     (window as any).DIA_temp_ReBackDialogueFunction = DIA_temp_ReBackDialogueFunction;

@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { UISubtitleMain } from "../subtitle_ui/UISubtitle.js";
 import { VariableMonitoring } from "./UIvariableMonitoring.js";
 import { UIConsole } from "./UIConsole.js";
@@ -11,7 +11,7 @@ export var DEBUG = {
 var isCreatDebugPanel = false;
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     if (!isCreatDebugPanel) {
 
         DEBUG.DebugMainUI = UIDebug.InitDebugPanel('f1')

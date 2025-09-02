@@ -1,7 +1,7 @@
-import { hf_engine } from "../../engine.js";
+import { Unreal__ } from "../../engine.js";
 import { DebugObjectRenderer, DebugColors } from "../Renderer/DebugObjectRenderer.js";
 
-hf_engine.gl$_ubu_init(()=>{
+Unreal__.GameBegin(()=>{
     // Initialize the area tools when the game starts
     PIXAreaTools.initialize();
 })
@@ -84,7 +84,7 @@ class PIXAreaTools {
         }
         
         // Get screen dimensions from runtime
-        const runtime = hf_engine.runtime;
+        const runtime = Unreal__.runtime;
         if (!runtime) return;
         
         const width = runtime.layout.width;
@@ -140,7 +140,7 @@ class PIXAreaTools {
      * Mark a point at the current mouse position
      */
     private static markPointAtMousePosition(): void {
-        const runtime = hf_engine.runtime;
+        const runtime = Unreal__.runtime;
         if (!runtime || !runtime.objects.Mouse) {
             console.error("[PIXAreaTools] 找不到鼠标对象");
             return;
@@ -268,7 +268,7 @@ class PIXAreaTools {
      */
     private static showCopiedMessage(text: string): void {
         // Get the runtime
-        const runtime = hf_engine.runtime;
+        const runtime = Unreal__.runtime;
         if (!runtime) return;
         
         // Log the copied coordinates

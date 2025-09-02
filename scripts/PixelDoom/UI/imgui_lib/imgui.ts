@@ -1,4 +1,4 @@
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { ImGuiFontManager } from "./FontManager.js";
 
 // Declare global ImGui objects
@@ -620,7 +620,7 @@ export class Imgui_chunchun {
 }
 
 // Initialize hook
-hf_engine.gl$_ubu_init(async () => {
+Unreal__.GameBegin(async () => {
     try {
         await Imgui_chunchun.Initialize();
         //Imgui_chunchun.CreateExampleWindow();
@@ -631,6 +631,6 @@ hf_engine.gl$_ubu_init(async () => {
 });
 
 // Update hook
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
     Imgui_chunchun.Render();
 });

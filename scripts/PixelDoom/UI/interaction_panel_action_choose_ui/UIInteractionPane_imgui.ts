@@ -13,7 +13,7 @@ declare global {
     }
 }
 
-import { hf_engine } from "../../../engine.js";
+import { Unreal__ } from "../../../engine.js";
 import { ClickObject, LastestChooseObject } from "../../Module/PIXClickObject.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 
@@ -27,7 +27,7 @@ class InteractionUIState {
 }
 
 /** Initialize */
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
     initInteractionUI();
     //UIInteractionPanelActionChooseMain.ShowChoosePanle()
     // AddChooseButtonIntoPanel("a", 1)
@@ -215,7 +215,7 @@ export class UIInteractionPanelActionChooseMain_imgui {
                         // Here's where we set the button size
                         if (ImGui.Button(buttonContent, new ImGui.ImVec2(this.buttonWidth, this.buttonHeight))) {
                             console.log('Button clicked:', buttonContent);
-                            hf_engine.gl$_run_eventhandle_("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonContent });
+                            Unreal__.SendEvent("ChoosePanleButtonClick:ClickButton", { ButtonContent_: buttonContent });
                         }
 
                         ImGui.Spacing();

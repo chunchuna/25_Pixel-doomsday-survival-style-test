@@ -1,14 +1,14 @@
-import { hf_engine } from "../../../../engine.js";
+import { Unreal__ } from "../../../../engine.js";
 import { DebugObjectRenderer, DebugColors } from "../../../Renderer/DebugObjectRenderer.js";
 import { Imgui_chunchun } from "../../../UI/imgui_lib/imgui.js";
 import { IMGUIDebugButton } from "../../../UI/debug_ui/UIDbugButton.js";
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
-    if (hf_engine.
+    if (Unreal__.
         LayoutName !== "Level"
     ) return
-    var fogSprite = hf_engine.
+    var fogSprite = Unreal__.
         runtime.objects.FogSprite.createInstance("Fog", 0, 0, false)
     // createFogAroundInstance(hf_engine.
     //     runtime.objects.
@@ -60,19 +60,19 @@ var FogGenerationTimer: any = null;
 
 //实时获取雾和实例的距离
 
-hf_engine.gl$_ubu_update(() => {
+Unreal__.GameUpdate(() => {
 
-    if (hf_engine.LayoutName !== "Level") return
+    if (Unreal__.LayoutName !== "Level") return
     if (TargetInstance == null) return;
 
     // Get all fog instances
-    const fogInstances = Array.from(hf_engine.
+    const fogInstances = Array.from(Unreal__.
         runtime.objects.FogSprite.instances());
 
     for (var FogSprites of fogInstances) {
         if (FogSprites == null) continue;
 
-        FogSprites.instVars.DistanceFromInstance = hf_engine.
+        FogSprites.instVars.DistanceFromInstance = Unreal__.
             //@ts-ignore
             CalculateDistancehahaShitCode(TargetInstance.x,
                 //@ts-ignore
@@ -101,7 +101,7 @@ hf_engine.gl$_ubu_update(() => {
                         cleanupFogDebugElements(FogSprites.uid);
 
                         // Set up a timer to clean up the tracking set after fade completes
-                        const cleanupTimer = hf_engine.
+                        const cleanupTimer = Unreal__.
                             runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
 
                         if (cleanupTimer && cleanupTimer.behaviors.Timer) {
@@ -179,7 +179,7 @@ function cleanupFogDebugElements(fogUID: number): void {
  */
 function createFogInstanceWithDebug(targetInstance: any, fogX: number, fogY: number, isReplacement: boolean = false): any {
     // Create fog instance at calculated position
-    const fogInstance = hf_engine.
+    const fogInstance = Unreal__.
         runtime.objects.FogSprite.createInstance("Fog", fogX, fogY, false);
 
     // Only add debug visualization if DebugRender is enabled
@@ -254,14 +254,14 @@ export async function createFogAroundInstance(
     maxDistance: number = 500
 ): Promise<void> {
 
-    await hf_engine.WAIT_TIME_FORM_PROMISE(1)
-    if (hf_engine.LayoutName !== "Level") return
+    await Unreal__.WAIT_TIME_FORM_PROMISE(1)
+    if (Unreal__.LayoutName !== "Level") return
     
     // 检查是否已有雾系统在运行，如果有则先停止
     if (IsFogSystemActive) {
         console.log("Fog system already active. Stopping current system before creating a new one.");
         stopFogGeneration(0.5); // 快速淡出现有雾
-        await hf_engine.WAIT_TIME_FORM_PROMISE(0.7); // 等待淡出完成
+        await Unreal__.WAIT_TIME_FORM_PROMISE(0.7); // 等待淡出完成
     }
     
     // 标记雾系统为活动状态
@@ -278,12 +278,12 @@ export async function createFogAroundInstance(
     FogInstancesFadingOut.clear();
     console.log("Cleared fog tracking for new fog generation cycle");
 
-    var FogTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -100, -100)
+    var FogTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -100, -100)
     FogTimer.behaviors.Timer.startTimer(checkInterval, "fog_check_timer", "regular")
     FogTimer.behaviors.Timer.addEventListener("timer", (e) => {
         if (e.tag === "fog_check_timer") {
             // 检查当前雾实例数量
-            const currentFogInstances = hf_engine.
+            const currentFogInstances = Unreal__.
                 runtime.objects.FogSprite.getAllInstances();
             const currentFogCount = currentFogInstances.length;
 
@@ -341,7 +341,7 @@ function createMissingFogInstances(targetInstance: any, missingCount: number, ra
     const centerY = targetInstance.y;
 
     // Get current fog instances to avoid overlapping positions
-    const currentFogInstances = hf_engine.
+    const currentFogInstances = Unreal__.
         runtime.objects.FogSprite.getAllInstances();
 
     for (let i = 0; i < missingCount; i++) {
@@ -415,7 +415,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
             MaxFogCount = 0;
             
             // Create a timer to restore MaxFogCount after all fog has faded out
-            const restoreTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -300, -300, false);
+            const restoreTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -300, -300, false);
             if (restoreTimer && restoreTimer.behaviors.Timer) {
                 // Wait a bit longer than fadeOutTime to ensure all fog is gone
                 restoreTimer.behaviors.Timer.startTimer(fadeOutTime + 1.0, "restore_fog_count", "once");
@@ -430,7 +430,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
             }
             
             // Get all existing fog instances
-            const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
+            const fogInstances = Unreal__.runtime.objects.FogSprite.getAllInstances();
             console.log(`Starting fade-out for ${fogInstances.length} existing fog instances`);
             
             // Start fade-out for all existing fog instances
@@ -455,7 +455,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
                             cleanupFogDebugElements(fogInstance.uid);
                             
                             // Set up a timer to destroy the fog instance after fade completes
-                            const cleanupTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                            const cleanupTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
                             
                             if (cleanupTimer && cleanupTimer.behaviors.Timer) {
                                 cleanupTimer.behaviors.Timer.startTimer(fadeOutTime + 0.2, `cleanup_${fogInstance.uid}`, "once");
@@ -508,7 +508,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
         IsFogSystemActive = false;
         
         // Even if no timer is running, try to fade out any existing fog
-        const fogInstances = hf_engine.runtime.objects.FogSprite.getAllInstances();
+        const fogInstances = Unreal__.runtime.objects.FogSprite.getAllInstances();
         if (fogInstances.length > 0) {
             console.log(`No timer found but fading out ${fogInstances.length} existing fog instances`);
             
@@ -527,7 +527,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
                             
                             cleanupFogDebugElements(fogInstance.uid);
                             
-                            const cleanupTimer = hf_engine.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
+                            const cleanupTimer = Unreal__.runtime.objects.C3Ctimer.createInstance("Other", -200, -200, false);
                             if (cleanupTimer && cleanupTimer.behaviors.Timer) {
                                 cleanupTimer.behaviors.Timer.startTimer(fadeOutTime + 0.2, `cleanup_${fogInstance.uid}`, "once");
                                 cleanupTimer.behaviors.Timer.addEventListener("timer", (e) => {
@@ -578,7 +578,7 @@ export function stopFogGeneration(fadeOutTime: number = 1.5): boolean {
 export function showFogDistanceDebugWindow(): void {
     console.log("Opening Fog Distance ImGui Window...");
 
-    const runtime = hf_engine.runtime;
+    const runtime = Unreal__.runtime;
     if (!runtime) {
         console.log("Runtime not available for debug window");
         return;
@@ -800,7 +800,7 @@ export function showFogDistanceDebugWindow(): void {
 export function startFogDistanceMonitoring(): void {
     console.log("Starting persistent fog distance ImGui monitoring...");
 
-    const runtime = hf_engine.runtime;
+    const runtime = Unreal__.runtime;
     if (!runtime) {
         console.log("Runtime not available for monitoring");
         return;
@@ -832,7 +832,7 @@ export function startFogDistanceMonitoring(): void {
 }
 
 
-hf_engine.gl$_ubu_init(() => {
+Unreal__.GameBegin(() => {
 
     // Start the ImGui fog distance monit
 
@@ -873,7 +873,7 @@ hf_engine.gl$_ubu_init(() => {
         "Clear All Fog",
         [1.0, 0.3, 0.3, 1.0], // Red color for destructive action
         () => {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime) {
                 const fogInstances = runtime.objects.FogSprite.getAllInstances();
                 fogInstances.forEach(fog => {
@@ -891,7 +891,7 @@ hf_engine.gl$_ubu_init(() => {
         fogCategoryId,
         "Create Test Fog",
         () => {
-            const runtime = hf_engine.runtime;
+            const runtime = Unreal__.runtime;
             if (runtime) {
                 const targetInstance = runtime.objects.RedHairGirlSprite.getFirstInstance();
                 if (targetInstance) {
