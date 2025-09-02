@@ -323,8 +323,7 @@
 			"ClickObject",
 			"MainMenu",
 			"Save",
-			"Gouhuo",
-			"Intro"
+			"Gouhuo"
 		],
 		"subfolders": []
 	},
@@ -615,6 +614,20 @@
 									],
 									"subfolders": [],
 									"name": "Watch"
+								},
+								{
+									"items": [
+										{
+											"name": "PIXIntro.ts",
+											"type": "application/typescript",
+											"sid": 169938639984702,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "Intro"
 								}
 							],
 							"name": "Group"

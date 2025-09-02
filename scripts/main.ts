@@ -79,6 +79,8 @@ import "./PixelDoom/Module/PIXAreaTools.js"
 
 import "./PixelDoom/Group/Watch/Watch.js"
 
+import "./PixelDoom/Group/Intro/PIXIntro.js"
+
 // GAME FLOW
 
 import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"
