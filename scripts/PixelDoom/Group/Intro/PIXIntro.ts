@@ -1,5 +1,5 @@
 import { hf_engine } from "../../../engine.js";
-import { LevelMain } from "../../Module/PIXLevel.js";
+import { PIXLevel } from "../../Module/PIXLevel.js";
 import { LayoutTransition, TransitionType } from "../../UI/layout_transition_ui/UILayoutTransition.js";
 
 hf_engine.gl$_ubu_init(() => {

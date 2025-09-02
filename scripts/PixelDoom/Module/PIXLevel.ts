@@ -11,74 +11,58 @@ import { TransitionEffectType, UIScreenEffect } from "../UI/screeneffect_ui/UISc
 import { _Audio } from "./PIXAudio.js";
 import { WEATHER_TYPE, WeatherState } from "./PIXWeather.js";
 
-export class LevelMain {
-    static CameraZoomValue: number = 0.35;
-    static CameraZoomTarget: number = 0.35;
-    
-    static async JumpOtehrLayoutFromLevel(LevelName: string) {
-
-        // UIScreenEffect.FadeOut(800, TransitionEffectType.WIPE_RADIAL, async () => {
-        //     pmlsdk$ProceduralStorytellingSandboxRPGDevelopmentToolkit.RUN_TIME_.goToLayout(LevelName)
-        // })
+export class PIXLevel {
+    static async GoToLayoutByTransitionEffect(LevelName: string) {
         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2).onFinish(() => {
             hf_engine.runtime.goToLayout(LevelName)
         })
     }
 }
 
-hf_engine.gl$_ubu_init(() => {
+// 相机相关 
 
-    if (hf_engine.runtime.layout.name != "Level") return
+hf_engine.gl$_ubu_init(()=>{Level2DCamera.CameraInit();Level2DCamera.ShortKey()})
+hf_engine.gl$_ubu_update(()=>{Level2DCamera.UpdateCamera()})
+export class Level2DCamera {
 
-    // 初始化时设置初始值
-    LevelMain.CameraZoomValue = 0.35;
-    LevelMain.CameraZoomTarget = 0.35; // 确保两个值初始一致
-    hf_engine.runtime.layout.scale = LevelMain.CameraZoomValue;
-
-    // 添加键盘事件监听，用于调整缩放
-    document.addEventListener('keydown', (e) => {
-        if (e.key === '+' || e.key === '=') {
-            LevelMain.CameraZoomTarget = Math.min(LevelMain.CameraZoomTarget + 0.1, 2.0);
-        } else if (e.key === '-' || e.key === '_') {
-            LevelMain.CameraZoomTarget = Math.max(LevelMain.CameraZoomTarget - 0.1, 0.35);
-        }
-    });
-
-    hf_engine.runtime.layout.scale = LevelMain.CameraZoomTarget;
     
+    static CameraZoomValue: number = 0.35;
+    static CameraZoomTarget: number = 0.35;
+    static CameraInit() {
+        if (hf_engine.runtime.layout.name != "Level") return
+        // 初始化时设置初始值
+        Level2DCamera.CameraZoomValue = 0.35;
+        Level2DCamera.CameraZoomTarget = 0.35; // 确保两个值初始一致
+        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomValue;
 
-})
+        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomTarget;
+    }
 
-hf_engine.gl$_ubu_update(() => {
-    //  平滑镜头缩放
+    static ShortKey() {
+        // 添加键盘事件监听，用于调整缩放
+        
+        document.addEventListener('keydown', (Event) => {
+            if (Event.key === '+' || Event.key === '=') {
+                Level2DCamera.CameraZoomTarget = Math.min(Level2DCamera.CameraZoomTarget + 0.1, 2.0);
+            } else if (Event.key === '-' || Event.key === '_') {
+                Level2DCamera.CameraZoomTarget = Math.max(Level2DCamera.CameraZoomTarget - 0.1, 0.35);
+            }
+        });
+    }
 
-    if (hf_engine.runtime.layout.name != "Level") return
-    // 使用更合适的插值系数(0.05)来实现平滑过渡
-    LevelMain.CameraZoomValue = hf_engine.Justlerp(LevelMain.CameraZoomValue, LevelMain.CameraZoomTarget, 0.05);
-    //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
-    hf_engine.runtime.layout.scale = LevelMain.CameraZoomValue;
-
-})
-
-// debug 相关
-var isBindButtonIntoDebugPanel = false;
-hf_engine.gl$_ubu_init(() => {
-
-    if (isBindButtonIntoDebugPanel) return
-    isBindButtonIntoDebugPanel = true
-    // IMGUI 面本绘制按钮
-    var level_cat = IMGUIDebugButton.AddCategory("Level")
-
-    if (level_cat) {
-
-        IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
-            if (hf_engine.runtime.layout.name == "MainMenu") return
-            LevelMain.JumpOtehrLayoutFromLevel("MainMenu")
-        })
+    static UpdateCamera(){
+        if (hf_engine.runtime.layout.name != "Level") return
+        Level2DCamera.CameraZoomValue = hf_engine.Justlerp(Level2DCamera.CameraZoomValue, Level2DCamera.CameraZoomTarget, 0.05);
+        //console.log("当前缩放: " + CameraZoomValue + ", 目标缩放: " + CameraZoomTarget);
+        hf_engine.runtime.layout.scale = Level2DCamera.CameraZoomValue;
 
     }
-})
 
+}
+
+
+
+// 离开Level
 hf_engine.gl$_layout_end(() => {
 
     if (hf_engine.gl$_getlayoutname() !== "Level") return
@@ -112,3 +96,23 @@ hf_engine.gl$_layout_end(() => {
     VariableMonitoring.CleanupDestroyed();
 })
 
+
+// ================================================================
+// debug 相关
+var isBindButtonIntoDebugPanel = false;
+hf_engine.gl$_ubu_init(() => {
+
+    if (isBindButtonIntoDebugPanel) return
+    isBindButtonIntoDebugPanel = true
+    // IMGUI 面本绘制按钮
+    var level_cat = IMGUIDebugButton.AddCategory("Level")
+
+    if (level_cat) {
+
+        IMGUIDebugButton.AddButtonToCategory(level_cat, "go layout [main_menu]", () => {
+            if (hf_engine.runtime.layout.name == "MainMenu") return
+            PIXLevel.GoToLayoutByTransitionEffect("MainMenu")
+        })
+
+    }
+})

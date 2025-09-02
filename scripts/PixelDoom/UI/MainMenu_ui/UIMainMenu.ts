@@ -27,8 +27,7 @@ async function initGameMainScene(): Promise<void> {
     console.log('Starting initGameMainScene');
     const gameMainScene = UIMainMenu.getInstance();
     gameMainScene.initialize();
-
-    UIMainMenu.getInstance().ShowMainMenu()
+    gameMainScene.ShowMainMenu()
     
 
     setTimeout(() => {
