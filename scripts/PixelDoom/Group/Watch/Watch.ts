@@ -27,7 +27,6 @@ hf_engine.gl$_ubu_init(() => {
     if (hf_engine.runtime.layout.name !== "Level") return
     // Initialize the watch when the game starts
     Watch.initialize();
-
     // Register for day/night events from AmbientLight
     AmbientLight.onDayStart(() => {
         console.log("Watch detected day start");
@@ -40,9 +39,6 @@ hf_engine.gl$_ubu_init(() => {
         // Update watch to show night time
         Watch.updateWatchFace();
     });
-
-
-
     Watch.show();
 })
 
@@ -74,6 +70,7 @@ class Watch {
     // 如果需要导入自定义的表盘 才需要填写这个值  这个是必须和图片大小绑定的
     private static watchImageWidth: number = 400;
     private static watchImageHeight: number = 600;
+    private static CustomWatchFacePath:string ="Resource/Art/Watch.png"
 
     // Watch colors - now configurable
     private static watchFaceColor: string = "rgba(179,181,250,0.96)";
@@ -230,7 +227,7 @@ class Watch {
             console.log("Failed to load watch face image");
             isWatchFaceImageLoaded = false;
         };
-        watchFaceImage.src = "Resource/Art/Watch.png";
+        watchFaceImage.src = Watch.CustomWatchFacePath;
     }
 
     /**
