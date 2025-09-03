@@ -32,6 +32,25 @@ Unreal__.GameBegin(() => {
 
     })
 
+    Unreal__.GetEvent("CharacterControllerStand", () => {
+        if (!GAME$_CHARACTER_CONTROLLER) return
+        GAME$_CHARACTER_CONTROLLER.setAnimation("Stand")
+
+    })
+
+    Unreal__.GetEvent("CharacterControllerSeat", () => {
+        if (!GAME$_CHARACTER_CONTROLLER) return
+        GAME$_CHARACTER_CONTROLLER.setAnimation("Seat")
+
+    })
+
+    GAME$_CHARACTER_CONTROLLER.addEventListener("animationend", (Event) => {
+        if (!GAME$_CHARACTER_CONTROLLER) return
+        if (Event.animationName == "Stand") {
+            GAME$_CHARACTER_CONTROLLER.setAnimation("Idle")
+        }
+    })
+
 })
 
 

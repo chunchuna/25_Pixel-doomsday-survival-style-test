@@ -19,64 +19,105 @@ Unreal__.GameBegin(() => {
 })
 
 
-//@ts-ignore
-var GAME$_KEYBOARD_INSTAHCE: IConstructProjectObjects.Keyboard;
-//@ts-ignore
-var GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
+
+
+class PlayerController {
+    //@ts-ignore
+    static GAME$_KEYBOARD_INSTAHCE: IConstructProjectObjects.Keyboard;
+    //@ts-ignore
+    static GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
+
+    static SitDown: boolean = false;
+
+    static async TogglePlayerCharacterSitState() {
+        if (this.SitDown) {
+            Unreal__.SendEvent("CharacterControllerStand", "")
+        }
+        if (!this.SitDown) {
+            this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
+            this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0,0);
+            Unreal__.SendEvent("CharacterControllerSeat", "")
+        }
+    }
+}
+
+
+
 
 Unreal__.GameBegin(() => {
 
     if (Unreal__.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
-
-
-
     //@ts-ignore
-    GAME$_KEYBOARD_INSTAHCE = Unreal__.runtime.objects.Keyboard;
-    console.log(GAME$_KEYBOARD_INSTAHCE)
-
-
+    PlayerController.GAME$_KEYBOARD_INSTAHCE = Unreal__.runtime.objects.Keyboard;
+    console.log(PlayerController.GAME$_KEYBOARD_INSTAHCE)
     //@ts-ignore
-    GAME$_CHARACTER_CONTROLLER = Unreal__.runtime.objects.CharacterController.getFirstInstance();
-    console.log(GAME$_CHARACTER_CONTROLLER)
+    PlayerController.GAME$_CHARACTER_CONTROLLER = Unreal__.runtime.objects.CharacterController.getFirstInstance();
+    console.log(PlayerController.GAME$_CHARACTER_CONTROLLER)
 
 })
 
-
+// 翻转
 Unreal__.GameUpdate(() => {
-    if (GAME$_CHARACTER_CONTROLLER == null) return;
+    if (PlayerController.GAME$_CHARACTER_CONTROLLER == null) return;
 
     //console.log(GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX)
 
-    if (GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX < -0) {
-        GAME$_CHARACTER_CONTROLLER.width = - Math.abs(GAME$_CHARACTER_CONTROLLER.width)
+    if (PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX < -0) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.width = - Math.abs(PlayerController.GAME$_CHARACTER_CONTROLLER.width)
     }
 
-    if (GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX > 0) {
-        GAME$_CHARACTER_CONTROLLER.width = Math.abs(GAME$_CHARACTER_CONTROLLER.width)
-    }
-
-    if (GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX > 0 || GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY > 0) {
-
+    if (PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX > 0) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.width = Math.abs(PlayerController.GAME$_CHARACTER_CONTROLLER.width)
     }
 })
 
+// Input 
+// 坐下
+Unreal__.GameBegin(() => {
+    document.addEventListener("keydown", (Event: any) => {
+        if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
 
+        if(PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isIgnoringInput) return
+
+        if (Event.key === "c") {
+            PlayerController.TogglePlayerCharacterSitState();
+        }
+    })
+    if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
+
+    PlayerController.GAME$_CHARACTER_CONTROLLER.addEventListener("animationend", (Event) => {
+        if (Event.animationName == "Seat") {
+            PlayerController.SitDown = true;
+        }
+        if (Event.animationName == "Stand") {
+            PlayerController.SitDown = false;
+
+        }
+
+    })
+
+})
+
+// 移动
 Unreal__.GameUpdate(() => {
     if (Unreal__.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
-    if (GAME$_KEYBOARD_INSTAHCE == null) return
-    if (GAME$_CHARACTER_CONTROLLER == null) return
+    if (PlayerController.GAME$_KEYBOARD_INSTAHCE == null) return
+    if (PlayerController.GAME$_CHARACTER_CONTROLLER == null) return
 
-    if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyW")) {
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("up");
+    if(PlayerController.SitDown) return
+    if(PlayerController.GAME$_CHARACTER_CONTROLLER.animationName=="Seat" || PlayerController.GAME$_CHARACTER_CONTROLLER.animationName=="Stand") return
+
+    if (PlayerController.GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyW")) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("up");
     }
-    if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyS")) {
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("down");
+    if (PlayerController.GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyS")) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("down");
     }
-    if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyA")) {
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("left");
+    if (PlayerController.GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyA")) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("left");
     }
-    if (GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyD")) {
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("right");
+    if (PlayerController.GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyD")) {
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("right");
     }
 })
 
@@ -84,13 +125,16 @@ Unreal__.GameUpdate(() => {
 Unreal__.GameBegin(() => {
     UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
         // First stop the player completely, then disable movement
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0, 0);
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
+
+        if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0, 0);
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
     })
 
     UIInteractionPanelActionChooseMain.OnInteractionClose(() => {
-        GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = true;
+        if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
+        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = true;
     })
 
 })
