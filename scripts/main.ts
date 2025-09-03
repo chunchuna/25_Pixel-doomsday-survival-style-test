@@ -81,6 +81,8 @@ import "./PixelDoom/Group/Watch/Watch.js"
 
 import "./PixelDoom/Group/Intro/PIXIntro.js"
 
+import "./PixelDoom/UI/three_js_ui/UIThreejst.js"
+
 // GAME FLOW
 
 import "./PixelDoom/GameFlow/GFLW__EntrancePerformance.js"

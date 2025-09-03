@@ -164,16 +164,75 @@ export class Unreal__ {
         }
     }
 
-
     public static CalculateDistancehahaShitCode = (x1: number, y1: number, x2: number, y2: number): number => {
         const deltaX = x2 - x1;
         const deltaY = y2 - y1;
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
-
     public static TryGetHandlerAgainFuckThisHandler() {
         Unreal__.GET_CONSTRUCT3_EVENTHANDL_INSTANCE = Unreal__.runtime.objects.EventHandler.getFirstInstance();
+    }
+
+    public static CheckNetWork(): Promise<boolean> {
+       
+        return new Promise((resolve) => {
+            if (navigator.onLine) {
+                // 多个测试URL，覆盖不同地区可访问的网站
+                const testURLs = [
+                    'https://www.google.com/favicon.ico',
+                    'https://www.microsoft.com/favicon.ico',
+                    'https://www.apple.com/favicon.ico',
+                    'https://www.baidu.com/favicon.ico',
+                    'https://www.qq.com/favicon.ico'
+                ];
+                
+                const timeOut = 5000; // 5秒超时
+                let completedTests = 0;
+                let anySuccess = false;
+                
+                // 对每个URL进行测试
+                testURLs.forEach(url => {
+                    const testImage = new Image();
+                    const timer = setTimeout(() => {
+                        checkComplete(false);
+                        testImage.src = '';
+                    }, timeOut);
+                    
+                    testImage.onload = () => {
+                        clearTimeout(timer);
+                        checkComplete(true);
+                    };
+                    
+                    testImage.onerror = () => {
+                        clearTimeout(timer);
+                        checkComplete(false);
+                    };
+                    
+                    testImage.src = url + '?_t=' + new Date().getTime();
+                    
+                    // 检查是否所有测试都完成
+                    function checkComplete(success: boolean) {
+                        if (anySuccess) return; // 如果已经有成功的，不再处理
+                        
+                        if (success) {
+                            anySuccess = true;
+                            resolve(true);
+                            console.info("has network")
+                            return;
+                        }
+                        
+                        completedTests++;
+                        if (completedTests === testURLs.length && !anySuccess) {
+                            resolve(false);
+                            console.info("not has network")
+                        }
+                    }
+                });
+            } else {
+                resolve(false);
+            }
+        });
     }
 }
 

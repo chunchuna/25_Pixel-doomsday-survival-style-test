@@ -1,28 +1,59 @@
 import { Unreal__ } from "../../../engine.js";
 import { PIXLevel } from "../../Module/PIXLevel.js";
 import { LayoutTransition, TransitionType } from "../../UI/layout_transition_ui/UILayoutTransition.js";
+import { ThreeJs3D } from "../../UI/three_js_ui/UIThreejst.js";
 
 Unreal__.GameBegin(() => {
     if (Unreal__.runtime.layout.name == "Intro") {
-        Intro.PlayIntroAnimation();
+        // 检查是否有网络 
+        // 否则不加载intro 
+        // 谁叫 three.js 不下到本地用呢
+        Intro.CheakNetWork(() => {
+            Intro.PlayIntroAnimation();
+        }, () => {
+            // 直接跳 菜单场景
+            Intro.GoMinMenuLayout()
+         });
+
     }
 })
 
 class Intro {
     static async PlayIntroAnimation() {
+
+        // 提前检查 three.js 是否能成功加载
+        var ThreeJsLoaded = await ThreeJs3D.loadWithTimeout(5000)
+        if (!ThreeJsLoaded) {
+            console.warn("Three.js加载失败");
+            Intro.GoMinMenuLayout()
+        } else {
+            console.log("Three.js加载成功");
+        }
+
+
         await IntroAnimation.PlayAnimation();
         // 等待动画播放完毕之后 
         await Unreal__.WAIT_TIME_FORM_PROMISE(5)
-        Intro.JumpMinMenuLayout();
+        Intro.GoMinMenuLayout();
     }
 
-    static JumpMinMenuLayout() {
+    static GoMinMenuLayout() {
         LayoutTransition.LeaveLayout(TransitionType.HOLE, 2, () => {
             //Hole 动画结束的时候再销毁这个 IntroAnimation
             IntroAnimation.destroyAnimation();
             // 在跳转
             Unreal__.runtime.goToLayout("MainMenu")
         })
+    }
+
+    public static async CheakNetWork(hsnet: () => void, nothasnet: () => void) {
+        var NetWork = await Unreal__.CheckNetWork()
+        if (NetWork) {
+            hsnet();
+        } else {
+            nothasnet();
+        }
+
     }
 }
 
@@ -40,13 +71,11 @@ class IntroAnimation {
     // DOM Elements
     private static container: HTMLDivElement | null;
 
-    // Three.js and GSAP libraries
+    // Three.js objects
     private static THREE: any;
     private static FontLoader: any;
     private static TextGeometry: any;
     private static gsap: any;
-
-    // Three.js objects
     private static scene: any | null;
     private static camera: any | null;
     private static renderer: any | null;
@@ -55,50 +84,21 @@ class IntroAnimation {
     private static textHeight: number = 0;
     private static animationFrameId: number;
 
-    private static async loadDependencies() {
-        if (this.THREE) return; // already loaded
-
-        if (!document.querySelector('script[type="importmap"]')) {
-            const importMap = document.createElement('script');
-            importMap.type = 'importmap';
-            importMap.textContent = JSON.stringify({
-                imports: {
-                    "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js",
-                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/",
-                    "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.2/+esm"
-                }
-            });
-            document.head.appendChild(importMap);
-        }
-
-        // @ts-ignore
-        this.THREE = await import("three");
-        // @ts-ignore
-        const { FontLoader } = await import("three/addons/loaders/FontLoader.js");
-        this.FontLoader = FontLoader;
-        // @ts-ignore
-        const { TextGeometry } = await import("three/addons/geometries/TextGeometry.js");
-        this.TextGeometry = TextGeometry;
-        // @ts-ignore
-        const { gsap } = await import("gsap");
-        this.gsap = gsap;
-    }
-
     public static async PlayAnimation(): Promise<void> {
-        await this.loadDependencies();
+        // Get Three.js and related libraries from ThreeJs3D
+        this.THREE = await ThreeJs3D.getThree();
+        this.FontLoader = await ThreeJs3D.getFontLoader();
+        this.TextGeometry = await ThreeJs3D.getTextGeometry();
+        this.gsap = await ThreeJs3D.getGSAP();
 
-        this.container = document.createElement('div');
-        this.container.style.position = 'absolute';
-        this.container.style.width = '100%';
-        this.container.style.height = '100%';
-        this.container.style.top = '0';
-        this.container.style.left = '0';
-        this.container.style.zIndex = '999';
-        document.body.appendChild(this.container);
+        // Create container
+        this.container = ThreeJs3D.createContainer();
 
+        // Create scene
         this.scene = new this.THREE.Scene();
         this.scene.background = new this.THREE.Color(0xffffff);
 
+        // Create camera
         this.camera = new this.THREE.PerspectiveCamera(
             45,
             this.CONFIG.useFixedDimensions ? this.CONFIG.gameWidth / this.CONFIG.gameHeight : this.CONFIG.gameAspectRatio,
@@ -108,24 +108,35 @@ class IntroAnimation {
         this.camera.position.set(0, 0, 50);
         this.camera.lookAt(0, 0, 0);
 
+        // Create renderer
         this.renderer = new this.THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = this.THREE.PCFSoftShadowMap;
         this.container.appendChild(this.renderer.domElement);
-        this.updateRendererSize();
 
-        this.setupLighting();
-        this.createInterior();
+        // Update renderer size
+        if (this.container && this.renderer && this.camera) {
+            ThreeJs3D.updateRendererSize(this.renderer, this.camera, this.container, this.CONFIG);
+        }
 
+        // Setup lighting
+        ThreeJs3D.setupStandardLighting(this.scene);
+
+        // Create floor and fog
+        ThreeJs3D.createBasicFloor(this.scene);
+        ThreeJs3D.addFog(this.scene);
+
+        // Start animation loop
         this.animate();
+
+        // Add resize event listener
         window.addEventListener('resize', this.onWindowResize, false);
 
-        const font = await new Promise<any>((resolve) => {
-            const fontLoader = new this.FontLoader();
-            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font: any) => resolve(font));
-        });
+        // Load font
+        const font = await ThreeJs3D.loadFont();
 
+        // Create and animate text
         const letters = this.createLetters(font);
         this.calculateFinalPositions(letters);
         this.setupCameraAnimation();
@@ -133,8 +144,8 @@ class IntroAnimation {
     }
 
     public static destroyAnimation(): void {
-        if (this.container && this.container.parentNode) {
-            this.container.parentNode.removeChild(this.container);
+        if (this.container) {
+            ThreeJs3D.removeContainer(this.container);
         }
         window.removeEventListener('resize', this.onWindowResize, false);
         if (this.animationFrameId) {
@@ -145,79 +156,6 @@ class IntroAnimation {
         this.camera = null;
         this.renderer = null;
         this.container = null;
-    }
-
-    private static updateRendererSize() {
-        if (!this.container || !this.renderer || !this.camera) return;
-
-        if (this.CONFIG.useFixedDimensions) {
-            this.renderer.setSize(this.CONFIG.gameWidth, this.CONFIG.gameHeight);
-            this.container.style.width = this.CONFIG.gameWidth + 'px';
-            this.container.style.height = this.CONFIG.gameHeight + 'px';
-            this.container.style.position = 'absolute';
-            this.container.style.left = '50%';
-            this.container.style.top = '50%';
-            this.container.style.transform = 'translate(-50%, -50%)';
-        } else if (this.CONFIG.maintainAspectRatio) {
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-            let width, height;
-            const windowRatio = windowWidth / windowHeight;
-            const gameRatio = this.CONFIG.gameAspectRatio;
-            if (windowRatio > gameRatio) {
-                height = windowHeight;
-                width = height * gameRatio;
-            } else {
-                width = windowWidth;
-                height = width / gameRatio;
-            }
-            this.renderer.setSize(width, height);
-            this.container.style.width = width + 'px';
-            this.container.style.height = height + 'px';
-            this.container.style.position = 'absolute';
-            this.container.style.left = '50%';
-            this.container.style.top = '50%';
-            this.container.style.transform = 'translate(-50%, -50%)';
-            this.camera.aspect = gameRatio;
-            this.camera.updateProjectionMatrix();
-        } else {
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-    }
-
-    private static setupLighting() {
-        const ambientLight = new this.THREE.AmbientLight(0xffffff, 0.5);
-        this.scene.add(ambientLight);
-        const directionalLight = new this.THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 20, 15);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.camera.near = 0.1;
-        directionalLight.shadow.camera.far = 100;
-        directionalLight.shadow.camera.left = -20;
-        directionalLight.shadow.camera.right = 20;
-        directionalLight.shadow.camera.top = 20;
-        directionalLight.shadow.camera.bottom = -20;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        this.scene.add(directionalLight);
-        const pointLight = new this.THREE.PointLight(0xffffff, 0.5);
-        pointLight.position.set(-10, 5, 10);
-        this.scene.add(pointLight);
-    }
-
-    private static createInterior() {
-        const floorGeometry = new this.THREE.PlaneGeometry(200, 200);
-        const floorMaterial = new this.THREE.MeshStandardMaterial({
-            color: 0xf5f5f5,
-            roughness: 0.1,
-            metalness: 0.1
-        });
-        const floor = new this.THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -10;
-        floor.receiveShadow = true;
-        this.scene.add(floor);
-        this.scene.fog = new this.THREE.Fog(0xffffff, 70, 200);
     }
 
     private static createLetters(font: any) {
@@ -383,14 +321,12 @@ class IntroAnimation {
     }
 
     private static calculateIdealCameraDistance() {
-        const aspect = this.CONFIG.useFixedDimensions
-            ? this.CONFIG.gameWidth / this.CONFIG.gameHeight
-            : this.CONFIG.gameAspectRatio;
-        const fovRadians = this.camera.fov * (Math.PI / 180);
-        const distanceForWidth = (this.textWidth / 2) / Math.tan(fovRadians / 2) / aspect;
-        const distanceForHeight = (this.textHeight / 2) / Math.tan(fovRadians / 2);
-        const padding = 1.3;
-        return Math.max(distanceForWidth, distanceForHeight) * padding;
+        return ThreeJs3D.calculateIdealCameraDistance(
+            this.camera,
+            this.textWidth,
+            this.textHeight,
+            this.CONFIG
+        );
     }
 
     private static animate = () => {
@@ -401,8 +337,8 @@ class IntroAnimation {
     }
 
     private static onWindowResize = () => {
-        if (!this.CONFIG.useFixedDimensions) {
-            this.updateRendererSize();
+        if (!this.CONFIG.useFixedDimensions && this.container && this.renderer && this.camera) {
+            ThreeJs3D.updateRendererSize(this.renderer, this.camera, this.container, this.CONFIG);
             if (this.textGroup) {
                 const newDistance = this.calculateIdealCameraDistance();
                 this.gsap.to(this.camera.position, {

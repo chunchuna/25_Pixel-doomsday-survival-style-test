@@ -982,6 +982,20 @@
 									],
 									"subfolders": [],
 									"name": "layout_transition_ui"
+								},
+								{
+									"items": [
+										{
+											"name": "UIThreejst.ts",
+											"type": "application/typescript",
+											"sid": 772848464694438,
+											"script-info": {
+												"purpose": "none"
+											}
+										}
+									],
+									"subfolders": [],
+									"name": "three_js_ui"
 								}
 							],
 							"name": "UI"
