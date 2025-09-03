@@ -229,7 +229,8 @@
 					"HouZi",
 					"DouMaoNanRen",
 					"ShouJiNvRen",
-					"LevelVars"
+					"LevelVars",
+					"BusStation_rgba"
 				],
 				"subfolders": [],
 				"name": "Sprite"

@@ -349,6 +349,156 @@
 					"overriden": 0,
 					"subLayers": [
 						{
+							"name": "GaoJiaoZhanTai",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [
+								{
+									"type": "BusStation_rgba",
+									"properties": {
+										"initially-visible": true,
+										"initial-animation": "Default",
+										"initial-frame": 0,
+										"enable-collisions": true,
+										"live-preview": false
+									},
+									"uid": 13,
+									"sid": 217547482239386,
+									"tags": "",
+									"instanceVariables": {
+										"GetYPosition": 0
+									},
+									"behaviors": {},
+									"effects": {
+										"像素化": {
+											"isEnabled": true,
+											"parameters": {
+												"size": -3.2222595097656246
+											}
+										}
+									},
+									"instanceFolderItem": {
+										"sid": 217547482239386,
+										"expanded": true
+									},
+									"showing": true,
+									"locked": false,
+									"world": {
+										"x": 1232,
+										"y": 2175,
+										"width": 589.7297360431415,
+										"height": 366.63786929046256,
+										"originX": 0.3282051282051282,
+										"originY": 0.7740585774058577,
+										"color": [
+											1,
+											1,
+											1,
+											1
+										],
+										"angle": 0,
+										"zElevation": 0
+									}
+								}
+							],
+							"sid": 635802238610876,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
+							"name": "BaoAnTing",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [],
+							"sid": 244966939083013,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
+							"name": "GongYuanGaoShi",
+							"overriden": 0,
+							"subLayers": [],
+							"instances": [],
+							"sid": 393247536949253,
+							"effectTypes": [],
+							"isInitiallyVisible": true,
+							"isInitiallyInteractive": true,
+							"isHTMLElementsLayer": false,
+							"color": [
+								1,
+								1,
+								1,
+								1
+							],
+							"backgroundColor": [
+								0.3686274509803922,
+								0.3686274509803922,
+								0.3686274509803922,
+								1
+							],
+							"isTransparent": true,
+							"parallaxX": 1,
+							"parallaxY": 1,
+							"scaleRate": 1,
+							"forceOwnTexture": false,
+							"renderingMode": "3d",
+							"drawOrder": "z-order",
+							"useRenderCells": false,
+							"blendMode": "normal",
+							"zElevation": 0,
+							"global": false
+						},
+						{
 							"name": "Bus",
 							"overriden": 0,
 							"subLayers": [],
@@ -1590,7 +1740,76 @@
 						{
 							"name": "ZhiWuJingGuan",
 							"overriden": 0,
-							"subLayers": [],
+							"subLayers": [
+								{
+									"name": "HuaCao",
+									"overriden": 0,
+									"subLayers": [],
+									"instances": [],
+									"sid": 805273590835958,
+									"effectTypes": [],
+									"isInitiallyVisible": true,
+									"isInitiallyInteractive": true,
+									"isHTMLElementsLayer": false,
+									"color": [
+										1,
+										1,
+										1,
+										1
+									],
+									"backgroundColor": [
+										0.3686274509803922,
+										0.3686274509803922,
+										0.3686274509803922,
+										1
+									],
+									"isTransparent": true,
+									"parallaxX": 1,
+									"parallaxY": 1,
+									"scaleRate": 1,
+									"forceOwnTexture": false,
+									"renderingMode": "3d",
+									"drawOrder": "z-order",
+									"useRenderCells": false,
+									"blendMode": "normal",
+									"zElevation": 0,
+									"global": false
+								},
+								{
+									"name": "Shu",
+									"overriden": 0,
+									"subLayers": [],
+									"instances": [],
+									"sid": 565484059635912,
+									"effectTypes": [],
+									"isInitiallyVisible": true,
+									"isInitiallyInteractive": true,
+									"isHTMLElementsLayer": false,
+									"color": [
+										1,
+										1,
+										1,
+										1
+									],
+									"backgroundColor": [
+										0.3686274509803922,
+										0.3686274509803922,
+										0.3686274509803922,
+										1
+									],
+									"isTransparent": true,
+									"parallaxX": 1,
+									"parallaxY": 1,
+									"scaleRate": 1,
+									"forceOwnTexture": false,
+									"renderingMode": "3d",
+									"drawOrder": "z-order",
+									"useRenderCells": false,
+									"blendMode": "normal",
+									"zElevation": 0,
+									"global": false
+								}
+							],
 							"instances": [
 								{
 									"type": "ZhiWuSprite2",
@@ -32550,8 +32769,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 767.038146078615,
-										"y": 2344.988499842406,
+										"x": 220,
+										"y": 2375,
 										"width": 1018.7858311971371,
 										"height": 339.59527706571237,
 										"originX": 0.5064102564102564,
@@ -34438,8 +34657,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1234,
-										"y": 1332,
+										"x": 806,
+										"y": 2138,
 										"width": 238.6528727224692,
 										"height": 238.65287272246945,
 										"originX": 0.49666666666666665,
@@ -35327,7 +35546,12 @@
 		}
 	],
 	"scene-graphs-folder-root": {
-		"items": [],
+		"items": [
+			{
+				"sid": 217547482239386,
+				"expanded": true
+			}
+		],
 		"subfolders": [
 			{
 				"items": [

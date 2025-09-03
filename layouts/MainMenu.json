@@ -48,8 +48,8 @@
 					"showing": true,
 					"locked": false,
 					"world": {
-						"x": 318.5,
-						"y": 240,
+						"x": 319,
+						"y": 245,
 						"width": 640.2582411623239,
 						"height": 480.62912058116194,
 						"originX": 0.5,
@@ -135,6 +135,60 @@
 					"overriden": 0,
 					"subLayers": [],
 					"instances": [
+						{
+							"type": "ZhiWuSprite",
+							"properties": {
+								"initially-visible": true,
+								"initial-animation": "Animation 1",
+								"initial-frame": 0,
+								"enable-collisions": true,
+								"live-preview": false
+							},
+							"uid": 126,
+							"sid": 843857051381336,
+							"tags": "",
+							"instanceVariables": {
+								"GetYPosition": 0
+							},
+							"behaviors": {
+								"正弦运动": {
+									"properties": {
+										"movement": "angle",
+										"wave": "sine",
+										"period": 6,
+										"period-random": 10,
+										"period-offset": 0.3,
+										"period-offset-random": 0,
+										"magnitude": 1,
+										"magnitude-random": 6,
+										"enabled": true,
+										"live-preview": false
+									}
+								}
+							},
+							"instanceFolderItem": {
+								"sid": 843857051381336,
+								"expanded": true
+							},
+							"showing": true,
+							"locked": false,
+							"world": {
+								"x": 335,
+								"y": 194,
+								"width": 101.71403884485582,
+								"height": 137.4997629310027,
+								"originX": 0.4736129905277402,
+								"originY": 0.7347347347347347,
+								"color": [
+									1,
+									1,
+									1,
+									1
+								],
+								"angle": 5.662949080484335,
+								"zElevation": 0
+							}
+						},
 						{
 							"type": "ZhiWuSprite5",
 							"properties": {
@@ -398,10 +452,10 @@
 							"showing": true,
 							"locked": false,
 							"world": {
-								"x": 286.2378321116004,
-								"y": 273.47940844242845,
-								"width": 932.7692968768408,
-								"height": 1260.9425271718058,
+								"x": 294,
+								"y": 276,
+								"width": 86.10972449644358,
+								"height": 110.59981943560064,
 								"originX": 0.4736129905277402,
 								"originY": 0.7347347347347347,
 								"color": [
@@ -465,60 +519,6 @@
 									1
 								],
 								"angle": 1.4835298641951802,
-								"zElevation": 0
-							}
-						},
-						{
-							"type": "ZhiWuSprite",
-							"properties": {
-								"initially-visible": true,
-								"initial-animation": "Animation 1",
-								"initial-frame": 0,
-								"enable-collisions": true,
-								"live-preview": false
-							},
-							"uid": 126,
-							"sid": 843857051381336,
-							"tags": "",
-							"instanceVariables": {
-								"GetYPosition": 0
-							},
-							"behaviors": {
-								"正弦运动": {
-									"properties": {
-										"movement": "angle",
-										"wave": "sine",
-										"period": 6,
-										"period-random": 10,
-										"period-offset": 0.3,
-										"period-offset-random": 0,
-										"magnitude": 1,
-										"magnitude-random": 6,
-										"enabled": true,
-										"live-preview": false
-									}
-								}
-							},
-							"instanceFolderItem": {
-								"sid": 843857051381336,
-								"expanded": true
-							},
-							"showing": true,
-							"locked": false,
-							"world": {
-								"x": 292.25822742382746,
-								"y": 162.58384555425664,
-								"width": 435.3688977217658,
-								"height": 588.5433407632532,
-								"originX": 0.4736129905277402,
-								"originY": 0.7347347347347347,
-								"color": [
-									1,
-									1,
-									1,
-									1
-								],
-								"angle": 5.662949080484335,
 								"zElevation": 0
 							}
 						},

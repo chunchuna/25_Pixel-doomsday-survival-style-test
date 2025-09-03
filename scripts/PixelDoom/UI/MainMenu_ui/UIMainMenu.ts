@@ -17,7 +17,7 @@ Unreal__.GameBegin(() => {
     if (Unreal__.runtime.layout.name != "MainMenu") return
     // 强行修改图层是否透明
     //@ts-ignore
-    Unreal__.runtime.layout.getLayer("background").isTransparent = true
+    //Unreal__.runtime.layout.getLayer("background").isTransparent = true
 
     initGameMainScene();
 

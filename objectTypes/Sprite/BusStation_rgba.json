@@ -1,0 +1,59 @@
+{
+	"name": "BusStation_rgba",
+	"plugin-id": "Sprite",
+	"sid": 691818995911279,
+	"isGlobal": false,
+	"editorNewInstanceIsReplica": true,
+	"instanceVariables": [],
+	"behaviorTypes": [],
+	"effectTypes": [
+		{
+			"effectId": "pixellate",
+			"name": "像素化"
+		}
+	],
+	"animations": {
+		"items": [
+			{
+				"frames": [
+					{
+						"width": 390,
+						"height": 239,
+						"originX": 0.3282051282051282,
+						"originY": 0.7740585774058577,
+						"originalSource": "",
+						"exportFormat": "lossless",
+						"exportQuality": 0.8,
+						"fileType": "image/png",
+						"imageSpriteId": 8676296,
+						"collisionPoly": {
+							"points": [
+								0.046153846153846156,
+								0.012552301255230155,
+								0.6256410256410256,
+								0.02510460251046025,
+								0.9461538461538461,
+								0.9539748953974896,
+								0.05641025641025641,
+								0.803347280334728,
+								0.007692307692307693,
+								0.09205020920502092
+							]
+						},
+						"useCollisionPoly": true,
+						"duration": 1,
+						"tag": ""
+					}
+				],
+				"sid": 197518041246472,
+				"name": "Default",
+				"isLooping": false,
+				"isPingPong": false,
+				"repeatCount": 1,
+				"repeatTo": 0,
+				"speed": 5
+			}
+		],
+		"subfolders": []
+	}
+}
