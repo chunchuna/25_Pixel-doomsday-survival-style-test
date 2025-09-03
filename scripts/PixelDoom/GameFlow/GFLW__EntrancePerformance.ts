@@ -9,9 +9,8 @@ Unreal__.GameBegin(() => {
 
 
     GFLW__EntrancePerformance.initinstance();
-    //testplayermove()
 
-   
+
     GFLW__EntrancePerformance.BusFullShow();
 
     GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived", () => {
@@ -34,14 +33,17 @@ class GFLW__EntrancePerformance {
     static bus: null | InstanceType.Bus = null;
 
 
+    static BusCmaeraValue = 0.7;
+
+
     static async initinstance() {
         this.bus = Unreal__.runtime.objects.Bus.getFirstInstance();
         this.player = Unreal__.runtime.objects.RedHairGirlSprite.getFirstInstance();
     }
 
     static ani__busentering() {
-        Level2DCamera.CameraZoomTarget = 0.65;
-     
+        Level2DCamera.CameraZoomTarget = GFLW__EntrancePerformance.BusCmaeraValue;
+
         this.bus = Unreal__.runtime.objects.Bus.getFirstInstance();
         if (this.bus == null) return;
         this.bus.x = -334
@@ -93,18 +95,18 @@ class GFLW__EntrancePerformance {
         this.player.behaviors.MoveTo.moveToPosition(688, 1955)
         this.player.behaviors.MoveTo.addEventListener("arrived", () => {
             this.player!.behaviors.MoveFunction.isIgnoringInput = false;
-            Level2DCamera.CameraZoomTarget = 0.35;
+            Level2DCamera.CameraZoomTarget = Level2DCamera.StandCameraZoomValue;
 
         });
 
     }
 
-     static async BusFullShow(){
+    static async BusFullShow() {
         await Unreal__.WAIT_TIME_FORM_PROMISE(0.05)
         if (Unreal__.runtime
             .objects.LevelVars.getFirstInstance()
             ?.instVars.Bus == false) {
-    
+
             GFLW__EntrancePerformance.gp_hideplayer();
             GFLW__EntrancePerformance.ani__busentering();
         }

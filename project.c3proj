@@ -1,6 +1,6 @@
 {
 	"projectFormatVersion": 1,
-	"savedWithRelease": 45200,
+	"savedWithRelease": 45300,
 	"name": "25_ThePark_h5",
 	"runtime": "c3",
 	"useWorker": "auto",
@@ -1486,7 +1486,7 @@
 		"useLoaderLayout": false,
 		"fullscreenMode": "letterbox-scale",
 		"fullscreenQuality": "high",
-		"viewportFit": "auto",
+		"viewportFit": "cover",
 		"backgroundColor": [
 			0,
 			0,
@@ -1511,7 +1511,7 @@
 		"gpuPreference": "high-performance",
 		"framerateMode": "vsync",
 		"sampling": "nearest",
-		"downscaling": "medium",
+		"downscaling": "high",
 		"renderingMode": "auto",
 		"anisotropicFiltering": "auto",
 		"zNear": 1,

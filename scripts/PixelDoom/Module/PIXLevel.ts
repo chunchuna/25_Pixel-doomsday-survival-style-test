@@ -26,16 +26,15 @@ Unreal__.GameUpdate(()=>{Level2DCamera.UpdateCamera()})
 export class Level2DCamera {
 
     
-    static CameraZoomValue: number = 0.35;
-    static CameraZoomTarget: number = 0.35;
+    static CameraZoomValue: number = 0.3;
+    static CameraZoomTarget: number = 0.5;
+
+    static StandCameraZoomValue = 0.5;
+
     static CameraInit() {
         if (Unreal__.runtime.layout.name != "Level") return
-        // 初始化时设置初始值
-        Level2DCamera.CameraZoomValue = 0.35;
-        Level2DCamera.CameraZoomTarget = 0.35; // 确保两个值初始一致
-        Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomValue;
-
-        Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomTarget;
+        //Unreal__.runtime.layout.scale = Level2DCamera.StandCameraZoomValue;
+        //Unreal__.runtime.layout.scale = Level2DCamera.CameraZoomTarget;
     }
 
     static ShortKey() {

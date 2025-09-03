@@ -59860,7 +59860,7 @@
 									"type": "RedHairGirlSprite",
 									"properties": {
 										"initially-visible": true,
-										"initial-animation": "Animation 1",
+										"initial-animation": "Walk",
 										"initial-frame": 0,
 										"enable-collisions": true,
 										"live-preview": false
@@ -59933,7 +59933,7 @@
 										"像素化": {
 											"isEnabled": true,
 											"parameters": {
-												"size": 3
+												"size": 4.0555419921875
 											}
 										},
 										"灰度": {
@@ -59950,12 +59950,12 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1125,
-										"y": 1416,
-										"width": 76.6332526970211,
-										"height": 184.3987643022071,
-										"originX": 0.5104166666666666,
-										"originY": 1,
+										"x": 1139.8900188288367,
+										"y": 1039.771508733915,
+										"width": 238.6528727224692,
+										"height": 238.65287272246945,
+										"originX": 0.49666666666666665,
+										"originY": 0.85,
 										"color": [
 											1,
 											1,
@@ -60032,8 +60032,8 @@
 									"showing": true,
 									"locked": false,
 									"world": {
-										"x": 1463.0322490528774,
-										"y": 1039.7768961393049,
+										"x": 1452,
+										"y": 1049,
 										"width": 124.43991699541489,
 										"height": 185.18546889365058,
 										"originX": 0.5734597156398105,
