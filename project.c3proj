@@ -194,9 +194,7 @@
 	],
 	"uniqueId": "44eynirip7v",
 	"objectTypes": {
-		"items": [
-			"LevelVars"
-		],
+		"items": [],
 		"subfolders": [
 			{
 				"items": [
@@ -230,7 +228,8 @@
 					"HeMa",
 					"HouZi",
 					"DouMaoNanRen",
-					"ShouJiNvRen"
+					"ShouJiNvRen",
+					"LevelVars"
 				],
 				"subfolders": [],
 				"name": "Sprite"
@@ -1486,7 +1485,7 @@
 		"useLoaderLayout": false,
 		"fullscreenMode": "letterbox-scale",
 		"fullscreenQuality": "high",
-		"viewportFit": "cover",
+		"viewportFit": "auto",
 		"backgroundColor": [
 			0,
 			0,

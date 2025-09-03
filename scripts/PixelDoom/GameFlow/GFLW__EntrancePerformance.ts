@@ -1,8 +1,6 @@
 import { Unreal__ } from "../../engine.js";
 import { Level2DCamera, PIXLevel } from "../Module/PIXLevel.js";
 
-
-
 Unreal__.GameBegin(() => {
 
     if (Unreal__.runtime.globalVars.GameType != "Level") return
@@ -22,9 +20,6 @@ Unreal__.GameBegin(() => {
         }
     })
 })
-
-
-
 
 class GFLW__EntrancePerformance {
 

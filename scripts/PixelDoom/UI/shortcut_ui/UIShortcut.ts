@@ -1,4 +1,5 @@
 import { Unreal__ } from "../../../engine.js";
+import { PLAYER_INVENTORY_ITEMS } from "../../Group/Player/PIXPlayerInventory.js";
 import { IMGUIDebugButton } from "../debug_ui/UIDbugButton.js";
 import { Imgui_chunchun } from "../imgui_lib/imgui.js";
 
@@ -1042,7 +1043,10 @@ Unreal__.GameBegin(() => {
     // First group - Player Base
     var PlayerShortBase = UIShortcut.CreateShortGroup(ShortPosition.BottomLeft)
 
+    
+    UIShortcut.CreateShort(PlayerShortBase,"+ -","镜头缩放")
     UIShortcut.CreateShort(PlayerShortBase, "TAB", "库存")
+    
 
     UIShortcut.CreateShortLittleGroup(PlayerShortBase)
         .setShort("W")
@@ -1052,6 +1056,7 @@ Unreal__.GameBegin(() => {
         .SetRegularHillPattern()
         .AddDescribe("控制");
 
+   
 
     Unreal__.runtime
         .addEventListener("beforeanylayoutend", () => {
