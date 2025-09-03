@@ -1054,8 +1054,9 @@ Unreal__.GameBegin(() => {
         .setShort("S")
         .setShort("D")
         .SetRegularHillPattern()
-        .AddDescribe("控制");
+        .AddDescribe("移动");
 
+    UIShortcut.CreateShort(PlayerShortBase,"C","坐下/站起")
    
 
     Unreal__.runtime
