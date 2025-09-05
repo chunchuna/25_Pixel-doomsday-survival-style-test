@@ -78,6 +78,27 @@ Unreal__.GameBegin(() => {
         }
     })
 })
+// 打伞
+Unreal__.GameBegin(() => {
+    document.addEventListener("keydown", (Event) => {
+        if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
+
+        if (PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isIgnoringInput) return
+        if (Event.key === "t") {
+            const currentState = CharacterStateManager.GetCurrentState();
+            if (currentState === CharacterState.Idle) {
+                CharacterStateManager.SwitchState(CharacterState.OpeningUmbrella);
+            }
+            if (currentState === CharacterState.UmbrellaIdle) {
+                CharacterStateManager.SwitchState(CharacterState.CloseingUmbrella);
+            }
+        }
+
+    })
+
+
+
+})
 
 // 移动
 Unreal__.GameUpdate(() => {
@@ -86,7 +107,8 @@ Unreal__.GameUpdate(() => {
     if (PlayerController.GAME$_CHARACTER_CONTROLLER == null) return
 
     const currentState = CharacterStateManager.GetCurrentState();
-    if (currentState !== CharacterState.Idle && currentState !== CharacterState.Walking) {
+    if (currentState !== CharacterState.Idle && currentState !== CharacterState.Walking && currentState !== CharacterState.UmbrellaIdle
+        && currentState !== CharacterState.UmbrellaWalk) {
         return;
     }
 

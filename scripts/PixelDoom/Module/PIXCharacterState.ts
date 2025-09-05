@@ -4,10 +4,18 @@ import { GAME_TYPE } from "../Global/PIXGlobal.js";
 export enum CharacterState {
     Idle,
     Walking,
+    // 坐下站立
     SittingDown,
     Sitting,
     StandingUp,
-    Interacting
+    // 互动
+    Interacting,
+    // 打伞
+    OpeningUmbrella,
+    CloseingUmbrella,
+    UmbrellaIdle,
+    UmbrellaWalk,
+
 }
 
 export class CharacterStateManager {
@@ -33,7 +41,7 @@ export class CharacterStateManager {
         this.currentState = newState;
         this.OnEnterState(this.currentState);
     }
-    
+
     public static GetCurrentState(): CharacterState {
         return this.currentState;
     }
@@ -63,18 +71,31 @@ export class CharacterStateManager {
                 this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
                 this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0, 0);
                 this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
-                
+
                 const isMoving = this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX !== 0 || this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY !== 0;
-                if(isMoving) {
+                if (isMoving) {
                     this.GAME$_CHARACTER_CONTROLLER.setAnimation("Idle");
                 }
                 break;
+
+            case CharacterState.UmbrellaIdle:
+                this.GAME$_CHARACTER_CONTROLLER.setAnimation("UmbrellaIdle")
+                break
+            case CharacterState.UmbrellaWalk:
+                this.GAME$_CHARACTER_CONTROLLER.setAnimation("UmbrellaWalk")
+                break
+            case CharacterState.OpeningUmbrella:
+                this.GAME$_CHARACTER_CONTROLLER.setAnimation("OpeningUmbrella")
+                break
+            case CharacterState.CloseingUmbrella:
+                this.GAME$_CHARACTER_CONTROLLER.setAnimation("CloseingUmbrella")
+                break
         }
     }
 
     private static OnExitState(state: CharacterState) {
         if (!this.GAME$_CHARACTER_CONTROLLER) return;
-        
+
         switch (state) {
             case CharacterState.Interacting:
                 this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = true;
@@ -91,13 +112,19 @@ export class CharacterStateManager {
             case "Stand":
                 this.SwitchState(CharacterState.Idle);
                 break;
+            case "OpeningUmbrella":
+                this.SwitchState(CharacterState.UmbrellaIdle)
+                break
+            case "CloseingUmbrella":
+                this.SwitchState(CharacterState.Idle)
+                break
         }
     }
 
     public static Update() {
         if (!this.GAME$_CHARACTER_CONTROLLER) return;
-        
-        switch(this.currentState) {
+
+        switch (this.currentState) {
             case CharacterState.Idle:
                 if (this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX !== 0 || this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY !== 0) {
                     this.SwitchState(CharacterState.Walking);
@@ -108,6 +135,19 @@ export class CharacterStateManager {
                     this.SwitchState(CharacterState.Idle);
                 }
                 break;
+
+            // 如果是打伞状态
+            case CharacterState.UmbrellaIdle:
+                if (this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX !== 0 || this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY !== 0) {
+                    this.SwitchState(CharacterState.UmbrellaWalk);
+                }
+                break;
+            case CharacterState.UmbrellaWalk:
+                if (this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorX === 0 && this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.vectorY === 0) {
+                    this.SwitchState(CharacterState.UmbrellaIdle);
+                }
+                break;
+
         }
     }
 }
@@ -115,7 +155,7 @@ export class CharacterStateManager {
 Unreal__.GameBegin(() => {
     // A short delay to ensure the character instance is ready.
     setTimeout(() => {
-        if (Unreal__.runtime.globalVars.GameType !== GAME_TYPE.LEVEL) return; 
+        if (Unreal__.runtime.globalVars.GameType !== GAME_TYPE.LEVEL) return;
         CharacterStateManager.Init();
     }, 100);
 });

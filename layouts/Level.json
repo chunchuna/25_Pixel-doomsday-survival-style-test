@@ -34567,7 +34567,7 @@
 									"type": "RedHairGirlSprite",
 									"properties": {
 										"initially-visible": true,
-										"initial-animation": "Walk",
+										"initial-animation": "Idle",
 										"initial-frame": 0,
 										"enable-collisions": true,
 										"live-preview": false
@@ -34604,7 +34604,7 @@
 												"period-random": 0.25,
 												"period-offset": 0,
 												"period-offset-random": 0,
-												"magnitude": 3,
+												"magnitude": 5,
 												"magnitude-random": 0,
 												"enabled": true,
 												"live-preview": false
