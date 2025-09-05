@@ -9,7 +9,7 @@ Unreal__.GameBegin(() => {
     GFLW__EntrancePerformance.initinstance();
 
 
-    GFLW__EntrancePerformance.BusFullShow();
+    //GFLW__EntrancePerformance.BusFullShow();
 
     GFLW__EntrancePerformance.bus?.behaviors.moveto.addEventListener("arrived", () => {
         GFLW__EntrancePerformance.gp_showplayer();

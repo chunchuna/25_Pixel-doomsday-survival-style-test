@@ -456,6 +456,14 @@
 									"script-info": {
 										"purpose": "none"
 									}
+								},
+								{
+									"name": "PIXCharacterState.ts",
+									"type": "application/typescript",
+									"sid": 490035181544195,
+									"script-info": {
+										"purpose": "none"
+									}
 								}
 							],
 							"subfolders": [],

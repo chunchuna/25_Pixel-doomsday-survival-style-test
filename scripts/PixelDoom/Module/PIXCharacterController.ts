@@ -1,6 +1,7 @@
 import { Unreal__ } from "../../engine.js";
 import { GAME_TYPE } from "../Global/PIXGlobal.js";
 import { UIInteractionPanelActionChooseMain } from "../UI/interaction_panel_action_choose_ui/UIInteractionPanelActionChoose.js";
+import { CharacterStateManager, CharacterState } from "./PIXCharacterState.js";
 
 
 // new eventhandler test
@@ -27,23 +28,11 @@ class PlayerController {
     //@ts-ignore
     static GAME$_CHARACTER_CONTROLLER: InstanceType.CharacterController;
 
-    static SitDown: boolean = false;
-
-    static async TogglePlayerCharacterSitState() {
-        if (this.SitDown) {
-            Unreal__.SendEvent("CharacterControllerStand", "")
-        }
-        if (!this.SitDown) {
-            this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
-            this.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0,0);
-            Unreal__.SendEvent("CharacterControllerSeat", "")
-        }
-    }
 }
 
 
 
-
+// 初始化
 Unreal__.GameBegin(() => {
 
     if (Unreal__.runtime.globalVars.GameType != GAME_TYPE.LEVEL) return
@@ -71,31 +60,23 @@ Unreal__.GameUpdate(() => {
     }
 })
 
-// Input 
+// =========INPUT
 // 坐下
 Unreal__.GameBegin(() => {
     document.addEventListener("keydown", (Event: any) => {
         if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
 
-        if(PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isIgnoringInput) return
+        if (PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isIgnoringInput) return
 
         if (Event.key === "c") {
-            PlayerController.TogglePlayerCharacterSitState();
+            const currentState = CharacterStateManager.GetCurrentState();
+            if (currentState === CharacterState.Sitting) {
+                CharacterStateManager.SwitchState(CharacterState.StandingUp);
+            } else if (currentState === CharacterState.Idle) {
+                CharacterStateManager.SwitchState(CharacterState.SittingDown);
+            }
         }
     })
-    if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
-
-    PlayerController.GAME$_CHARACTER_CONTROLLER.addEventListener("animationend", (Event) => {
-        if (Event.animationName == "Seat") {
-            PlayerController.SitDown = true;
-        }
-        if (Event.animationName == "Stand") {
-            PlayerController.SitDown = false;
-
-        }
-
-    })
-
 })
 
 // 移动
@@ -104,8 +85,10 @@ Unreal__.GameUpdate(() => {
     if (PlayerController.GAME$_KEYBOARD_INSTAHCE == null) return
     if (PlayerController.GAME$_CHARACTER_CONTROLLER == null) return
 
-    if(PlayerController.SitDown) return
-    if(PlayerController.GAME$_CHARACTER_CONTROLLER.animationName=="Seat" || PlayerController.GAME$_CHARACTER_CONTROLLER.animationName=="Stand") return
+    const currentState = CharacterStateManager.GetCurrentState();
+    if (currentState !== CharacterState.Idle && currentState !== CharacterState.Walking) {
+        return;
+    }
 
     if (PlayerController.GAME$_KEYBOARD_INSTAHCE.isKeyDown("KeyW")) {
         PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.simulateControl("up");
@@ -121,20 +104,16 @@ Unreal__.GameUpdate(() => {
     }
 })
 
-// Disable player movement when interaction is active
+// 互动时
 Unreal__.GameBegin(() => {
     UIInteractionPanelActionChooseMain.OnInteractionOpen(() => {
-        // First stop the player completely, then disable movement
-
         if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
-        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.stop();
-        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.setVector(0, 0);
-        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = false;
+        CharacterStateManager.SwitchState(CharacterState.Interacting);
     })
 
     UIInteractionPanelActionChooseMain.OnInteractionClose(() => {
         if (!PlayerController.GAME$_CHARACTER_CONTROLLER) return
-        PlayerController.GAME$_CHARACTER_CONTROLLER.behaviors.MoveFunction.isEnabled = true;
+        CharacterStateManager.SwitchState(CharacterState.Idle);
     })
 
 })
